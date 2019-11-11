@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<div class="jumbotron">
+  <div class="container">
+    <h1>Swedish ASV database</h1>
+  </div>
+</div>
+<div class="container">
+<h2>ASV list</h2>
+<br>
+  {% for asv in asvs %}
+    <ul id="asv.id">
+      <li>ASV-ID: {{ asv.id }}</li>
+      <li>Sequence: {{ asv.sequence }}</li>
+      <li>First added: {{ asv.date }}</li>
+      ---
+    </ul>
+  {% endfor %}
+</div>
+<br>
+<br>
+{% endblock %}

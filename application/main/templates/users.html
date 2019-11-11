@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<div class="jumbotron">
+  <div class="container">
+    <h1>Swedish ASV database</h1>
+  </div>
+</div>
+<div class="container">
+<h2>User list</h2>
+<br>
+  {% for user in users %}
+    <ul id="user.username">
+      <li>Username: {{ user.username }}</li>
+      <li>Email: {{ user.email }}</li>
+      <li>Created: {{ user.created }}</li>
+      <li>Admin: {{ user.admin }}</li>
+      ---
+    </ul>
+  {% endfor %}
+</div>
+<br>
+<br>
+{% endblock %}
