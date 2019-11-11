@@ -1,5 +1,5 @@
 # MP
-.DS_Store
+*.DS_Store
 
 # https://github.com/github/gitignore/blob/master/Python.gitignore
 # Byte-compiled / optimized / DLL files
