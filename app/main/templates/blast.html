@@ -1,0 +1,121 @@
+{% extends "layout.html" %}
+{% block body %}
+<br>
+<br>
+<br>
+<br>
+<div class="container">
+    <form action="" method="post" id='filter_form' name="filter" class="filter_function">
+        {{ form.hidden_tag() }}
+        <div class="row">
+            <div class="col-md-3">
+                <label for="algorithm"><h4>Algorithm</h4></label>
+                {{ form.blast_algorithm() }}
+            </div>
+            <div class="col-md-6 col-md-offset-1">
+                {% if form.sequence.errors %}
+                <div class="form-group has-error">
+                    {% else %}
+                    <div class="form-group">
+                        {% endif %}
+                        <label for="sequence" class='control-label'>Sequence</label>
+                        <span id='sequence_count'>47</span>/15000 characters
+                        {{ form.sequence(id='sequence_textarea', rows=7, cols=81, maxlength="15000", class='form-control') }}
+                        <span id="helpBlock2" class="help-block">
+                            {% for error in form.sequence.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <h4>Maximum E-value: <span><span id="e_value_factor_display">1</span>x10<sup><span id="e_value_exponent_display">-5</span></sup></span></h4>
+                    {% if form.e_value_exponent.errors %}
+                    <div class="form-group has-error">
+                        {% else %}
+                        <div class="form-group">
+                            {% endif %}
+                            <label for="e_value_exponent">exponent</label>
+                            {{ form.e_value_exponent(id="e_value_exponent_input", class="form-control", type="number") }}
+                            <span class="help-block">
+                                {% for error in form.e_value_exponent.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </span>
+                        </div>
+                        {% if form.e_value_factor.errors %}
+                        <div class="form-group has-error">
+                            {% else %}
+                            <div class="form-group">
+                                {% endif %}
+                                <label for="e_value_factor">factor</label>
+                                {{ form.e_value_factor(id="e_value_factor_input", maxlength='1', class="form-control", type="number") }}
+                                <span class="help-block">
+                                    {% for error in form.e_value_factor.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-md-offset-1">
+                            <h4>Minimum identity (%):</h4>
+                            {% if form.min_identity.errors %}
+                            <div class="form-group has-error">
+                                {% else %}
+                                <div class="form-group">
+                                    {% endif %}
+                                    {{ form.min_identity(id="min_identity_input", class="form-control", type="number") }}
+                                    <span class="help-block">
+                                        {% for error in form.min_identity.errors %}
+                                        {{ error }}
+                                        {% endfor %}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <h4>Minimal alignment length:</h4>
+                                {% if form.min_aln_length.errors %}
+                                <div class="form-group has-error">
+                                    {% else %}
+                                    <div class="form-group">
+                                        {% endif %}
+                                        {{ form.min_aln_length(id="min_aln_length_input", class="form-control", type="number") }}
+                                        <span class="help-block">
+                                            {% for error in form.min_aln_length.errors %}
+                                            {{ error }}
+                                            {% endfor %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="sample_filtering">
+
+                                    <div class="col-md-6">
+                                    </div>
+                                </div>
+                                <div class="col-md-11">
+                                    <div id="search_result_annotations">
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                </div>
+                            </div>
+                            <div class="col-md-7">
+                                {{ form.submit_view(class='btn btn-primary') }}
+                            </div>
+
+                        </form>
+
+                        {% if result %}
+                        <div class="container">
+                            <h2>{{ title }}</h2>
+                            {{ result | safe }}
+                        </div>
+                        {% endif %}
+
+
+
+                        {% endblock body %}

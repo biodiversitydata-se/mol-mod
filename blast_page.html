@@ -1,0 +1,354 @@
+{% extends "default_base.html" %}
+{% block body %}
+<div class="container">
+  <div id='spinner_div' style="display:none">
+    <div class="row">
+      <div class="col-md-4 col-md-offset-3"><h2>Please wait while the BLAST search finishes</h2></div>
+      <div class="col-md-3"><img src="{{ url_for('static', filename='images/loader.gif') }}" id="loading-indicator" style="display:none" />
+      </div>
+    </div>
+  </div>
+  <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="headingOne">
+        <h4 class="panel-title">
+          <a role="button" id="filter_accordion" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+            BLAST Filtering Options
+          </a>
+        </h4>
+      </div>
+      <div id="collapseOne" class="panel-collapse" role="tabpanel" aria-labelledby="headingOne">
+        <div class="panel-body">
+
+          <form action="" method="post" id='filter_form' name="filter" class="filter_function">
+            {{ form.hidden_tag() }}
+            <div class="row">
+              <div class="col-md-3">
+                <label for="algorithm"><h4>Algorithm</h4></label>
+                  {{ form.blast_algorithm() }}
+              </div>
+              <div class="col-md-6 col-md-offset-1">
+				{% if form.sequence.errors %}
+				  <div class="form-group has-error">
+				{% else %}
+				  <div class="form-group">
+				{% endif %}
+					<label for="sequence" class='control-label'>Sequence</label>
+					<span id='sequence_count'>47</span>/15000 characters
+					{{ form.sequence(id='sequence_textarea', rows=7, cols=81, maxlength="15000", class='form-control') }}
+					<span id="helpBlock2" class="help-block">
+					{% for error in form.sequence.errors %}
+						{{ error }}
+					{% endfor %}
+					</span>
+				</div>
+              </div>
+              </div>
+              <div class="row">
+			  <div class="col-md-3">
+			  <h4>Maximum E-value: <span><span id="e_value_factor_display">1</span>x10<sup><span id="e_value_exponent_display">-5</span></sup></span></h4>
+			  {% if form.e_value_exponent.errors %}
+				<div class="form-group has-error">
+		      {% else %}
+		        <div class="form-group">
+			  {% endif %}
+                <label for="e_value_exponent">exponent</label>
+                  {{ form.e_value_exponent(id="e_value_exponent_input", class="form-control", type="number") }}
+				<span class="help-block">
+				  {% for error in form.e_value_exponent.errors %}
+				    {{ error }}
+				  {% endfor %}
+				</span>
+                </div>
+			  {% if form.e_value_factor.errors %}
+				<div class="form-group has-error">
+		      {% else %}
+		        <div class="form-group">
+			  {% endif %}
+                <label for="e_value_factor">factor</label>
+                  {{ form.e_value_factor(id="e_value_factor_input", maxlength='1', class="form-control", type="number") }}
+				<span class="help-block">
+				  {% for error in form.e_value_factor.errors %}
+				    {{ error }}
+				  {% endfor %}
+				</span>
+                </div>
+			  </div>
+			  <div class="col-md-3 col-md-offset-1">
+			  <h4>Minimum identity (%):</h4>
+			  {% if form.min_identity.errors %}
+				<div class="form-group has-error">
+		      {% else %}
+		        <div class="form-group">
+			  {% endif %}
+                  {{ form.min_identity(id="min_identity_input", class="form-control", type="number") }}
+				<span class="help-block">
+				  {% for error in form.min_identity.errors %}
+				    {{ error }}
+				  {% endfor %}
+				</span>
+                </div>
+              </div>
+			  <div class="col-md-3">
+			  <h4>Minimal alignment length:</h4>
+			  {% if form.min_aln_length.errors %}
+				<div class="form-group has-error">
+		      {% else %}
+		        <div class="form-group">
+			  {% endif %}
+                  {{ form.min_aln_length(id="min_aln_length_input", class="form-control", type="number") }}
+				<span class="help-block">
+				  {% for error in form.min_aln_length.errors %}
+				    {{ error }}
+				  {% endfor %}
+				</span>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="sample_filtering">
+
+                <div class="col-md-6">
+                  <h4>Choose sample group</h4>
+                  <div class="form-group">
+                    <label for="sample_groups">Sample Group</label>
+				    <span class="help-block">Select sample groups from which counts will be displayed for matching genes. Selecting none is equivalent to selecting all.</span>
+                    {{ form.select_sample_groups(class="form-control") }}
+                  </div>
+                </div>
+                <div class="col-md-6">
+                </div>
+              </div>
+              <div class="col-md-11">
+                <div id="search_result_annotations">
+                </div>
+              </div>
+              <div class="col-md-1">
+              </div>
+            </div>
+            <div class="col-md-7">
+              {{ form.submit_view(class='btn btn-primary') }}
+            </div>
+            <div class="col-md-5">
+              <div class="input-group">
+                {{ form.download_select(class="form-control") }}
+                <span class="input-group-btn">
+                  {{ form.submit_download(class='btn btn-primary') }}
+                </span>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="headingTwo">
+        <h4 class="panel-title">
+          <a role="button" id="filter_accordion" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+            Sample Information Shown
+          </a>
+        </h4>
+      </div>
+      <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+        <div class="panel-body">
+          <form action="" id='sample_info_form' name="sample_info">
+            <div class="row">
+              <div class="col-md-7">
+                <h3>Choose parameters to show for samples</h3>
+                <p>Sample information is shown in a hover box for each sample in the diagrams. Adjust these settings after the BLAST query have been performed. Not all measurements were taken for all samples.</p>
+              </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <h4>General Parameters</h4>
+                    <div class="checkbox">
+                      <label>
+                        <input id='date' data-label="Date" type="checkbox" checked> Date [YYYY-MM-DD]
+                      </label>
+                    </div>
+                    <div class="checkbox">
+                      <label>
+                        <input id='latitude' data-label="Latitude" type="checkbox" checked> Latitude [Decimal Degrees]
+                      </label>
+                    </div>
+                    <div class="checkbox">
+                      <label>
+                        <input id='longitude' data-label="Longitude" type="checkbox" checked> Longitude [Decimal Degrees]
+                      </label>
+                    </div>
+                    {% for sample_p_name, sample_p_id in general_information_property_names %}
+                    <div class="checkbox">
+                      <label>
+                        <input id={{sample_p_id}} data-label="{{sample_p_name}}" type="checkbox"> {{sample_p_name}} ({{idable_property_to_unit[sample_p_id]}})
+                      </label>
+                    </div>
+                    {% endfor %}
+                  </div>
+                  <div class="col-md-4">
+                    <h4>Measured Parameters</h4>
+                    {% for sample_p_name, sample_p_id in measured_parameters_property_names %}
+                    <div class="checkbox">
+                      <label>
+                        <input id={{sample_p_id}} data-label="{{sample_p_name}}" type="checkbox"> {{sample_p_name}} ({{idable_property_to_unit[sample_p_id]}})</span>
+                      </label>
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+                <button class="btn btn-primary" id="update_sample_info_btn">Update Properties Shown</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+  {% if table %}
+  <div class="container">
+    <div id="buttons_above_table" class="row">
+      <button class="btn btn-default" id="toggle_table_annotations" value='hide'>Hide annotations</button>
+      <button class="btn btn-default" id="toggle_table_taxonomy" value='hide'>Hide taxonomy</button>
+    </div>
+  </div>
+  <ul class="nav nav-tabs" id="table_diagram_tabs">
+      <li role="presentation" class="active"><a href="#sparkline_tab" aria-controls="sparkline_tab" role="tab" data-toggle="tab">Diagram</a></li>
+      <li role="presentation"><a href="#table_tab" aria-controls="table_tab" role="tab">Table</a></li>
+  </ul>
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="sparkline_tab">
+      {% include 'blast_table_diagram.html' %}
+    </div>
+    <div role="tabpanel" class="tab-pane" id="table_tab">
+      {% include 'blast_table_part.html' %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<script type=text/javascript>
+  $(document).ready(function () {
+      $('#table_diagram_tabs a').click(function (e) {
+          e.preventDefault()
+          $(this).tab('show')
+      });
+
+      update_sample_information();
+
+      $('#update_sample_info_btn').click(function (e) {
+          e.preventDefault()
+          update_sample_information()
+      });
+
+	  $("#sequence_textarea").bind('input', function(){
+  		$("#sequence_count").text($(this).val().length);
+	  });
+
+	  $("#e_value_factor_input").bind('input', function(){
+  		$("#e_value_factor_display").text($(this).val());
+	  });
+
+	  $("#e_value_exponent_input").bind('input', function(){
+  		$("#e_value_exponent_display").text($(this).val());
+	  });
+
+      enable_tooltip();
+      hide_description_column();
+      $('#toggle_description_column').click(function(event) {
+        if ($(this).attr('value') == 'show') {
+           $(this).text("Hide Annotation Description");
+           $(this).attr('value', 'hide');
+           show_description_column();
+        } else {
+           $(this).text("Show Annotation Description");
+           $(this).attr('value', 'show');
+           hide_description_column();
+        }
+      });
+
+      $('#toggle_table_annotations').click(function(event) {
+        if ($(this).attr('value') == 'show') {
+           $(this).text("Hide Annotations");
+           $(this).attr('value', 'hide');
+           show_table_annotations();
+        } else {
+           $(this).text("Show Annotations");
+           $(this).attr('value', 'show');
+           hide_table_annotations();
+        }
+      });
+      $('#toggle_table_taxonomy').click(function(event) {
+        if ($(this).attr('value') == 'show') {
+           $(this).text("Hide Taxonomy");
+           $(this).attr('value', 'hide');
+           show_table_taxonomy();
+        } else {
+           $(this).text("Show Taxonomy");
+           $(this).attr('value', 'show');
+           hide_table_taxonomy();
+        }
+      });
+    $('#submit_view').click(function() {
+      $('#spinner_div').show();
+      $('#loading-indicator').show();
+      return true;
+    });
+
+    $('#submit_download').click(function() {
+      $('#spinner_div').show();
+      $('#loading-indicator').show();
+      $('.flash').hide();
+      setTimeout(function() {
+        $('#spinner_div').hide();
+        $('#loading-indicator').hide();
+      }, 20000);
+      return true;
+    });
+  });
+
+
+  function enable_tooltip() {
+    $('[data-toggle="tooltip"]').tooltip();
+  }
+
+  function show_description_column(){
+    $('thead .hideable_annotation_description').show();
+    $('tbody .hideable_annotation_description').show();
+  }
+
+  function hide_description_column(){
+    $('thead .hideable_annotation_description').hide();
+    $('tbody .hideable_annotation_description').hide();
+  }
+
+  function show_table_annotations(){
+    $('#gene_counts_table thead .annotations_in_table').show();
+    $('#gene_counts_table tbody .annotations_in_table').show();
+    $('#gene_counts_diagram_table thead .annotations_in_table').show();
+    $('#gene_counts_diagram_table tbody .annotations_in_table').show();
+  }
+
+  function hide_table_annotations(){
+    $('#gene_counts_table thead .annotations_in_table').hide();
+    $('#gene_counts_table tbody .annotations_in_table').hide();
+    $('#gene_counts_diagram_table thead .annotations_in_table').hide();
+    $('#gene_counts_diagram_table tbody .annotations_in_table').hide();
+  }
+
+  function show_table_taxonomy(){
+    $('#gene_counts_table thead .taxonomy_in_table').show();
+    $('#gene_counts_table tbody .taxonomy_in_table').show();
+    $('#gene_counts_diagram_table thead .taxonomy_in_table').show();
+    $('#gene_counts_diagram_table tbody .taxonomy_in_table').show();
+  }
+
+  function hide_table_taxonomy(){
+    $('#gene_counts_table thead .taxonomy_in_table').hide();
+    $('#gene_counts_table tbody .taxonomy_in_table').hide();
+    $('#gene_counts_diagram_table thead .taxonomy_in_table').hide();
+    $('#gene_counts_diagram_table tbody .taxonomy_in_table').hide();
+  }
+</script>
+{% endblock body %}
