@@ -1,17 +1,9 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
-from wtforms import TextAreaField, RadioField, IntegerField, ValidationError
+from wtforms import IntegerField, StringField, SubmitField
+from wtforms import TextAreaField, ValidationError
 from wtforms.validators import DataRequired
 
-
-class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    remember_me = BooleanField('Remember Me')
-    submit = SubmitField('Sign In')
-
-
-DEFAULT_BLAST_GENE = """>test1
+DEFAULT_BLAST_GENE = """>SMHI:seq_1
 TGGGGAATATTGGGCAATGGAGGAAACTCTGACCCAGCGACGCCGCGTGCGGGATGAAGGCCTTCGGGTTGTAAACCGCTTTCAGCAGGGAAGAAGCGAAAGTGACGGTACCTGCAGAAGAAGCACCGGCTAACTATGTGCCAGCAGCCGCGGTAATACATAGGGTGCAAGCGTTGTCCGGAATTATTGGGCGTAAAGAGCTCGTAGGTGGTTCGTCACGTCGGATGTGAAACTCTGGGGCTTAACCCCAGACCTGCATTCGATACGGGCGAGCTTGAGTATGGTAGGGGAGTCTGGAATTCCTGGTGTAGCGGTGGAATGCGCAGATATCAGGAGGAACACCAATGGCGAAGGCAGGACTCTGGGCCATTACTGACACTGAGGAGCGAAAGCGTGGGGAGCGAACA"""
 
 
@@ -83,12 +75,14 @@ def aln_length_check(form, field):
             raise ValidationError('Minimum alignment length is required to be smaller than 100000')
 
 
-class BlastFilterForm(FlaskForm):
+class BlastSearchForm(FlaskForm):
     sequence = TextAreaField('Sequence', [fasta_length_check], default=DEFAULT_BLAST_GENE)
-    blast_algorithm = RadioField(u'Algorithm', choices=[(
-        'blastp', 'blastp'), ('blastn', 'blastn')], default='blastp')
     e_value_exponent = IntegerField(u'e_value_exponent', [e_val_exponent_check], default=-5)
     e_value_factor = IntegerField(u'e_value_factor', [e_val_factor_check], default=1)
-    min_identity = IntegerField(u'min_identity', [identity_check], default=0)
+    min_identity = IntegerField(u'min_identity', [identity_check], default=100)
     min_aln_length = IntegerField(u'min_aln_length', [aln_length_check], default=0)
-    submit_view = SubmitField(u'View Results')
+    blast_for_seq = SubmitField(u'BLAST')
+
+
+class BlastResultForm(FlaskForm):
+    blast_for_occ = SubmitField(u'Show occurrences')

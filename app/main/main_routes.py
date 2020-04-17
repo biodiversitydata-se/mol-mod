@@ -4,6 +4,7 @@ import csv
 import json
 import io
 from io import StringIO
+import random
 import subprocess
 from subprocess import check_output
 
@@ -11,9 +12,12 @@ from flask import Blueprint, flash, make_response, render_template
 from flask import redirect, url_for
 import pandas as pd
 import requests
+from flask import request
 from tabulate import tabulate
+from werkzeug.exceptions import HTTPException
 
-from app.forms import BlastFilterForm
+
+from app.forms import BlastSearchForm, BlastResultForm
 
 main_bp = Blueprint('main_bp', __name__,
                     template_folder='templates')
@@ -25,74 +29,98 @@ def index():
     return render_template('index.html')
 
 
+@main_bp.route('/form', methods=["GET"])
+def form():
+    return '''
+        <form name="taxaUploadsform" id="taxaUploadsform" action="https://records-ws.nbnatlas.org/occurrences/batchSearch" method="POST">
+            <div class="col-sm-8">
+                <div class="form-group">
+                    <label for="taxon_names">Enter a list of taxon names/scientific names, one name per line (common names not currently supported).</label>
+                    <textarea name="queries" id="taxon_names" class="form-control" rows="15" cols="60"></textarea>
+                </div>
+                <input type="hidden" name="redirectBase" value="https://records.nbnatlas.org/occurrences/search" class="form-control">
+                <input type="hidden" name="field" value="taxon_name" class="form-control">
+                <input type="hidden" name="action" value="Search">
+                <input type="submit" value="Search" class="btn btn-primary">
+            </div>
+        </form>'''
+
+
 @main_bp.route('/blast', methods=['GET', 'POST'])
 def blast():
-    form = BlastFilterForm()
-    if form.validate_on_submit():
-        cmd = ['blastn']  # [form.blast_algorithm.data]
+    sform = BlastSearchForm()
+    rform = BlastResultForm()
 
-        e_val = int(form.e_value_factor.data) * 10**int(form.e_value_exponent.data)
+    if sform.validate_on_submit():
+
+        # Make list of BLAST options
+        cmd = ['blastn']  # [sform.blast_algorithm.data]
+        e_val = int(sform.e_value_factor.data) * 10**int(sform.e_value_exponent.data)
         cmd += ["-evalue", str(e_val)]
-
-        if form.blast_algorithm.data == 'blastp':
-            blast_db = "app/data/blastdb/asvdb"
-        else:
-            blast_db = "app/data/blastdb/asvdb"
-
+        cmd += ["-perc_identity", str(sform.min_identity.data)]
+        blast_db = "app/data/blastdb/asvdb"
         cmd += ['-db', blast_db]
-        # names = ["qseqid", "sseqid", "pident", "qlen", "slen", "length", "qcovs",
-        #          "qcovhsp", "mismatch", "gapopen", "evalue", "bitscore"]
         names = ['qacc', 'sacc', 'pident', 'length', 'evalue']
-
         cmd += ['-outfmt', f'6 {" ".join(names)}']
 
         # Spawn system process and direct data to file handles
         with subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE) as process:
-            # Send seq from form to stdin, read output & error until eof
-            blast_stdout, stderr = process.communicate(input=form.sequence.data.encode())
+            # Send seq from sform to stdin, read output & error until eof
+            blast_stdout, stderr = process.communicate(input=sform.sequence.data.encode())
             # Get exit status
             returncode = process.returncode
-        # If OK
+
+        # If BLAST worked
         if returncode == 0:
-            # Make in-memory file-like str from blast-output
+            # Make in-memory file-like string from blast-output
             with io.StringIO(blast_stdout.decode()) as stdout_buf:
                 # Read into dataframe
                 df = pd.read_csv(stdout_buf, sep='\t', index_col=None, header=None, names=names)
+                # Filter not available as blast cmd option...?
+                df = df[df['length'] >= sform.min_aln_length.data]  # Show 1 decimal
 
-                df['sacc'] = df['sacc'].str.replace(':', '\\n')
-                # Use 1 decimal for sci-num evalue
                 df['evalue'] = df['evalue'].map('{:.1e}'.format)
+                df = df.round(1)
 
-                # Filter on identity and alignment length
-                df = df[df['pident'] >= form.min_identity.data]
-                hits_after_pident = len(df)
+                df['asvid'] = df['sacc'].str.split(":", expand=True)[0]
 
-                df = df[df['length'] >= form.min_aln_length.data]
-                hits_after_length = len(df)
-
-                # Fetch counts for the matching genes
                 if len(df) == 0:
                     msg = "No hits were found in the BLAST search"
-                    # flash(msg, category="error")
-                    return msg
+                    flash(msg, category="error")
 
-                # .to_html())
-                df_html = df.to_html(classes="table table-striped",
-                                     index=False).replace("\\n", "<br>")
+                # If BLAST button was clicked, show results
+                elif sform.blast_for_seq.data:
+                    # Rename hdrs
+                    # df.columns = ['query', 'match',
+                    #               'identity', 'length', 'evalue']
+                    # # Make pretty table
+                    # df_html = df.to_html(classes="table table-striped",
+                    #                      index=False)
+                    # Show
+                    # return render_template('blast.html',  sform=sform, results=df_html, df=df)
+                    return render_template('blast.html',  sform=sform, rform=rform, rdf=df)
 
-                return render_template('blast.html',  form=form, result=df_html, title='Blast results')
+        else:
+            msg = "Error, the BLAST query was not successful."
+            flash(msg, category="error")
 
-        msg = "Error, the BLAST query was not successful."
-        flash(msg, category="error")
+            # Logging the error FUNKAR DETTA?
+            print("BLAST ERROR, cmd: {}".format(cmd))
+            print("BLAST ERROR, returncode: {}".format(returncode))
+            print("BLAST ERROR, output: {}".format(blast_stdout))
+            print("BLAST ERROR, stderr: {}".format(stderr))
 
-        # Logging the error
-        print("BLAST ERROR, cmd: {}".format(cmd))
-        print("BLAST ERROR, returncode: {}".format(returncode))
-        print("BLAST ERROR, output: {}".format(blast_stdout))
-        print("BLAST ERROR, stderr: {}".format(stderr))
+    # If Show button was clicked, redirect to SBDI results page
+    elif rform.blast_for_occ.data:
+        ids = request.form.getlist("asvid")
+        # Add validation of non-zero selection later
+        idstr = '%22%20OR%20taxon_name%3A%22'.join([str(id) for id in ids])
+        url = 'http://molecular.infrabas.se/ala-hub/occurrences/search?q=(taxon_name%3A%22' + \
+            idstr + '%22)#tab_recordsView'
+        return redirect(url)
 
-    return render_template('blast.html', form=form)
+    return render_template('blast.html', sform=sform)
 
 
 @main_bp.route('/about')

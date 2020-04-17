@@ -14,66 +14,32 @@ seq = '>test1\nTGGGGAATATTGGGCAATGGAGGAAACTCTGACCCAGCGACGCCGCGTGCGGGATGAAGGCCTTC
 
 
 def main():
-    blast(seq)
 
+    raw_data = {'first_name': ['JasonXXXTest', 'Molly', 'Tina', 'Jake', 'Amy'],
+                'last_name': ['Miller', 'Jacobson', 'Ali', 'Milner', 'Cooze'],
+                'age': [42, 52, 36, 24, 73],
+                'preTestScore': [4, 24, 31, 2, 3],
+                'postTestScore': [25, 94, 57, 62, 70]}
 
-def blast(seq):
-    cmd = ['blastn']  # [form.blast_algorithm.data]
+    # df = pd.DataFrame({'A': [0, 1, 2, 3, 4],
+    #                    'B': [5, 6, 7, 8, 9],
+    #                    'C': ['a', 'b', 'c', 'd', 'e']})
 
-    e_val = int(10) * 10**int(-5)
-    cmd += ["-evalue", str(e_val)]
+    # print(tabulate(df))
 
-    blast_db = "app/data/blastdb/asvdb"
+    # df = df.replace(0, 5)
 
-    cmd += ['-db', blast_db]
-    names = ['qacc', 'sacc', 'pident', 'length', 'evalue', 'bitscore']
+    # print(tabulate(df))
 
-    cmd += ['-outfmt', f'6 {" ".join(names)}']
+    df = pd.DataFrame(raw_data, columns=['first_name',
+                                         'last_name', 'age', 'preTestScore', 'postTestScore'])
 
-    # Spawn system process and direct data to file handles
-    with subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE) as process:
-        # Send seq from form to stdin, read output & error until eof
-        blast_stdout, stderr = process.communicate(input=seq.encode())
-        # Get exit status
-        returncode = process.returncode
-    # print(returncode)
+    print(tabulate(df))
 
-    # If OK
-    if returncode == 0:
-        # Make in-memory file-like str from blast-output
-        with io.StringIO(blast_stdout.decode()) as stdout_buf:
-            # Read into dataframe
-            df = pd.read_csv(stdout_buf, sep='\t', index_col=0, header=None, names=names)
+    df['first_name'] = df['first_name'].str.replace('XXX', '')
 
-        # Filter on identity and alignment length
-        df = df[df['pident'] >= 97]
-        hits_after_pident = len(df)
-
-        df = df[df['length'] >= 400]
-        hits_after_length = len(df)
-
-        print(tabulate(df))
-        #
-        # # Fetch counts for the matching genes
-        # if len(df) == 0:
-        #     msg = "No hits were found in the BLAST search"
-        #     # flash(msg, category="error")
-        #     return msg
-        #
-        # return render_template('blast_results.html',  tables=[df.to_html(classes='data')], title='BLAST hits', titles=df.columns.values)
-
-#     msg = "Error, the BLAST query was not successful."
-#     flash(msg, category="error")
-#
-#     # Logging the error
-#     print("BLAST ERROR, cmd: {}".format(cmd))
-#     print("BLAST ERROR, returncode: {}".format(returncode))
-#     print("BLAST ERROR, output: {}".format(blast_stdout))
-#     print("BLAST ERROR, stderr: {}".format(stderr))
-#
-#
-# return render_template('blast.html', form=form)
+    df[['First', 'Last']] = df['first_name'].str.split("i", expand=True,)
+    print(tabulate(df))
 
 
 if __name__ == '__main__':

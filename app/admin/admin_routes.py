@@ -6,8 +6,6 @@ from flask import redirect, url_for
 
 import requests
 
-from app.forms import LoginForm
-
 admin_bp = Blueprint('admin_bp', __name__,
                      template_folder='templates')
 

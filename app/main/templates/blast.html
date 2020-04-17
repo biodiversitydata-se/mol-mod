@@ -5,117 +5,153 @@
 <br>
 <br>
 <div class="container">
-    <form action="" method="post" id='filter_form' name="filter" class="filter_function">
-        {{ form.hidden_tag() }}
+    <form action="" method="post" id='search_form' name="search" class="search_function">
+        {{ sform.hidden_tag() }}
         <div class="row">
-            <div class="col-md-3">
-                <label for="algorithm"><h4>Algorithm</h4></label>
-                {{ form.blast_algorithm() }}
-            </div>
-            <div class="col-md-6 col-md-offset-1">
-                {% if form.sequence.errors %}
-                <div class="form-group has-error">
-                    {% else %}
+            <div class="col-md-12">
+                {% if sform.sequence.errors %}
+                    <div class="form-group has-error">
+                {% else %}
                     <div class="form-group">
-                        {% endif %}
-                        <label for="sequence" class='control-label'>Sequence</label>
-                        <span id='sequence_count'>47</span>/15000 characters
-                        {{ form.sequence(id='sequence_textarea', rows=7, cols=81, maxlength="15000", class='form-control') }}
+                {% endif %}
+                        <h4>Sequence</h4>
+                        <label for="sequence_count" class='control-label'>
+                            <span id='sequence_count'>419</span>/15000 characters
+                        </label>
+                        {{ sform.sequence(id='sequence_textarea', rows=7, cols=81, maxlength="15000", class='form-control') }}
                         <span id="helpBlock2" class="help-block">
-                            {% for error in form.sequence.errors %}
+                            {% for error in sform.sequence.errors %}
                             {{ error }}
                             {% endfor %}
                         </span>
                     </div>
-                </div>
             </div>
-            <div class="row">
-                <div class="col-md-3">
-                    <h4>Maximum E-value: <span><span id="e_value_factor_display">1</span>x10<sup><span id="e_value_exponent_display">-5</span></sup></span></h4>
-                    {% if form.e_value_exponent.errors %}
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <h4>Minimum identity (%)</h4><br>
+                {% if sform.min_identity.errors %}
                     <div class="form-group has-error">
-                        {% else %}
-                        <div class="form-group">
-                            {% endif %}
-                            <label for="e_value_exponent">exponent</label>
-                            {{ form.e_value_exponent(id="e_value_exponent_input", class="form-control", type="number") }}
-                            <span class="help-block">
-                                {% for error in form.e_value_exponent.errors %}
-                                {{ error }}
-                                {% endfor %}
-                            </span>
-                        </div>
-                        {% if form.e_value_factor.errors %}
-                        <div class="form-group has-error">
-                            {% else %}
-                            <div class="form-group">
-                                {% endif %}
-                                <label for="e_value_factor">factor</label>
-                                {{ form.e_value_factor(id="e_value_factor_input", maxlength='1', class="form-control", type="number") }}
-                                <span class="help-block">
-                                    {% for error in form.e_value_factor.errors %}
-                                    {{ error }}
-                                    {% endfor %}
-                                </span>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-md-offset-1">
-                            <h4>Minimum identity (%):</h4>
-                            {% if form.min_identity.errors %}
-                            <div class="form-group has-error">
-                                {% else %}
-                                <div class="form-group">
-                                    {% endif %}
-                                    {{ form.min_identity(id="min_identity_input", class="form-control", type="number") }}
-                                    <span class="help-block">
-                                        {% for error in form.min_identity.errors %}
-                                        {{ error }}
-                                        {% endfor %}
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <h4>Minimal alignment length:</h4>
-                                {% if form.min_aln_length.errors %}
-                                <div class="form-group has-error">
-                                    {% else %}
-                                    <div class="form-group">
-                                        {% endif %}
-                                        {{ form.min_aln_length(id="min_aln_length_input", class="form-control", type="number") }}
-                                        <span class="help-block">
-                                            {% for error in form.min_aln_length.errors %}
-                                            {{ error }}
-                                            {% endfor %}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="sample_filtering">
+                {% else %}
+                    <div class="form-group">
+                {% endif %}
+                        {{ sform.min_identity(id="min_identity_input", class="form-control", type="number") }}
+                        <span class="help-block">
+                            {% for error in sform.min_identity.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </span>
+                    </div>
+                <br>
+                {{ sform.blast_for_seq(class='btn btn-primary') }}
 
-                                    <div class="col-md-6">
-                                    </div>
-                                </div>
-                                <div class="col-md-11">
-                                    <div id="search_result_annotations">
-                                    </div>
-                                </div>
-                                <div class="col-md-1">
-                                </div>
-                            </div>
-                            <div class="col-md-7">
-                                {{ form.submit_view(class='btn btn-primary') }}
-                            </div>
+            </div>
+            <div class="col-md-4">
+                <h4>Minimum alignment length</h4><br>
+                {% if sform.min_aln_length.errors %}
+                    <div class="form-group has-error">
+                {% else %}
+                    <div class="form-group">
+                {% endif %}
+                        {{ sform.min_aln_length(id="min_aln_length_input", class="form-control", type="number") }}
+                        <span class="help-block">
+                            {% for error in sform.min_aln_length.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </span>
+                    </div>
+            </div>
+            <div class="col-md-4">
+                <h4>Maximum E-value: <span><span id="e_value_factor_display">1</span>x10<sup><span id="e_value_exponent_display">-5</span></sup></span></h4>
+                {% if sform.e_value_exponent.errors %}
+                    <div class="form-group has-error">
+                {% else %}
+                    <div class="form-group">
+                {% endif %}
+                        <label for="e_value_exponent">exponent</label>
+                        {{ sform.e_value_exponent(id="e_value_exponent_input", class="form-control", type="number") }}
+                        <span class="help-block">
+                            {% for error in sform.e_value_exponent.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </span>
+                    </div>
+                {% if sform.e_value_factor.errors %}
+                    <div class="form-group has-error">
+                {% else %}
+                    <div class="form-group">
+                {% endif %}
+                        <label for="e_value_factor">factor</label>
+                        {{ sform.e_value_factor(id="e_value_factor_input", maxlength='1', class="form-control", type="number") }}
+                        <span class="help-block">
+                            {% for error in sform.e_value_factor.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </span>
+                    </div>
+            </div>
+        </div>
+        <br>
 
-                        </form>
+    </form>
+</div>
 
-                        {% if result %}
-                        <div class="container">
-                            <h2>{{ title }}</h2>
-                            {{ result | safe }}
-                        </div>
-                        {% endif %}
+{% if rdf is defined %}
+<div class="container">
+    <form action="" method="post" id='result_form' name="result">
+        <div class="row">
+            <div class="col-md-12">
+                <table border="1" class="dataframe table table-striped">
+                    <thead>
+                        <tr>
+                          <th>Query</th>
+                          <th>Subject</th>
+                          <th>Identity (%)</th>
+                          <th>Alignment length</th>
+                          <th>E-value</th>
+                          <th>Select</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for _, row in rdf.iterrows() %}
+                        <tr>
+                            <td>{{ row['qacc'] }}</td>
+                            {% autoescape false %}
+                            <td>{{ row['sacc'] | replace(':', '<br>') }}</td>
+                            {% endautoescape %}
+                            <td>{{ row['pident'] }}</td>
+                            <td>{{ row['length'] }}</td>
+                            <td>{{ row['evalue'] }}</td>
+                            <!-- <td>{{ row['asvid'] }}</td> -->
+
+                            <td><input type="checkbox" id="{{ row['asvid'] }}" name="asvid" value="{{ row['asvid'] }}">
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                {{ rform.blast_for_occ(class='btn btn-primary') }}
+            </div>
+        </div>
+    </form>
+</div>
+{% endif %}
 
 
-
-                        {% endblock body %}
+<script type=text/javascript>
+$(document).ready(function () {
+    $("#sequence_textarea").bind('input', function(){
+        $("#sequence_count").text($(this).val().length);
+    });
+    $("#e_value_factor_input").bind('input', function(){
+        $("#e_value_factor_display").text($(this).val());
+    });
+    $("#e_value_exponent_input").bind('input', function(){
+        $("#e_value_exponent_display").text($(this).val());
+    });
+});
+</script>
+{% endblock body %}
