@@ -31,7 +31,10 @@ def index():
 
 @main_bp.route('/form', methods=["GET"])
 def form():
-    return '''
+
+
+'''Test of ALA POST - currently broken in BAS'''
+return '''
         <form name="taxaUploadsform" id="taxaUploadsform" action="https://records-ws.nbnatlas.org/occurrences/batchSearch" method="POST">
             <div class="col-sm-8">
                 <div class="form-group">
@@ -53,7 +56,7 @@ def blast():
 
     if sform.validate_on_submit():
 
-        # Make list of BLAST options
+        # Make list of BLAST parameters
         cmd = ['blastn']  # [sform.blast_algorithm.data]
         e_val = int(sform.e_value_factor.data) * 10**int(sform.e_value_exponent.data)
         cmd += ["-evalue", str(e_val)]
@@ -63,7 +66,7 @@ def blast():
         names = ['qacc', 'sacc', 'pident', 'length', 'evalue']
         cmd += ['-outfmt', f'6 {" ".join(names)}']
 
-        # Spawn system process and direct data to file handles
+        # Spawn system process (BLAST) and direct data to file handles
         with subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE) as process:
             # Send seq from sform to stdin, read output & error until eof
@@ -71,7 +74,7 @@ def blast():
             # Get exit status
             returncode = process.returncode
 
-        # If BLAST worked
+        # If BLAST worked (no error)
         if returncode == 0:
             # Make in-memory file-like string from blast-output
             with io.StringIO(blast_stdout.decode()) as stdout_buf:
@@ -111,7 +114,7 @@ def blast():
             print("BLAST ERROR, output: {}".format(blast_stdout))
             print("BLAST ERROR, stderr: {}".format(stderr))
 
-    # If Show button was clicked, redirect to SBDI results page
+    # If Show button was clicked, redirect to infraBAS
     elif rform.blast_for_occ.data:
         ids = request.form.getlist("asvid")
         # Add validation of non-zero selection later
