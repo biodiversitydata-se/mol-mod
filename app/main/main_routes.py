@@ -29,12 +29,10 @@ def index():
     return render_template('index.html')
 
 
+'''Test of ALA POST - currently broken in BAS'''
 @main_bp.route('/form', methods=["GET"])
 def form():
-
-
-'''Test of ALA POST - currently broken in BAS'''
-return '''
+    return '''
         <form name="taxaUploadsform" id="taxaUploadsform" action="https://records-ws.nbnatlas.org/occurrences/batchSearch" method="POST">
             <div class="col-sm-8">
                 <div class="form-group">
