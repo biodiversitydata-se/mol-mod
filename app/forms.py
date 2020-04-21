@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import IntegerField, StringField, SubmitField
+from wtforms import BooleanField, IntegerField, StringField, SubmitField
 from wtforms import TextAreaField, ValidationError
 from wtforms.validators import DataRequired
 
@@ -75,6 +75,11 @@ def aln_length_check(form, field):
             raise ValidationError('Minimum alignment length is required to be smaller than 100000')
 
 
+# def asv_selection_check(form, field):
+#     if len(field.data) == 0:
+#         raise ValidationError('Must select at least one person')
+
+
 class BlastSearchForm(FlaskForm):
     sequence = TextAreaField('Sequence', [fasta_length_check], default=DEFAULT_BLAST_GENE)
     e_value_exponent = IntegerField(u'e_value_exponent', [e_val_exponent_check], default=-5)
@@ -85,4 +90,5 @@ class BlastSearchForm(FlaskForm):
 
 
 class BlastResultForm(FlaskForm):
-    blast_for_occ = SubmitField(u'Show occurrences')
+    asvid = BooleanField(u'asvid')
+    show_occur = SubmitField(u'Show occurrences')
