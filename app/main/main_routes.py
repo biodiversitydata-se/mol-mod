@@ -93,14 +93,17 @@ def blast():
 
                 # If some hit(s)
                 else:
-                    # Filter not available as blast cmd option...?
+                    # Filter on alignment length (not available as cmd option...?)
                     df = df[df['length'] >= sform.min_aln_length.data]  # Show 1 decimal
 
+                    # Set single decimal for Sci not & float
                     df['evalue'] = df['evalue'].map('{:.1e}'.format)
                     df = df.round(1)
 
+                    # Extract asvid from sacc = id + taxonomy
                     df['asvid'] = df['sacc'].str.split(":", expand=True)[0]
 
+                    # Show both search and result forms on same page
                     return render_template('blast.html',  sform=sform, rform=rform, rdf=df)
 
         # If BLAST error
@@ -108,7 +111,7 @@ def blast():
             msg = "Error, the BLAST query was not successful."
             flash(msg, category="error")
 
-            # Logging the error FUNKAR DETTA?
+            # Logging the error - Not sure if this is working
             print("BLAST ERROR, cmd: {}".format(cmd))
             print("BLAST ERROR, returncode: {}".format(returncode))
             print("BLAST ERROR, output: {}".format(blast_stdout))
@@ -127,7 +130,7 @@ def blast():
         # Redirect to SBDI / bioatlas (GET request)
         return redirect(url)
 
-    # If nothing has been submitted (or no hits were found)
+    # If no valid submission (or no hits), show search form (incl. any error messages)
     return render_template('blast.html', sform=sform)
 
 
