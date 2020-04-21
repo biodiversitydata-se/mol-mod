@@ -16,7 +16,6 @@ from flask import request
 from tabulate import tabulate
 from werkzeug.exceptions import HTTPException
 
-
 from app.forms import BlastSearchForm, BlastResultForm
 
 main_bp = Blueprint('main_bp', __name__,
@@ -49,10 +48,11 @@ def form():
 
 @main_bp.route('/blast', methods=['GET', 'POST'])
 def blast():
+
     sform = BlastSearchForm()
     rform = BlastResultForm()
 
-    if sform.validate_on_submit():
+    if request.form.get('blast_for_seq') and sform.validate_on_submit():
 
         # Make list of BLAST parameters
         cmd = ['blastn']  # [sform.blast_algorithm.data]
@@ -78,30 +78,25 @@ def blast():
             with io.StringIO(blast_stdout.decode()) as stdout_buf:
                 # Read into dataframe
                 df = pd.read_csv(stdout_buf, sep='\t', index_col=None, header=None, names=names)
-                # Filter not available as blast cmd option...?
-                df = df[df['length'] >= sform.min_aln_length.data]  # Show 1 decimal
 
-                df['evalue'] = df['evalue'].map('{:.1e}'.format)
-                df = df.round(1)
-
-                df['asvid'] = df['sacc'].str.split(":", expand=True)[0]
-
+                # If no hits were found
                 if len(df) == 0:
                     msg = "No hits were found in the BLAST search"
                     flash(msg, category="error")
 
-                # If BLAST button was clicked, show results
-                elif sform.blast_for_seq.data:
-                    # Rename hdrs
-                    # df.columns = ['query', 'match',
-                    #               'identity', 'length', 'evalue']
-                    # # Make pretty table
-                    # df_html = df.to_html(classes="table table-striped",
-                    #                      index=False)
-                    # Show
-                    # return render_template('blast.html',  sform=sform, results=df_html, df=df)
+                # If hit(s) were found
+                else:
+                    # Filter not available as blast cmd option...?
+                    df = df[df['length'] >= sform.min_aln_length.data]  # Show 1 decimal
+
+                    df['evalue'] = df['evalue'].map('{:.1e}'.format)
+                    df = df.round(1)
+
+                    df['asvid'] = df['sacc'].str.split(":", expand=True)[0]
+
                     return render_template('blast.html',  sform=sform, rform=rform, rdf=df)
 
+        # If BLAST error
         else:
             msg = "Error, the BLAST query was not successful."
             flash(msg, category="error")
@@ -113,7 +108,8 @@ def blast():
             print("BLAST ERROR, stderr: {}".format(stderr))
 
     # If Show button was clicked, redirect to infraBAS
-    elif rform.blast_for_occ.data:
+    if request.form.get('show_occur') and rform.validate_on_submit():
+
         ids = request.form.getlist("asvid")
         # Add validation of non-zero selection later
         idstr = '%22%20OR%20taxon_name%3A%22'.join([str(id) for id in ids])
@@ -121,6 +117,7 @@ def blast():
             idstr + '%22)#tab_recordsView'
         return redirect(url)
 
+    # If nothing has been submitted (or no hits were found)
     return render_template('blast.html', sform=sform)
 
 
