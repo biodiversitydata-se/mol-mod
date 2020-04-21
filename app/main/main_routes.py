@@ -28,20 +28,26 @@ def index():
     return render_template('index.html')
 
 
-'''Test of ALA POST - currently broken in BAS'''
+'''Test of ALA POST'''
 @main_bp.route('/form', methods=["GET"])
 def form():
     return '''
-        <form name="taxaUploadsform" id="taxaUploadsform" action="https://records-ws.nbnatlas.org/occurrences/batchSearch" method="POST">
-            <div class="col-sm-8">
-                <div class="form-group">
-                    <label for="taxon_names">Enter a list of taxon names/scientific names, one name per line (common names not currently supported).</label>
-                    <textarea name="queries" id="taxon_names" class="form-control" rows="15" cols="60"></textarea>
+        <form name="taxaUploadForm" id="taxaUploadForm"
+            action="https://records.bioatlas.se/ws/occurrences/batchSearch"
+                method="POST">
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="form-group">
+                        <label for="raw_names">Enter a list of taxon names/scientific names, one name per line (common names not currently supported).</label>
+                        <br><textarea name="queries" id="raw_names" class="form-control" rows="15" cols="60">Bombus</textarea>
+                    </div>
+                    <input type="hidden" name="redirectBase"
+                           value="https://records.bioatlas.se/occurrences/search" class="form-control">
+                    <input type="hidden" name="field" value="raw_name" class="form-control"/>
+                    <input type="hidden" name="action" value="Search" />
+                    <input type="submit"
+                           value="Search" class="btn btn-primary" />
                 </div>
-                <input type="hidden" name="redirectBase" value="https://records.nbnatlas.org/occurrences/search" class="form-control">
-                <input type="hidden" name="field" value="taxon_name" class="form-control">
-                <input type="hidden" name="action" value="Search">
-                <input type="submit" value="Search" class="btn btn-primary">
             </div>
         </form>'''
 
