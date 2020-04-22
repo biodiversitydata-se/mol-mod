@@ -93,7 +93,7 @@
 </div>
 
 {% if rform %}
-<div class="container">
+<div class="container" id="result">
     <form action="" method="post" id='rform' name="rform">
         {{ rform.csrf_token }}
         <div class="row">
@@ -119,7 +119,8 @@
                             <td>{{ row['pident'] }}</td>
                             <td>{{ row['length'] }}</td>
                             <td>{{ row['evalue'] }}</td>
-                            <td>{{ rform.asvid(id="asvid", value=row['asvid']) }}</td>
+                            <!-- <td>{{ rform.asvid(id="asvid", value=row['asvid']) }}</td> -->
+                            <td>{{ rform.asvid(id=row['asvid'], value=row['asvid']) }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -128,21 +129,18 @@
         </div>
         <div class="row">
             <div class="col-md-4">
-                {{ rform.show_occur(class='btn btn-primary', id='show_occur') }}
+                <!-- {{ rform.show_occur(class='btn btn-primary', id='show_occur') }} -->
             </div>
         </div>
     </form>
-    <br>
     <form name="taxaUploadForm" id="taxaUploadForm"
         action="http://molecular.infrabas.se/biocache-service/occurrences/batchSearch" method="POST">
-        <!-- <textarea name="queries" id="raw_names" style="display: none">c366064866eaed18a54d15640272ab34</textarea> -->
-        <textarea name="queries" id="raw_names" rows="5" cols="60">c366064866eaed18a54d15640272ab34</textarea>
-        <br>
+        <textarea name="queries" id="raw_names" style="display: none"></textarea>
         <input type="hidden" name="redirectBase"
             value="http://molecular.infrabas.se/ala-hub/occurrences/search">
         <input type="hidden" name="field" value="raw_name"/>
         <input type="hidden" name="action" value="Search"/>
-        <input type="submit" value="POST occurrences" class="btn btn-primary"/>
+        <input type="submit" value="Show occurrences" class="btn btn-primary"/>
     </form>
 </div>
 {% endif %}
@@ -158,6 +156,14 @@ $(document).ready(function () {
     });
     $("#e_value_exponent_input").bind('input', function(){
         $("#e_value_exponent_display").text($(this).val());
+    });
+
+    // Add checked ASVs to hidden textarea for POST to SBDI
+    $("#result :checkbox").change(function () {
+        var text = $("#result :checked").map(function () {
+            return this.value;
+        }).get().join("\n");
+        $("#raw_names").val(text);
     });
 });
 </script>
