@@ -3,14 +3,17 @@
 <head>
     <title>SBDI-ASV-DB</title>
     <meta charset="utf-8">
+    <!-- Adjust visible area to screen-width (rather than zoom out to fit) -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Load Google font, Bootstrap CSS & (custom) file CSS -->
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,700,400italic|Source+Code+Pro:400,700" rel="stylesheet" type="text/css">
     <link rel="stylesheet"href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}?v=0.2">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-    <!-- <script src="https://code.highcharts.com/highcharts.js"></script> -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <!-- Load jQuery & js (no file js yet)-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <!-- <script src="{{ url_for('static', filename='main.js') }}?v=0.2"></script> -->
+
 </head>
 <body>
     <nav class="navbar navbar-inverse navbar-fixed-top">
