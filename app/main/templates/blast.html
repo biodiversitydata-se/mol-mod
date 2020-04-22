@@ -132,6 +132,18 @@
             </div>
         </div>
     </form>
+    <br>
+    <form name="taxaUploadForm" id="taxaUploadForm"
+        action="http://molecular.infrabas.se/biocache-service/occurrences/batchSearch" method="POST">
+        <!-- <textarea name="queries" id="raw_names" style="display: none">c366064866eaed18a54d15640272ab34</textarea> -->
+        <textarea name="queries" id="raw_names" rows="5" cols="60">c366064866eaed18a54d15640272ab34</textarea>
+        <br>
+        <input type="hidden" name="redirectBase"
+            value="http://molecular.infrabas.se/ala-hub/occurrences/search">
+        <input type="hidden" name="field" value="raw_name"/>
+        <input type="hidden" name="action" value="Search"/>
+        <input type="submit" value="POST occurrences" class="btn btn-primary"/>
+    </form>
 </div>
 {% endif %}
 
