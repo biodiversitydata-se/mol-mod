@@ -63,8 +63,6 @@ def blast():
 
         # Collect BLAST cmd items into list
         cmd = ['blastn']  # [sform.blast_algorithm.data]
-        e_val = int(sform.e_value_factor.data) * 10**int(sform.e_value_exponent.data)
-        cmd += ["-evalue", str(e_val)]
         cmd += ["-perc_identity", str(sform.min_identity.data)]
         blast_db = "app/data/blastdb/asvdb"
         cmd += ['-db', blast_db]
@@ -116,19 +114,6 @@ def blast():
             print("BLAST ERROR, returncode: {}".format(returncode))
             print("BLAST ERROR, output: {}".format(blast_stdout))
             print("BLAST ERROR, stderr: {}".format(stderr))
-
-    # If Show was clicked (add validation of non-zero selection later)
-    if request.form.get('show_occur') and rform.validate_on_submit():
-        # Get selected hits from form
-        ids = request.form.getlist("asvid")
-
-        # Make url query string
-        idstr = '%22%20OR%20taxon_name%3A%22'.join([str(id) for id in ids])
-        url = 'http://molecular.infrabas.se/ala-hub/occurrences/search?q=(taxon_name%3A%22' + \
-            idstr + '%22)#tab_recordsView'
-
-        # Redirect to SBDI / bioatlas (GET request)
-        return redirect(url)
 
     # If no valid submission (or no hits), show search form (incl. any error messages)
     return render_template('blast.html', sform=sform)

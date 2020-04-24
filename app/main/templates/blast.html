@@ -39,8 +39,6 @@
                         </span>
                     </div>
                 <br>
-                {{ sform.blast_for_seq(class='btn btn-primary', id='blast_for_seq') }}
-
             </div>
             <div class="col-md-4">
                 <h4>Minimum alignment length</h4><br>
@@ -57,40 +55,16 @@
                         </span>
                     </div>
             </div>
+        </div>
+        <div class="row">
             <div class="col-md-4">
-                <h4>Maximum E-value: <span><span id="e_value_factor_display">1</span>x10<sup><span id="e_value_exponent_display">-5</span></sup></span></h4>
-                {% if sform.e_value_exponent.errors %}
-                    <div class="form-group has-error">
-                {% else %}
-                    <div class="form-group">
-                {% endif %}
-                        <label for="e_value_exponent">exponent</label>
-                        {{ sform.e_value_exponent(id="e_value_exponent_input", class="form-control", type="number") }}
-                        <span class="help-block">
-                            {% for error in sform.e_value_exponent.errors %}
-                            {{ error }}
-                            {% endfor %}
-                        </span>
-                    </div>
-                {% if sform.e_value_factor.errors %}
-                    <div class="form-group has-error">
-                {% else %}
-                    <div class="form-group">
-                {% endif %}
-                        <label for="e_value_factor">factor</label>
-                        {{ sform.e_value_factor(id="e_value_factor_input", maxlength='1', class="form-control", type="number") }}
-                        <span class="help-block">
-                            {% for error in sform.e_value_factor.errors %}
-                            {{ error }}
-                            {% endfor %}
-                        </span>
-                    </div>
+                {{ sform.blast_for_seq(class='btn btn-primary', id='blast_for_seq') }}
             </div>
         </div>
-        <br>
-
     </form>
 </div>
+<br>
+<br>
 
 {% if rform %}
 <div class="container" id="result">
@@ -119,17 +93,11 @@
                             <td>{{ row['pident'] }}</td>
                             <td>{{ row['length'] }}</td>
                             <td>{{ row['evalue'] }}</td>
-                            <!-- <td>{{ rform.asvid(id="asvid", value=row['asvid']) }}</td> -->
                             <td>{{ rform.asvid(id=row['asvid'], value=row['asvid']) }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-4">
-                <!-- {{ rform.show_occur(class='btn btn-primary', id='show_occur') }} -->
             </div>
         </div>
     </form>
@@ -140,7 +108,11 @@
             value="http://molecular.infrabas.se/ala-hub/occurrences/search">
         <input type="hidden" name="field" value="raw_name"/>
         <input type="hidden" name="action" value="Search"/>
-        <input type="submit" value="Show occurrences" class="btn btn-primary"/>
+        <div class="row">
+            <div class="col-md-4">
+                <input type="submit" value="Show occurrences" class="btn btn-primary"/>
+            </div>
+        </div>
     </form>
 </div>
 {% endif %}
