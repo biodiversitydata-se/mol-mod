@@ -67,6 +67,7 @@
 <br>
 
 {% if rform %}
+<!-- Keep separate & use for download  -->
 <div class="container" id="result">
     <form action="" method="post" id='rform' name="rform">
         {{ rform.csrf_token }}
@@ -101,6 +102,7 @@
             </div>
         </div>
     </form>
+    <!-- Bulk taxon search form copied from SBDI  -->
     <form name="taxaUploadForm" id="taxaUploadForm"
         action="http://molecular.infrabas.se/biocache-service/occurrences/batchSearch" method="POST">
         <textarea name="queries" id="raw_names" style="display: none"></textarea>
