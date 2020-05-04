@@ -106,6 +106,8 @@
     <form name="taxaUploadForm" id="taxaUploadForm"
         action="http://molecular.infrabas.se/biocache-service/occurrences/batchSearch" method="POST">
         <textarea name="queries" id="raw_names" style="display: none"></textarea>
+        <!-- For testing: -->
+        <!-- <textarea name="queries" id="raw_names" rows=4, cols=40></textarea> -->
         <input type="hidden" name="redirectBase"
             value="http://molecular.infrabas.se/ala-hub/occurrences/search">
         <input type="hidden" name="field" value="raw_name"/>
@@ -129,11 +131,13 @@ $(document).ready(function () {
 
     // Add checked ASVs to hidden textarea for POST to SBDI
     $("#result :checkbox").change(function () {
-        var text = $("#result :checked").map(function () {
+        var ids = $("#result :checked").map(function () {
             return this.value;
-        }).get().join("\n");
-        $("#raw_names").val(text);
+        }).get();
+        ids_str = jQuery.unique(ids).join("\n");
+        $("#raw_names").val(ids_str);
     });
+
 });
 </script>
 {% endblock body %}
