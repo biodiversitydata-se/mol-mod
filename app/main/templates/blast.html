@@ -105,13 +105,16 @@
     <!-- Bulk taxon search form copied from SBDI  -->
     <form name="taxaUploadForm" id="taxaUploadForm"
         action="http://molecular.infrabas.se/biocache-service/occurrences/batchSearch" method="POST">
-        <textarea name="queries" id="raw_names" style="display: none"></textarea>
-        <!-- Visible for testing: -->
-        <!-- <textarea name="queries" id="raw_names" rows=4, cols=40></textarea> -->
-        <input type="hidden" name="redirectBase"
-            value="http://molecular.infrabas.se/ala-hub/occurrences/search">
-        <input type="hidden" name="field" value="raw_name"/>
-        <input type="hidden" name="action" value="Search"/>
+        <div class="row">
+            <textarea name="queries" id="raw_names" style="display: none"></textarea>
+            <!-- Visible for testing: -->
+            <!-- <textarea name="queries" id="raw_names" rows=4, cols=40></textarea> -->
+            <input type="hidden" name="redirectBase"
+                value="http://molecular.infrabas.se/ala-hub/occurrences/search">
+            <input type="hidden" name="field" value="raw_name"/>
+            <input type="hidden" name="action" value="Search"/>
+        </div>
+        <br>
         <div class="row">
             <div class="col-md-4">
                 <input type="submit" value="Show occurrences" class="btn btn-primary"/>
