@@ -125,12 +125,6 @@ $(document).ready(function () {
     $("#sequence_textarea").bind('input', function(){
         $("#sequence_count").text($(this).val().length);
     });
-    $("#e_value_factor_input").bind('input', function(){
-        $("#e_value_factor_display").text($(this).val());
-    });
-    $("#e_value_exponent_input").bind('input', function(){
-        $("#e_value_exponent_display").text($(this).val());
-    });
 
     // Add checked ASVs to hidden textarea for POST to SBDI
     $("#result :checkbox").change(function () {
