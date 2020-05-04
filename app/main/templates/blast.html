@@ -81,7 +81,7 @@
                           <th>Identity (%)</th>
                           <th>Alignment length</th>
                           <th>E-value</th>
-                          <th><input type="checkbox" id="selectAll" /> <b>Select</b></th>
+                          <th><input type="checkbox" id="select_all" /> <b>Select</b></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -106,7 +106,7 @@
     <form name="taxaUploadForm" id="taxaUploadForm"
         action="http://molecular.infrabas.se/biocache-service/occurrences/batchSearch" method="POST">
         <textarea name="queries" id="raw_names" style="display: none"></textarea>
-        <!-- For testing: -->
+        <!-- Visible for testing: -->
         <!-- <textarea name="queries" id="raw_names" rows=4, cols=40></textarea> -->
         <input type="hidden" name="redirectBase"
             value="http://molecular.infrabas.se/ala-hub/occurrences/search">
@@ -118,6 +118,9 @@
             </div>
         </div>
     </form>
+
+
+
 </div>
 {% endif %}
 
@@ -128,24 +131,33 @@ $(document).ready(function () {
     $("#sequence_textarea").bind('input', function(){
         $("#sequence_count").text($(this).val().length);
     });
-
-    // Add checked ASVs to hidden textarea for POST to SBDI
-    $("#result :checkbox:not(#selectAll)").change(function () {
-        var ids = $("#result :checked").map(function () {
-            return this.value;
-        }).get();
-        ids_str = jQuery.unique(ids).join("\n");
-        $("#raw_names").val(ids_str);
+    // Add checked ASV ID:s to hidden textarea for POST request to SBDI
+    function addChecked() {
+        var ids = [];
+        //Add checked to list
+        $("#result :checked").map(function () {
+            ids.push(this.value);
+        });
+        //Remove duplicates
+        ids = ids.filter(function(item, i, ids) {
+            return i == ids.indexOf(item);
+        });
+        //Exclude select_all (value = 'on')
+        ids = jQuery.grep(ids, function(value) {
+            return value != 'on';
+        });
+        //Add to textarea
+        $("#raw_names").val(ids.join("\n"));
+    }
+    // Apply when any ASV:s are checked
+    $("#result :checkbox").change(function () {
+        addChecked();
     });
-
-    // $("#result :checkbox:not(#selectAll)").toggle(function(){
-    //     $("#result :checkbox").attr('checked','checked');
-    //     $(this).val('uncheck all');
-    // },function(){
-    //     $("#result :checkbox:not(#selectAll)").removeAttr('checked');
-    //     $(this).val('check all');
-    // })
-
+    // ... and when all are checked
+    $("#select_all").change(function () {
+        $("#result :checkbox").prop('checked',this.checked);
+        addChecked();
+    });
 });
 </script>
 {% endblock body %}
