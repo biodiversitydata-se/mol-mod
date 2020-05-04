@@ -81,7 +81,7 @@
                           <th>Identity (%)</th>
                           <th>Alignment length</th>
                           <th>E-value</th>
-                          <th>Select</th>
+                          <th><input type="checkbox" id="selectAll" /> <b>Select</b></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -130,13 +130,21 @@ $(document).ready(function () {
     });
 
     // Add checked ASVs to hidden textarea for POST to SBDI
-    $("#result :checkbox").change(function () {
+    $("#result :checkbox:not(#selectAll)").change(function () {
         var ids = $("#result :checked").map(function () {
             return this.value;
         }).get();
         ids_str = jQuery.unique(ids).join("\n");
         $("#raw_names").val(ids_str);
     });
+
+    // $("#result :checkbox:not(#selectAll)").toggle(function(){
+    //     $("#result :checkbox").attr('checked','checked');
+    //     $(this).val('uncheck all');
+    // },function(){
+    //     $("#result :checkbox:not(#selectAll)").removeAttr('checked');
+    //     $(this).val('check all');
+    // })
 
 });
 </script>
