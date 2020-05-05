@@ -12,9 +12,9 @@
                 {% endif %}
                         <h4>Sequence</h4>
                         <label for="sequence_count" class='control-label'>
-                            <span id='sequence_count'>793</span>/150000 characters
+                            <span id='sequence_count'>793</span>/500000 characters
                         </label>
-                        {{ sform.sequence(id='sequence_textarea', rows=7, cols=81, maxlength="15000", class='form-control') }}
+                        {{ sform.sequence(id='sequence_textarea', rows=7, cols=81, maxlength="500000", class='form-control') }}
                         <span id="helpBlock2" class="help-block">
                             {% for error in sform.sequence.errors %}
                             {{ error }}
@@ -72,7 +72,8 @@
         {{ rform.csrf_token }}
         <div class="row">
             <div class="col-md-12">
-                <table border="1" class="dataframe table table-striped">
+                <div class="help-block" style="display:none" id="asv_error">Please select at least one BLAST hit</div>
+                <table id='result_table' border="1" class="dataframe table table-striped">
                     <thead>
                         <tr>
                           <th>Query</th>
@@ -80,11 +81,11 @@
                           <th>Identity (%)</th>
                           <th>Coverage (%)</th>
                           <th>E-value</th>
-                          <th><input type="checkbox" id="select_all" /> <b>Select</b></th>
+                          <th><input type="checkbox" id="select_all" /> Select</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for _, row in rdf.iterrows() %}
+                        {% for i, row in rdf.iterrows() %}
                         <tr>
                             <td>{{ row['qacc'] }}</td>
                             {% autoescape false %}
@@ -93,7 +94,7 @@
                             <td>{{ row['pident'] }}</td>
                             <td>{{ row['qcovs'] }}</td>
                             <td>{{ row['evalue'] }}</td>
-                            <td>{{ rform.asvid(id=row['asvid'], value=row['asvid']) }}</td>
+                            <td>{{ rform.asvid(id='asvid_' + i|string, value=row['asvid']) }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -105,7 +106,7 @@
     <form name="taxaUploadForm" id="taxaUploadForm"
         action="http://molecular.infrabas.se/biocache-service/occurrences/batchSearch" method="POST">
         <div class="row">
-            <textarea name="queries" id="raw_names" style="display: none"></textarea>
+            <textarea name="queries" id="raw_names" style="display: none" data-required="true"></textarea>
             <!-- Visible for testing: -->
             <!-- <textarea name="queries" id="raw_names" rows=4, cols=40></textarea> -->
             <input type="hidden" name="redirectBase"
@@ -129,6 +130,7 @@ $(document).ready(function () {
     $("#sequence_textarea").bind('input', function(){
         $("#sequence_count").text($(this).val().length);
     });
+
     // Add checked ASV ID:s to hidden textarea for POST request to SBDI
     function addChecked() {
         var ids = [];
@@ -155,6 +157,15 @@ $(document).ready(function () {
     $("#select_all").change(function () {
         $("#result :checkbox").prop('checked',this.checked);
         addChecked();
+    });
+
+    //Require at least one checked hit for SBDI submission
+    $('#taxaUploadForm').submit(function() {
+        if (!$("#raw_names").val()) {
+            $('#result_table tr > td:nth-child(6), #result_table tr>th:nth-child(6)').attr('bgcolor', '#f2e4e4');
+            $('#asv_error').attr('style', 'text-align:right; color:#aa4442');
+            return false;
+        }
     });
 });
 </script>

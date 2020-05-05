@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, IntegerField, StringField, SubmitField
 from wtforms import TextAreaField, ValidationError
-from wtforms.validators import DataRequired
+from wtforms.validators import InputRequired
 
 DEFAULT_BLAST_GENE = """>test-seq-1
 GCGCGAAAACTTCACACTGCAGGAAACTGTGATGAGGGAACTCCAAGTGCATCCACTATGTGGATGCTTTTTTTGACTATTAATCGGTCAACGAATAAGGGCTGGGAAAGACCGGTGCCAGCCGCCGCGGTAATACCGGCAGCTCAAGTGGTCGTCGCTTTTATTGGGCCTAAAACGTCCGTAGCCTGTTTGGTAAATCTGTGGGTAAATCAACCAGCTTAACTGGTTGAATTCTGCAGAGACTGCCAGACTAGGGACCGGGAGAGGTGTGGGGTACTCTAGGGGTAGGGGTAAAATCCTGTCATCCTTAGAGGACCACCAGTTGCGAAGGCGCCACACTGGAACGGATCCGACGGTCAGGGACGAAGCCTAGGGGCACGAACC
@@ -12,8 +12,8 @@ GCGCGAAAACTTCACACTGCAGGAAACTGTGATGAGGGAACTCCAAGTGACTGCACATTGTGTAGCCTTTTCTTTACTAT
 def fasta_length_check(form, field):
     if len(field.data) < 1:
         raise ValidationError('Please submit an input sequence')
-    if len(field.data) > 150000:
-        raise ValidationError('Input sequence must be less than 15000 characters')
+    if len(field.data) > 500000:
+        raise ValidationError('Input sequence must be less than 500000 characters')
     if field.data[0] != '>':
         raise ValidationError('Input sequence must be in fasta format')
     # Count number of fasta headers:
@@ -46,7 +46,7 @@ def cover_check(form, field):
 
 
 class BlastSearchForm(FlaskForm):
-    sequence = TextAreaField('Sequence', [fasta_length_check], default=DEFAULT_BLAST_GENE)
+    sequence = TextAreaField(u'sequence', [fasta_length_check], default=DEFAULT_BLAST_GENE)
     min_identity = IntegerField(u'min_identity', [identity_check], default=100)
     min_qry_cover = IntegerField(u'min_qry_cover', [cover_check], default=100)
     blast_for_seq = SubmitField(u'BLAST')
