@@ -12,7 +12,7 @@ GCGCGAAAACTTCACACTGCAGGAAACTGTGATGAGGGAACTCCAAGTGACTGCACATTGTGTAGCCTTTTCTTTACTAT
 def fasta_length_check(form, field):
     if len(field.data) < 1:
         raise ValidationError('Please submit an input sequence')
-    if len(field.data) > 15000:
+    if len(field.data) > 150000:
         raise ValidationError('Input sequence must be less than 15000 characters')
     if field.data[0] != '>':
         raise ValidationError('Input sequence must be in fasta format')
