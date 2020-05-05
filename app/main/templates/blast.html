@@ -12,7 +12,7 @@
                 {% endif %}
                         <h4>Sequence</h4>
                         <label for="sequence_count" class='control-label'>
-                            <span id='sequence_count'>793</span>/15000 characters
+                            <span id='sequence_count'>793</span>/150000 characters
                         </label>
                         {{ sform.sequence(id='sequence_textarea', rows=7, cols=81, maxlength="15000", class='form-control') }}
                         <span id="helpBlock2" class="help-block">
@@ -38,18 +38,17 @@
                             {% endfor %}
                         </span>
                     </div>
-                <br>
             </div>
             <div class="col-md-4">
-                <h4>Minimum alignment length</h4>
-                {% if sform.min_aln_length.errors %}
+                <h4>Minimum query coverage (%)</h4>
+                {% if sform.min_qry_cover.errors %}
                     <div class="form-group has-error">
                 {% else %}
                     <div class="form-group">
                 {% endif %}
-                        {{ sform.min_aln_length(id="min_aln_length_input", class="form-control", type="number") }}
+                        {{ sform.min_qry_cover(id="min_qry_cover", class="form-control", type="number") }}
                         <span class="help-block">
-                            {% for error in sform.min_aln_length.errors %}
+                            {% for error in sform.min_qry_cover.errors %}
                             {{ error }}
                             {% endfor %}
                         </span>
@@ -79,7 +78,7 @@
                           <th>Query</th>
                           <th>Subject</th>
                           <th>Identity (%)</th>
-                          <th>Alignment length</th>
+                          <th>Coverage (%)</th>
                           <th>E-value</th>
                           <th><input type="checkbox" id="select_all" /> <b>Select</b></th>
                         </tr>
@@ -92,7 +91,7 @@
                             <td>{{ row['sacc'] | replace(':', '<br>') }}</td>
                             {% endautoescape %}
                             <td>{{ row['pident'] }}</td>
-                            <td>{{ row['length'] }}</td>
+                            <td>{{ row['qcovs'] }}</td>
                             <td>{{ row['evalue'] }}</td>
                             <td>{{ rform.asvid(id=row['asvid'], value=row['asvid']) }}</td>
                         </tr>
@@ -114,16 +113,12 @@
             <input type="hidden" name="field" value="raw_name"/>
             <input type="hidden" name="action" value="Search"/>
         </div>
-        <br>
         <div class="row">
             <div class="col-md-4">
                 <input type="submit" value="Show occurrences" class="btn btn-primary"/>
             </div>
         </div>
     </form>
-
-
-
 </div>
 {% endif %}
 
