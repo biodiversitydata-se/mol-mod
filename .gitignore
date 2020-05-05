@@ -1,6 +1,7 @@
 # MP
 *.DS_Store
 test.py
+app/data/
 MPnotesKEEP
 
 # https://github.com/github/gitignore/blob/master/Python.gitignore
