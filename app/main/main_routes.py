@@ -42,7 +42,7 @@ def blast():
         cmd += ["-qcov_hsp_perc", str(sform.min_qry_cover.data)]
         blast_db = "app/data/blastdb/asvdb"
         cmd += ['-db', blast_db]
-        names = ['qacc', 'sacc', 'pident', 'qcovs', 'evalue']
+        names = ['qacc', 'sacc', 'pident', 'qcovhsp', 'evalue']
         cmd += ['-outfmt', f'6 {" ".join(names)}']
 
         # Spawn system process (BLAST) and direct data to file handles
