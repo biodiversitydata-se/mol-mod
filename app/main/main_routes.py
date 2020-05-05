@@ -77,7 +77,7 @@ def blast():
                     df['asvid'] = df['sacc'].str.split(":", expand=True)[0]
 
                     # Show both search and result forms on same page
-                    return render_template('blast.html',  sform=sform, rform=rform, rdf=df)
+                    return render_template('blast.html', sform=sform, rform=rform, rdf=df)
 
         # If BLAST error
         else:
