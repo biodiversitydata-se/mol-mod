@@ -31,7 +31,7 @@ def identity_check(form, field):
         except:
             return None
         if data_i < 0 or data_i > 100:
-            raise ValidationError('Value between 0-100 expected')
+            raise ValidationError('Please enter value between 0 and 100')
 
 
 def cover_check(form, field):
@@ -42,7 +42,7 @@ def cover_check(form, field):
         except:
             return None
         if data_i < 0 or data_i > 100:
-            raise ValidationError('Value between 0-100 expected')
+            raise ValidationError('Please enter value between 0 and 100')
 
 
 class BlastSearchForm(FlaskForm):
