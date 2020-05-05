@@ -30,34 +30,25 @@ def identity_check(form, field):
             data_i = int(field.data)
         except:
             return None
-        if data_i < 0:
-            raise ValidationError('Minimum identity is required to be non-negative')
-        if data_i > 100:
-            raise ValidationError('Minimum identity is required to be smaller than 101')
+        if data_i < 0 or data_i > 100:
+            raise ValidationError('Value between 0-100 expected')
 
 
-def aln_length_check(form, field):
+def cover_check(form, field):
     # Check max value, min value
     if field.data is not None:
         try:
             data_i = int(field.data)
         except:
             return None
-        if data_i < 0:
-            raise ValidationError('Minimum alignment length is required to be non-negative')
-        if data_i > 100000:
-            raise ValidationError('Minimum alignment length is required to be smaller than 100000')
-
-
-# def asv_selection_check(form, field):
-#     if len(field.data) == 0:
-#         raise ValidationError('Must select at least one person')
+        if data_i < 0 or data_i > 100:
+            raise ValidationError('Value between 0-100 expected')
 
 
 class BlastSearchForm(FlaskForm):
     sequence = TextAreaField('Sequence', [fasta_length_check], default=DEFAULT_BLAST_GENE)
     min_identity = IntegerField(u'min_identity', [identity_check], default=100)
-    min_aln_length = IntegerField(u'min_aln_length', [aln_length_check], default=0)
+    min_qry_cover = IntegerField(u'min_qry_cover', [cover_check], default=100)
     blast_for_seq = SubmitField(u'BLAST')
 
 

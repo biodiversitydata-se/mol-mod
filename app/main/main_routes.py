@@ -39,9 +39,10 @@ def blast():
         # Collect BLAST cmd items into list
         cmd = ['blastn']  # [sform.blast_algorithm.data]
         cmd += ["-perc_identity", str(sform.min_identity.data)]
+        cmd += ["-qcov_hsp_perc", str(sform.min_qry_cover.data)]
         blast_db = "app/data/blastdb/asvdb"
         cmd += ['-db', blast_db]
-        names = ['qacc', 'sacc', 'pident', 'length', 'evalue']
+        names = ['qacc', 'sacc', 'pident', 'qcovs', 'evalue']
         cmd += ['-outfmt', f'6 {" ".join(names)}']
 
         # Spawn system process (BLAST) and direct data to file handles
@@ -67,9 +68,6 @@ def blast():
                 # If some hit(s)
                 else:
                     rform = BlastResultForm()
-
-                    # Filter on alignment length (not available as cmd option...?)
-                    df = df[df['length'] >= sform.min_aln_length.data]  # Show 1 decimal
 
                     # Set single decimal for Sci not & float
                     df['evalue'] = df['evalue'].map('{:.1e}'.format)
