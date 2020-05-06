@@ -10,10 +10,8 @@
                 {% else %}
                     <div class="form-group">
                 {% endif %}
-                        <h4>Sequence</h4>
-                        <label for="sequence_count" class='control-label'>
-                            <span id='sequence_count'>793</span>/500000 characters
-                        </label>
+                        <h5><b>Sequence</b>
+                            <span id='sequence_count'>793</span>/500000 characters</h5>
                         {{ sform.sequence(id='sequence_textarea', rows=7, cols=81, maxlength="500000", class='form-control') }}
                         <span id="helpBlock2" class="help-block">
                             {% for error in sform.sequence.errors %}
@@ -24,8 +22,8 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-4">
-                <h4>Minimum identity (%)</h4>
+            <div class="col-md-3">
+                <h5><b>Minimum identity (%)</b></h5>
                 {% if sform.min_identity.errors %}
                     <div class="form-group has-error">
                 {% else %}
@@ -39,8 +37,8 @@
                         </span>
                     </div>
             </div>
-            <div class="col-md-4">
-                <h4>Minimum query coverage (%)</h4>
+            <div class="col-md-3">
+                <h5><b>Minimum query coverage (%)</b></h5>
                 {% if sform.min_qry_cover.errors %}
                     <div class="form-group has-error">
                 {% else %}
@@ -72,16 +70,15 @@
         {{ rform.csrf_token }}
         <div class="row">
             <div class="col-md-12">
-                <div class="help-block" style="display:none" id="asv_error">Please select at least one BLAST hit</div>
-                <table id='result_table' border="1" class="dataframe table table-striped">
+                <table id='result_table' class="dataframe table table-striped">
                     <thead>
                         <tr>
-                          <th>Query</th>
-                          <th>Subject</th>
-                          <th>Identity (%)</th>
-                          <th>Coverage (%)</th>
-                          <th>E-value</th>
-                          <th><input type="checkbox" id="select_all" /> Select</th>
+                            <th>Query</th>
+                            <th>Subject</th>
+                            <th>Id (%)</th>
+                            <th>Cov (%)</th>
+                            <th>E-value</th>
+                            <th><input type="checkbox" id="select_all" /></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -94,7 +91,7 @@
                             <td>{{ row['pident'] }}</td>
                             <td>{{ row['qcovhsp'] }}</td>
                             <td>{{ row['evalue'] }}</td>
-                            <td>{{ rform.asvid(id='asvid_' + i|string, value=row['asvid']) }}</td>
+                            <td>{{ rform.asvid(id=row['asvid'], class='asvid') }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -118,6 +115,8 @@
             <div class="col-md-4">
                 <input type="submit" value="Show occurrences" class="btn btn-primary"/>
             </div>
+            <div class="col-md-8 help-block" style="display:none" id="asv_error">Please select at least one BLAST hit</div>
+
         </div>
     </form>
 </div>
@@ -127,35 +126,44 @@
 <script type=text/javascript>
 $(document).ready(function () {
     // Get input seq length
+    // $("#sequence_textarea").change(function (){
     $("#sequence_textarea").bind('input', function(){
         $("#sequence_count").text($(this).val().length);
     });
+
+    // Convert BLAST result table to jQuery dataTable
+    var dTb = $('#result_table').dataTable({
+        stateSave: true,
+        // searching: false,
+        // Disable sort on select col - currently not working
+        "columnDefs": [
+            { "orderable": false, "targets": 5 }
+        ]
+    });
+    // To access items in all pages...
+    var allPages = dTb.fnGetNodes();
 
     // Add checked ASV ID:s to hidden textarea for POST request to SBDI
     function addChecked() {
         var ids = [];
         //Add checked to list
-        $("#result :checked").map(function () {
-            ids.push(this.value);
+        $(".asvid:checkbox:checked", allPages).map(function () {
+            ids.push(this.id);
         });
         //Remove duplicates
         ids = ids.filter(function(item, i, ids) {
             return i == ids.indexOf(item);
         });
-        //Exclude select_all (value = 'on')
-        ids = jQuery.grep(ids, function(value) {
-            return value != 'on';
-        });
         //Add to textarea
         $("#raw_names").val(ids.join("\n"));
     }
     // Apply when any ASV:s are checked
-    $("#result :checkbox").change(function () {
+    $(".asvid", allPages).change(function () {
         addChecked();
     });
     // ... and when all are checked
     $("#select_all").change(function () {
-        $("#result :checkbox").prop('checked',this.checked);
+        $(".asvid", allPages).prop('checked',this.checked);
         addChecked();
     });
 
