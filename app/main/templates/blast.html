@@ -64,7 +64,6 @@
 <br>
 
 {% if rform %}
-<!-- Keep separate & use for download  -->
 <div class="container" id="result">
     <form action="" method="post" id='rform' name="rform">
         {{ rform.csrf_token }}
@@ -98,10 +97,7 @@
                 </table>
             </div>
         </div>
-    </form>
-    <!-- Bulk taxon search form copied from SBDI  -->
-    <form name="taxaUploadForm" id="taxaUploadForm"
-        action="http://molecular.infrabas.se/biocache-service/occurrences/batchSearch" method="POST">
+        <!-- For redirection to SBDI -->
         <div class="row">
             <textarea name="queries" id="raw_names" style="display: none" data-required="true"></textarea>
             <!-- Visible for testing: -->
@@ -112,11 +108,13 @@
             <input type="hidden" name="action" value="Search"/>
         </div>
         <div class="row">
-            <div class="col-md-4">
-                <input type="submit" value="Show occurrences" class="btn btn-primary"/>
+            <div class="col-md-2">
+                <input id='download' name='download' type="submit" value="Download" class="btn btn-primary"/>
+            </div>
+            <div class="col-md-2">
+                <input id='show_occurrences' name='show_occurrences' type="submit" value="Show occurrences" class="btn btn-primary"/>
             </div>
             <div class="col-md-8 help-block" style="display:none" id="asv_error">Please select at least one BLAST hit</div>
-
         </div>
     </form>
 </div>
@@ -126,11 +124,11 @@
 <script type=text/javascript>
 $(document).ready(function () {
     // Get input seq length
-    // $("#sequence_textarea").change(function (){
     $("#sequence_textarea").bind('input', function(){
         $("#sequence_count").text($(this).val().length);
     });
 
+    // For pagination etc.
     // Convert BLAST result table to jQuery dataTable
     var dTb = $('#result_table').dataTable({
         stateSave: true,
@@ -143,7 +141,7 @@ $(document).ready(function () {
     // To access items in all pages...
     var allPages = dTb.fnGetNodes();
 
-    // Add checked ASV ID:s to hidden textarea for POST request to SBDI
+    // Add checked to hidden textarea for POST to SBDI
     function addChecked() {
         var ids = [];
         //Add checked to list
@@ -157,7 +155,7 @@ $(document).ready(function () {
         //Add to textarea
         $("#raw_names").val(ids.join("\n"));
     }
-    // Apply when any ASV:s are checked
+    // Apply addition when any ASV:s are checked
     $(".asvid", allPages).change(function () {
         addChecked();
     });
@@ -168,12 +166,23 @@ $(document).ready(function () {
     });
 
     //Require at least one checked hit for SBDI submission
-    $('#taxaUploadForm').submit(function() {
+    $('#rform').submit(function() {
         if (!$("#raw_names").val()) {
+            //Highlight checkbox column
             $('#result_table tr > td:nth-child(6), #result_table tr>th:nth-child(6)').attr('bgcolor', '#f2e4e4');
             $('#asv_error').attr('style', 'text-align:right; color:#aa4442');
             return false;
         }
+    });
+
+    //Change form action depending on submit button
+    $('#download').click(function(){
+        $('#rform').attr('action', '');
+        alert('Sorry, download is not yet available')
+        return false;
+    });
+    $('#show_occurrences').click(function(){
+        $('#rform').attr('action', 'http://molecular.infrabas.se/biocache-service/occurrences/batchSearch');
     });
 });
 </script>

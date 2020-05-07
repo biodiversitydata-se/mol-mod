@@ -90,6 +90,13 @@ def blast():
             print("BLAST ERROR, output: {}".format(blast_stdout))
             print("BLAST ERROR, stderr: {}".format(stderr))
 
+    # elif request.form.get('download'):
+    #     response = requests.get('http://localhost:3000/asv_tax_seq')
+    #     asvs = json.loads(response.text)
+    #     return render_template('asvs.html',
+    #                            asvs=asvs,
+    #                            title="ASVs currently in database")
+
     # If no valid submission (or no hits), show search form (incl. any error messages)
     return render_template('blast.html', sform=sform)
 
