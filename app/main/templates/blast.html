@@ -10,9 +10,9 @@
                 {% else %}
                     <div class="form-group">
                 {% endif %}
-                        <h5><b>Sequence</b>
-                            <span id='sequence_count'>793</span>/500000 characters</h5>
-                        {{ sform.sequence(id='sequence_textarea', rows=7, cols=81, maxlength="500000", class='form-control') }}
+                        <h5><b>Query sequence(s) </b>
+                            <span id='sequence_count'>2108</span>/500000 characters</h5>
+                        {{ sform.sequence(id='sequence_textarea', rows=8, cols=80, maxlength="500000", class='form-control') }}
                         <span id="helpBlock2" class="help-block">
                             {% for error in sform.sequence.errors %}
                             {{ error }}
