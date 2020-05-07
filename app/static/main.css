@@ -10,12 +10,6 @@ body {
     /* color: red */
 }
 
-#result_table th:nth-child(n+3) {
- text-align: center;
-}
-#result_table td:nth-child(n+3) {
- text-align: center;
-}
 #result_table td:nth-child(1) {
     word-wrap: break-word;
     /* min-width: 100px; */
