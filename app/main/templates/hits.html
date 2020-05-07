@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<h2>{{ title }}</h2>
+<br>
+  {% for seq in seqs %}
+    {{ seq }}
+    <br>
+  {% endfor %}
+</div>
+<br>
+<br>
+{% endblock %}

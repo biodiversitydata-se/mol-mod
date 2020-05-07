@@ -99,7 +99,7 @@
         </div>
         <!-- For redirection to SBDI -->
         <div class="row">
-            <textarea name="queries" id="raw_names" style="display: none" data-required="true"></textarea>
+            <textarea name="queries" id="raw_names" style="display: none"></textarea>
             <!-- Visible for testing: -->
             <!-- <textarea name="queries" id="raw_names" rows=4, cols=40></textarea> -->
             <input type="hidden" name="redirectBase"
@@ -178,8 +178,8 @@ $(document).ready(function () {
     //Change form action depending on submit button
     $('#download').click(function(){
         $('#rform').attr('action', '');
-        alert('Sorry, download is not yet available')
-        return false;
+        // alert('Sorry, download is not yet available')
+        // return false;
     });
     $('#show_occurrences').click(function(){
         $('#rform').attr('action', 'http://molecular.infrabas.se/biocache-service/occurrences/batchSearch');
