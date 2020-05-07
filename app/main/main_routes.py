@@ -32,6 +32,7 @@ def index():
 def blast():
 
     sform = BlastSearchForm()
+    rform = BlastResultForm()
 
     # If Search was clicked, and settings are valid
     if request.form.get('blast_for_seq') and sform.validate_on_submit():
@@ -67,8 +68,6 @@ def blast():
 
                 # If some hit(s)
                 else:
-                    rform = BlastResultForm()
-
                     # Set single decimal for Sci not & float
                     df['evalue'] = df['evalue'].map('{:.1e}'.format)
                     df = df.round(1)
@@ -90,12 +89,27 @@ def blast():
             print("BLAST ERROR, output: {}".format(blast_stdout))
             print("BLAST ERROR, stderr: {}".format(stderr))
 
-    # elif request.form.get('download'):
-    #     response = requests.get('http://localhost:3000/asv_tax_seq')
-    #     asvs = json.loads(response.text)
-    #     return render_template('asvs.html',
-    #                            asvs=asvs,
-    #                            title="ASVs currently in database")
+    elif request.form.get('download'):
+        # # Alt1: One API-request per selected
+        # ids = request.form.get('queries').split()
+        # seqs = []
+        # for id in ids:
+        #     url = f'http://localhost:3000/asv_tax_seq?asv_id=eq.{id}'
+        #     response = requests.get(url)
+        #     seqs.append(json.loads(response.text)[0]['asv_sequence'])
+
+        # Alt2: Download all seqs and get those matching selection
+        response = requests.get('http://localhost:3000/asv_tax_seq')
+        asvs = json.loads(response.text)
+        df = pd.DataFrame(asvs)
+        # Note: splitting on '\n' does not work!
+        ids = request.form.get('queries').split()
+        df = df[df['asv_id'].isin(ids)]
+        seqs = df['asv_sequence']
+
+        return render_template('hits.html',
+                               seqs=seqs,
+                               title="Hits")
 
     # If no valid submission (or no hits), show search form (incl. any error messages)
     return render_template('blast.html', sform=sform)
