@@ -110,13 +110,13 @@
         </div>
         <br>
         <div class="row">
-            <!-- <div class="col-md-2">
+            <div class="col-md-2">
                 <input id='download' name='download' type="submit" value="Download" class="btn btn-primary"/>
-            </div> -->
+            </div>
             <div class="col-md-2">
                 <input id='show_occurrences' name='show_occurrences' type="submit" value="Show occurrences" class="btn btn-primary"/>
             </div>
-            <div class="col-md-10 help-block" style="display:none" id="asv_error">Please select at least one BLAST hit</div>
+            <div class="col-md-8 help-block" style="display:none" id="asv_error">Please select at least one BLAST hit</div>
         </div>
     </form>
 </div>
@@ -218,10 +218,10 @@ $(document).ready(function () {
         return requireSelection();
     });
 
-    // //Change form action depending on submit button
-    // $('#download').click(function(){
-    //     $('#rform').attr('action', '');
-    // });
+    //Change form action depending on submit button
+    $('#download').click(function(){
+        $('#rform').attr('action', '');
+    });
     $('#show_occurrences').click(function(){
         $('#rform').attr('action', 'http://molecular.infrabas.se/biocache-service/occurrences/batchSearch');
     });
