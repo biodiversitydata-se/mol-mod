@@ -28,6 +28,11 @@ def index():
     return render_template('index.html')
 
 
+@main_bp.route('/test')
+def test():
+    return render_template('test.html')
+
+
 @main_bp.route('/blast', methods=['GET', 'POST'])
 def blast():
 
