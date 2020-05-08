@@ -85,7 +85,7 @@
                         <tr>
                             <td>{{ row['qacc'] }}</td>
                             {% autoescape false %}
-                            <td>{{ row['sacc'] | replace(':', '<br>') }}</td>
+                            <td>{{ row['sacc'] | replace(':', ':<br>') }}</td>
                             {% endautoescape %}
                             <td>{{ row['pident'] }}</td>
                             <td>{{ row['qcovhsp'] }}</td>
