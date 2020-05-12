@@ -28,9 +28,9 @@ def index():
     return render_template('index.html')
 
 
-@main_bp.route('/test')
-def test():
-    return render_template('test.html')
+@main_bp.route('/about')
+def about():
+    return render_template('about.html')
 
 
 @main_bp.route('/blast', methods=['GET', 'POST'])
@@ -103,11 +103,6 @@ def api_search():
     return render_template('api_search.html')
 
 
-@main_bp.route('/about')
-def about():
-    return redirect(url_for('main_bp.index'))
-
-
 @main_bp.route('/show_asvs', methods=['GET'])
 def show_asvs():
     # Using postgREST API
@@ -121,5 +116,4 @@ def show_asvs():
 
 @main_bp.route('/<page_name>')
 def other_page(page_name):
-    response = make_response(page_name, 404)
-    return render_template('404.html', page=f'{page_name!r}')
+    return render_template('index.html', error_page=f'{page_name!r}')
