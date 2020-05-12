@@ -65,7 +65,8 @@
 
 {% if rform %}
 <div class="container" id="result">
-    <form action="" method="post" id='rform' name="rform">
+    <form action="http://molecular.infrabas.se/biocache-service/occurrences/batchSearch"
+          method="post" id='rform' name="rform">
         {{ rform.csrf_token }}
         <div class="row">
             <div class="col-md-12">
