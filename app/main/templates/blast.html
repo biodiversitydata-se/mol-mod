@@ -215,14 +215,6 @@ $(document).ready(function () {
         return requireSelection();
     });
 
-    //Change form action depending on submit button
-    $('#download').click(function(){
-        $('#rform').attr('action', '');
-    });
-    $('#show_occurrences').click(function(){
-        $('#rform').attr('action', 'http://molecular.infrabas.se/biocache-service/occurrences/batchSearch');
-    });
-
 });
 </script>
 {% endblock body %}
