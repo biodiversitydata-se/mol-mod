@@ -1,32 +1,29 @@
 {% extends "layout.html" %}
 {% block body %}
 <div class="jumbotron">
-  <div class="container">
-    <h1>Swedish ASV database</h1>
-    <p>Welcome to the database of Swedish Amplicon Sequence Variants (ASVs)
-        <br /> - an interface to sequence-based observations in the SBDI Bioatlas platform.
-        <br />Choose your entry point below.
-    </p>
-
-  </div>
+    <div class="container">
+        <h1>Swedish ASV database</h1>
+        <p>Welcome to the database of Swedish Amplicon Sequence Variants (ASVs)
+            <br> - an interface to sequence-based observations in the SBDI Bioatlas platform
+        </p>
+    </div>
 </div>
 <div class="container">
-  <!-- Example row of columns -->
-  <div class="row">
+    <!-- Example row of columns -->
+    <div class="row">
+        <div class="col-md-4">
+            <p>Find ASVs and occurrences
+                <br>using sequence alignment
+            </p>
+            <p><a class="btn btn-primary" id=link_to_blast href="{{ url_for('main_bp.blast') }}" role="button">BLAST sequence(s)</a></p>
+        </div>
     <div class="col-md-4">
-      <h2>BLAST+ search</h2>
-      <p>Search for ASV(s).</p>
-      <p><a class="btn btn-default" id=link_to_blast href="{{ url_for('main_bp.blast') }}" role="button">Take me there &raquo;</a></p>
-</div>
-    <div class="col-md-4">
-      <h2>Bladibla</h2>
-      <p>This will show you bladibla.</p>
-      <p><a class="btn btn-default" id=link_to_functional href="/functional_table" role="button">View Data &raquo;</a></p>
+        <p>Find ASVs and occurrences
+            <br>with certain metadata
+        </p>
+        <p><a class="btn btn-primary"  id=link_to_functional href="{{ url_for('main_bp.api_search') }}" role="button">Search metadata</a></p>
     </div>
     <div class="col-md-4">
-      <h2>Bladibla again</h2>
-      <p>This will show you bladibla again.</p>
-      <p><a class="btn btn-default" id=link_to_taxonomic href="/taxonomy_tree_table" role="button">View Data &raquo;</a></p>
     </div>
   </div>
 </div>
