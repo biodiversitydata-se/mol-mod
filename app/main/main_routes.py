@@ -50,6 +50,8 @@ def blast():
         cmd += ['-db', blast_db]
         names = ['qacc', 'sacc', 'pident', 'qcovhsp', 'evalue']
         cmd += ['-outfmt', f'6 {" ".join(names)}']
+        cmd += ['-num_threads', '4']
+        # default: 59 sec, 4/6/8 - 35 sec ca.
 
         # Spawn system process (BLAST) and direct data to file handles
         with subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
