@@ -100,7 +100,7 @@ def blast():
 
 @main_bp.route('/api_search', methods=['GET', 'POST'])
 def api_search():
-    return render_template('test.html')
+    return render_template('api_search.html')
 
 
 @main_bp.route('/about')

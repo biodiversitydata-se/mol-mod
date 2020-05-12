@@ -9,25 +9,17 @@
     </div>
 </div>
 <div class="container">
-    <!-- Example row of columns -->
     <div class="row">
         <div class="col-md-4">
-            <p>Find ASVs and occurrences
-                <br>using sequence alignment
+            <p>Find ASVs and occurrences<br>using sequence alignment
             </p>
             <p><a class="btn btn-primary" id=link_to_blast href="{{ url_for('main_bp.blast') }}" role="button">BLAST sequence(s)</a></p>
         </div>
-    <div class="col-md-4">
-        <p>Find ASVs and occurrences
-            <br>with certain metadata
-        </p>
-        <p><a class="btn btn-primary"  id=link_to_functional href="{{ url_for('main_bp.api_search') }}" role="button">Search metadata</a></p>
+        <div class="col-md-4">
+            <p>Find ASVs and occurrences<br>matching certain criteria
+            </p>
+            <p><a class="btn btn-primary"  id=link_to_functional href="{{ url_for('main_bp.api_search') }}" role="button">Search metadata</a></p>
+        </div>
     </div>
-    <div class="col-md-4">
-    </div>
-  </div>
 </div>
-<div id="container" style="width:100%; height:100px;"></div>
-<script type=text/javascript>
-</script>
 {% endblock body %}
