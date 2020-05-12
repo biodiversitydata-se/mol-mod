@@ -142,6 +142,7 @@ $(document).ready(function () {
             { extend: 'csv',
                 exportOptions: { rows: '.checkedrow'},
                 action: function ( e, dt, node, config ) {
+                    // Warn & stop if no selection
                     if (!$("#raw_names").val()) {
                         return requireSelection();
                     }
@@ -167,39 +168,37 @@ $(document).ready(function () {
     var allPages = dTb.fnGetNodes();
 
     // Add checked ids to hidden textarea - for POST to SBDI
-    // and add class - for download filter
+    // and add class 'checkedrows'- for download
     function addChecked() {
-        // Empty list of selected & remove checkedrow class
+        // Empty selected list & checkedrow class
         var ids = [];
         $(".asvid", allPages).map(function () {
             $(this).closest("tr").removeClass("checkedrow");
         });
-        //For all checked
+        // Add checked to list & class
         $(".asvid:checkbox:checked", allPages).map(function () {
             // Add to list
             ids.push(this.id);
-            // Add class for datatables download
+            // Add class
             $(this).closest("tr").addClass("checkedrow");
         });
-        //Remove duplicates
+        // Remove duplicates from list
         ids = ids.filter(function(item, i, ids) {
             return i == ids.indexOf(item);
         });
-        //Add to textarea
+        // Add ids to textarea
         $("#raw_names").val(ids.join("\n"));
     }
-    // Apply addition when any ASV:s are checked
+    // When any ASV:s are checked
     $(".asvid", allPages).change(function () {
-        // alert (this.check)
         addChecked();
     });
-    // ... and when all are checked
+    // When all
     $("#select_all").change(function () {
         $(".asvid", allPages).prop('checked',this.checked);
         addChecked();
     });
-
-    // Require at least one selected row
+    // Require at least one selected id
     function requireSelection() {
         if (!$("#raw_names").val()) {
             // Highlight checkbox column
@@ -210,8 +209,6 @@ $(document).ready(function () {
             return false;
         }
     }
-
-    //Require at least one checked hit for SBDI submission
     $('#rform').submit(function() {
         return requireSelection();
     });
