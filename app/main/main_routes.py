@@ -94,30 +94,13 @@ def blast():
             print("BLAST ERROR, output: {}".format(blast_stdout))
             print("BLAST ERROR, stderr: {}".format(stderr))
 
-    elif request.form.get('download'):
-        # # Alt1: One API-request per selected
-        # ids = request.form.get('queries').split()
-        # seqs = []
-        # for id in ids:
-        #     url = f'http://localhost:3000/asv_tax_seq?asv_id=eq.{id}'
-        #     response = requests.get(url)
-        #     seqs.append(json.loads(response.text)[0]['asv_sequence'])
-
-        # Alt2: Download all seqs and get those matching selection
-        response = requests.get('http://localhost:3000/asv_tax_seq')
-        asvs = json.loads(response.text)
-        df = pd.DataFrame(asvs)
-        # Note: splitting on '\n' does not work!
-        ids = request.form.get('queries').split()
-        df = df[df['asv_id'].isin(ids)]
-        seqs = df['asv_sequence']
-
-        return render_template('hits.html',
-                               seqs=seqs,
-                               title="Hits")
-
     # If no valid submission (or no hits), show search form (incl. any error messages)
     return render_template('blast.html', sform=sform)
+
+
+@main_bp.route('/api_search', methods=['GET', 'POST'])
+def api_search():
+    return render_template('test.html')
 
 
 @main_bp.route('/about')
