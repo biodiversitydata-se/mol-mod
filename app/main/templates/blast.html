@@ -91,7 +91,7 @@
                             <td>{{ row['pident'] }}</td>
                             <td>{{ row['qcovhsp'] }}</td>
                             <td>{{ row['evalue'] }}</td>
-                            <td>{{ rform.asvid(id=row['asvid'], class='asvid') }}</td>
+                            <td>{{ rform.asv_id(id=row['asv_id'], class='asv_id') }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -172,11 +172,11 @@ $(document).ready(function () {
     function addChecked() {
         // Empty selected list & checkedrow class
         var ids = [];
-        $(".asvid", allPages).map(function () {
+        $(".asv_id", allPages).map(function () {
             $(this).closest("tr").removeClass("checkedrow");
         });
         // Add checked to list & class
-        $(".asvid:checkbox:checked", allPages).map(function () {
+        $(".asv_id:checkbox:checked", allPages).map(function () {
             // Add to list
             ids.push(this.id);
             // Add class
@@ -190,12 +190,12 @@ $(document).ready(function () {
         $("#raw_names").val(ids.join("\n"));
     }
     // When any ASV:s are checked
-    $(".asvid", allPages).change(function () {
+    $(".asv_id", allPages).change(function () {
         addChecked();
     });
     // When all
     $("#select_all").change(function () {
-        $(".asvid", allPages).prop('checked',this.checked);
+        $(".asv_id", allPages).prop('checked',this.checked);
         addChecked();
     });
     // Require at least one selected id

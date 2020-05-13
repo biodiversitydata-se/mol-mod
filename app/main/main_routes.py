@@ -80,7 +80,7 @@ def blast():
                     df = df.round(1)
 
                     # Extract asvid from sacc = id + taxonomy
-                    df['asvid'] = df['sacc'].str.split(":", expand=True)[0]
+                    df['asv_id'] = df['sacc'].str.split(":", expand=True)[0]
 
                     # Show both search and result forms on same page
                     return render_template('blast.html', sform=sform, rform=rform, rdf=df)
