@@ -44,9 +44,9 @@ def blast():
 
         # Collect BLAST cmd items into list
         cmd = ['blastn']  # [sform.blast_algorithm.data]
-        cmd += ["-perc_identity", str(sform.min_identity.data)]
-        cmd += ["-qcov_hsp_perc", str(sform.min_qry_cover.data)]
-        blast_db = "app/data/blastdb/asvdb"
+        cmd += ['-perc_identity', str(sform.min_identity.data)]
+        cmd += ['-qcov_hsp_perc', str(sform.min_qry_cover.data)]
+        blast_db = 'app/data/blastdb/asvdb'
         cmd += ['-db', blast_db]
         names = ['qacc', 'sacc', 'pident', 'qcovhsp', 'evalue']
         cmd += ['-outfmt', f'6 {" ".join(names)}']
@@ -70,8 +70,8 @@ def blast():
 
                 # If no hits
                 if len(df) == 0:
-                    msg = "No hits were found in the BLAST search"
-                    flash(msg, category="error")
+                    msg = 'No hits were found in the BLAST search'
+                    flash(msg, category='error')
 
                 # If some hit(s)
                 else:
@@ -80,21 +80,21 @@ def blast():
                     df = df.round(1)
 
                     # Extract asvid from sacc = id + taxonomy
-                    df['asv_id'] = df['sacc'].str.split(":", expand=True)[0]
+                    df['asv_id'] = df['sacc'].str.split(':', expand=True)[0]
 
                     # Show both search and result forms on same page
                     return render_template('blast.html', sform=sform, rform=rform, rdf=df)
 
         # If BLAST error
         else:
-            msg = "Error, the BLAST query was not successful."
-            flash(msg, category="error")
+            msg = 'Error, the BLAST query was not successful.'
+            flash(msg, category='error')
 
             # Logging the error - Not sure if this is working
-            print("BLAST ERROR, cmd: {}".format(cmd))
-            print("BLAST ERROR, returncode: {}".format(returncode))
-            print("BLAST ERROR, output: {}".format(blast_stdout))
-            print("BLAST ERROR, stderr: {}".format(stderr))
+            print('BLAST ERROR, cmd: {}'.format(cmd))
+            print('BLAST ERROR, returncode: {}'.format(returncode))
+            print('BLAST ERROR, output: {}'.format(blast_stdout))
+            print('BLAST ERROR, stderr: {}'.format(stderr))
 
     # If no valid submission (or no hits), show search form (incl. any error messages)
     return render_template('blast.html', sform=sform)
