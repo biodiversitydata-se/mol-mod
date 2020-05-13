@@ -16,14 +16,19 @@
 <div class="container">
     <div class="row">
         <div class="col-md-4">
-            <p>Find ASVs and occurrences<br>using sequence alignment
+            <p>Search for ASVs and occurrences <br>using sequence alignment
             </p>
-            <p><a class="btn btn-primary" id=link_to_blast href="{{ url_for('main_bp.blast') }}" role="button">BLAST sequence(s)</a></p>
+            <p><a class="btn btn-primary" id=link_to_blast href="{{ url_for('main_bp.blast') }}" role="button">BLAST</a></p>
         </div>
         <div class="col-md-4">
-            <p>Find ASVs and occurrences<br>matching certain criteria
+            <p>Search for ASVs and occurrences <br>matching some criteria
             </p>
-            <p><a class="btn btn-primary"  id=link_to_functional href="{{ url_for('main_bp.api_search') }}" role="button">Search metadata</a></p>
+            <p><a class="btn btn-primary"  id=link_to_api_search href="{{ url_for('main_bp.search_api') }}" role="button">Search</a></p>
+        </div>
+        <div class="col-md-4">
+            <p>View and download all <br>ASVs in database<br>
+            </p>
+            <p><a class="btn btn-primary"  id=link_to_asv_list href="{{ url_for('main_bp.list_asvs') }}" role="button">List</a></p>
         </div>
     </div>
 </div>

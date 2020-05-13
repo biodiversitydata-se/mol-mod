@@ -100,20 +100,16 @@ def blast():
     return render_template('blast.html', sform=sform)
 
 
-@main_bp.route('/api_search', methods=['GET', 'POST'])
-def api_search():
-    return render_template('api_search.html')
+@main_bp.route('/search_api', methods=['GET', 'POST'])
+def search_api():
+    return render_template('search_api.html')
 
 
-@main_bp.route('/show_asvs', methods=['GET'])
-def show_asvs():
-    # Using postgREST API
-
+@main_bp.route('/list_asvs', methods=['GET'])
+def list_asvs():
     response = requests.get('http://localhost:3000/asv_tax_seq')
     asvs = json.loads(response.text)
-    return render_template('asvs.html',
-                           asvs=asvs,
-                           title="ASVs currently in database")
+    return render_template('list_asvs.html', asvs=asvs)
 
 
 @main_bp.route('/<page_name>')
