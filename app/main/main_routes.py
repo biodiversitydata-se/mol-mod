@@ -79,6 +79,8 @@ def blast():
                     df['evalue'] = df['evalue'].map('{:.1e}'.format)
                     df = df.round(1)
 
+                    df['sacc'] = df['sacc'].str.replace(';', '|')
+
                     # Extract asvid from sacc = id + taxonomy
                     df['asv_id'] = df['sacc'].str.split(':', expand=True)[0]
 
