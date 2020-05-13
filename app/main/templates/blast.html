@@ -1,19 +1,19 @@
-{% extends "layout.html" %}
+{% extends 'layout.html' %}
 {% block body %}
-<div class="container">
-    <form action="" method="post" id='sform' name="sform" class="search_function">
+<div class='container'>
+    <form action='' method='post' id='sform' name='sform' class='search_function'>
         {{ sform.csrf_token }}
-        <div class="row">
-            <div class="col-md-12">
+        <div class='row'>
+            <div class='col-md-12'>
                 {% if sform.sequence.errors %}
-                    <div class="form-group has-error">
+                    <div class='form-group has-error'>
                 {% else %}
-                    <div class="form-group">
+                    <div class='form-group'>
                 {% endif %}
                         <h5><b>Query sequence(s) </b>
                             <span id='sequence_count'>2108</span>/500000 characters</h5>
-                        {{ sform.sequence(id='sequence_textarea', rows=8, cols=80, maxlength="500000", class='form-control') }}
-                        <span id="helpBlock2" class="help-block">
+                        {{ sform.sequence(id='sequence_textarea', rows=8, cols=80, maxlength='500000', class='form-control') }}
+                        <span id='helpBlock2' class='help-block'>
                             {% for error in sform.sequence.errors %}
                             {{ error }}
                             {% endfor %}
@@ -21,31 +21,31 @@
                     </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-3">
+        <div class='row'>
+            <div class='col-md-3'>
                 <h5><b>Minimum identity (%)</b></h5>
                 {% if sform.min_identity.errors %}
-                    <div class="form-group has-error">
+                    <div class='form-group has-error'>
                 {% else %}
-                    <div class="form-group">
+                    <div class='form-group'>
                 {% endif %}
-                        {{ sform.min_identity(id="min_identity_input", class="form-control", type="number") }}
-                        <span class="help-block">
+                        {{ sform.min_identity(id='min_identity_input', class='form-control', type='number') }}
+                        <span class='help-block'>
                             {% for error in sform.min_identity.errors %}
                             {{ error }}
                             {% endfor %}
                         </span>
                     </div>
             </div>
-            <div class="col-md-3">
+            <div class='col-md-3'>
                 <h5><b>Minimum query coverage (%)</b></h5>
                 {% if sform.min_qry_cover.errors %}
-                    <div class="form-group has-error">
+                    <div class='form-group has-error'>
                 {% else %}
-                    <div class="form-group">
+                    <div class='form-group'>
                 {% endif %}
-                        {{ sform.min_qry_cover(id="min_qry_cover", class="form-control", type="number") }}
-                        <span class="help-block">
+                        {{ sform.min_qry_cover(id='min_qry_cover', class='form-control', type='number') }}
+                        <span class='help-block'>
                             {% for error in sform.min_qry_cover.errors %}
                             {{ error }}
                             {% endfor %}
@@ -53,8 +53,8 @@
                     </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-4">
+        <div class='row'>
+            <div class='col-md-4'>
                 {{ sform.blast_for_seq(class='btn btn-primary', id='blast_for_seq') }}
             </div>
         </div>
@@ -64,13 +64,13 @@
 <br>
 
 {% if rform %}
-<div class="container" id="result">
-    <form action="http://molecular.infrabas.se/biocache-service/occurrences/batchSearch"
-          method="post" id='rform' name="rform">
+<div class='container' id='result'>
+    <form action='http://molecular.infrabas.se/biocache-service/occurrences/batchSearch'
+          method='post' id='rform' name='rform'>
         {{ rform.csrf_token }}
-        <div class="row">
-            <div class="col-md-12">
-                <table id='result_table' class="dataframe table table-striped">
+        <div class='row'>
+            <div class='col-md-12'>
+                <table id='result_table' class='dataframe table table-striped'>
                     <thead>
                         <tr>
                             <th>Query</th>
@@ -78,7 +78,7 @@
                             <th>Id (%)</th>
                             <th>Cov (%)</th>
                             <th>E-value</th>
-                            <th><input type="checkbox" id="select_all" /></th>
+                            <th><input type='checkbox' id='select_all' /></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -99,21 +99,21 @@
             </div>
         </div>
         <!-- Hidden part, for redirection to SBDI -->
-        <div class="row">
-            <textarea name="queries" id="raw_names" style="display: none"></textarea>
+        <div class='row'>
+            <textarea name='queries' id='raw_names' style='display: none'></textarea>
             <!-- Make visible for testing: -->
-            <!-- <textarea name="queries" id="raw_names" rows=4, cols=40></textarea> -->
-            <input type="hidden" name="redirectBase"
-                value="http://molecular.infrabas.se/ala-hub/occurrences/search">
-            <input type="hidden" name="field" value="raw_name"/>
-            <input type="hidden" name="action" value="Search"/>
+            <!-- <textarea name='queries' id='raw_names' rows=4, cols=40></textarea> -->
+            <input type='hidden' name='redirectBase'
+                value='http://molecular.infrabas.se/ala-hub/occurrences/search'>
+            <input type='hidden' name='field' value='raw_name'/>
+            <input type='hidden' name='action' value='Search'/>
         </div>
         <br>
-        <div class="row">
-            <div class="col-md-2">
-                <input id='show_occurrences' name='show_occurrences' type="submit" value="Show occurrences" class="btn btn-primary"/>
+        <div class='row'>
+            <div class='col-md-2'>
+                <input id='show_occurrences' name='show_occurrences' type='submit' value='Show occurrences' class='btn btn-primary'/>
             </div>
-            <div class="col-md-10 help-block" style="display:none" id="asv_error">Please select at least one BLAST hit</div>
+            <div class='col-md-10 help-block' style='display:none' id='asv_error'>Please select at least one BLAST hit</div>
         </div>
     </form>
 </div>
@@ -123,8 +123,8 @@
 $(document).ready(function () {
     // Search form
     // Get input seq length
-    $("#sequence_textarea").bind('input', function(){
-        $("#sequence_count").text($(this).val().length);
+    $('#sequence_textarea').bind('input', function(){
+        $('#sequence_count').text($(this).val().length);
     });
 
     // Result table
@@ -142,7 +142,7 @@ $(document).ready(function () {
                 exportOptions: { rows: '.checkedrow'},
                 action: function ( e, dt, node, config ) {
                     // Warn & stop if no selection
-                    if (!$("#raw_names").val()) {
+                    if (!$('#raw_names').val()) {
                         return requireSelection();
                     }
                     $.fn.DataTable.ext.buttons.csvHtml5.action.call(this, e, dt, node, config);
@@ -151,7 +151,7 @@ $(document).ready(function () {
             { extend: 'excel',
                 exportOptions: { rows: '.checkedrow'},
                 action: function ( e, dt, node, config ) {
-                    if (!$("#raw_names").val()) {
+                    if (!$('#raw_names').val()) {
                         return requireSelection();
                     }
                     $.fn.DataTable.ext.buttons.excelHtml5.action.call(this, e, dt, node, config);
@@ -159,8 +159,8 @@ $(document).ready(function () {
             },
         ],
         // Disable sort on select col - currently not working
-        "columnDefs": [
-            { "orderable": false, "targets": 5 }
+        'columnDefs': [
+            { 'orderable': false, 'targets': 5 }
         ]
     });
     // Enable access to items in all pages
@@ -171,35 +171,35 @@ $(document).ready(function () {
     function addChecked() {
         // Empty selected list & checkedrow class
         var ids = [];
-        $(".asv_id", allPages).map(function () {
-            $(this).closest("tr").removeClass("checkedrow");
+        $('.asv_id', allPages).map(function () {
+            $(this).closest('tr').removeClass('checkedrow');
         });
         // Add checked to list & class
-        $(".asv_id:checkbox:checked", allPages).map(function () {
+        $('.asv_id:checkbox:checked', allPages).map(function () {
             // Add to list
             ids.push(this.id);
             // Add class
-            $(this).closest("tr").addClass("checkedrow");
+            $(this).closest('tr').addClass('checkedrow');
         });
         // Remove duplicates from list
         ids = ids.filter(function(item, i, ids) {
             return i == ids.indexOf(item);
         });
         // Add ids to textarea
-        $("#raw_names").val(ids.join("\n"));
+        $('#raw_names').val(ids.join('\n'));
     }
     // When any ASV:s are checked
-    $(".asv_id", allPages).change(function () {
+    $('.asv_id', allPages).change(function () {
         addChecked();
     });
     // When all
-    $("#select_all").change(function () {
-        $(".asv_id", allPages).prop('checked',this.checked);
+    $('#select_all').change(function () {
+        $('.asv_id', allPages).prop('checked',this.checked);
         addChecked();
     });
     // Require at least one selected id
     function requireSelection() {
-        if (!$("#raw_names").val()) {
+        if (!$('#raw_names').val()) {
             // Highlight checkbox column
             $('#result_table tr > td:nth-child(6), #result_table tr>th:nth-child(6)').attr('bgcolor', '#f2e4e4');
             // Show error msg
