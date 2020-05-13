@@ -59,4 +59,4 @@ class BlastSearchForm(FlaskForm):
 
 
 class BlastResultForm(FlaskForm):
-    asvid = BooleanField(u'asvid')
+    asv_id = BooleanField(u'asv_id')
