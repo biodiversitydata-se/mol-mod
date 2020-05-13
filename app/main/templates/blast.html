@@ -197,19 +197,9 @@ $(document).ready(function () {
         $('.asv_id', allPages).prop('checked',this.checked);
         addChecked();
     });
-    // Require at least one selected id
-    function requireSelection() {
-        if (!$('#raw_names').val()) {
-            // Highlight checkbox column
-            $('#result_table tr > td:nth-child(6), #result_table tr>th:nth-child(6)').attr('bgcolor', '#f2e4e4');
-            // Show error msg
-            $('#asv_error').attr('style', 'text-align:right; color:#aa4442');
-            // Stop submission
-            return false;
-        }
-    }
+
     $('#rform').submit(function() {
-        return requireSelection();
+        return requireRowSelection(6);
     });
 
 });
