@@ -139,21 +139,22 @@ $(document).ready(function () {
         // Add buttons for download of selected rows (class = checkedrow)
         buttons: [
             { extend: 'csv',
-                exportOptions: { rows: '.checkedrow'},
+                exportOptions: { rows: '.selectedRow'},
                 action: function ( e, dt, node, config ) {
+                    // requireSelection();
                     // Warn & stop if no selection
-                    if (!$('#raw_names').val()) {
-                        return requireSelection();
-                    }
+                    // if (!$('#raw_names').val()) {
+                    //     return requireSelection();
+                    // }
                     $.fn.DataTable.ext.buttons.csvHtml5.action.call(this, e, dt, node, config);
                 }
             },
             { extend: 'excel',
-                exportOptions: { rows: '.checkedrow'},
+                exportOptions: { rows: '.selectedRow'},
                 action: function ( e, dt, node, config ) {
-                    if (!$('#raw_names').val()) {
-                        return requireSelection();
-                    }
+                    // if (!$('#raw_names').val()) {
+                    //     return requireSelection();
+                    // }
                     $.fn.DataTable.ext.buttons.excelHtml5.action.call(this, e, dt, node, config);
                 }
             },
@@ -167,39 +168,50 @@ $(document).ready(function () {
     var allPages = dTb.fnGetNodes();
 
     // Add checked ids to hidden textarea - for POST to SBDI
-    // and add class 'checkedrows'- for download
-    function addChecked() {
-        // Empty selected list & checkedrow class
+    function addCheckedToArea() {
         var ids = [];
-        $('.asv_id', allPages).map(function () {
-            $(this).closest('tr').removeClass('checkedrow');
-        });
-        // Add checked to list & class
+        // Add checked ids to list
         $('.asv_id:checkbox:checked', allPages).map(function () {
-            // Add to list
             ids.push(this.id);
-            // Add class
-            $(this).closest('tr').addClass('checkedrow');
         });
-        // Remove duplicates from list
+        // Remove duplicates
         ids = ids.filter(function(item, i, ids) {
             return i == ids.indexOf(item);
         });
         // Add ids to textarea
         $('#raw_names').val(ids.join('\n'));
     }
-    // When any ASV:s are checked
+
+    // // Require at least one selected row
+    // function requireSelection(cno) {
+    //     if (!$('#raw_names').val()) {
+    //         // Highlight checkbox column
+    //         $('#result_table tr > td:nth-child('+cno+'), #result_table tr>th:nth-child('+cno+')').attr('bgcolor', '#f2e4e4');
+    //         // Show error msg
+    //         $('#asv_error').attr('style', 'text-align:right; color:#aa4442');
+    //         // Stop submission
+    //         return false;
+    //     }
+    //     return true;
+    // }
+
+    // When any ASV checkbox is changed
     $('.asv_id', allPages).change(function () {
-        addChecked();
+        // Toggle row selection for download
+        $(this).closest('tr').toggleClass("selectedRow", this.checked);
     });
-    // When all
+
+    // When hdr checkbox is changed
     $('#select_all').change(function () {
-        $('.asv_id', allPages).prop('checked',this.checked);
-        addChecked();
+        // Set all ASV checkboxes to same status
+        $('.asv_id', allPages).prop('checked', this.checked);
+        // Toggle row selection for download
+        $('.asv_id', allPages).closest('tr').toggleClass('selectedRow', this.checked);
     });
 
     $('#rform').submit(function() {
-        return requireRowSelection(6);
+        //requireSelection(6);
+        addCheckedToArea();
     });
 
 });
