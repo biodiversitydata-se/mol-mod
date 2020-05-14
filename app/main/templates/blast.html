@@ -100,9 +100,9 @@
         </div>
         <!-- Hidden part, for redirection to SBDI -->
         <div class='row'>
-            <!-- <textarea name='queries' id='raw_names' style='display: none'></textarea> -->
+            <textarea name='queries' id='raw_names' style='display: none'></textarea>
             <!-- Make visible for testing: -->
-            <textarea name='queries' id='raw_names' rows=4, cols=40></textarea>
+            <!-- <textarea name='queries' id='raw_names' rows=4, cols=40></textarea> -->
             <input type='hidden' name='redirectBase'
                 value='http://molecular.infrabas.se/ala-hub/occurrences/search'>
             <input type='hidden' name='field' value='raw_name'/>
@@ -113,22 +113,22 @@
             <div class='col-md-2'>
                 <input id='show_occurrences' name='show_occurrences' type='submit' value='Show occurrences' class='btn btn-primary'/>
             </div>
-            <div class='col-md-10 help-block' style='display:none' id='asv_error'>Please select at least one BLAST hit</div>
+            <div class='col-md-10' style='display:none' id='selection_error'>Please select at least one BLAST hit</div>
         </div>
     </form>
 </div>
 {% endif %}
 
 <script>
-
-
-
 $(document).ready(function () {
 
     // Get input seq length for display
     $('#sequence_textarea').bind('input', function(){
         $('#sequence_count').text($(this).val().length);
     });
+
+    var sbdiArea = $('#raw_names');
+    var eBox = $('#selection_error');
 
     // Convert reasults to jQuery dataTable
     var dTb = $('#result_table').dataTable({
@@ -145,7 +145,7 @@ $(document).ready(function () {
                 action: function ( e, dt, node, config ) {
                     // Warn & stop if no selection
                     if ($('.selectedRow').length == 0) {
-                        return alertNoSelection(6);
+                        return alertNoSelection('result_table', 6, eBox);
                     }
                     $.fn.DataTable.ext.buttons.csvHtml5.action.call(this, e, dt, node, config);
                 }
@@ -155,7 +155,7 @@ $(document).ready(function () {
                 action: function ( e, dt, node, config ) {
                     // Warn & stop if no selection
                     if ($('.selectedRow').length == 0) {
-                        return alertNoSelection(6);
+                        return alertNoSelection('result_table', 6, eBox);
                     }
                     $.fn.DataTable.ext.buttons.excelHtml5.action.call(this, e, dt, node, config);
                 }
@@ -169,7 +169,7 @@ $(document).ready(function () {
     // Enable access to items in all pages
     var allPages = dTb.fnGetNodes();
     var asvBoxes = $('.asv_id', allPages);
-    var sbdiArea = $('#raw_names');
+
 
     // When any ASV checkbox is changed
     asvBoxes.change(function () {
@@ -191,7 +191,7 @@ $(document).ready(function () {
         addCheckedToArea(asvBoxes, sbdiArea);
         // Warn & stop if no selection
         if (!sbdiArea.val()) {
-            return alertNoSelection(6);
+            return alertNoSelection('result_table', 6, eBox);
         }
     });
 
