@@ -141,23 +141,23 @@ $(document).ready(function () {
             { extend: 'csv',
                 exportOptions: { rows: '.selectedRow'},
                 action: function ( e, dt, node, config ) {
-                    // requireSelection();
                     // Warn & stop if no selection
-                    // if (!$('#raw_names').val()) {
-                    //     return requireSelection();
-                    // }
+                    if ($('.selectedRow').length == 0) {
+                        return alertNoSelection(6);
+                    }
                     $.fn.DataTable.ext.buttons.csvHtml5.action.call(this, e, dt, node, config);
                 }
             },
             { extend: 'excel',
                 exportOptions: { rows: '.selectedRow'},
                 action: function ( e, dt, node, config ) {
-                    // if (!$('#raw_names').val()) {
-                    //     return requireSelection();
-                    // }
+                    // Warn & stop if no selection
+                    if ($('.selectedRow').length == 0) {
+                        return alertNoSelection(6);
+                    }
                     $.fn.DataTable.ext.buttons.excelHtml5.action.call(this, e, dt, node, config);
                 }
-            },
+            }
         ],
         // Disable sort on select col - currently not working
         'columnDefs': [
@@ -182,18 +182,14 @@ $(document).ready(function () {
         $('#raw_names').val(ids.join('\n'));
     }
 
-    // // Require at least one selected row
-    // function requireSelection(cno) {
-    //     if (!$('#raw_names').val()) {
-    //         // Highlight checkbox column
-    //         $('#result_table tr > td:nth-child('+cno+'), #result_table tr>th:nth-child('+cno+')').attr('bgcolor', '#f2e4e4');
-    //         // Show error msg
-    //         $('#asv_error').attr('style', 'text-align:right; color:#aa4442');
-    //         // Stop submission
-    //         return false;
-    //     }
-    //     return true;
-    // }
+    //
+    function alertNoSelection(cno) {
+        $('#result_table tr > td:nth-child('+cno+'), #result_table tr>th:nth-child('+cno+')').attr('bgcolor', '#f2e4e4');
+        // Show error msg
+        $('#asv_error').attr('style', 'text-align:right; color:#aa4442');
+        // Stop submission
+        return false;
+    }
 
     // When any ASV checkbox is changed
     $('.asv_id', allPages).change(function () {
@@ -210,8 +206,10 @@ $(document).ready(function () {
     });
 
     $('#rform').submit(function() {
-        //requireSelection(6);
         addCheckedToArea();
+        if (!$('#raw_names').val()) {
+            alertNoSelection(6);
+        }
     });
 
 });
