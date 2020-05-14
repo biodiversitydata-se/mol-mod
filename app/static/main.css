@@ -17,7 +17,18 @@ body {
  }
 /* Subject */
 #result_table td:nth-child(2) {
- word-wrap: break-word;
- /* min-width: 500px; */
- max-width: 400px;
+    word-wrap: break-word;
+    /* min-width: 500px; */
+    max-width: 400px;
+}
+.hiddenElem {
+    display: none;
+}
+.visHlpElem {
+    background-color: #f2e4e4;
+}
+.visHlpDiv {
+    display: block;
+    text-align: right;
+    color: #aa4442;
 }

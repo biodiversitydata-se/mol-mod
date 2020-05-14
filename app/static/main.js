@@ -16,12 +16,8 @@ function addCheckedToArea(asvBoxes, sbdiArea) {
 }
 
 // Warn & stop if no selection for SBDI submission / download
-function alertNoSelection(tblName, cno, eBox) {
-    // Colour checkbox column
-    // $(tbl+'tr > td:nth-child('+cno+'), '+tbl+' tr>th:nth-child('+cno+')').attr('bgcolor', '#f2e4e4');
-    $('#'+tblName+' tr > td:nth-child('+cno+'), '+tblName+' tr>th:nth-child('+cno+')').attr('bgcolor', '#f2e4e4');
-    // Show error msg
-    eBox.attr('style', 'text-align:right; color:#aa4442');
-    // Stop further action
+function alertNoSelection(hlpElem, hlpDiv) {
+    hlpDiv.addClass('visHlpDiv');
+    hlpElem.addClass('visHlpElem');
     return false;
 }
