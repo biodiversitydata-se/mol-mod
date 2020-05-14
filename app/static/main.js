@@ -1,8 +1,3 @@
-function mtest() {
-    alert('då');
-    // alert(value);
-}
-
 // Add checked ids to hidden textarea - for POST to SBDI
 function addCheckedToArea(asvBoxes, sbdiArea) {
     var ids = [];
@@ -19,13 +14,14 @@ function addCheckedToArea(asvBoxes, sbdiArea) {
     // Add ids to textarea
     sbdiArea.val(ids.join('\n'));
 }
-//
+
 // Warn & stop if no selection for SBDI submission / download
-function alertNoSelection(cno) {
+function alertNoSelection(tblName, cno, eBox) {
     // Colour checkbox column
-    $('#result_table tr > td:nth-child('+cno+'), #result_table tr>th:nth-child('+cno+')').attr('bgcolor', '#f2e4e4');
+    // $(tbl+'tr > td:nth-child('+cno+'), '+tbl+' tr>th:nth-child('+cno+')').attr('bgcolor', '#f2e4e4');
+    $('#'+tblName+' tr > td:nth-child('+cno+'), '+tblName+' tr>th:nth-child('+cno+')').attr('bgcolor', '#f2e4e4');
     // Show error msg
-    $('#asv_error').attr('style', 'text-align:right; color:#aa4442');
+    eBox.attr('style', 'text-align:right; color:#aa4442');
     // Stop further action
     return false;
 }
