@@ -175,6 +175,7 @@ $(document).ready(function () {
     asvBoxes.change(function () {
         // Toggle download selection
         $(this).closest('tr').toggleClass('selectedRow', this.checked);
+        // Remove no-selection warnings (if any)
         if (this.checked) {
             hlpElem.removeClass('visHlpElem');
             hlpDiv.removeClass('visHlpDiv');
@@ -187,6 +188,7 @@ $(document).ready(function () {
         asvBoxes.prop('checked', this.checked);
         // Toggle download selection
         asvBoxes.closest('tr').toggleClass('selectedRow', this.checked);
+        // Remove no-selection warnings (if any)
         hlpElem.removeClass('visHlpElem');
         hlpDiv.removeClass('visHlpDiv');
     });
