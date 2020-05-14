@@ -127,16 +127,16 @@ $(document).ready(function () {
         $('#sequence_count').text($(this).val().length);
     });
 
-    // Result table
-    // Convert to jQuery dataTable for pagination, download etc.
+    // Result form
+    // Convert to jQuery dataTable
     var dTb = $('#result_table').dataTable({
-        // Modify layout of components:
+        // Modify layout of dataTable components:
         // l=Show.., f=Search, tr=table, i=Showing.., p=pagination
         dom: "<'row'<'col-md-4'l><'col-md-8'f>>" +
         "<'row'<'col-md-12't>>" +
         "<'row'<'col-md-3'B><'col-md-3'i><'col-md-6'p>>",
         stateSave: true,
-        // Add buttons for download of selected rows (class = checkedrow)
+        // Add download buttons
         buttons: [
             { extend: 'csv',
                 exportOptions: { rows: '.selectedRow'},
@@ -159,7 +159,7 @@ $(document).ready(function () {
                 }
             }
         ],
-        // Disable sort on select col - currently not working
+        // Disable sort on select col - as it does not work
         'columnDefs': [
             { 'orderable': false, 'targets': 5 }
         ]
@@ -198,7 +198,7 @@ $(document).ready(function () {
         $(this).closest('tr').toggleClass("selectedRow", this.checked);
     });
 
-    // When hdr checkbox is changed
+    // When header checkbox is changed
     $('#select_all').change(function () {
         // Set all ASV checkboxes to same status
         $('.asv_id', allPages).prop('checked', this.checked);
@@ -206,11 +206,11 @@ $(document).ready(function () {
         $('.asv_id', allPages).closest('tr').toggleClass('selectedRow', this.checked);
     });
 
-    // SBDI submit
+    // At submit to SBDI
     $('#rform').submit(function() {
         addCheckedToArea();
         if (!$('#raw_names').val()) {
-            alertNoSelection(6);
+            return alertNoSelection(6);
         }
     });
 
