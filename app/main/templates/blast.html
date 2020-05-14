@@ -206,6 +206,7 @@ $(document).ready(function () {
         $('.asv_id', allPages).closest('tr').toggleClass('selectedRow', this.checked);
     });
 
+    // SBDI submit
     $('#rform').submit(function() {
         addCheckedToArea();
         if (!$('#raw_names').val()) {
