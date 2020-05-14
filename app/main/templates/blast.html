@@ -113,7 +113,7 @@
             <div class='col-md-2'>
                 <input id='show_occurrences' name='show_occurrences' type='submit' value='Show occurrences' class='btn btn-primary'/>
             </div>
-            <div class='col-md-10' style='display:none' id='selection_error'>Please select at least one BLAST hit</div>
+            <div class='col-md-10 hiddenElem' id='selection_error'>Please select at least one BLAST hit</div>
         </div>
     </form>
 </div>
@@ -128,7 +128,8 @@ $(document).ready(function () {
     });
 
     var sbdiArea = $('#raw_names');
-    var eBox = $('#selection_error');
+    var hlpElem = $('#result_table tr > td:nth-child(6), #result_table tr>th:nth-child(6)');
+    var hlpDiv = $('#selection_error');
 
     // Convert reasults to jQuery dataTable
     var dTb = $('#result_table').dataTable({
@@ -145,7 +146,7 @@ $(document).ready(function () {
                 action: function ( e, dt, node, config ) {
                     // Warn & stop if no selection
                     if ($('.selectedRow').length == 0) {
-                        return alertNoSelection('result_table', 6, eBox);
+                        return alertNoSelection(hlpElem, hlpDiv);
                     }
                     $.fn.DataTable.ext.buttons.csvHtml5.action.call(this, e, dt, node, config);
                 }
@@ -155,7 +156,7 @@ $(document).ready(function () {
                 action: function ( e, dt, node, config ) {
                     // Warn & stop if no selection
                     if ($('.selectedRow').length == 0) {
-                        return alertNoSelection('result_table', 6, eBox);
+                        return alertNoSelection(hlpElem, hlpDiv);
                     }
                     $.fn.DataTable.ext.buttons.excelHtml5.action.call(this, e, dt, node, config);
                 }
@@ -170,11 +171,14 @@ $(document).ready(function () {
     var allPages = dTb.fnGetNodes();
     var asvBoxes = $('.asv_id', allPages);
 
-
     // When any ASV checkbox is changed
     asvBoxes.change(function () {
         // Toggle download selection
-        $(this).closest('tr').toggleClass("selectedRow", this.checked);
+        $(this).closest('tr').toggleClass('selectedRow', this.checked);
+        if (this.checked) {
+            hlpElem.removeClass('visHlpElem');
+            hlpDiv.removeClass('visHlpDiv');
+        }
     });
 
     // When header checkbox is changed
@@ -183,6 +187,8 @@ $(document).ready(function () {
         asvBoxes.prop('checked', this.checked);
         // Toggle download selection
         asvBoxes.closest('tr').toggleClass('selectedRow', this.checked);
+        hlpElem.removeClass('visHlpElem');
+        hlpDiv.removeClass('visHlpDiv');
     });
 
     // At SBDI submit
@@ -191,7 +197,7 @@ $(document).ready(function () {
         addCheckedToArea(asvBoxes, sbdiArea);
         // Warn & stop if no selection
         if (!sbdiArea.val()) {
-            return alertNoSelection('result_table', 6, eBox);
+            return alertNoSelection(hlpElem, hlpDiv);
         }
     });
 
