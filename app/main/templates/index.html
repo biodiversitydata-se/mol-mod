@@ -4,7 +4,7 @@
     <div class="container">
         <h1>Swedish ASV database</h1>
         <p>Welcome to the database of Swedish Amplicon Sequence Variants (ASVs)
-            <br> - an interface to sequence-based observations in the SBDI Bioatlas platform
+            <br> - an interface to sequence-based observations in <a href="https://bioatlas.se/">the SBDI Bioatlas platform.</a>
         </p>
     </div>
 </div>
@@ -16,17 +16,17 @@
 <div class="container">
     <div class="row">
         <div class="col-md-4">
-            <p>Search for ASVs and occurrences <br>using sequence alignment
+            <p>Search for ASVs and occurrences <br>using sequence alignment.
             </p>
             <p><a class="btn btn-primary" id=link_to_blast href="{{ url_for('main_bp.blast') }}" role="button">BLAST</a></p>
         </div>
         <div class="col-md-4">
-            <p>Search for ASVs and occurrences <br>matching some criteria
+            <p>Search for ASVs and occurrences <br>matching some criteria.
             </p>
             <p><a class="btn btn-primary"  id=link_to_api_search href="{{ url_for('main_bp.search_api') }}" role="button">Search</a></p>
         </div>
         <div class="col-md-4">
-            <p>View and download all <br>ASVs in database<br>
+            <p>View and download all <br>ASVs in database.<br>
             </p>
             <p><a class="btn btn-primary"  id=link_to_asv_list href="{{ url_for('main_bp.list_asvs') }}" role="button">List</a></p>
         </div>
