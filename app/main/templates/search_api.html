@@ -1,6 +1,81 @@
 {% extends "layout.html" %}
 {% block body %}
 
-This is where you search via metadata
+<div class='container'>
+    <form action='' method='post' id='sform' name='sform' class='search_function'>
+        {{ sform.csrf_token }}
+        <div class='row'>
+            <div class='col-md-5'>
+                {{ sform.prim_fw(class='form-control')}}
+            </div>
+        </div>
+        <br>
+        <br>
+        <div class='row'>
+            <div class='col-md-5'>
+                <select class="js-example-data-array form-control" name="states[]" multiple="multiple">
+                </select>
+            </div>
+        </div>
+
+    </form>
+</div>
+<br>
+<br>
+
+<script>
+    $(document).ready(function () {
+
+        $.fn.select2.defaults.set("theme", "bootstrap");
+
+        // fw_primers = $('#prim_fw option').map(function() {
+        //     return $(this).val();
+        // }).get();
+        //
+        // $('#prim_fw').change(function () {
+        //     alert (fw_primers);
+        // });
+        $('#prim_fw').select2({
+            placeholder: 'Select primer(s)'
+        });
+
+        var data = [
+            {
+                text: '16S rRNA',
+                children : [
+                    {
+                        id: 'CYA106F',
+                        text: "CYA106F: CGGACGGGTGAGTAACGCGTGA"
+                    },
+                    {
+                        id: '341F',
+                        text: "341F: CCTACGGGNGGCWGCAG"
+                    }
+                ]
+            },
+            {
+                text: 'ITS',
+                children : [
+                    {
+                        id: 3,
+                        text: "Option 2.1"
+                    },
+                    {
+                        id: 4,
+                        text: "Option 2.2"
+                    }
+                ]
+            }
+        ];
+        $(".js-example-data-array").select2({
+            placeholder: 'Select primer(s)',
+            data: data
+        })
+
+
+    });
+
+
+</script>
 
 {% endblock body %}

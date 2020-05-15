@@ -120,89 +120,89 @@
 {% endif %}
 
 <script>
-$(document).ready(function () {
+    $(document).ready(function () {
 
-    // Get input seq length for display
-    $('#sequence_textarea').bind('input', function(){
-        $('#sequence_count').text($(this).val().length);
-    });
+        // Get input seq length for display
+        $('#sequence_textarea').bind('input', function(){
+            $('#sequence_count').text($(this).val().length);
+        });
 
-    var sbdiArea = $('#raw_names');
-    var hlpElem = $('#result_table tr > td:nth-child(6), #result_table tr>th:nth-child(6)');
-    var hlpDiv = $('#selection_error');
+        var sbdiArea = $('#raw_names');
+        var hlpElem = $('#result_table tr > td:nth-child(6), #result_table tr>th:nth-child(6)');
+        var hlpDiv = $('#selection_error');
 
-    // Convert reasults to jQuery dataTable
-    var dTb = $('#result_table').dataTable({
-        // Modify layout of dataTable components:
-        // l=Show.., f=Search, tr=table, i=Showing.., p=pagination
-        dom: "<'row'<'col-md-4'l><'col-md-8'f>>" +
-        "<'row'<'col-md-12't>>" +
-        "<'row'<'col-md-3'B><'col-md-3'i><'col-md-6'p>>",
-        stateSave: true,
-        // Add download buttons
-        buttons: [
-            { extend: 'csv',
-                exportOptions: { rows: '.selectedRow'},
-                action: function ( e, dt, node, config ) {
-                    // Warn & stop if no selection
-                    if ($('.selectedRow').length == 0) {
-                        return alertNoSelection(hlpElem, hlpDiv);
+        // Convert reasults to jQuery dataTable
+        var dTb = $('#result_table').dataTable({
+            // Modify layout of dataTable components:
+            // l=Show.., f=Search, tr=table, i=Showing.., p=pagination
+            dom: "<'row'<'col-md-4'l><'col-md-8'f>>" +
+            "<'row'<'col-md-12't>>" +
+            "<'row'<'col-md-3'B><'col-md-3'i><'col-md-6'p>>",
+            stateSave: true,
+            // Add download buttons
+            buttons: [
+                { extend: 'csv',
+                    exportOptions: { rows: '.selectedRow'},
+                    action: function ( e, dt, node, config ) {
+                        // Warn & stop if no selection
+                        if ($('.selectedRow').length == 0) {
+                            return alertNoSelection(hlpElem, hlpDiv);
+                        }
+                        $.fn.DataTable.ext.buttons.csvHtml5.action.call(this, e, dt, node, config);
                     }
-                    $.fn.DataTable.ext.buttons.csvHtml5.action.call(this, e, dt, node, config);
-                }
-            },
-            { extend: 'excel',
-                exportOptions: { rows: '.selectedRow'},
-                action: function ( e, dt, node, config ) {
-                    // Warn & stop if no selection
-                    if ($('.selectedRow').length == 0) {
-                        return alertNoSelection(hlpElem, hlpDiv);
+                },
+                { extend: 'excel',
+                    exportOptions: { rows: '.selectedRow'},
+                    action: function ( e, dt, node, config ) {
+                        // Warn & stop if no selection
+                        if ($('.selectedRow').length == 0) {
+                            return alertNoSelection(hlpElem, hlpDiv);
+                        }
+                        $.fn.DataTable.ext.buttons.excelHtml5.action.call(this, e, dt, node, config);
                     }
-                    $.fn.DataTable.ext.buttons.excelHtml5.action.call(this, e, dt, node, config);
                 }
+            ],
+            // Disable sort on select col - as it does not work
+            'columnDefs': [
+                { 'orderable': false, 'targets': 5 }
+            ]
+        });
+        // Enable access to items in all pages
+        var allPages = dTb.fnGetNodes();
+        var asvBoxes = $('.asv_id', allPages);
+
+        // When any ASV checkbox is changed
+        asvBoxes.change(function () {
+            // Toggle download selection
+            $(this).closest('tr').toggleClass('selectedRow', this.checked);
+            // Remove no-selection warnings (if any)
+            if (this.checked) {
+                hlpElem.removeClass('visHlpElem');
+                hlpDiv.removeClass('visHlpDiv');
             }
-        ],
-        // Disable sort on select col - as it does not work
-        'columnDefs': [
-            { 'orderable': false, 'targets': 5 }
-        ]
-    });
-    // Enable access to items in all pages
-    var allPages = dTb.fnGetNodes();
-    var asvBoxes = $('.asv_id', allPages);
+        });
 
-    // When any ASV checkbox is changed
-    asvBoxes.change(function () {
-        // Toggle download selection
-        $(this).closest('tr').toggleClass('selectedRow', this.checked);
-        // Remove no-selection warnings (if any)
-        if (this.checked) {
+        // When header checkbox is changed
+        $('#select_all').change(function () {
+            // Toggle all ASV checkboxes
+            asvBoxes.prop('checked', this.checked);
+            // Toggle download selection
+            asvBoxes.closest('tr').toggleClass('selectedRow', this.checked);
+            // Remove no-selection warnings (if any)
             hlpElem.removeClass('visHlpElem');
             hlpDiv.removeClass('visHlpDiv');
-        }
-    });
+        });
 
-    // When header checkbox is changed
-    $('#select_all').change(function () {
-        // Toggle all ASV checkboxes
-        asvBoxes.prop('checked', this.checked);
-        // Toggle download selection
-        asvBoxes.closest('tr').toggleClass('selectedRow', this.checked);
-        // Remove no-selection warnings (if any)
-        hlpElem.removeClass('visHlpElem');
-        hlpDiv.removeClass('visHlpDiv');
-    });
+        // At SBDI submit
+        $('#rform').submit(function() {
+            // Copy ASV ids to hidden area
+            addCheckedToArea(asvBoxes, sbdiArea);
+            // Warn & stop if no selection
+            if (!sbdiArea.val()) {
+                return alertNoSelection(hlpElem, hlpDiv);
+            }
+        });
 
-    // At SBDI submit
-    $('#rform').submit(function() {
-        // Copy ASV ids to hidden area
-        addCheckedToArea(asvBoxes, sbdiArea);
-        // Warn & stop if no selection
-        if (!sbdiArea.val()) {
-            return alertNoSelection(hlpElem, hlpDiv);
-        }
     });
-
-});
 </script>
 {% endblock body %}

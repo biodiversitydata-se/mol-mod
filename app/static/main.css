@@ -4,7 +4,9 @@ body {
     padding-top: 50px;
     font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
-
+footer {
+    padding: 15px;
+}
 .main-content {
     padding: 15px 15px;
     /* color: red */
