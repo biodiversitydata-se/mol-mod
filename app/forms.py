@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, IntegerField, StringField, SubmitField
+from wtforms import BooleanField, IntegerField, SelectField, SelectMultipleField, StringField, SubmitField
 from wtforms import TextAreaField, ValidationError
 
 DEFAULT_BLAST_GENE = """>test-seq-1
@@ -60,3 +60,18 @@ class BlastSearchForm(FlaskForm):
 
 class BlastResultForm(FlaskForm):
     asv_id = BooleanField(u'asv_id')
+
+
+class ApiSearchForm(FlaskForm):
+    prim_fw = SelectMultipleField('prim_fw_seq', id='prim_fw', choices=[])
+    # gene = SelectField('gene', choices=[('16S', '16S rRNA'),
+    #                                     ('18S', '18S rRNA'), ('ITS', 'ITS rRNA')])
+    # gene_sub = SelectField('gene', choices=[])
+# gene_sub
+    # prim_fw_name
+    # prim_fw_seq
+    # prim_rv_name
+    # prim_rv_seq
+    # env_broad_
+    # env_local
+    # env_medium

@@ -16,7 +16,7 @@ from flask import request
 from tabulate import tabulate
 from werkzeug.exceptions import HTTPException
 
-from app.forms import BlastSearchForm, BlastResultForm
+from app.forms import BlastSearchForm, BlastResultForm, ApiSearchForm
 
 main_bp = Blueprint('main_bp', __name__,
                     template_folder='templates')
@@ -104,12 +104,32 @@ def blast():
 
 @main_bp.route('/search_api', methods=['GET', 'POST'])
 def search_api():
-    return render_template('search_api.html')
+
+    sform = ApiSearchForm()
+
+    # response = requests.get('http://localhost:3000/app_dist_mixs')
+    # mixs = json.loads(response.text)
+    # df = pd.DataFrame(mixs)
+    # API request currently returns single row, so use dummy df for testing
+    df = pd.DataFrame({'pcr_primer_name_forward': ['CYA106F', '341F'],
+                       'pcr_primer_name_reverse': ['CYA781R', '805R'],
+                       'pcr_primer_forward':      ['CGGACGGGTGAGTAACGCGTGA', 'CCTACGGGNGGCWGCAG'],
+                       'pcr_primer_reverse':      ['GACTACTGGGGTATCTAATCCCATT', 'GACTACHVGGGTATCTAATCC'],
+                       'target_gene':             ['16S rRNA', '16S rRNA'],
+                       'target_subfragment':      ['V3-V4', 'V3-V4']
+                       })
+    # print(tabulate(df, headers='keys', tablefmt='psql'))
+    df['pcr_primer_show'] = df['pcr_primer_name_forward'] + ': ' + df['pcr_primer_forward']
+    df = df[['pcr_primer_name_forward', 'pcr_primer_show']]
+
+    sform.prim_fw.choices = list(df.itertuples(index=False, name=None))
+
+    return render_template('search_api.html', sform=sform)
 
 
 @main_bp.route('/list_asvs', methods=['GET'])
 def list_asvs():
-    response = requests.get('http://localhost:3000/asv_tax_seq')
+    response = requests.get('http://localhost:3000/app_asv_tax_seq')
     asvs = json.loads(response.text)
     return render_template('list_asvs.html', asvs=asvs)
 
