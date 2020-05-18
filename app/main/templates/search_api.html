@@ -4,16 +4,11 @@
 <div class='container'>
     <form action='' method='post' id='sform' name='sform' class='search_function'>
         {{ sform.csrf_token }}
-        <div class='row'>
-            <div class='col-md-5'>
-                {{ sform.prim_fw(class='form-control')}}
-            </div>
-        </div>
         <br>
         <br>
         <div class='row'>
             <div class='col-md-5'>
-                <select class="js-example-data-array form-control" name="states[]" multiple="multiple">
+                <select id='primer_fw_sel' class='js-example-data-array form-control' multiple='multiple'>
                 </select>
             </div>
         </div>
@@ -27,51 +22,17 @@
     $(document).ready(function () {
 
         $.fn.select2.defaults.set("theme", "bootstrap");
+        // List of dict
+        var data = {{ prim_fw | safe }};
 
-        // fw_primers = $('#prim_fw option').map(function() {
-        //     return $(this).val();
-        // }).get();
-        //
-        // $('#prim_fw').change(function () {
-        //     alert (fw_primers);
-        // });
-        $('#prim_fw').select2({
-            placeholder: 'Select primer(s)'
-        });
-
-        var data = [
-            {
-                text: '16S rRNA',
-                children : [
-                    {
-                        id: 'CYA106F',
-                        text: "CYA106F: CGGACGGGTGAGTAACGCGTGA"
-                    },
-                    {
-                        id: '341F',
-                        text: "341F: CCTACGGGNGGCWGCAG"
-                    }
-                ]
-            },
-            {
-                text: 'ITS',
-                children : [
-                    {
-                        id: 3,
-                        text: "Option 2.1"
-                    },
-                    {
-                        id: 4,
-                        text: "Option 2.2"
-                    }
-                ]
-            }
-        ];
-        $(".js-example-data-array").select2({
-            placeholder: 'Select primer(s)',
+        $('#primer_fw_sel').select2({
+            placeholder: 'Select forward primer(s)',
             data: data
         })
 
+        $('#primer_fw_sel').change(function () {
+            alert('Selected value is: '+$(this).select2('val'));
+        });
 
     });
 

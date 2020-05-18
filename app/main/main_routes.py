@@ -111,20 +111,38 @@ def search_api():
     # mixs = json.loads(response.text)
     # df = pd.DataFrame(mixs)
     # API request currently returns single row, so use dummy df for testing
-    df = pd.DataFrame({'pcr_primer_name_forward': ['CYA106F', '341F'],
-                       'pcr_primer_name_reverse': ['CYA781R', '805R'],
-                       'pcr_primer_forward':      ['CGGACGGGTGAGTAACGCGTGA', 'CCTACGGGNGGCWGCAG'],
-                       'pcr_primer_reverse':      ['GACTACTGGGGTATCTAATCCCATT', 'GACTACHVGGGTATCTAATCC'],
-                       'target_gene':             ['16S rRNA', '16S rRNA'],
-                       'target_subfragment':      ['V3-V4', 'V3-V4']
+    df = pd.DataFrame({'pcr_primer_name_forward': ['ITS1F', 'CYA106F', '341F'],
+                       'pcr_primer_name_reverse': ['ITS4B', 'CYA781R', '805R'],
+                       'pcr_primer_forward':      ['CTTGGTCATTTAGAGGAAGTAA', 'CGGACGGGTGAGTAACGCGTGA', 'CCTACGGGNGGCWGCAG'],
+                       'pcr_primer_reverse':      ['CAGGAGACTTGTACACGGTCCAG', 'GACTACTGGGGTATCTAATCCCATT', 'GACTACHVGGGTATCTAATCC'],
+                       'target_gene':             ['ITS', '16S rRNA', '16S rRNA'],
+                       'target_subfragment':      ['ITS', 'V3-V4', 'V3-V4']
                        })
-    # print(tabulate(df, headers='keys', tablefmt='psql'))
+
     df['pcr_primer_show'] = df['pcr_primer_name_forward'] + ': ' + df['pcr_primer_forward']
-    df = df[['pcr_primer_name_forward', 'pcr_primer_show']]
+    # df = df[['pcr_primer_name_forward', 'pcr_primer_show']]
+    # sform.prim_fw.choices = list(df.itertuples(index=False, name=None))
+    df = df[['target_gene', 'pcr_primer_name_forward', 'pcr_primer_show']]
+    df = df.sort_values(by=['target_gene', 'pcr_primer_name_forward'])
+    df = df.reset_index(drop=True)
+    # Make list of nested dicts for grouped select box
+    ddlist = []
+    for i, row in df.iterrows():
+        gene = row['target_gene']
+        primer = {
+            'id': row['pcr_primer_name_forward'],
+            'text': row['pcr_primer_show']
+        }
+        if i == 0 or gene != ddlist[len(ddlist)-1]['text']:
+            ddict = {
+                'text': gene,
+                'children': [primer]
+            }
+            ddlist.append(ddict)
+        else:
+            ddlist[i-1]['children'].append(primer)
 
-    sform.prim_fw.choices = list(df.itertuples(index=False, name=None))
-
-    return render_template('search_api.html', sform=sform)
+    return render_template('search_api.html', sform=sform, prim_fw=json.dumps(ddlist))
 
 
 @main_bp.route('/list_asvs', methods=['GET'])
