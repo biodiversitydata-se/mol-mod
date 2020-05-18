@@ -63,15 +63,5 @@ class BlastResultForm(FlaskForm):
 
 
 class ApiSearchForm(FlaskForm):
-    prim_fw = SelectMultipleField('prim_fw_seq', id='prim_fw', choices=[])
-    # gene = SelectField('gene', choices=[('16S', '16S rRNA'),
-    #                                     ('18S', '18S rRNA'), ('ITS', 'ITS rRNA')])
-    # gene_sub = SelectField('gene', choices=[])
-# gene_sub
-    # prim_fw_name
-    # prim_fw_seq
-    # prim_rv_name
-    # prim_rv_seq
-    # env_broad_
-    # env_local
-    # env_medium
+    pass
+    # prim_fw = SelectMultipleField('prim_fw_seq', id='prim_fw', choices=[])
