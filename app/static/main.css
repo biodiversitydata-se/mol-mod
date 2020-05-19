@@ -1,9 +1,9 @@
 /* Bypass cache in Chrome/Mac: shift + cmd + r */
 
 body {
-    padding-top: 50px;
     font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
+
 footer {
     padding: 15px;
 }
