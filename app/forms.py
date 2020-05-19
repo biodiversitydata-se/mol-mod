@@ -64,4 +64,3 @@ class BlastResultForm(FlaskForm):
 
 class ApiSearchForm(FlaskForm):
     pass
-    # prim_fw = SelectMultipleField('prim_fw_seq', id='prim_fw', choices=[])
