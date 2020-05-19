@@ -8,11 +8,21 @@
         <br>
         <div class='row'>
             <div class='col-md-5'>
-                <select id='primer_fw_sel' class='js-example-data-array form-control' multiple='multiple'>
-                </select>
+                <select name='fw_prim_sel' id='fw_prim_sel' class='form-control' multiple='multiple'></select>
+            </div>
+        </div>
+        <div class='row'>
+            <div class='col-md-5'>
+                <textarea name='queries' id='raw_names' rows=4, cols=40></textarea> 
             </div>
         </div>
 
+        <br>
+        <div class='row'>
+            <div class='col-md-2'>
+                <input id='search_api' name='search_api' type='submit' value='Search' class='btn btn-primary'/>
+            </div>
+        </div>
     </form>
 </div>
 <br>
@@ -22,17 +32,15 @@
     $(document).ready(function () {
 
         $.fn.select2.defaults.set("theme", "bootstrap");
-        // List of dict
-        var data = {{ prim_fw | safe }};
+        var fw_prim = {{ fw_prim | safe }};
+        var fw_prim_sel = {{ fw_prim_sel | safe }};
 
-        $('#primer_fw_sel').select2({
+        $('#fw_prim_sel').select2({
             placeholder: 'Select forward primer(s)',
-            data: data
-        })
-
-        $('#primer_fw_sel').change(function () {
-            alert('Selected value is: '+$(this).select2('val'));
+            data: fw_prim
         });
+        $('#fw_prim_sel').val(fw_prim_sel);
+        $('#fw_prim_sel').trigger('change');
 
     });
 
