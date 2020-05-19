@@ -10,8 +10,8 @@
                 {% else %}
                     <div class='form-group'>
                 {% endif %}
-                        <h5><b>Query sequence(s) </b>
-                            <span id='sequence_count'>2108</span>/500000 characters</h5>
+                        <h6><b>Query sequence(s) </b>
+                            <span id='sequence_count'>2108</span>/500000 characters</h6>
                         {{ sform.sequence(id='sequence_textarea', rows=8, cols=80, maxlength='500000', class='form-control') }}
                         <span id='helpBlock2' class='help-block'>
                             {% for error in sform.sequence.errors %}
@@ -23,7 +23,7 @@
         </div>
         <div class='row'>
             <div class='col-md-3'>
-                <h5><b>Minimum identity (%)</b></h5>
+                <h6><b>Minimum identity (%)</b></h6>
                 {% if sform.min_identity.errors %}
                     <div class='form-group has-error'>
                 {% else %}
@@ -38,7 +38,7 @@
                     </div>
             </div>
             <div class='col-md-3'>
-                <h5><b>Minimum query coverage (%)</b></h5>
+                <h6><b>Minimum query coverage (%)</b></h6>
                 {% if sform.min_qry_cover.errors %}
                     <div class='form-group has-error'>
                 {% else %}
