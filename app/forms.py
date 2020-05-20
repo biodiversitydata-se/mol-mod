@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, IntegerField, SelectField, SelectMultipleField, StringField, SubmitField
+from wtforms import BooleanField, IntegerField, SelectMultipleField, StringField, SubmitField
 from wtforms import TextAreaField, ValidationError
 
 DEFAULT_BLAST_GENE = """>test-seq-1
@@ -63,4 +63,4 @@ class BlastResultForm(FlaskForm):
 
 
 class ApiSearchForm(FlaskForm):
-    pass
+    fw_prim_sel = SelectMultipleField('fw_prim_sel', choices=[])

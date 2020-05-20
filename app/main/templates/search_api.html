@@ -6,14 +6,20 @@
         {{ sform.csrf_token }}
         <br>
         <br>
-        <div class='row'>
+        <!-- <div class='row'>
             <div class='col-md-5'>
                 <select name='fw_prim_sel' id='fw_prim_sel' class='form-control' multiple='multiple'></select>
             </div>
-        </div>
+        </div> -->
         <div class='row'>
             <div class='col-md-5'>
-                <textarea name='queries' id='raw_names' rows=4, cols=40></textarea> 
+                {{ sform.fw_prim_sel(id='fw_prim_sel', class='form-control') }}
+            </div>
+        </div>
+        <br>
+        <div class='row'>
+            <div class='col-md-5'>
+                <textarea name='test' id='test' rows=4, cols=40></textarea>
             </div>
         </div>
 
@@ -33,14 +39,14 @@
 
         $.fn.select2.defaults.set("theme", "bootstrap");
         var fw_prim = {{ fw_prim | safe }};
-        var fw_prim_sel = {{ fw_prim_sel | safe }};
-
+        // // var fw_prim_sel = {{ fw_prim_sel | safe }};
+        //
         $('#fw_prim_sel').select2({
             placeholder: 'Select forward primer(s)',
             data: fw_prim
         });
-        $('#fw_prim_sel').val(fw_prim_sel);
-        $('#fw_prim_sel').trigger('change');
+        // $('#fw_prim_sel').val(fw_prim_sel);
+        // $('#fw_prim_sel').trigger('change');
 
     });
 
