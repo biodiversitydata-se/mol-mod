@@ -106,10 +106,11 @@ def blast():
 def search_api():
 
     sform = ApiSearchForm()
-    fw_prim_sel = []
 
+    # If BLAST was clicked, and settings are valid
     if request.form.get('search_api'):
-        fw_prim_sel = request.form.getlist('fw_prim_sel')
+        sel_fw_prim = request.form.getlist('fw_prim_sel')
+        return sel_fw_prim[0]
 
     # response = requests.get('http://localhost:3000/app_dist_mixs')
     # mixs = json.loads(response.text)
@@ -124,8 +125,7 @@ def search_api():
                        })
 
     df['pcr_primer_show'] = df['pcr_primer_name_forward'] + ': ' + df['pcr_primer_forward']
-    # df = df[['pcr_primer_name_forward', 'pcr_primer_show']]
-    # sform.fw_prim.choices = list(df.itertuples(index=False, name=None))
+
     df = df[['target_gene', 'pcr_primer_name_forward', 'pcr_primer_show']]
     df = df.sort_values(by=['target_gene', 'pcr_primer_name_forward'])
     df = df.reset_index(drop=True)
@@ -146,7 +146,10 @@ def search_api():
         else:
             ddlist[i-1]['children'].append(primer)
 
-    return render_template('search_api.html', sform=sform, fw_prim=ddlist, fw_prim_sel=fw_prim_sel)
+    # df = df[['pcr_primer_name_forward', 'pcr_primer_show']]
+    # sform.fw_prim_sel.choices = list(df.itertuples(index=False, name=None))
+
+    return render_template('search_api.html', sform=sform, fw_prim=ddlist)
 
 
 @main_bp.route('/list_asvs', methods=['GET'])
