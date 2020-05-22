@@ -12,17 +12,17 @@
             </div>
         </div> -->
         <div class='row'>
-            <div class='col-md-5'>
+            <div class='col-md-4'>
                 {{ sform.fw_prim_sel(id='fw_prim_sel', class='form-control') }}
             </div>
-        </div>
-        <br>
-        <div class='row'>
-            <div class='col-md-5'>
-                <textarea name='test' id='test' rows=4, cols=40></textarea>
+            <div class='col-md-4'>
+                {{ sform.rv_prim_sel(id='rv_prim_sel', class='form-control') }}
             </div>
-        </div>
+            <div class='col-md-4'>
+                {{ sform.xxx(id='xxx', class='form-control') }}
+            </div>
 
+        </div>
         <br>
         <div class='row'>
             <div class='col-md-2'>
@@ -38,13 +38,21 @@
     $(document).ready(function () {
 
         $.fn.select2.defaults.set("theme", "bootstrap");
-        var fw_prim = {{ fw_prim | safe }};
-        // // var fw_prim_sel = {{ fw_prim_sel | safe }};
-        //
+
+        var fw_prim = {{ fw_lst | safe }};
+        var rv_prim = {{ rv_lst | safe }};
         $('#fw_prim_sel').select2({
             placeholder: 'Select forward primer(s)',
             data: fw_prim
         });
+        $('#rv_prim_sel').select2({
+            placeholder: 'Select reverse primer(s)',
+            data: rv_prim
+        });
+        $('#xxx').select2({
+            placeholder: 'Select reverse primer(s)',
+        });
+
         // $('#fw_prim_sel').val(fw_prim_sel);
         // $('#fw_prim_sel').trigger('change');
 
