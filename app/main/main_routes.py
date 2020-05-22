@@ -107,15 +107,17 @@ def search_api():
 
     sform = ApiSearchForm()
 
-    # If BLAST was clicked, and settings are valid
-    if request.form.get('search_api'):
-        sel_fw_prim = request.form.getlist('fw_prim_sel')
-        return sel_fw_prim[0]
+    # if request.form.get('search_api'):
+    #     sel_fw_prim = request.form.getlist('fw_prim_sel')
+    #     return sel_fw_prim[0]
+    #     return render_template('blast.html', sform=sform)
 
-    # response = requests.get('http://localhost:3000/app_dist_mixs')
-    # mixs = json.loads(response.text)
-    # df = pd.DataFrame(mixs)
-    # API request currently returns single row, so use dummy df for testing
+    # Get disctint gene-primer rows from db
+    response = requests.get('http://localhost:3000/app_dist_primers_genes')
+    mixs = json.loads(response.text)
+    df = pd.DataFrame(mixs)
+
+    # Get dummy df for testing with multiple primer options
     df = pd.DataFrame({'pcr_primer_name_forward': ['ITS1F', 'CYA106F', '341F'],
                        'pcr_primer_name_reverse': ['ITS4B', 'CYA781R', '805R'],
                        'pcr_primer_forward':      ['CTTGGTCATTTAGAGGAAGTAA', 'CGGACGGGTGAGTAACGCGTGA', 'CCTACGGGNGGCWGCAG'],
@@ -124,32 +126,45 @@ def search_api():
                        'target_subfragment':      ['ITS', 'V3-V4', 'V3-V4']
                        })
 
-    df['pcr_primer_show'] = df['pcr_primer_name_forward'] + ': ' + df['pcr_primer_forward']
+    # Add primer display values
+    df['fw_show'] = df['pcr_primer_name_forward'] + ': ' + df['pcr_primer_forward']
+    df['rv_show'] = df['pcr_primer_name_reverse'] + ': ' + df['pcr_primer_reverse']
 
-    df = df[['target_gene', 'pcr_primer_name_forward', 'pcr_primer_show']]
-    df = df.sort_values(by=['target_gene', 'pcr_primer_name_forward'])
-    df = df.reset_index(drop=True)
-    # Make list of nested dicts for grouped select box
-    ddlist = []
-    for i, row in df.iterrows():
-        gene = row['target_gene']
-        primer = {
-            'id': row['pcr_primer_name_forward'],
-            'text': row['pcr_primer_show']
-        }
-        if i == 0 or gene != ddlist[len(ddlist)-1]['text']:
-            ddict = {
-                'text': gene,
-                'children': [primer]
+    fw_df = df[['target_gene', 'pcr_primer_name_forward', 'fw_show']]
+    rv_df = df[['target_gene', 'pcr_primer_name_reverse', 'rv_show']]
+
+    def make_grouped_lst(df):
+        '''Sort by gene and primer, and make list of nested dicts for grouped select2 box'''
+        df = df.sort_values(by=[df.columns[0], df.columns[1]])
+        df = df.reset_index(drop=True)
+        ddlist = []
+        for i, row in df.iterrows():
+            gene = row[0]
+            primer = {
+                'id': row[1],
+                'text': row[2]
             }
-            ddlist.append(ddict)
-        else:
-            ddlist[i-1]['children'].append(primer)
+            # If first row, or new gene (i.e. name differs from previous)
+            if i == 0 or gene != ddlist[len(ddlist)-1]['text']:
+                ddict = {
+                    'text': gene,
+                    'children': [primer]
+                }
+                # add new gene dict
+                ddlist.append(ddict)
+            # If additional primer for previous gene
+            else:
+                # add new primer (child) dict
+                ddlist[i-1]['children'].append(primer)
+        return ddlist
 
-    # df = df[['pcr_primer_name_forward', 'pcr_primer_show']]
-    # sform.fw_prim_sel.choices = list(df.itertuples(index=False, name=None))
+    fw_lst = make_grouped_lst(fw_df)
+    rv_lst = make_grouped_lst(rv_df)
 
-    return render_template('search_api.html', sform=sform, fw_prim=ddlist)
+    xxx_df = df[['pcr_primer_name_forward', 'fw_show']]
+    sform.xxx.choices = [tuple(x) for x in xxx_df.to_numpy()]
+
+    return render_template('search_api.html', sform=sform, fw_lst=fw_lst, rv_lst=rv_lst)
 
 
 @main_bp.route('/list_asvs', methods=['GET'])
