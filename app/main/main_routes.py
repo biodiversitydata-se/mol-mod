@@ -118,53 +118,22 @@ def search_api():
     df = pd.DataFrame(mixs)
 
     # Get dummy df for testing with multiple primer options
-    df = pd.DataFrame({'pcr_primer_name_forward': ['ITS1F', 'CYA106F', '341F'],
-                       'pcr_primer_name_reverse': ['ITS4B', 'CYA781R', '805R'],
-                       'pcr_primer_forward':      ['CTTGGTCATTTAGAGGAAGTAA', 'CGGACGGGTGAGTAACGCGTGA', 'CCTACGGGNGGCWGCAG'],
-                       'pcr_primer_reverse':      ['CAGGAGACTTGTACACGGTCCAG', 'GACTACTGGGGTATCTAATCCCATT', 'GACTACHVGGGTATCTAATCC'],
-                       'target_gene':             ['ITS', '16S rRNA', '16S rRNA'],
-                       'target_subfragment':      ['ITS', 'V3-V4', 'V3-V4']
-                       })
+    df = pd.DataFrame({'pcr_primer_name_forward': {0: '341F', 1: 'CYA106F', 2: 'ITS1F'}, 'pcr_primer_name_reverse': {0: '805R', 1: 'CYA781R', 2: 'ITS4B'}, 'pcr_primer_forward': {0: 'CCTACGGGNGGCWGCAG', 1: 'CGGACGGGTGAGTAACGCGTGA', 2: 'CTTGGTCATTTAGAGGAAGTAA'},
+                       'pcr_primer_reverse': {0: 'GACTACHVGGGTATCTAATCC', 1: 'GACTACTGGGGTATCTAATCCCATT', 2: 'CAGGAGACTTGTACACGGTCCAG'}, 'target_gene': {0: '16S rRNA', 1: '16S rRNA', 2: 'ITS'}, 'target_subfragment': {0: 'V3-V4', 1: 'V3-V4', 2: 'ITS'}})
 
     # Add primer display values
     df['fw_show'] = df['pcr_primer_name_forward'] + ': ' + df['pcr_primer_forward']
     df['rv_show'] = df['pcr_primer_name_reverse'] + ': ' + df['pcr_primer_reverse']
 
-    fw_df = df[['target_gene', 'pcr_primer_name_forward', 'fw_show']]
-    rv_df = df[['target_gene', 'pcr_primer_name_reverse', 'rv_show']]
+    tg_df = df[['target_gene', 'target_gene']].drop_duplicates()
+    fw_df = df[['pcr_primer_name_forward', 'fw_show']].drop_duplicates()
+    rv_df = df[['pcr_primer_name_reverse', 'rv_show']].drop_duplicates()
 
-    def make_grouped_lst(df):
-        '''Sort by gene and primer, and make list of nested dicts for grouped select2 box'''
-        df = df.sort_values(by=[df.columns[0], df.columns[1]])
-        df = df.reset_index(drop=True)
-        ddlist = []
-        for i, row in df.iterrows():
-            gene = row[0]
-            primer = {
-                'id': row[1],
-                'text': row[2]
-            }
-            # If first row, or new gene (i.e. name differs from previous)
-            if i == 0 or gene != ddlist[len(ddlist)-1]['text']:
-                ddict = {
-                    'text': gene,
-                    'children': [primer]
-                }
-                # add new gene dict
-                ddlist.append(ddict)
-            # If additional primer for previous gene
-            else:
-                # add new primer (child) dict
-                ddlist[i-1]['children'].append(primer)
-        return ddlist
+    sform.gene_sel.choices = [tuple(x) for x in tg_df.to_numpy()]
+    sform.fw_prim_sel.choices = [tuple(y) for y in fw_df.to_numpy()]
+    sform.rv_prim_sel.choices = [tuple(z) for z in rv_df.to_numpy()]
 
-    fw_lst = make_grouped_lst(fw_df)
-    rv_lst = make_grouped_lst(rv_df)
-
-    xxx_df = df[['pcr_primer_name_forward', 'fw_show']]
-    sform.xxx.choices = [tuple(x) for x in xxx_df.to_numpy()]
-
-    return render_template('search_api.html', sform=sform, fw_lst=fw_lst, rv_lst=rv_lst)
+    return render_template('search_api.html', sform=sform)
 
 
 @main_bp.route('/list_asvs', methods=['GET'])
