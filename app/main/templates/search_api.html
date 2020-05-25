@@ -2,15 +2,9 @@
 {% block body %}
 
 <div class='container'>
+    <br>
     <form action='' method='post' id='sform' name='sform' class='search_function'>
         {{ sform.csrf_token }}
-        <br>
-        <br>
-        <!-- <div class='row'>
-            <div class='col-md-5'>
-                <select name='fw_prim_sel' id='fw_prim_sel' class='form-control' multiple='multiple'></select>
-            </div>
-        </div> -->
         <div class='row'>
             <div class='col-md-6'>
                 {{ sform.gene_sel(id='gene_sel', class='form-control') }}
