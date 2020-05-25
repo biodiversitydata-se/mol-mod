@@ -9,7 +9,7 @@ import subprocess
 from subprocess import check_output
 
 from flask import Blueprint, flash, make_response, render_template
-from flask import redirect, url_for
+from flask import jsonify, redirect, url_for
 import pandas as pd
 import requests
 from flask import request
@@ -107,33 +107,53 @@ def search_api():
 
     sform = ApiSearchForm()
 
-    # if request.form.get('search_api'):
+    # if request.form.get('search_for_asv'):
     #     sel_fw_prim = request.form.getlist('fw_prim_sel')
     #     return sel_fw_prim[0]
-    #     return render_template('blast.html', sform=sform)
 
     # Get disctint gene-primer rows from db
-    response = requests.get('http://localhost:3000/app_dist_primers_genes')
+    response = requests.get('http://localhost:3000/app_prim_per_gene')
     mixs = json.loads(response.text)
     df = pd.DataFrame(mixs)
 
     # Get dummy df for testing with multiple primer options
-    df = pd.DataFrame({'pcr_primer_name_forward': {0: '341F', 1: 'CYA106F', 2: 'ITS1F'}, 'pcr_primer_name_reverse': {0: '805R', 1: 'CYA781R', 2: 'ITS4B'}, 'pcr_primer_forward': {0: 'CCTACGGGNGGCWGCAG', 1: 'CGGACGGGTGAGTAACGCGTGA', 2: 'CTTGGTCATTTAGAGGAAGTAA'},
-                       'pcr_primer_reverse': {0: 'GACTACHVGGGTATCTAATCC', 1: 'GACTACTGGGGTATCTAATCCCATT', 2: 'CAGGAGACTTGTACACGGTCCAG'}, 'target_gene': {0: '16S rRNA', 1: '16S rRNA', 2: 'ITS'}, 'target_subfragment': {0: 'V3-V4', 1: 'V3-V4', 2: 'ITS'}})
+    df = pd.DataFrame({
+        'gene': {0: '16S rRNA', 1: '16S rRNA', 2: 'ITS'},
+        'sub': {0: 'V3-V4', 1: 'V3-V4', 2: 'ITS'},
+        'fw_name': {0: '341F', 1: 'CYA106F', 2: 'ITS1F'},
+        'fw_seq': {0: 'CCTACGGGNGGCWGCAG', 1: 'CGGACGGGTGAGTAACGCGTGA', 2: 'CTTGGTCATTTAGAGGAAGTAA'},
+        'fw_display': {0: '341F: CCTACGGGNGGCWGCAG', 1: 'CYA106F: CGGACGGGTGAGTAACGCGTGA', 2: 'ITS1F: CTTGGTCATTTAGAGGAAGTAA'},
+        'rv_name': {0: '805R', 1: 'CYA781R', 2: 'ITS4B'},
+        'rv_seq': {0: 'GACTACHVGGGTATCTAATCC', 1: 'GACTACTGGGGTATCTAATCCCATT', 2: 'CAGGAGACTTGTACACGGTCCAG'},
+        'rv_display': {0: '805R: GACTACHVGGGTATCTAATCC', 1: 'CYA781R: GACTACTGGGGTATCTAATCCCATT', 2: 'ITS4B: CAGGAGACTTGTACACGGTCCAG'}
+    })
 
-    # Add primer display values
-    df['fw_show'] = df['pcr_primer_name_forward'] + ': ' + df['pcr_primer_forward']
-    df['rv_show'] = df['pcr_primer_name_reverse'] + ': ' + df['pcr_primer_reverse']
-
-    tg_df = df[['target_gene', 'target_gene']].drop_duplicates()
-    fw_df = df[['pcr_primer_name_forward', 'fw_show']].drop_duplicates()
-    rv_df = df[['pcr_primer_name_reverse', 'rv_show']].drop_duplicates()
+    tg_df = df[['gene', 'gene']].drop_duplicates()
+    fw_df = df[['fw_name', 'fw_display']].drop_duplicates()
+    rv_df = df[['rv_name', 'rv_display']].drop_duplicates()
 
     sform.gene_sel.choices = [tuple(x) for x in tg_df.to_numpy()]
     sform.fw_prim_sel.choices = [tuple(y) for y in fw_df.to_numpy()]
     sform.rv_prim_sel.choices = [tuple(z) for z in rv_df.to_numpy()]
 
     return render_template('search_api.html', sform=sform)
+
+
+@main_bp.route('/get_primers/<gene>')
+def get_primers(gene):
+
+    primers = {
+        '16S rRNA': ['341F', 'CYA106F'],
+        'ITS': ['ITS1F']
+    }
+
+    gene_lst = gene.split(",")
+    sel_primers = []
+
+    for gene in gene_lst:
+        if gene in primers:
+            sel_primers = sel_primers + primers[gene]
+    return jsonify(sel_primers)
 
 
 @main_bp.route('/list_asvs', methods=['GET'])

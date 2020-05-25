@@ -3,7 +3,7 @@
 
 <div class='container'>
     <br>
-    <form action='' method='post' id='sform' name='sform' class='search_function'>
+    <form action='' method='post' id='sform' name='sform' class='search_function' >
         {{ sform.csrf_token }}
         <div class='row'>
             <div class='col-md-6'>
@@ -22,7 +22,7 @@
         <br>
         <div class='row'>
             <div class='col-md-2'>
-                <input id='search_api' name='search_api' type='submit' value='Search' class='btn btn-primary'/>
+                {{ sform.search_for_asv(class='btn btn-primary', id='search_for_asv') }}
             </div>
         </div>
     </form>
@@ -35,16 +35,45 @@
 
         $.fn.select2.defaults.set("theme", "bootstrap");
 
-        $('#gene_sel').select2({
+        var geneSelS2 = $('#gene_sel').select2({
             placeholder: 'Select target gene(s)'
         });
-        $('#fw_prim_sel').select2({
+        var fwSelS2 = $('#fw_prim_sel').select2({
             placeholder: 'Select forward primer(s)'
         });
-        $('#rv_prim_sel').select2({
+        var rvSelS2 = $('#rv_prim_sel').select2({
             placeholder: 'Select reverse primer(s)'
         });
-    });
+
+        var selGene = geneSelS2.val();
+
+        geneSelS2.change(function () {
+            // alert($(this).val());
+            // Make Ajax Request and expect JSON-encoded data
+
+            var gene = geneSelS2.val();
+
+            $.getJSON(
+                '/get_primers' + '/' + gene,
+                function(data) {
+
+                    // Remove old options
+                    fwSelS2.find('option').remove();
+
+                    // Add new items
+                    $.each(data, function(key, val) {
+                        var option_item = '<option value="' + val + '">' + val + '</option>'
+                        fwSelS2.append(option_item);
+                    });
+                }
+            );
+        });
+
+        // fwSelS2.on("change", function(){
+        //     alert($(this).val());
+        // });
+});
+
 
 
 </script>
