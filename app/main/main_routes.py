@@ -142,21 +142,20 @@ def search_api():
 @main_bp.route('/get_primers/<gene>')
 def get_primers(gene):
 
-    # primers = {
-    #     '16S rRNA': ['341F', 'CYA106F'],
-    #     'ITS': ['ITS1F']
-    # }
     primers = {
         '16S rRNA': ['341F: CCTACGGGNGGCWGCAG', 'CYA106F: CGGACGGGTGAGTAACGCGTGA'],
         'ITS': ['ITS1F: CTTGGTCATTTAGAGGAAGTAA']
     }
-    # Handle multiple gene selection
-    gene_lst = gene.split(",")
-    sel_primers = []
-    for gene in gene_lst:
-        if gene in primers:
-            sel_primers = sel_primers + primers[gene]
-
+    if (gene != 'all'):
+        gene_lst = gene.split(",")
+        sel_primers_lol = [v for k, v in primers.items() if k in gene_lst]
+        sel_primers = sorted([v for sublist in sel_primers_lol for v in sublist])
+        # sel_primers = []
+        # for gene in gene_lst:
+        #     if gene in primers:
+        #         sel_primers = sel_primers + primers[gene]
+    else:
+        sel_primers = sorted({x for v in primers.values() for x in v})
     return jsonify(sel_primers)
 
 
