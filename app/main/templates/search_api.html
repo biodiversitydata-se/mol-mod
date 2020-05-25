@@ -45,28 +45,34 @@
             placeholder: 'Select reverse primer(s)'
         });
 
-        var selGene = geneSelS2.val();
+        function filterGenSelect() {
+            var gene = geneSelS2.val();
+            // alert(fwSelS2.val());
+            // If no selected gene, get all primers
+            if (gene.length === 0) {gene = 'all'}
+           // Make Ajax Request and expect JSON-encoded data
+           $.getJSON(
+               '/get_primers' + '/' + gene,
+               function(data) {
+                   // Save selected
+                   fwSel = fwSelS2.val();
+                   // Remove old options
+                   fwSelS2.find('option').remove();
+                   // Add new items
+                   $.each(data, function(key, val) {
+                       var option_item = '<option value="' + val + '">' + val + '</option>'
+                       fwSelS2.append(option_item);
+                   });
+                   // Reapply selected
+                   fwSelS2.val(fwSel);
+               }
+            );
+        };
+
+        filterGenSelect();
 
         geneSelS2.change(function () {
-            // alert($(this).val());
-            // Make Ajax Request and expect JSON-encoded data
-
-            var gene = geneSelS2.val();
-
-            $.getJSON(
-                '/get_primers' + '/' + gene,
-                function(data) {
-
-                    // Remove old options
-                    fwSelS2.find('option').remove();
-
-                    // Add new items
-                    $.each(data, function(key, val) {
-                        var option_item = '<option value="' + val + '">' + val + '</option>'
-                        fwSelS2.append(option_item);
-                    });
-                }
-            );
+            filterGenSelect();
         });
 
         // fwSelS2.on("change", function(){
