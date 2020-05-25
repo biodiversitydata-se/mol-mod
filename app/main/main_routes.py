@@ -129,8 +129,8 @@ def search_api():
     })
 
     tg_df = df[['gene', 'gene']].drop_duplicates()
-    fw_df = df[['fw_name', 'fw_display']].drop_duplicates()
-    rv_df = df[['rv_name', 'rv_display']].drop_duplicates()
+    fw_df = df[['fw_display', 'fw_display']].drop_duplicates()
+    rv_df = df[['fw_display', 'rv_display']].drop_duplicates()
 
     sform.gene_sel.choices = [tuple(x) for x in tg_df.to_numpy()]
     sform.fw_prim_sel.choices = [tuple(y) for y in fw_df.to_numpy()]
@@ -142,17 +142,21 @@ def search_api():
 @main_bp.route('/get_primers/<gene>')
 def get_primers(gene):
 
+    # primers = {
+    #     '16S rRNA': ['341F', 'CYA106F'],
+    #     'ITS': ['ITS1F']
+    # }
     primers = {
-        '16S rRNA': ['341F', 'CYA106F'],
-        'ITS': ['ITS1F']
+        '16S rRNA': ['341F: CCTACGGGNGGCWGCAG', 'CYA106F: CGGACGGGTGAGTAACGCGTGA'],
+        'ITS': ['ITS1F: CTTGGTCATTTAGAGGAAGTAA']
     }
-
+    # Handle multiple gene selection
     gene_lst = gene.split(",")
     sel_primers = []
-
     for gene in gene_lst:
         if gene in primers:
             sel_primers = sel_primers + primers[gene]
+
     return jsonify(sel_primers)
 
 
