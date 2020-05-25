@@ -63,6 +63,6 @@ class BlastResultForm(FlaskForm):
 
 
 class ApiSearchForm(FlaskForm):
+    gene_sel = SelectMultipleField('gene_sel', choices=[])
     fw_prim_sel = SelectMultipleField('fw_prim_sel', choices=[])
     rv_prim_sel = SelectMultipleField('rv_prim_sel', choices=[])
-    xxx = SelectMultipleField('xxx', choices=[('aaa', 'aaa'), ('bbb', 'bbb')])
