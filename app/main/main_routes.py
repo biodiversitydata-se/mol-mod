@@ -116,18 +116,6 @@ def search_api():
     mixs = json.loads(response.text)
     df = pd.DataFrame(mixs)
 
-    # Get dummy df for testing with multiple primer options
-    df = pd.DataFrame({
-        'gene': {0: '16S rRNA', 1: '16S rRNA', 2: 'ITS'},
-        'sub': {0: 'V3-V4', 1: 'V3-V4', 2: 'ITS'},
-        'fw_name': {0: '341F', 1: 'CYA106F', 2: 'ITS1F'},
-        'fw_seq': {0: 'CCTACGGGNGGCWGCAG', 1: 'CGGACGGGTGAGTAACGCGTGA', 2: 'CTTGGTCATTTAGAGGAAGTAA'},
-        'fw_display': {0: '341F: CCTACGGGNGGCWGCAG', 1: 'CYA106F: CGGACGGGTGAGTAACGCGTGA', 2: 'ITS1F: CTTGGTCATTTAGAGGAAGTAA'},
-        'rv_name': {0: '805R', 1: 'CYA781R', 2: 'ITS4B'},
-        'rv_seq': {0: 'GACTACHVGGGTATCTAATCC', 1: 'GACTACTGGGGTATCTAATCCCATT', 2: 'CAGGAGACTTGTACACGGTCCAG'},
-        'rv_display': {0: '805R: GACTACHVGGGTATCTAATCC', 1: 'CYA781R: GACTACTGGGGTATCTAATCCCATT', 2: 'ITS4B: CAGGAGACTTGTACACGGTCCAG'}
-    })
-
     tg_df = df[['gene', 'gene']].drop_duplicates()
     fw_df = df[['fw_display', 'fw_display']].drop_duplicates()
     rv_df = df[['fw_display', 'rv_display']].drop_duplicates()
@@ -139,23 +127,18 @@ def search_api():
     return render_template('search_api.html', sform=sform)
 
 
-@main_bp.route('/get_primers/<gene>')
-def get_primers(gene):
+@main_bp.route('/get_primers/<gene>/<dir>')
+def get_primers(gene, dir):
+    col = 'fw_name, fw_display'
+    url = f'http://localhost:3000/app_prim_per_gene?select={col}'
+    if gene != 'all':
+        url += f'&gene=in.({gene})'
 
-    primers = {
-        '16S rRNA': ['341F: CCTACGGGNGGCWGCAG', 'CYA106F: CGGACGGGTGAGTAACGCGTGA'],
-        'ITS': ['ITS1F: CTTGGTCATTTAGAGGAAGTAA']
-    }
-    if (gene != 'all'):
-        gene_lst = gene.split(",")
-        sel_primers_lol = [v for k, v in primers.items() if k in gene_lst]
-        sel_primers = sorted([v for sublist in sel_primers_lol for v in sublist])
-        # sel_primers = []
-        # for gene in gene_lst:
-        #     if gene in primers:
-        #         sel_primers = sel_primers + primers[gene]
-    else:
-        sel_primers = sorted({x for v in primers.values() for x in v})
+    # Get disctint gene-primer rows from db
+    response = requests.get(url)
+    mixs = json.loads(response.text)
+    sel_primers = [{'name': x['fw_name'], 'display': x['fw_display']} for x in mixs]
+
     return jsonify(sel_primers)
 
 
