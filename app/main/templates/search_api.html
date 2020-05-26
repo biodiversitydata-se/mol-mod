@@ -7,15 +7,18 @@
         {{ sform.csrf_token }}
         <div class='row'>
             <div class='col-md-6'>
+                <h6><b>Target gene(s)</b></h6>
                 {{ sform.gene_sel(id='gene_sel', class='form-control') }}
             </div>
         </div>
         <br>
         <div class='row'>
             <div class='col-md-6'>
+                <h6><b>Forward primer(s)</b></h6>
                 {{ sform.fw_prim_sel(id='fw_prim_sel', class='form-control') }}
             </div>
             <div class='col-md-6'>
+                <h6><b>Reverse primer(s)</b></h6>
                 {{ sform.rv_prim_sel(id='rv_prim_sel', class='form-control') }}
             </div>
         </div>
