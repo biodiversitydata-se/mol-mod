@@ -103,13 +103,19 @@ def blast():
 
 
 def get_drop_options(val_col, disp_col, genes='all'):
+    '''Uses gene and/or column names to filter api request for genes or primers,
+    and returns sorted list of unique gene/primer value and display text tuples'''
+    # Add column filter to url
     url = f'http://localhost:3000/app_prim_per_gene?select={val_col},{disp_col}'
+    # Add row/gene filter, if genes have been specified
     if genes != 'all':
         url += f'&gene=in.({genes})'
+    # Make api request
     response = requests.get(url)
-    mixs = json.loads(response.text)
+    # Convert json to dict
+    rdict = json.loads(response.text)
     # Get list of unique (set of) value-display tuples
-    options = list(set([(x[val_col], x[disp_col]) for x in mixs]))
+    options = list(set([(x[val_col], x[disp_col]) for x in rdict]))
     # Sort on value
     options.sort(key=lambda x: x[0])
     return options
@@ -124,6 +130,7 @@ def search_api():
     #     sel_fw_prim = request.form.getlist('fw_prim_sel')
     #     return sel_fw_prim[0]
 
+    # Get dropdown options from api, and send to form
     sform.gene_sel.choices = get_drop_options('gene', 'gene')
     sform.fw_prim_sel.choices = get_drop_options('fw_name', 'fw_display')
     sform.rv_prim_sel.choices = get_drop_options('rv_name', 'rv_display')
@@ -133,10 +140,13 @@ def search_api():
 
 @main_bp.route('/get_primers/<genes>/<dir>')
 def get_primers(genes, dir):
+    '''Takes gene and/or dir from url in Ajax request, and uses
+    function to make api request, returning primer options as json'''
     val_col = f'{dir}_name'
     disp_col = f'{dir}_display'
+    # Get list of primer name & display text tuples from api
     prim_tpl_lst = get_drop_options(val_col, disp_col, genes)
-    # Add keys to values to make list of dict
+    # Add keys to make list of dict
     prim_dct_lst = [dict(zip(['name', 'display'], val)) for val in prim_tpl_lst]
     return jsonify(prim_dct_lst)
 
