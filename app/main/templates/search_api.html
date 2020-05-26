@@ -45,36 +45,38 @@
             placeholder: 'Select reverse primer(s)'
         });
 
-        function filterGenSelect(dir) {
+        function filterPrimerOptions (dir) {
             var gene = geneSelS2.val();
+            if (dir === 'fw') { var primDrop = fwSelS2; }
+            else { var primDrop = rvSelS2; }
             // If no selected gene, get all primers
-            if (gene.length === 0) {gene = 'all'}
-           // Make Ajax Request and expect JSON-encoded data
-           $.getJSON(
-               '/get_primers' + '/' + gene + '/' + dir,
-               function(data) {
-                   // Save selection
-                   currSel = fwSelS2.val();
-                   // Remove old options
-                   fwSelS2.find('option').remove();
-                   $.each(data, function(i,e) {
-                       fwSelS2.append('<option value="' + e.name + '">' + e.display + '</option>');
-                   });
-                   // Reapply selection
-                   fwSelS2.val(currSel);
-               }
+            if (gene.length === 0) { gene = 'all'; }
+            // Make Ajax Request and expect JSON-encoded data
+            $.getJSON(
+                '/get_primers' + '/' + gene + '/' + dir,
+                function(data) {
+                    // Save selection
+                    currSel = primDrop.val();
+                    // Remove old options
+                    primDrop.find('option').remove();
+                    $.each(data, function(i,e) {
+                        primDrop.append('<option value="' + e.name + '">' + e.display + '</option>');
+                    });
+                    // Reapply selection
+                    primDrop.val(currSel);
+                }
             );
         };
+        // Filter primer options on pre-submission gene selection - on reload
+        filterPrimerOptions('fw');
+        filterPrimerOptions('rv');
 
-        filterGenSelect('fw');
-
+        // Filter primer options when genes are selected
         geneSelS2.change(function () {
-            filterGenSelect('fw');
+            filterPrimerOptions('fw');
+            filterPrimerOptions('rv');
         });
 
-        // fwSelS2.on("change", function(){
-        //     alert($(this).val());
-        // });
 });
 
 

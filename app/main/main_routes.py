@@ -102,6 +102,19 @@ def blast():
     return render_template('blast.html', sform=sform)
 
 
+def get_drop_options(val_col, disp_col, genes='all'):
+    url = f'http://localhost:3000/app_prim_per_gene?select={val_col},{disp_col}'
+    if genes != 'all':
+        url += f'&gene=in.({genes})'
+    response = requests.get(url)
+    mixs = json.loads(response.text)
+    # Get list of unique (set of) value-display tuples
+    options = list(set([(x[val_col], x[disp_col]) for x in mixs]))
+    # Sort on value
+    options.sort(key=lambda x: x[0])
+    return options
+
+
 @main_bp.route('/search_api', methods=['GET', 'POST'])
 def search_api():
 
@@ -111,35 +124,21 @@ def search_api():
     #     sel_fw_prim = request.form.getlist('fw_prim_sel')
     #     return sel_fw_prim[0]
 
-    # Get disctint gene-primer rows from db
-    response = requests.get('http://localhost:3000/app_prim_per_gene')
-    mixs = json.loads(response.text)
-    df = pd.DataFrame(mixs)
-
-    tg_df = df[['gene', 'gene']].drop_duplicates()
-    fw_df = df[['fw_display', 'fw_display']].drop_duplicates()
-    rv_df = df[['fw_display', 'rv_display']].drop_duplicates()
-
-    sform.gene_sel.choices = [tuple(x) for x in tg_df.to_numpy()]
-    sform.fw_prim_sel.choices = [tuple(y) for y in fw_df.to_numpy()]
-    sform.rv_prim_sel.choices = [tuple(z) for z in rv_df.to_numpy()]
+    sform.gene_sel.choices = get_drop_options('gene', 'gene')
+    sform.fw_prim_sel.choices = get_drop_options('fw_name', 'fw_display')
+    sform.rv_prim_sel.choices = get_drop_options('rv_name', 'rv_display')
 
     return render_template('search_api.html', sform=sform)
 
 
-@main_bp.route('/get_primers/<gene>/<dir>')
-def get_primers(gene, dir):
-    col = 'fw_name, fw_display'
-    url = f'http://localhost:3000/app_prim_per_gene?select={col}'
-    if gene != 'all':
-        url += f'&gene=in.({gene})'
-
-    # Get disctint gene-primer rows from db
-    response = requests.get(url)
-    mixs = json.loads(response.text)
-    sel_primers = [{'name': x['fw_name'], 'display': x['fw_display']} for x in mixs]
-
-    return jsonify(sel_primers)
+@main_bp.route('/get_primers/<genes>/<dir>')
+def get_primers(genes, dir):
+    val_col = f'{dir}_name'
+    disp_col = f'{dir}_display'
+    prim_tpl_lst = get_drop_options(val_col, disp_col, genes)
+    # Add keys to values to make list of dict
+    prim_dct_lst = [dict(zip(['name', 'display'], val)) for val in prim_tpl_lst]
+    return jsonify(prim_dct_lst)
 
 
 @main_bp.route('/list_asvs', methods=['GET'])
