@@ -35,6 +35,7 @@
 
         $.fn.select2.defaults.set("theme", "bootstrap");
 
+        // Make select2-dropdowns for gene & primers
         var geneSelS2 = $('#gene_sel').select2({
             placeholder: 'Select target gene(s)'
         });
@@ -46,28 +47,31 @@
         });
 
         function filterPrimerOptions (dir) {
+            // Get gene(s) to filter options on
             var gene = geneSelS2.val();
             if (dir === 'fw') { var primDrop = fwSelS2; }
             else { var primDrop = rvSelS2; }
             // If no selected gene, get all primers
             if (gene.length === 0) { gene = 'all'; }
-            // Make Ajax Request and expect JSON-encoded data
+            // Make Ajax request
             $.getJSON(
+                // Set flask endpoint
                 '/get_primers' + '/' + gene + '/' + dir,
                 function(data) {
-                    // Save selection
+                    // Save current selection
                     currSel = primDrop.val();
                     // Remove old options
                     primDrop.find('option').remove();
+                    // Add option for each item in returned json object (data)
                     $.each(data, function(i,e) {
                         primDrop.append('<option value="' + e.name + '">' + e.display + '</option>');
                     });
-                    // Reapply selection
+                    // Reapply selection (to keep it after reload)
                     primDrop.val(currSel);
                 }
             );
         };
-        // Filter primer options on pre-submission gene selection - on reload
+        // To 'keep' option filters after submit
         filterPrimerOptions('fw');
         filterPrimerOptions('rv');
 
