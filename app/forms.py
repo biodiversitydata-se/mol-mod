@@ -66,4 +66,8 @@ class ApiSearchForm(FlaskForm):
     gene_sel = SelectMultipleField('gene_sel', choices=[])
     fw_prim_sel = SelectMultipleField('fw_prim_sel', choices=[])
     rv_prim_sel = SelectMultipleField('rv_prim_sel', choices=[])
-    search_for_asv = SubmitField(u'Search for ASV')
+    search_for_asv = SubmitField(u'Search')
+
+
+class ApiResultForm(FlaskForm):
+    asv_id = BooleanField(u'asv_id')
