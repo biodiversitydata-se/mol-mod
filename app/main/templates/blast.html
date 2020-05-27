@@ -145,7 +145,7 @@
                     exportOptions: { rows: '.selectedRow'},
                     action: function ( e, dt, node, config ) {
                         // Warn & stop if no selection
-                        if ($('.asv_id', allPages).length == 0) {
+                        if (dt.rows('.selectedRow').count() == 0) {
                             return alertNoSelection(hlpElem, hlpDiv);
                         }
                         $.fn.DataTable.ext.buttons.csvHtml5.action.call(this, e, dt, node, config);
@@ -155,7 +155,7 @@
                     exportOptions: { rows: '.selectedRow'},
                     action: function ( e, dt, node, config ) {
                         // Warn & stop if no selection
-                        if ($('.asv_id', allPages).length == 0) {
+                        if (dt.rows('.selectedRow').count() == 0) {
                             return alertNoSelection(hlpElem, hlpDiv);
                         }
                         $.fn.DataTable.ext.buttons.excelHtml5.action.call(this, e, dt, node, config);
