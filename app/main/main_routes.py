@@ -16,7 +16,7 @@ from flask import request
 from tabulate import tabulate
 from werkzeug.exceptions import HTTPException
 
-from app.forms import BlastSearchForm, BlastResultForm, ApiSearchForm
+from app.forms import BlastSearchForm, BlastResultForm, ApiSearchForm, ApiResultForm
 
 main_bp = Blueprint('main_bp', __name__,
                     template_folder='templates')
@@ -125,15 +125,26 @@ def get_drop_options(val_col, disp_col, genes='all'):
 def search_api():
 
     sform = ApiSearchForm()
-
-    # if request.form.get('search_for_asv'):
-    #     sel_fw_prim = request.form.getlist('fw_prim_sel')
-    #     return sel_fw_prim[0]
+    rform = ApiResultForm()
 
     # Get dropdown options from api, and send to form
     sform.gene_sel.choices = get_drop_options('gene', 'gene')
     sform.fw_prim_sel.choices = get_drop_options('fw_name', 'fw_display')
     sform.rv_prim_sel.choices = get_drop_options('rv_name', 'rv_display')
+
+    # If BLAST was clicked, and settings are valid
+    if request.form.get('search_for_asv'):
+        # Show both search and result forms on same page
+        data = {
+            'asv_id':  ['xxx', 'xxx'],
+            'target_gene ': ['xxx', 'xxx'],
+            'fw_prim ': ['xxx', 'xxx'],
+            'rv_prim': ['xxx', 'xxx']
+        }
+
+        df = pd.DataFrame(data)
+
+        return render_template('search_api.html', sform=sform, rform=rform, rdf=df)
 
     return render_template('search_api.html', sform=sform)
 
