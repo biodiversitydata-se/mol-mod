@@ -127,7 +127,6 @@
             $('#sequence_count').text($(this).val().length);
         });
 
-        var sbdiArea = $('#raw_names');
         var hlpElem = $('#result_table tr > td:nth-child(6), #result_table tr>th:nth-child(6)');
         var hlpDiv = $('#selection_error');
 
@@ -162,9 +161,9 @@
         // At SBDI submit
         $('#rform').submit(function() {
             // Copy ASV ids to hidden area
-            addCheckedToArea(asvBoxes, sbdiArea);
+            addCheckedToArea(asvBoxes, $('#raw_names'));
             // Warn & stop if no selection
-            if (!sbdiArea.val()) {
+            if (!$('#raw_names').val()) {
                 return alertNoSelection(hlpElem, hlpDiv);
             }
         });
