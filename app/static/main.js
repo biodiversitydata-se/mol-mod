@@ -1,7 +1,7 @@
 /* May require cache bypass in Chrome/Mac: shift + cmd + r */
 
 // Add checked ids to hidden textarea - for POST to SBDI
-function addCheckedToArea(asvBoxes, sbdiArea) {
+function addCheckedToArea(asvBoxes) {
     var ids = [];
     // Add checked ids to list
     asvBoxes.map(function () {
@@ -14,7 +14,7 @@ function addCheckedToArea(asvBoxes, sbdiArea) {
         return i == ids.indexOf(item);
     });
     // Add ids to textarea
-    sbdiArea.val(ids.join('\n'));
+    $('#raw_names').val(ids.join('\n'));
 }
 
 // Warn & stop if no selection for SBDI submission / download
