@@ -1,5 +1,19 @@
 /* May require cache bypass in Chrome/Mac: shift + cmd + r */
+$(document).ready(function() {
 
+    var currPage = $(location).attr('href').split("/").pop();
+    switch(currPage) {
+        case 'blast':
+        alert('This is blast');
+        break;
+        case 'search_api':
+        alert('This is api');
+        break;
+        default:
+        alert('This neither blast nor api');
+        break;
+    }
+});
 // Add checked ids to hidden textarea - for POST to SBDI
 function addCheckedToArea(asvBoxes) {
     var ids = [];
