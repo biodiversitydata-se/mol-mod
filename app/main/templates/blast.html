@@ -130,10 +130,9 @@
         var sbdiArea = $('#raw_names');
         var hlpElem = $('#result_table tr > td:nth-child(6), #result_table tr>th:nth-child(6)');
         var hlpDiv = $('#selection_error');
-        var htmlTbl = $('#result_table')
 
         // Convert reasults to jQuery dataTable
-        var dataTbl = makeDataTbl($('#result_table'), 5)
+        var dataTbl = makeDataTbl($('#result_table'), 5, hlpElem, hlpDiv)
         // Enable access to items in all pages
         var allPages = dataTbl.fnGetNodes();
         var asvBoxes = $('.asv_id', allPages);

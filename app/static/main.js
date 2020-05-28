@@ -24,7 +24,7 @@ function alertNoSelection(hlpElem, hlpDiv) {
     return false;
 }
 
-function makeDataTbl(htmlTbl, CheckBoxIdx) {
+function makeDataTbl(htmlTbl, CheckBoxIdx, hlpElem, hlpDiv) {
     var dataTbl = htmlTbl.dataTable({
         // Modify layout of dataTable components:
         // l=Show.., f=Search, tr=table, i=Showing.., p=pagination
