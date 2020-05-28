@@ -2,35 +2,77 @@
 $(document).ready(function() {
 
     var hlpDiv = $('#selection_error');
-    
+
     var currPage = $(location).attr('href').split("/").pop();
     switch(currPage) {
         case 'blast':
+            // Get input seq length for display
+            $('#sequence_textarea').bind('input', function(){
+                $('#sequence_count').text($(this).val().length);
+            });
+            var hlpElem = selectHlpElem(6);
+            // Convert reasults to jQuery dataTable
+            var dataTbl = makeDataTbl(5, hlpElem, hlpDiv);
+            break;
 
-        // Get input seq length for display
-        $('#sequence_textarea').bind('input', function(){
-            $('#sequence_count').text($(this).val().length);
-        });
-
-        var hlpElem = $('#result_table tr > td:nth-child(6), #result_table tr>th:nth-child(6)');
-
-
-        // Convert reasults to jQuery dataTable
-        var dataTbl = makeDataTbl(5, hlpElem, hlpDiv)
-        // Enable access to checkboxes in all rows over all pages
-
-        break;
         case 'search_api':
-        alert('This is api');
-        break;
-        default:
-        alert('This neither blast nor api');
-        break;
-    }
+            // SEARCH FORM
+            $.fn.select2.defaults.set("theme", "bootstrap");
+            // Make select2-dropdowns for gene & primers
+            var geneSelS2 = $('#gene_sel').select2({
+                placeholder: 'Select target gene(s)'
+            });
+            var fwSelS2 = $('#fw_prim_sel').select2({
+                placeholder: 'Select forward primer(s)'
+            });
+            var rvSelS2 = $('#rv_prim_sel').select2({
+                placeholder: 'Select reverse primer(s)'
+            });
 
+            function filterPrimerOptions (dir) {
+                // Get gene(s) to filter options on
+                var gene = geneSelS2.val();
+                if (dir === 'fw') { var primDrop = fwSelS2; }
+                else { var primDrop = rvSelS2; }
+                // If no selected gene, get all primers
+                if (gene.length === 0) { gene = 'all'; }
+                // Make Ajax request
+                $.getJSON(
+                    // Set flask endpoint
+                    '/get_primers' + '/' + gene + '/' + dir,
+                    function(data) {
+                        currSel = primDrop.val();
+                        // Remove old options
+                        primDrop.find('option').remove();
+                        // Add option for each item in returned json object (data)
+                        $.each(data, function(i,e) {
+                            primDrop.append('<option value="' + e.name + '">' + e.display + '</option>');
+                        });
+                        primDrop.val(currSel);
+                    }
+                );
+            };
+            // To 'keep' option filters after submit
+            filterPrimerOptions('fw');
+            filterPrimerOptions('rv');
+            // Filter primer options when genes are selected
+            geneSelS2.change(function () {
+                filterPrimerOptions('fw');
+                filterPrimerOptions('rv');
+            });
+
+            var hlpElem = selectHlpElem(5);
+            // Convert reasults to jQuery dataTable
+            var dataTbl = makeDataTbl(4, hlpElem, hlpDiv);
+            break;
+        // Neither blast nor api search
+        default:
+            break;
+    }
+    // FIX LATER: Perhaps run only if blast or api search...
+    // Enable access to checkboxes in all DataTable pages
     var allPages = dataTbl.fnGetNodes();
     var asvBoxes = $('.asv_id', allPages);
-
 
     // When any ASV checkbox is changed
     asvBoxes.change(function () {
@@ -65,6 +107,11 @@ $(document).ready(function() {
     });
 
 });
+
+function selectHlpElem(childColIdx){
+    var hlpElem = $('#result_table tr > td:nth-child(' + childColIdx + '), #result_table tr>th:nth-child(' + childColIdx + ')');
+    return hlpElem;
+}
 
 // Add checked ids to hidden textarea - for POST to SBDI
 function addCheckedToArea(asvBoxes) {
