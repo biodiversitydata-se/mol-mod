@@ -1,22 +1,23 @@
 /* May require cache bypass in Chrome/Mac: shift + cmd + r */
 $(document).ready(function() {
 
+    var hlpDiv = $('#selection_error');
+    
     var currPage = $(location).attr('href').split("/").pop();
     switch(currPage) {
         case 'blast':
+
         // Get input seq length for display
         $('#sequence_textarea').bind('input', function(){
             $('#sequence_count').text($(this).val().length);
         });
 
         var hlpElem = $('#result_table tr > td:nth-child(6), #result_table tr>th:nth-child(6)');
-        var hlpDiv = $('#selection_error');
+
 
         // Convert reasults to jQuery dataTable
         var dataTbl = makeDataTbl(5, hlpElem, hlpDiv)
         // Enable access to checkboxes in all rows over all pages
-        var allPages = dataTbl.fnGetNodes();
-        var asvBoxes = $('.asv_id', allPages);
 
         break;
         case 'search_api':
@@ -26,6 +27,10 @@ $(document).ready(function() {
         alert('This neither blast nor api');
         break;
     }
+
+    var allPages = dataTbl.fnGetNodes();
+    var asvBoxes = $('.asv_id', allPages);
+
 
     // When any ASV checkbox is changed
     asvBoxes.change(function () {
