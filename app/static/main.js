@@ -23,9 +23,10 @@ function alertNoSelection(hlpElem, hlpDiv) {
     hlpElem.addClass('visHlpElem');
     return false;
 }
-
-function makeDataTbl(htmlTbl, CheckBoxIdx, hlpElem, hlpDiv) {
-    var dataTbl = htmlTbl.dataTable({
+// Make jQuery dataTable from html table
+// hlpElem/Div needs to be passed here
+function makeDataTbl(CheckBoxIdx, hlpElem, hlpDiv) {
+    var dataTbl = $('#result_table').dataTable({
         // Modify layout of dataTable components:
         // l=Show.., f=Search, tr=table, i=Showing.., p=pagination
         dom: "<'row'<'col-md-4'l><'col-md-8'f>>" +
