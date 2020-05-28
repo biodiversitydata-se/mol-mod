@@ -131,7 +131,7 @@
         var hlpDiv = $('#selection_error');
 
         // Convert reasults to jQuery dataTable
-        var dataTbl = makeDataTbl($('#result_table'), 5, hlpElem, hlpDiv)
+        var dataTbl = makeDataTbl(5, hlpElem, hlpDiv)
         // Enable access to checkboxes in all rows over all pages
         var allPages = dataTbl.fnGetNodes();
         var asvBoxes = $('.asv_id', allPages);
