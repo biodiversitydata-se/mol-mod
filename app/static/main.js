@@ -61,9 +61,9 @@ $(document).ready(function() {
                 filterPrimerOptions('rv');
             });
 
-            var hlpElem = selectHlpElem(5);
+            var hlpElem = selectHlpElem(6);
             // Convert reasults to jQuery dataTable
-            var dataTbl = makeDataTbl(4, hlpElem, hlpDiv);
+            var dataTbl = makeDataTbl(5, hlpElem, hlpDiv);
             break;
         // Neither blast nor api search
         default:
