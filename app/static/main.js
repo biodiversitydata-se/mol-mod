@@ -69,6 +69,11 @@ $(document).ready(function() {
         default:
             break;
     }
+
+    // Show result form after styling
+    $('#rform').css("visibility", "visible");
+    // $('#sform').css("visibility", "visible");
+
     // FIX LATER: Perhaps run only if blast or api search...
     // Enable access to checkboxes in all DataTable pages
     var allPages = dataTbl.fnGetNodes();
@@ -105,6 +110,7 @@ $(document).ready(function() {
             return alertNoSelection(hlpElem, hlpDiv);
         }
     });
+
 
 });
 
