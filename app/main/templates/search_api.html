@@ -1,25 +1,23 @@
 {% extends "layout.html" %}
 {% block body %}
-
 <div class='container'>
-    <br>
     <form action='' method='post' id='sform' name='sform' class='search_function' >
         {{ sform.csrf_token }}
         <div class='row'>
             <div class='col-md-6'>
                 <h6><b>Target gene(s)</b></h6>
-                {{ sform.gene_sel(id='gene_sel', class='form-control') }}
+                {{ sform.gene_sel(id='gene_sel', class='form-control select2') }}
             </div>
         </div>
         <br>
         <div class='row'>
             <div class='col-md-6'>
                 <h6><b>Forward primer(s)</b></h6>
-                {{ sform.fw_prim_sel(id='fw_prim_sel', class='form-control') }}
+                {{ sform.fw_prim_sel(id='fw_prim_sel', class='form-control select2') }}
             </div>
             <div class='col-md-6'>
                 <h6><b>Reverse primer(s)</b></h6>
-                {{ sform.rv_prim_sel(id='rv_prim_sel', class='form-control') }}
+                {{ sform.rv_prim_sel(id='rv_prim_sel', class='form-control select2') }}
             </div>
         </div>
         <br>
@@ -62,7 +60,7 @@
                             <td>{{ row['rv_name'] }}</td>
                             <td>{{ rform.asv_id(id=row['asv_id'], class='asv_id form-control') }}</td>
                         </tr>
-                        {% endfor %}  
+                        {% endfor %}
                     </tbody>
 
                 </table>
