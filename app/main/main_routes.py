@@ -134,15 +134,19 @@ def search_api():
 
     # If BLAST was clicked, and settings are valid
     if request.form.get('search_for_asv'):
-        # Show both search and result forms on same page
-        data = {
-            'asv_id':  ['xxx', 'xxx'],
-            'target_gene ': ['xxx', 'xxx'],
-            'fw_prim ': ['xxx', 'xxx'],
-            'rv_prim': ['xxx', 'xxx']
-        }
+        url = f'http://localhost:3000/app_asv_ggbn'
+        gene_lst = request.form.getlist('gene_sel')
 
-        df = pd.DataFrame(data)
+        # Add row filter, if specified
+        if len(gene_lst) > 0:
+            genes = ','.join(map(str, gene_lst))
+            url += f'?gene=in.({genes})'
+        # return url
+        # Make api request
+        response = requests.get(url)
+        # Convert json to list of dicts
+        rdict_lst = json.loads(response.text)
+        df = pd.DataFrame(rdict_lst)
 
         return render_template('search_api.html', sform=sform, rform=rform, rdf=df)
 

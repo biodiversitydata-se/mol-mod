@@ -44,8 +44,9 @@
                 <table id='result_table' class='dataframe table table-striped'>
                     <thead>
                         <tr>
-                            <th>ASV</th>
-                            <th>Target gene</th>
+                            <th>ASV ID</th>
+                            <th>Gene</th>
+                            <th>Fragment</th>
                             <th>Forward primer</th>
                             <th>Reverse primer</th>
                             <th><input type='checkbox' id='select_all' /></th>
@@ -55,12 +56,13 @@
                         {% for i, row in rdf.iterrows() %}
                         <tr>
                             <td>{{ row['asv_id'] }}</td>
-                            <td>{{ row['target_gene'] }}</td>
-                            <td>{{ row['fw_prim'] }}</td>
-                            <td>{{ row['rv_prim'] }}</td>
+                            <td>{{ row['gene'] }}</td>
+                            <td>{{ row['sub'] }}</td>
+                            <td>{{ row['fw_name'] }}</td>
+                            <td>{{ row['rv_name'] }}</td>
                             <td>{{ rform.asv_id(id=row['asv_id'], class='asv_id form-control') }}</td>
                         </tr>
-                        {% endfor %}
+                        {% endfor %}  
                     </tbody>
 
                 </table>
