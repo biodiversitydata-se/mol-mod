@@ -112,10 +112,10 @@ def get_drop_options(val_col, disp_col, genes='all'):
         url += f'&gene=in.({genes})'
     # Make api request
     response = requests.get(url)
-    # Convert json to dict
-    rdict = json.loads(response.text)
+    # Convert json to list of dicts
+    rdict_lst = json.loads(response.text)
     # Get list of unique (set of) value-display tuples
-    options = list(set([(x[val_col], x[disp_col]) for x in rdict]))
+    options = list(set([(x[val_col], x[disp_col]) for x in rdict_lst]))
     # Sort on value
     options.sort(key=lambda x: x[0])
     return options
