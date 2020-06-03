@@ -82,7 +82,7 @@ def blast():
                     df['sacc'] = df['sacc'].str.replace(';', '|')
 
                     # Extract asvid from sacc = id + taxonomy
-                    df['asv_id'] = df['sacc'].str.split(':', expand=True)[0]
+                    df['asv_id'] = df['sacc'].str.split('-', expand=True)[0]
 
                     # Show both search and result forms on same page
                     return render_template('blast.html', sform=sform, rform=rform, rdf=df)
@@ -134,7 +134,7 @@ def search_api():
 
     # If BLAST was clicked, and settings are valid
     if request.form.get('search_for_asv'):
-        url = f'http://localhost:3000/app_asv_ggbn'
+        url = f'http://localhost:3000/app_asv_mixs'
         gene_lst = request.form.getlist('gene_sel')
 
         # Add row filter, if specified

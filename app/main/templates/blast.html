@@ -85,8 +85,8 @@
                         {% for i, row in rdf.iterrows() %}
                         <tr>
                             <td>{{ row['qacc'] }}</td>
-                            <td>{{ row['sacc'].split(':')[0] + '\n'
-                                + row['sacc'].split(':')[1] }}</td>
+                            <td>{{ row['sacc'].split('-')[0] + '\n'
+                                + row['sacc'].split('-')[1] }}</td>
                             <td>{{ row['pident'] }}</td>
                             <td>{{ row['qcovhsp'] }}</td>
                             <td>{{ row['evalue'] }}</td>
