@@ -1,4 +1,4 @@
-/* May require cache bypass in Chrome/Mac: shift + cmd + r */
+/* Changes may require cache bypass, in Chrome/Mac: shift + cmd + r */
 $(document).ready(function() {
 
     var hlpDiv = $('#selection_error');
