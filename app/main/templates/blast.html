@@ -105,7 +105,8 @@
             <!-- <textarea name='queries' id='raw_names' rows=4, cols=40></textarea> -->
             <input type='hidden' name='redirectBase'
                 value='http://molecular.infrabas.se/ala-hub/occurrences/search'>
-            <input type='hidden' name='field' value='taxon_concept_lsid'/>
+            <!-- Use taxon_id instead of (original) raw_name -->
+            <input type='hidden' name='field' value='taxon_id'/>
             <input type='hidden' name='action' value='Search'/>
         </div>
         <br>
