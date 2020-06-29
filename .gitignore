@@ -1,7 +1,7 @@
 # MP
 .DS_Store
 test.py
-data/
+# data/
 MPnotesKEEP
 
 __pycache__/
