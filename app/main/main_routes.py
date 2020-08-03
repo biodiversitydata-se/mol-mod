@@ -136,11 +136,15 @@ def search_api():
     if request.form.get('search_for_asv'):
         url = f'http://localhost:3000/app_asv_mixs'
         gene_lst = request.form.getlist('gene_sel')
+        fw_lst = request.form.getlist('fw_prim_sel')
 
         # Add row filter, if specified
         if len(gene_lst) > 0:
             genes = ','.join(map(str, gene_lst))
             url += f'?gene=in.({genes})'
+        if len(fw_lst) > 0:
+            fw = ','.join(map(str, fw_lst))
+            url += f'?fw_prim=in.({genes})'
         # return url
         # Make api request
         response = requests.get(url)
@@ -155,7 +159,7 @@ def search_api():
 
 @main_bp.route('/get_primers/<genes>/<dir>')
 def get_primers(genes, dir):
-    '''Takes gene and/or dir from url in Ajax request, and uses
+    '''Takes gene and/or direction from url in Ajax request, and uses
     function to make api request, returning primer options as json'''
     val_col = f'{dir}_name'
     disp_col = f'{dir}_display'
