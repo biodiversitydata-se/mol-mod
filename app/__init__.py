@@ -17,7 +17,4 @@ def create_app():
     from app.main import main_routes
     app.register_blueprint(main_routes.main_bp)
 
-    from app.admin import admin_routes
-    app.register_blueprint(admin_routes.admin_bp)
-
     return app
