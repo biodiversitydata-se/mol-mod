@@ -142,19 +142,32 @@ def search_api():
     sform.fw_prim_sel.choices = get_drop_options('fw_name', 'fw_display')
     sform.rv_prim_sel.choices = get_drop_options('rv_name', 'rv_display')
 
-    # If BLAST was clicked, and settings are valid
+    # If SEARCH was clicked
     if request.form.get('search_for_asv'):
+        # Set base URL for api search
         url = f'http://localhost:3000/app_asv_mixs'
+
+        # Get selected genes and/or primers
         gene_lst = request.form.getlist('gene_sel')
         fw_lst = request.form.getlist('fw_prim_sel')
+        rv_lst = request.form.getlist('rv_prim_sel')
+        # Set empty logical operator
+        op = ''
 
-        # Add row filter, if specified
+        # Modify URL according to selections
         if len(gene_lst) > 0:
             genes = ','.join(map(str, gene_lst))
             url += f'?gene=in.({genes})'
+            # Use 'AND' for additional criteria, if any
+            op = '&'
         if len(fw_lst) > 0:
             fw = ','.join(map(str, fw_lst))
-            url += f'?fw_prim=in.({genes})'
+            url += f'{op}fw_name=in.({fw})'
+            # Use 'AND' for additional criteria, if any
+            op = '&'
+        if len(rv_lst) > 0:
+            rv = ','.join(map(str, rv_lst))
+            url += f'{op}rv_name=in.({rv})'
         # return url
         # Make api request
         response = requests.get(url)
