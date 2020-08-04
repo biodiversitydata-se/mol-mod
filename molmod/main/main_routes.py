@@ -151,8 +151,8 @@ def search_api():
         gene_lst = request.form.getlist('gene_sel')
         fw_lst = request.form.getlist('fw_prim_sel')
         rv_lst = request.form.getlist('rv_prim_sel')
-        # Set empty logical operator
-        op = ''
+        # Set logical operator
+        op = '?'
 
         # Modify URL according to selections
         if len(gene_lst) > 0:
