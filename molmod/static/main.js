@@ -70,9 +70,10 @@ $(document).ready(function() {
             break;
     }
 
-    // Show result form after styling
+    // Show result form after styling (to avoid FOUC)
     $('#rform').css("visibility", "visible");
-    // $('#sform').css("visibility", "visible");
+    $('#sform').css("visibility", "visible");
+
 
     // FIX LATER: Perhaps run only if blast or api search...
     // Enable access to checkboxes in all DataTable pages
