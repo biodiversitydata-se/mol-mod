@@ -8,6 +8,7 @@ import random
 import subprocess
 from subprocess import check_output
 
+from flask import current_app as app
 from flask import Blueprint, flash, make_response, render_template
 from flask import jsonify, redirect, url_for
 import pandas as pd
@@ -18,8 +19,17 @@ from werkzeug.exceptions import HTTPException
 
 from app.forms import BlastSearchForm, BlastResultForm, ApiSearchForm, ApiResultForm
 
+
 main_bp = Blueprint('main_bp', __name__,
                     template_folder='templates')
+
+
+# Temp - for debugging
+@main_bp.route('/test')
+def test():
+    # var = app.config
+    var = app.instance_path
+    return render_template('test.html', var=var)
 
 
 @main_bp.route('/')
