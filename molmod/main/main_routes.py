@@ -17,7 +17,7 @@ from flask import request
 from tabulate import tabulate
 from werkzeug.exceptions import HTTPException
 
-from app.forms import BlastSearchForm, BlastResultForm, ApiSearchForm, ApiResultForm
+from molmod.forms import BlastSearchForm, BlastResultForm, ApiSearchForm, ApiResultForm
 
 
 main_bp = Blueprint('main_bp', __name__,
@@ -56,7 +56,7 @@ def blast():
         cmd = ['blastn']  # [sform.blast_algorithm.data]
         cmd += ['-perc_identity', str(sform.min_identity.data)]
         cmd += ['-qcov_hsp_perc', str(sform.min_qry_cover.data)]
-        blast_db = 'app/data/blastdb/asvdb'
+        blast_db = 'data/blastdb/asvdb'
         cmd += ['-db', blast_db]
         names = ['qacc', 'sacc', 'pident', 'qcovhsp', 'evalue']
         cmd += ['-outfmt', f'6 {" ".join(names)}']

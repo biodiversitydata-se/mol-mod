@@ -14,7 +14,7 @@ def create_app():
     app.config.from_object(os.environ['APP_SETTINGS'])
     CSRFProtect(app)
 
-    from app.main import main_routes
+    from molmod.main import main_routes
     app.register_blueprint(main_routes.main_bp)
 
     return app
