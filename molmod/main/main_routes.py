@@ -192,12 +192,12 @@ def get_primers(genes, dir):
     prim_dct_lst = [dict(zip(['name', 'display'], val)) for val in prim_tpl_lst]
     return jsonify(prim_dct_lst)
 
-
-@main_bp.route('/list_asvs', methods=['GET'])
-def list_asvs():
-    response = requests.get('http://localhost:3000/app_asv_tax_seq')
-    asvs = json.loads(response.text)
-    return render_template('list_asvs.html', asvs=asvs)
+# Perhaps use for third option on start page
+# @main_bp.route('/list_asvs', methods=['GET'])
+# def list_asvs():
+#     response = requests.get('http://localhost:3000/app_asv_tax_seq')
+#     asvs = json.loads(response.text)
+#     return render_template('list_asvs.html', asvs=asvs)
 
 
 @main_bp.route('/<page_name>')
