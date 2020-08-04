@@ -15,9 +15,9 @@ footer {
 #rform {
     visibility: hidden;
  }
-/* #sform {
+#sform {
      visibility: hidden;
-} */
+}
 #result_table td:nth-child(1) {
     word-wrap: break-word;
     /* min-width: 100px; */
