@@ -7,9 +7,8 @@ Uses some (e.g. BLAST) code from [Baltic sea Reference Metagenome web server](ht
 Flask (+ jQuery) app for BLAST and metadata (currently just gene & pcr primer) search of sequence-based occurrences in SBDI, via separate BLAST and Amplicon Sequence Variant (ASV) databases. Views of the ASV db are exposed via [postgREST server](https://postgrest.org/en/v7.0.0/index.html), and accessed in API calls (for metadata part). The BLAST db was also pre-built from one of these views, using additional python code (to be shared soon).
 
 ### Branches
-*master* Based on older idea of how to represent ASV in Darwin Core, i.e. using ASV id as scientificName AND taxonID (requiring db-200529-schema-data-sciname.sql).
-
-*taxonid* Based on using ASV id as taxonID only (requiring shema db-200XXX-schema-data-taxonid.sql). 
+* **master:** Based on older idea of how to represent ASV in Darwin Core, i.e. using ASV id as scientificName AND taxonID (requiring db-200529-schema-data-sciname.sql).
+* **taxonid:** Based on using ASV id as taxonID only (requiring shema db-200XXX-schema-data-taxonid.sql). 
 
 ### Files and folders
 * **molmod:** actual Flask app
