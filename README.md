@@ -8,9 +8,9 @@ Flask (+ jQuery) app for BLAST and metadata (currently just gene & pcr primer) s
 
 ### Branches
 * **master:** Based on older idea of how to represent ASV in Darwin Core, i.e. using ASV id as scientificName AND taxonID (requiring db-200529-schema-data-sciname.sql).
-* **taxonid:** Based on using ASV id as taxonID only (requiring shema db-200XXX-schema-data-taxonid.sql). 
+* **taxonid:** Based on using ASV id as taxonID only (requiring shema db-200XXX-schema-data-taxonid.sql).
 
 ### Files and folders
 * **molmod:** actual Flask app
 * **data:** BLAST db, dump from ASV db (postgres), and some test query files
-* **environment.yml:** [Conda file](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file) that can be used to recreate environment. NOTE: this likely includes some obsolete packages and needs cleaning up.
+* **environment.yml:** [Conda file](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file)
