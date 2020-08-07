@@ -1,12 +1,8 @@
 #!/usr/bin/env python
 
-import csv
 import json
 import io
-from io import StringIO
-import random
 import subprocess
-from subprocess import check_output
 
 from flask import current_app as app
 from flask import Blueprint, flash, make_response, render_template
