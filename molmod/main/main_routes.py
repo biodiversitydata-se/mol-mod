@@ -6,10 +6,8 @@ import subprocess
 
 import pandas as pd
 import requests
-from flask import Blueprint
-from flask import current_app as app
-from flask import (flash, jsonify, make_response, redirect, render_template,
-                   request, url_for)
+from flask import Blueprint, current_app as app, flash, jsonify
+from flask import make_response, redirect, render_template, request, url_for
 from tabulate import tabulate
 from werkzeug.exceptions import HTTPException
 
