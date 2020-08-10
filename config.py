@@ -23,7 +23,7 @@ class ProductionConfig(Config):
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    # BLAST_DB =
+    BLAST_DB = 'misc/blastdb/asvdb'
 
 
 class TestConfig(Config):
