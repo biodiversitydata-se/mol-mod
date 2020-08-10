@@ -11,6 +11,6 @@ Flask (+ jQuery) app for BLAST and metadata (currently just gene & pcr primer) s
 * **taxonid:** Based on using ASV id as taxonID only (requiring shema db-200XXX-schema-data-taxonid.sql).
 
 ### Files and folders
-* **molmod:** Flask app
+* **mol-mod:** Flask app
 * **misc:** BLAST db, dump (schema + test data) from ASV db (postgres), postgREST config file and some test query files for BLAST
 * **environment.yml:** [Conda file](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file)
