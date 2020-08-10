@@ -1,3 +1,4 @@
+from flask import current_app as app
 from flask_wtf import FlaskForm
 from wtforms import (BooleanField, IntegerField, SelectMultipleField,
                      StringField, SubmitField, TextAreaField, ValidationError)
@@ -60,6 +61,8 @@ class BlastSearchForm(FlaskForm):
 
 class BlastResultForm(FlaskForm):
     asv_id = BooleanField(u'asv_id')
+    batch_url = app.config['BATCH_SEARCH_URL']
+    redirect_url = app.config['REDIRECT_URL']
 
 
 class ApiSearchForm(FlaskForm):
@@ -71,3 +74,5 @@ class ApiSearchForm(FlaskForm):
 
 class ApiResultForm(FlaskForm):
     asv_id = BooleanField(u'asv_id')
+    batch_url = app.config['BATCH_SEARCH_URL']
+    redirect_url = app.config['REDIRECT_URL']

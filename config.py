@@ -24,6 +24,8 @@ class ProductionConfig(Config):
 class DevelopmentConfig(Config):
     DEBUG = True
     BLAST_DB = 'misc/blastdb/asvdb'
+    BATCH_SEARCH_URL = 'http://molecular.infrabas.se/biocache-service/occurrences/batchSearch'
+    REDIRECT_URL = 'http://molecular.infrabas.se/ala-hub/occurrences/search'
 
 
 class TestConfig(Config):
