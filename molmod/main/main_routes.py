@@ -13,7 +13,7 @@ from flask import (flash, jsonify, make_response, redirect, render_template,
 from tabulate import tabulate
 from werkzeug.exceptions import HTTPException
 
-from mol-mod.forms import (ApiResultForm, ApiSearchForm, BlastResultForm,
+from molmod.forms import (ApiResultForm, ApiSearchForm, BlastResultForm,
                           BlastSearchForm)
 
 main_bp = Blueprint('main_bp', __name__,
