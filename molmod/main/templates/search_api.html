@@ -34,8 +34,7 @@
 <br>
 {% if rform %}
 <div class='container' id='result'>
-    <form action='http://molecular.infrabas.se/biocache-service/occurrences/batchSearch'
-          method='post' id='rform' name='rform'>
+    <form action={{ rform.batch_url }} method='post' id='rform' name='rform'>
         {{ rform.csrf_token }}
         <div class='row'>
             <div class='col-md-12'>
@@ -71,8 +70,7 @@
             <textarea name='queries' id='raw_names' style='display: none'></textarea>
             <!-- Make visible for testing: -->
             <!-- <textarea name='queries' id='raw_names' rows=4, cols=40></textarea> -->
-            <input type='hidden' name='redirectBase'
-                value='http://molecular.infrabas.se/ala-hub/occurrences/search'>
+            <input type='hidden' name='redirectBase' value={{ rform.redirect_url }} >
             <input type='hidden' name='field' value='taxon_id'/>
             <input type='hidden' name='action' value='Search'/>
         </div>
