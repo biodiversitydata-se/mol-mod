@@ -52,8 +52,7 @@ def blast():
         cmd = ['blastn']  # [sform.blast_algorithm.data]
         cmd += ['-perc_identity', str(sform.min_identity.data)]
         cmd += ['-qcov_hsp_perc', str(sform.min_qry_cover.data)]
-        blast_db = 'misc/blastdb/asvdb'
-        cmd += ['-db', blast_db]
+        cmd += ['-db', app.config['BLAST_DB']]
         names = ['qacc', 'sacc', 'pident', 'qcovhsp', 'evalue']
         cmd += ['-outfmt', f'6 {" ".join(names)}']
         cmd += ['-num_threads', '4']
