@@ -12,15 +12,34 @@ def get_env_variable(name):
 
 
 class Config:
-    # Use hardcoded string if env. variable is missing
     SECRET_KEY = get_env_variable('SECRET_KEY') or 'you-will-never-guess'
+    DEBUG = False
+    TESTING = False
+
+
+class ProductionConfig(Config):
+    pass
 
 
 class DevelopmentConfig(Config):
     DEBUG = True
+    # BLAST_DB =
+
+
+class TestConfig(Config):
     TESTING = True
 
 
-class ProductionConfig(Config):
-    DEBUG = False
-    TESTING = False
+def get_config():
+    try:
+        env = get_env_variable('FLASK_ENV')
+    except Exception:
+        env = 'development'
+        print('FLASK_ENV is not set, using FLASK_ENV:', env)
+
+    if env == 'production':
+        return ProductionConfig()
+    elif env == 'test':
+        return TestConfig()
+
+    return DevelopmentConfig()
