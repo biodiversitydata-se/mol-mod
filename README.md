@@ -14,3 +14,17 @@ Flask (+ jQuery) app for BLAST and metadata (currently just gene & pcr primer) s
 * **molmod:** Flask app
 * **misc:** BLAST db, dump (schema + test data) from ASV db (postgres), postgREST config file and some test query files for BLAST
 * **environment.yml:** [Conda file](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file)
+
+### Environmental variables
+Required environmental variable SECRET_KEY (used for global CSRF protection) can be set in your Conda environment:
+```
+conda activate [your-env-name]
+# List existing
+conda env config vars list
+# Set var
+conda env config vars set SECRET_KEY=[your-secret-key]
+conda activate [your-env-name]
+# Check var
+echo $SECRET_KEY
+
+```
