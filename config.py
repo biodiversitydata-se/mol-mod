@@ -40,7 +40,7 @@ def get_config():
     '''
     Uses FLASK_ENV (set in start.sh) to determine app environment.
     '''
-   try:
+    try:
         env = get_env_variable('FLASK_ENV')
     except Exception:
         env = 'development'
