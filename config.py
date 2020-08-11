@@ -4,6 +4,9 @@ import os
 
 
 def get_env_variable(name):
+    '''
+    Gets env var or warns if missing
+    '''
     try:
         return os.environ[name]
     except KeyError:
@@ -24,6 +27,7 @@ class ProductionConfig(Config):
 class DevelopmentConfig(Config):
     DEBUG = True
     BLAST_DB = 'misc/blastdb/asvdb'
+    # URLs for POST requests from search result forms to BioAtlas/SBDI
     BATCH_SEARCH_URL = 'http://molecular.infrabas.se/biocache-service/occurrences/batchSearch'
     REDIRECT_URL = 'http://molecular.infrabas.se/ala-hub/occurrences/search'
 
@@ -33,7 +37,10 @@ class TestConfig(Config):
 
 
 def get_config():
-    try:
+    '''
+    Uses FLASK_ENV (set in start.sh) to determine app environment.
+    '''
+   try:
         env = get_env_variable('FLASK_ENV')
     except Exception:
         env = 'development'
