@@ -146,7 +146,7 @@ $(document).ready(function() {
 });
 
 function selectHlpElem(childColIdx){
-    var hlpElem = $('#result_table tr > td:nth-child(' + childColIdx + '), #result_table tr>th:nth-child(' + childColIdx + ')');
+    var hlpElem = $('#result_table tr td:nth-child(' + childColIdx + '), #result_table tr th:nth-child(' + childColIdx + ')');
     return hlpElem;
 }
 
