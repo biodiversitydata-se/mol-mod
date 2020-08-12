@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from flask import current_app as app
 from flask_wtf import FlaskForm
 from wtforms import (BooleanField, IntegerField, SelectMultipleField,
