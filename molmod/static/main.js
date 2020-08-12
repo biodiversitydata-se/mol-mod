@@ -7,7 +7,7 @@ $(document).ready(function() {
     switch(currPage) {
         case 'blast':
             // Get input seq length for display
-            $('#sequence_textarea').bind('input', function(){
+            $('#sequence_textarea').on('input', function(){
                 $('#sequence_count').text($(this).val().length);
             });
             var hlpElem = selectHlpElem(6);
