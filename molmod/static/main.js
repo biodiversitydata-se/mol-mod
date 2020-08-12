@@ -9,20 +9,23 @@ $(document).ready(function() {
     var currPage = $(location).attr('href').split("/").pop();
     switch(currPage) {
 
-        // If BLAST search page
+        // BLAST PAGE
         case 'blast':
+            // SEARCH FORM
             // Get input seq length for display
             $('#sequence_textarea').on('input', function(){
                 $('#sequence_count').text($(this).val().length);
             });
+            // RESULT FORM
             // Get tbl col holding checkboxes (to highlight when needed)
             var hlpElem = selectHlpElem(6);
             // Convert BLAST results to jQuery dataTable
             var dataTbl = makeDataTbl(5, hlpElem, hlpDiv);
             break;
 
-        // If API search page
+        // API PAGE
         case 'search_api':
+            // SEARCH FORM
             // Set format for select2-dropdown boxes
             $.fn.select2.defaults.set("theme", "bootstrap");
 
@@ -72,31 +75,38 @@ $(document).ready(function() {
                 );
             };
 
-            // To 'keep' option filters after submit
+            // Filter primer options (i.e. even if gene selection has not changed)
+            // Needed to 'keep' filters after submit ('Search')
             filterPrimerOptions('fw');
             filterPrimerOptions('rv');
-            // Filter primer options when genes are selected
+
+            // Re-filter primer options when genes are selected
             geneSelS2.change(function () {
                 filterPrimerOptions('fw');
                 filterPrimerOptions('rv');
             });
 
+            // RESULT FORM
+            // Get tbl col holding checkboxes (to highlight when needed)
             var hlpElem = selectHlpElem(6);
-            // Convert reasults to jQuery dataTable
+            // Convert results to jQuery dataTable
             var dataTbl = makeDataTbl(5, hlpElem, hlpDiv);
             break;
-        // Neither blast nor api search
+
+        // Neither BLAST nor API
         default:
             break;
     }
 
-    // Show result form after styling (to avoid FOUC)
+    // Only show forms after Bootstrap/dataTables/Select2 styling is done
+    // to avoid flash of unstyled content (FOUC)
     $('#rform').css("visibility", "visible");
     $('#sform').css("visibility", "visible");
 
+    /* Functions below handles user selection of dataTables rows.
+    Change later to only run if BLAST or API search */
 
-    // FIX LATER: Perhaps run only if blast or api search...
-    // Enable access to checkboxes in all DataTable pages
+    // Enable access to checkboxes in all dataTable pages
     var allPages = dataTbl.fnGetNodes();
     var asvBoxes = $('.asv_id', allPages);
 
@@ -111,7 +121,7 @@ $(document).ready(function() {
         }
     });
 
-    // When header checkbox is changed
+    // When table header (select-all) checkbox is changed
     $('#select_all').change(function () {
         // Toggle all ASV checkboxes
         asvBoxes.prop('checked', this.checked);
