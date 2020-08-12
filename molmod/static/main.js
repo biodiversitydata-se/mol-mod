@@ -1,10 +1,15 @@
 /* Changes may require cache bypass, in Chrome/Mac: shift + cmd + r */
 $(document).ready(function() {
+    /* Code to run when page has finished loading*/
 
+    // Div holding no-selection error msg (originally hidden)
     var hlpDiv = $('#selection_error');
 
+    // Get page name from URL
     var currPage = $(location).attr('href').split("/").pop();
     switch(currPage) {
+
+        // If BLAST search
         case 'blast':
             // Get input seq length for display
             $('#sequence_textarea').on('input', function(){
