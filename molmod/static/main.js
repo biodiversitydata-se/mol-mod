@@ -1,28 +1,31 @@
 /* Changes may require cache bypass, in Chrome/Mac: shift + cmd + r */
 $(document).ready(function() {
-    /* Code to run when page has finished loading*/
+    /* Code to run when page has finished loading */
 
-    // Div holding no-selection error msg (originally hidden)
+    // Get div holding no-selection error msg (to make visible when needed)
     var hlpDiv = $('#selection_error');
 
     // Get page name from URL
     var currPage = $(location).attr('href').split("/").pop();
     switch(currPage) {
 
-        // If BLAST search
+        // If BLAST search page
         case 'blast':
             // Get input seq length for display
             $('#sequence_textarea').on('input', function(){
                 $('#sequence_count').text($(this).val().length);
             });
+            // Get tbl col holding checkboxes (to highlight when needed)
             var hlpElem = selectHlpElem(6);
-            // Convert reasults to jQuery dataTable
+            // Convert BLAST results to jQuery dataTable
             var dataTbl = makeDataTbl(5, hlpElem, hlpDiv);
             break;
 
+        // If API search page
         case 'search_api':
-            // SEARCH FORM
+            // Set format for select2-dropdown boxes
             $.fn.select2.defaults.set("theme", "bootstrap");
+
             // Make select2-dropdowns for gene & primers
             var geneSelS2 = $('#gene_sel').select2({
                 placeholder: 'Select target gene(s)'
@@ -35,28 +38,40 @@ $(document).ready(function() {
             });
 
             function filterPrimerOptions (dir) {
-                // Get gene(s) to filter options on
+                /* Uses AJAX to update options in primer dropdowns
+                in response to selection in gene dropdown, by getting
+                filtered DB/API data from Flask endpoint, without reloading page */
+
+                // Get selected gene(s)
                 var gene = geneSelS2.val();
+
+                // Select fw/rv primer dropdown
                 if (dir === 'fw') { var primDrop = fwSelS2; }
                 else { var primDrop = rvSelS2; }
+
                 // If no selected gene, get all primers
                 if (gene.length === 0) { gene = 'all'; }
-                // Make Ajax request
+
+                // Make AJAX request for JSON of filtered primers
                 $.getJSON(
-                    // Set flask endpoint
+                    // Set Flask endpoint
                     '/get_primers' + '/' + gene + '/' + dir,
                     function(data) {
+                        // Save current selection
                         currSel = primDrop.val();
                         // Remove old options
                         primDrop.find('option').remove();
-                        // Add option for each item in returned json object (data)
+                        // Add option for each item in returned JSON object
                         $.each(data, function(i,e) {
                             primDrop.append('<option value="' + e.name + '">' + e.display + '</option>');
                         });
+                        // Reapply old selection
+                        // (otherwise existing selection disappears if user adds new gene)
                         primDrop.val(currSel);
                     }
                 );
             };
+
             // To 'keep' option filters after submit
             filterPrimerOptions('fw');
             filterPrimerOptions('rv');
