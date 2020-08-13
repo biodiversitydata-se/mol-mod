@@ -195,4 +195,7 @@ def get_primers(genes, dir):
 
 @main_bp.route('/<page_name>')
 def other_page(page_name):
-    return render_template('index.html', error_page=f'{page_name!r}')
+    msg = f'Sorry, page {page_name!r} does not exist.'
+    flash(msg, category='error')
+
+    return render_template('index.html')
