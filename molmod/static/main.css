@@ -7,10 +7,15 @@ body {
 footer {
     padding: 15px;
 }
+
 .main-content {
     padding: 15px 15px;
-    /* color: red */
 }
+
+.help-block {
+    color: #aa4442;
+}
+
 /* Hide unstyled result form */
 #rform {
     visibility: hidden;
@@ -20,13 +25,10 @@ footer {
 }
 #result_table td:nth-child(1) {
     word-wrap: break-word;
-    /* min-width: 100px; */
     max-width: 100px;
  }
-/* Subject */
 #result_table td:nth-child(2) {
     word-wrap: break-word;
-    /* min-width: 500px; */
     max-width: 400px;
 }
 .hiddenElem {
@@ -40,23 +42,6 @@ footer {
     text-align: right;
     color: #aa4442;
 }
-/* select.select2{
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-bottom-left-radius: 0;
-      border-bottom-right-radius: 0;
-    color: #444;
-    background-color: #FFF;
-    border: 1px solid #AAA;
-    border-radius: 4px;
-    box-sizing: border-box;
-    cursor: pointer;
-    display: block;
-    height: 28px;
-    padding-left: 5px;
-    font: unset;
-} */
-
 select.select2{
     display: block;
     width: 100%;
