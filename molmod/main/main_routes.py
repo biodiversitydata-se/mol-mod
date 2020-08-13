@@ -114,14 +114,19 @@ def get_drop_options(val_col, disp_col, genes='all'):
     if genes != 'all':
         url += f'&gene=in.({genes})'
     # Make api request
-    response = requests.get(url)
-    # Convert json to list of dicts
-    rdict_lst = json.loads(response.text)
-    # Get list of unique (set of) value-display tuples
-    options = list(set([(x[val_col], x[disp_col]) for x in rdict_lst]))
-    # Sort on value
-    options.sort(key=lambda x: x[0])
-    return options
+    try:
+        response = requests.get(url)
+    except requests.ConnectionError:
+        options = []
+    else:
+        # Convert json to list of dicts
+        rdict_lst = json.loads(response.text)
+        # Get list of unique (set of) value-display tuples
+        options = list(set([(x[val_col], x[disp_col]) for x in rdict_lst]))
+        # Sort on value
+        options.sort(key=lambda x: x[0])
+    finally:
+        return options
 
 
 @main_bp.route('/search_api', methods=['GET', 'POST'])
@@ -135,6 +140,13 @@ def search_api():
     sform.fw_prim_sel.choices = get_drop_options('fw_name', 'fw_display')
     sform.rv_prim_sel.choices = get_drop_options('rv_name', 'rv_display')
 
+    for l in [sform.gene_sel.choices, sform.fw_prim_sel.choices, sform.rv_prim_sel.choices]:
+        if (len(l) == 0):
+            # support = "<a href='mailto:sbdi-mol-data-support@scilifelab.se' subject='ASV DB connection failure in molecular module'>Support</a>"
+            msg = f'Sorry, gene and/or primer options are unavailable due to DB connection failure.'
+            flash(msg, category='error')
+            break
+
     # If SEARCH was clicked
     if request.form.get('search_for_asv'):
         # Set base URL for api search
@@ -144,7 +156,7 @@ def search_api():
         gene_lst = request.form.getlist('gene_sel')
         fw_lst = request.form.getlist('fw_prim_sel')
         rv_lst = request.form.getlist('rv_prim_sel')
-        # Set logical operator
+        # Set logical operator for URL filtering
         op = '?'
 
         # Modify URL according to selections
@@ -161,14 +173,20 @@ def search_api():
         if len(rv_lst) > 0:
             rv = ','.join(map(str, rv_lst))
             url += f'{op}rv_name=in.({rv})'
-        # return url
-        # Make api request
-        response = requests.get(url)
-        # Convert json to list of dicts
-        rdict_lst = json.loads(response.text)
-        df = pd.DataFrame(rdict_lst)
 
-        return render_template('search_api.html', sform=sform, rform=rform, rdf=df)
+        # Make api request
+        try:
+            response = requests.get(url)
+        except requests.ConnectionError:
+            msg = 'Sorry, search is disabled due to DB connection failure.'
+
+            flash(msg, category='error')
+        else:
+            # Convert json to list of dicts
+            rdict_lst = json.loads(response.text)
+            df = pd.DataFrame(rdict_lst)
+
+            return render_template('search_api.html', sform=sform, rform=rform, rdf=df)
 
     return render_template('search_api.html', sform=sform)
 
