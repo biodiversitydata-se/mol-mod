@@ -92,7 +92,7 @@ def blast():
 
         # If BLAST error
         else:
-            msg = 'Error, the BLAST query was not successful.'
+            msg = 'Sorry, the BLAST query was not successful.'
             flash(msg, category='error')
 
             # Logging the error - Not sure if this is working
