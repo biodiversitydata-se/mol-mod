@@ -148,7 +148,7 @@ def search_api():
             break
 
     # If SEARCH was clicked
-    if request.form.get('search_for_asv'):
+    if request.form.get('search_for_asv') and sform.validate_on_submit():
         # Set base URL for api search
         url = f'http://localhost:3000/app_asv_mixs'
 

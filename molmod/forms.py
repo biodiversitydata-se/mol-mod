@@ -68,10 +68,27 @@ class BlastResultForm(FlaskForm):
 
 
 class ApiSearchForm(FlaskForm):
+    # gene_sel = SelectMultipleField('gene_sel', [selection_check], choices=[])
     gene_sel = SelectMultipleField('gene_sel', choices=[])
     fw_prim_sel = SelectMultipleField('fw_prim_sel', choices=[])
     rv_prim_sel = SelectMultipleField('rv_prim_sel', choices=[])
     search_for_asv = SubmitField(u'Search')
+
+    def validate(self):
+        '''Requires at least one selected gene or primer'''
+        if not FlaskForm.validate(self):
+            return False
+        result = True
+        g = self.gene_sel
+        fw = self.fw_prim_sel
+        rv = self.rv_prim_sel
+        tot = len(g.data) + len(fw.data) + len(rv.data)
+        if tot == 0:
+            g.errors.append('Please, select at least one gene or primer.')
+            fw.errors.append('')
+            rv.errors.append('')
+            result = False
+        return result
 
 
 class ApiResultForm(FlaskForm):
