@@ -30,10 +30,10 @@ echo $SECRET_KEY
 
 ### DB setup
 ```
-# Make current UNIX user PostgreSQL user also
+# Make current UNIX user into PostgreSQL user
 sudo -u postgres createuser --superuser $USER
 sudo -u postgres createdb $USER
-# Set up roles from file (e.g. from previous pg_dumpall -g > roles.sql)
+# Set up roles from file (e.g. from previous pg_dumpall -g > db-roles.sql)
 psql -f ~/[dir]/db-roles.sql
 # Make new DB
 createdb [db-name]
