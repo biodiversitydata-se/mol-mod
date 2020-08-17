@@ -12,7 +12,7 @@ Flask (+ jQuery) app for BLAST and metadata (currently just gene & pcr primer) s
 
 ### Files and folders
 * **molmod:** Flask app
-* **misc:** Auxiliary files needed to run app, e.g. DB files, API config and some test query files for BLAST.
+* **misc:** Auxiliary files needed to run app, e.g. DB dump, API config and some test query files for BLAST.
 * **environment.yml:** [Conda file](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file)
 
 ### Environmental variables
