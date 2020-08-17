@@ -26,5 +26,17 @@ conda env config vars set SECRET_KEY=[your-secret-key]
 conda activate [your-env-name]
 # Check var
 echo $SECRET_KEY
+```
 
+### DB setup
+```
+# Make current UNIX user PostgreSQL user also
+sudo -u postgres createuser --superuser $USER
+sudo -u postgres createdb $USER
+# Set up roles from file (e.g. from previous pg_dumpall -g > roles.sql)
+psql -f ~/[dir]/db-roles.sql
+# Make new DB
+createdb [db-name]
+# Restore from dump file (from previous pg_dump [db-name])
+psql --single-transaction [db-name] < ~/[dir]/db-dump
 ```
