@@ -116,7 +116,9 @@ def get_drop_options(val_col, disp_col, genes='all'):
     # Make api request
     try:
         response = requests.get(url)
-    except requests.ConnectionError:
+        response.raise_for_status()
+    except (requests.ConnectionError, requests.exceptions.HTTPError) as e:
+        # return "Error: " + str(e)
         options = []
     else:
         # Convert json to list of dicts
@@ -177,9 +179,10 @@ def search_api():
         # Make api request
         try:
             response = requests.get(url)
-        except requests.ConnectionError:
+            response.raise_for_status()
+        except (requests.ConnectionError, requests.exceptions.HTTPError) as e:
             msg = 'Sorry, search is disabled due to DB connection failure.'
-
+            # return "Error: " + str(e)
             flash(msg, category='error')
         else:
             # Convert json to list of dicts
