@@ -95,7 +95,7 @@ $(document).ready(function() {
             var dataTbl = makeDataTbl(5, hlpElem, hlpDiv);
             break;
 
-                      // Neither BLAST nor API
+        // Neither BLAST nor API
         default:
             break;
     }
