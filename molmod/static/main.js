@@ -1,4 +1,6 @@
 /* Changes may require cache bypass, in Chrome/Mac: shift + cmd + r */
+/* Perhaps change later to only run if BLAST or API search */
+
 $(document).ready(function() {
     /* Code to run when page has finished loading */
 
@@ -93,7 +95,7 @@ $(document).ready(function() {
             var dataTbl = makeDataTbl(5, hlpElem, hlpDiv);
             break;
 
-        // Neither BLAST nor API
+                      // Neither BLAST nor API
         default:
             break;
     }
@@ -103,23 +105,21 @@ $(document).ready(function() {
     $('#rform').css("visibility", "visible");
     $('#sform').css("visibility", "visible");
 
-    /* Functions below handles user selection of dataTables rows.
-    Change later to only run if BLAST or API search */
+    // If BLAST or API result form
+    if(typeof dataTbl !== "undefined") {
+        var asvBoxes = dataTbl.$('.asv_id');
 
-    // Enable access to checkboxes in all dataTable pages
-    var allPages = dataTbl.fnGetNodes();
-    var asvBoxes = $('.asv_id', allPages);
-
-    // When any ASV checkbox is changed
-    asvBoxes.change(function () {
-        // Toggle download selection
-        $(this).closest('tr').toggleClass('selectedRow', this.checked);
-        // Remove no-selection warnings (if any)
-        if (this.checked) {
-            hlpElem.removeClass('visHlpElem');
-            hlpDiv.removeClass('visHlpDiv');
-        }
-    });
+        // When any ASV checkbox is changed
+        asvBoxes.change(function () {
+            // Toggle download selection
+            $(this).closest('tr').toggleClass('selectedRow', this.checked);
+            // Remove no-selection warnings (if any)
+            if (this.checked) {
+                hlpElem.removeClass('visHlpElem');
+                hlpDiv.removeClass('visHlpDiv');
+            }
+        });
+    }
 
     // When table header (select-all) checkbox is changed
     $('#select_all').change(function () {
@@ -141,7 +141,6 @@ $(document).ready(function() {
             return alertNoSelection(hlpElem, hlpDiv);
         }
     });
-
 
 });
 
