@@ -65,19 +65,28 @@ $(document).ready(function() {
                 $.getJSON(
                     url,
                     function(data) {
-                        // Save current selection
-                        currSel = primDrop.val();
-
+                        // Save old selection & options
+                        var oldSel = primDrop.val();
+                        var oldOpt = primDrop.find('option:selected').clone();
                         // Remove old options
                         primDrop.find('option').remove();
                         // data format: [{"display":"ITS1F: CTTGGTCATTTAGAGGAAGTAA","name":"ITS1F"}]
                         // Add option for each item in returned JSON object
+                        var newOpt = []
                         $.each(data, function(i,e) {
                             primDrop.append('<option value="' + e.name + '">' + e.display + '</option>');
+                            newOpt.push(e.name);
                         });
+                        // Uncomment to keep primer selection when primers are selected
+                        // But then perhaps change search to primer=x OR gene=y instead of AND
+                        // $.each(oldOpt, function(i,e) {
+                        //     if (newOpt.indexOf(e.value) === -1){
+                        //         primDrop.append(e);
+                        //     }
+                        // });
                         // Reapply old selection
                         // (otherwise existing selection disappears if user adds new gene)
-                        primDrop.val(currSel);
+                        primDrop.val(oldSel);
                     }
                 );
             };
