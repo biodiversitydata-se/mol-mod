@@ -54,18 +54,23 @@ $(document).ready(function() {
                 if (dir === 'fw') { var primDrop = fwSelS2; }
                 else { var primDrop = rvSelS2; }
 
+                var url = 'http://localhost:3000/app_filter_' + dir + '_primers';
+
                 // If no selected gene, get all primers
-                if (gene.length === 0) { gene = 'all'; }
+                if (gene.length !== 0) {
+                    url = url + '?gene=in.(' + gene + ')';
+                }
 
                 // Make AJAX request for JSON of filtered primers
                 $.getJSON(
-                    // Set Flask endpoint
-                    '/get_primers' + '/' + gene + '/' + dir,
+                    url,
                     function(data) {
                         // Save current selection
                         currSel = primDrop.val();
+
                         // Remove old options
                         primDrop.find('option').remove();
+                        // data format: [{"display":"ITS1F: CTTGGTCATTTAGAGGAAGTAA","name":"ITS1F"}]
                         // Add option for each item in returned JSON object
                         $.each(data, function(i,e) {
                             primDrop.append('<option value="' + e.name + '">' + e.display + '</option>');
@@ -77,13 +82,16 @@ $(document).ready(function() {
                 );
             };
 
-            // Filter primer options (i.e. even if gene selection has not changed)
-            // Needed to 'keep' filters after submit ('Search')
-            filterPrimerOptions('fw');
-            filterPrimerOptions('rv');
+            // Filter primer options if a gene was selected before reload/submit
+            if (geneSelS2.val() != ''){
+                // alert('gene selected');
+                filterPrimerOptions('fw');
+                filterPrimerOptions('rv');
+            }
 
             // Re-filter primer options when genes are selected
             geneSelS2.change(function () {
+                // alert('gene changed');
                 filterPrimerOptions('fw');
                 filterPrimerOptions('rv');
             });

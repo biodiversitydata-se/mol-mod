@@ -201,18 +201,6 @@ def search_api():
     return render_template('search_api.html', sform=sform)
 
 
-@main_bp.route('/get_primers/<genes>/<dir>')
-def get_primers(genes, dir):
-    '''Takes gene and/or direction from url in Ajax request, and uses
-    function to make api request, returning primer options as json'''
-    val_col = f'{dir}_name'
-    disp_col = f'{dir}_display'
-    # Get list of primer name & display text tuples from api
-    prim_tpl_lst = get_drop_options(val_col, disp_col, genes)
-    # Add keys to make list of dict
-    prim_dct_lst = [dict(zip(['name', 'display'], val)) for val in prim_tpl_lst]
-    return jsonify(prim_dct_lst)
-
 # Perhaps use for third option on start page
 # @main_bp.route('/list_asvs', methods=['GET'])
 # def list_asvs():
