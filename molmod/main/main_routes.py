@@ -105,14 +105,10 @@ def blast():
     return render_template('blast.html', sform=sform)
 
 
-def get_drop_options(val_col, disp_col, genes='all'):
-    '''Uses gene and/or column names to filter api request for genes or primers,
-    and returns sorted list of unique gene/primer value and display text tuples'''
-    # Add column filter to url
-    url = f"{app.config['API_URL']}/app_prim_per_gene?select={val_col},{disp_col}"
-    # Add row/gene filter, if genes have been specified
-    if genes != 'all':
-        url += f'&gene=in.({genes})'
+def request_drop_options(type: str, dir: str = ''):
+    '''Makes API request for dropdown list options used in API search'''
+    # Get API URL
+    url = get_drop_url(type, dir)
     # Make api request
     try:
         response = requests.get(url)
@@ -124,11 +120,18 @@ def get_drop_options(val_col, disp_col, genes='all'):
         # Convert json to list of dicts
         rdict_lst = json.loads(response.text)
         # Get list of unique (set of) value-display tuples
-        options = list(set([(x[val_col], x[disp_col]) for x in rdict_lst]))
-        # Sort on value
-        options.sort(key=lambda x: x[0])
+        options = [(x['name'], x['display']) for x in rdict_lst]
     finally:
         return options
+
+
+def get_drop_url(type: str, dir: str = ''):
+    base = app.config['API_URL']
+    url = {
+        'primer': f'{base}/app_filter_{dir}_primers?select=name,display',
+        'gene':  f'{base}/app_genes'
+    }
+    return url.get(type, '')
 
 
 @main_bp.route('/search_api', methods=['GET', 'POST'])
@@ -138,10 +141,11 @@ def search_api():
     rform = ApiResultForm()
 
     # Get dropdown options from api, and send to form
-    sform.gene_sel.choices = get_drop_options('gene', 'gene')
-    sform.fw_prim_sel.choices = get_drop_options('fw_name', 'fw_display')
-    sform.rv_prim_sel.choices = get_drop_options('rv_name', 'rv_display')
+    sform.gene_sel.choices = request_drop_options('gene')
+    sform.fw_prim_sel.choices = request_drop_options('primer', 'fw')
+    sform.rv_prim_sel.choices = request_drop_options('primer', 'rv')
 
+    # If any dropdowns have no options - warn about connection error
     for l in [sform.gene_sel.choices, sform.fw_prim_sel.choices, sform.rv_prim_sel.choices]:
         if (len(l) == 0):
             # support = "<a href='mailto:sbdi-mol-data-support@scilifelab.se' subject='ASV DB connection failure in molecular module'>Support</a>"
@@ -162,16 +166,19 @@ def search_api():
         op = '?'
 
         # Modify URL according to selections
+        # GENE
         if len(gene_lst) > 0:
             genes = ','.join(map(str, gene_lst))
             url += f'?gene=in.({genes})'
             # Use 'AND' for additional criteria, if any
             op = '&'
+        # FW PRIMER
         if len(fw_lst) > 0:
             fw = ','.join(map(str, fw_lst))
             url += f'{op}fw_name=in.({fw})'
             # Use 'AND' for additional criteria, if any
             op = '&'
+        # RV PRIMER
         if len(rv_lst) > 0:
             rv = ','.join(map(str, rv_lst))
             url += f'{op}rv_name=in.({rv})'
