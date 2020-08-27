@@ -27,9 +27,11 @@ class ProductionConfig(Config):
 class DevelopmentConfig(Config):
     DEBUG = True
     BLAST_DB = 'misc/blastdb/asvdb'
-    # URLs for POST requests from search result forms to BioAtlas/SBDI
+    # For POST requests from search result forms to BioAtlas/SBDI
     BATCH_SEARCH_URL = 'http://molecular.infrabas.se/biocache-service/occurrences/batchSearch'
     REDIRECT_URL = 'http://molecular.infrabas.se/ala-hub/occurrences/search'
+    # PostgREST
+    API_URL = 'http://localhost:3000'
 
 
 class TestConfig(Config):
