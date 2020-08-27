@@ -109,7 +109,7 @@ def get_drop_options(val_col, disp_col, genes='all'):
     '''Uses gene and/or column names to filter api request for genes or primers,
     and returns sorted list of unique gene/primer value and display text tuples'''
     # Add column filter to url
-    url = f'http://localhost:3000/app_prim_per_gene?select={val_col},{disp_col}'
+    url = f"{app.config['API_URL']}/app_prim_per_gene?select={val_col},{disp_col}"
     # Add row/gene filter, if genes have been specified
     if genes != 'all':
         url += f'&gene=in.({genes})'
@@ -152,7 +152,7 @@ def search_api():
     # If SEARCH was clicked
     if request.form.get('search_for_asv') and sform.validate_on_submit():
         # Set base URL for api search
-        url = f'http://localhost:3000/app_asv_mixs'
+        url = f"{app.config['API_URL']}/app_asv_mixs"
 
         # Get selected genes and/or primers
         gene_lst = request.form.getlist('gene_sel')
@@ -209,7 +209,7 @@ def get_primers(genes, dir):
 # Perhaps use for third option on start page
 # @main_bp.route('/list_asvs', methods=['GET'])
 # def list_asvs():
-#     response = requests.get('http://localhost:3000/app_asv_tax_seq')
+#     response = requests.get("{app.config['API_URL']}/app_asv_tax_seq")
 #     asvs = json.loads(response.text)
 #     return render_template('list_asvs.html', asvs=asvs)
 
