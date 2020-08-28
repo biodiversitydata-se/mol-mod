@@ -209,7 +209,15 @@ function makeDataTbl(data, columns) {
                 style:    'multi',
                 selector: 'td:first-child'
         },
-        order: [[ 1, 'asc' ]]
+        order: [[ 1, 'asc' ]],
+        // Modify layout of dataTable components:
+        // l=Show.., f=Search, tr=table, i=Showing.., p=pagination
+        dom: "<'row'<'col-md-4'l><'col-md-8'f>>" +
+        "<'row'<'col-md-12't>>" +
+        "<'row'<'col-md-3'B><'col-md-3'i><'col-md-6'p>>",
+        buttons: [
+            'copy', 'excel'
+        ]
     });
 
     return dTbl;
