@@ -23,14 +23,17 @@ footer {
 #sform {
      visibility: hidden;
 }
-#result_table td:nth-child(1) {
+
+/* Not working */
+#result_table td:nth-child(2) {
     word-wrap: break-word;
     max-width: 100px;
  }
-#result_table td:nth-child(2) {
+#result_table td:nth-child(3) {
     word-wrap: break-word;
     max-width: 400px;
 }
+
 .hiddenElem {
     display: none;
 }
