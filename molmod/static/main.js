@@ -195,6 +195,7 @@ function makeDataTbl(data, columns) {
     var dTbl = $('#result_table').DataTable( {
         data : data,
         columns : columns,
+        deferRender: true,
         columnDefs: [ {
             targets: 0,
             data: null,
