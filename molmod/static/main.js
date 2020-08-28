@@ -31,25 +31,6 @@ $(document).ready(function() {
             ];
             // Make dataTable
             var dTbl = makeDataTbl(blastResults, columns);
-            // var dTbl = $('#result_table').DataTable( {
-            //     data : blastResults,
-            //     columns : columns,
-            //     columnDefs: [ {
-            //         targets: 0,
-            //         data: null,
-            //         defaultContent: '',
-            //         orderable: false,
-            //         className: 'select-checkbox',
-            //     },
-            //     {
-            //         targets:1,
-            //         visible: false}],
-            //         select: {
-            //             style:    'multi',
-            //             selector: 'td:first-child'
-            //     },
-            //     order: [[ 1, 'asc' ]]
-            // });
         }
         break;
 
