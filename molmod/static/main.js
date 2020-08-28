@@ -154,9 +154,10 @@ $(document).ready(function() {
         });
 
         // Uncheck hdr checkbox if any row is unselected
-        dTbl.on( 'unselect', function () {
-            if ($('#select_all:checked').val() === 'on')
+        dTbl.on( 'deselect', function () {
+            if ($('#select_all:checked').val() === 'on'){
                 $('#select_all:checked').prop("checked", false);
+            }
         });
 
         // Remove no-selection warnings if they exist
@@ -210,7 +211,7 @@ function makeDataTbl(data, columns) {
                 style:    'multi',
                 selector: 'td:first-child'
         },
-        order: [[ 1, 'asc' ]],
+        order: [[ 3, 'asc' ]],
         // Modify layout of dataTable components:
         // l=Show.., f=Search, tr=table, i=Showing.., p=pagination
         dom: "<'row'<'col-md-4'l><'col-md-8'f>>" +
