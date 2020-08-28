@@ -3,6 +3,7 @@
 import io
 import json
 import subprocess
+import sys
 
 import pandas as pd
 import requests
@@ -215,3 +216,8 @@ def other_page(page_name):
     flash(msg, category='error')
 
     return render_template('index.html')
+
+
+def mpdebug(name, var):
+    '''Prints var to console. Ex: mpdebug('gene', gene))'''
+    print(f'\n\nDEBUG: Variable: {name}, Value: {var}, Type: {type(var)}', file=sys.stdout)
