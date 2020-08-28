@@ -194,6 +194,7 @@ $(document).ready(function() {
 // hlpElem/Div needs to be passed here
 function makeDataTbl(data, columns) {
     var dTbl = $('#result_table').DataTable( {
+        autoWidth : false,
         data : data,
         columns : columns,
         deferRender: true,
