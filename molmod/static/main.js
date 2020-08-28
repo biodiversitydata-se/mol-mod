@@ -11,19 +11,47 @@ $(document).ready(function() {
     var currPage = $(location).attr('href').split("/").pop();
     switch(currPage) {
 
-        // BLAST PAGE
-        case 'blast':
-            // SEARCH FORM
-            // Get input seq length for display
-            $('#sequence_textarea').on('input', function(){
-                $('#sequence_count').text($(this).val().length);
-            });
-            // RESULT FORM
-            // Get tbl col holding checkboxes (to highlight when needed)
-            var hlpElem = selectHlpElem(6);
-            // Convert BLAST results to jQuery dataTable
-            var dataTbl = makeDataTbl(5, hlpElem, hlpDiv);
-            break;
+    // BLAST PAGE
+    case 'blast':
+        // SEARCH FORM
+        // Get input seq length for display
+        $('#sequence_textarea').on('input', function(){
+            $('#sequence_count').text($(this).val().length);
+        });
+        // RESULT FORM
+        if(typeof blastResults !== "undefined") {
+            var columns = [
+                {'data': ''},
+                {'data': 'asv_id'},
+                {'data': 'qacc'},
+                {'data': 'sacc'},
+                {'data': 'pident'},
+                {'data': 'qcovhsp'},
+                {'data': 'evalue'}
+            ];
+            // Make dataTable
+            var dTbl = makeDataTbl(blastResults, columns);
+            // var dTbl = $('#result_table').DataTable( {
+            //     data : blastResults,
+            //     columns : columns,
+            //     columnDefs: [ {
+            //         targets: 0,
+            //         data: null,
+            //         defaultContent: '',
+            //         orderable: false,
+            //         className: 'select-checkbox',
+            //     },
+            //     {
+            //         targets:1,
+            //         visible: false}],
+            //         select: {
+            //             style:    'multi',
+            //             selector: 'td:first-child'
+            //     },
+            //     order: [[ 1, 'asc' ]]
+            // });
+        }
+        break;
 
         // API PAGE
         case 'search_api':
@@ -105,12 +133,23 @@ $(document).ready(function() {
                 filterPrimerOptions('rv');
             });
 
-            // RESULT FORM
-            // Get tbl col holding checkboxes (to highlight when needed)
-            var hlpElem = selectHlpElem(6);
+            // RESULT FORM            // Get tbl col holding checkboxes (to highlight when needed)
             // Convert results to jQuery dataTable
-            var dataTbl = makeDataTbl(5, hlpElem, hlpDiv);
+            if(typeof apiResults !== "undefined") {
+                var columns = [
+                    {'data': ''},
+                    {'data': 'asv_id'},
+                    {'data': 'asv_id'},
+                    {'data': 'gene'},
+                    {'data': 'sub'},
+                    {'data': 'fw_name'},
+                    {'data': 'rv_name'}
+                ];
+                // alert(JSON.stringify(apiResults));
+                var dTbl = makeDataTbl(apiResults, columns);
+            }
             break;
+
 
         // Neither BLAST nor API
         default:
@@ -122,111 +161,75 @@ $(document).ready(function() {
     $('#rform').css("visibility", "visible");
     $('#sform').css("visibility", "visible");
 
-    // If BLAST or API result form
-    if(typeof dataTbl !== "undefined") {
-        var asvBoxes = dataTbl.$('.asv_id');
+    // ANY RESULT FORM
+    if(typeof dTbl !== "undefined") {
 
-        // When any ASV checkbox is changed
-        asvBoxes.change(function () {
-            // Toggle download selection
-            $(this).closest('tr').toggleClass('selectedRow', this.checked);
-            // Remove no-selection warnings (if any)
-            if (this.checked) {
-                hlpElem.removeClass('visHlpElem');
-                hlpDiv.removeClass('visHlpDiv');
+        // Add Select-all function to hdr checkbox
+        dTbl.on('click', '#select_all', function () {
+            if ($('#select_all:checked').val() === 'on')
+                dTbl.rows().select();
+            else
+                dTbl.rows().deselect();
+        });
+
+        // Uncheck hdr checkbox if any row is unselected
+        dTbl.on( 'unselect', function () {
+            if ($('#select_all:checked').val() === 'on')
+                $('#select_all:checked').prop("checked", false);
+        });
+
+        // Remove no-selection warnings if they exist
+        dTbl.on( 'select', function () {
+            if($('#selection_error').hasClass('visHlpDiv')){
+                $('#selection_error').removeClass('visHlpDiv');
+                $('#result_table tr td:first-child').removeClass('visHlpElem');
+            }
+        });
+        $('#rform').submit(function() {
+            // Get selected ASV IDs
+            var ids = $.map(dTbl.rows('.selected').data(), function (item) {
+                return item['asv_id']
+            });
+            // Remove duplicates
+            ids = ids.filter(function(item, i, ids) {
+                return i == ids.indexOf(item);
+            });
+            // Add IDs to textarea
+            $('#raw_names').val(ids.join('\n'));
+
+            // Warn if no selection
+            if (!$('#raw_names').val()) {
+                $('#selection_error').addClass('visHlpDiv');
+                $('#result_table tr td:first-child').addClass('visHlpElem');
+                return false;
             }
         });
     }
 
-    // When table header (select-all) checkbox is changed
-    $('#select_all').change(function () {
-        // Toggle all ASV checkboxes
-        asvBoxes.prop('checked', this.checked);
-        // Toggle download selection
-        asvBoxes.closest('tr').toggleClass('selectedRow', this.checked);
-        // Remove no-selection warnings (if any)
-        hlpElem.removeClass('visHlpElem');
-        hlpDiv.removeClass('visHlpDiv');
-    });
-
-    // At SBDI submit
-    $('#rform').submit(function() {
-        // Copy ASV ids to hidden area
-        addCheckedToArea(asvBoxes, $('#raw_names'));
-        // Warn & stop if no selection
-        if (!$('#raw_names').val()) {
-            return alertNoSelection(hlpElem, hlpDiv);
-        }
-    });
-
 });
-
-function selectHlpElem(childColIdx){
-    var hlpElem = $('#result_table tr td:nth-child(' + childColIdx + '), #result_table tr th:nth-child(' + childColIdx + ')');
-    return hlpElem;
-}
-
-// Add checked ids to hidden textarea - for POST to SBDI
-function addCheckedToArea(asvBoxes) {
-    var ids = [];
-    // Add checked ids to list
-    asvBoxes.map(function () {
-        if($(this).is(":checked")){
-            ids.push(this.id);
-        }
-    });
-    // Remove duplicates
-    ids = ids.filter(function(item, i, ids) {
-        return i == ids.indexOf(item);
-    });
-    // Add ids to textarea
-    $('#raw_names').val(ids.join('\n'));
-}
-
-// Warn & stop if no selection for SBDI submission / download
-function alertNoSelection(hlpElem, hlpDiv) {
-    hlpDiv.addClass('visHlpDiv');
-    hlpElem.addClass('visHlpElem');
-    return false;
-}
 
 // Make jQuery dataTable from html table
 // hlpElem/Div needs to be passed here
-function makeDataTbl(CheckBoxIdx, hlpElem, hlpDiv) {
-    var dataTbl = $('#result_table').dataTable({
-        // Modify layout of dataTable components:
-        // l=Show.., f=Search, tr=table, i=Showing.., p=pagination
-        dom: "<'row'<'col-md-4'l><'col-md-8'f>>" +
-        "<'row'<'col-md-12't>>" +
-        "<'row'<'col-md-3'B><'col-md-3'i><'col-md-6'p>>",
-        stateSave: true,
-        // Add download buttons
-        buttons: [
-            { extend: 'csv',
-                exportOptions: { rows: '.selectedRow'},
-                action: function ( e, dt, node, config ) {
-                    // Warn & stop if no selection
-                    if (dt.rows('.selectedRow').count() == 0) {
-                        return alertNoSelection(hlpElem, hlpDiv);
-                    }
-                    $.fn.DataTable.ext.buttons.csvHtml5.action.call(this, e, dt, node, config);
-                }
-            },
-            { extend: 'excel',
-                exportOptions: { rows: '.selectedRow'},
-                action: function ( e, dt, node, config ) {
-                    // Warn & stop if no selection
-                    if (dt.rows('.selectedRow').count() == 0) {
-                        return alertNoSelection(hlpElem, hlpDiv);
-                    }
-                    $.fn.DataTable.ext.buttons.excelHtml5.action.call(this, e, dt, node, config);
-                }
-            }
-        ],
-        // Disable sort on select col - as it does not work
-        'columnDefs': [
-            { 'orderable': false, 'targets': CheckBoxIdx }
-        ]
+function makeDataTbl(data, columns) {
+    var dTbl = $('#result_table').DataTable( {
+        data : data,
+        columns : columns,
+        columnDefs: [ {
+            targets: 0,
+            data: null,
+            defaultContent: '',
+            orderable: false,
+            className: 'select-checkbox',
+        },
+        {
+            targets:1,
+            visible: false}],
+            select: {
+                style:    'multi',
+                selector: 'td:first-child'
+        },
+        order: [[ 1, 'asc' ]]
     });
-    return dataTbl
+
+    return dTbl;
 }

@@ -65,6 +65,9 @@
 
 {% if rform %}
 <div class='container' id='result'>
+    <script>
+        var blastResults = {{ blast_results|tojson }};
+    </script>
     <form action={{ rform.batch_url }} method='post' id='rform' name='rform'>
         {{ rform.csrf_token }}
         <div class='row'>
@@ -72,27 +75,16 @@
                 <table id='result_table' class='dataframe table table-striped'>
                     <thead>
                         <tr>
+                            <th style="text-align: center"><input type="checkbox" id="select_all" /></th>
+                            <th>ID</th>
                             <th>Query</th>
                             <th>Subject</th>
                             <th>Id (%)</th>
                             <th>Cov (%)</th>
                             <th>E-value</th>
-                            <th><input type='checkbox' id='select_all' /></th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {% for i, row in rdf.iterrows() %}
-                        <tr>
-                            <td>{{ row['qacc'] }}</td>
-                            <td>{{ row['sacc'].split('-')[0] + '\n'
-                                + row['sacc'].split('-')[1] }}</td>
-                            <td>{{ row['pident'] }}</td>
-                            <td>{{ row['qcovhsp'] }}</td>
-                            <td>{{ row['evalue'] }}</td>
-                            <td>{{ rform.asv_id(id=row['asv_id'], class='asv_id form-control') }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
+
 
                 </table>
             </div>
