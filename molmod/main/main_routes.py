@@ -87,9 +87,10 @@ def blast():
 
                     # Extract asvid from sacc = id + taxonomy
                     df['asv_id'] = df['sacc'].str.split('-', expand=True)[0]
+                    rdict = df.to_dict('records')
 
                     # Show both search and result forms on same page
-                    return render_template('blast.html', sform=sform, rform=rform, rdf=df)
+                    return render_template('blast.html', sform=sform, rform=rform, blast_results=rdict)
 
         # If BLAST error
         else:
@@ -197,7 +198,8 @@ def search_api():
             rdict_lst = json.loads(response.text)
             df = pd.DataFrame(rdict_lst)
 
-            return render_template('search_api.html', sform=sform, rform=rform, rdf=df)
+            return render_template('search_api.html', sform=sform, rform=rform, api_results=rdict_lst)
+            mpdebug('rdict_lst', rdict_lst)
 
     return render_template('search_api.html', sform=sform)
 
@@ -214,7 +216,6 @@ def search_api():
 def other_page(page_name):
     msg = f'Sorry, page {page_name!r} does not exist.'
     flash(msg, category='error')
-
     return render_template('index.html')
 
 
