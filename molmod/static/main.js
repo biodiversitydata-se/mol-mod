@@ -216,7 +216,7 @@ function makeDataTbl(data, columns) {
         "<'row'<'col-md-12't>>" +
         "<'row'<'col-md-3'B><'col-md-3'i><'col-md-6'p>>",
         buttons: [
-            'copy', 'excel'
+            'copy', 'excel', 'csv'
         ]
     });
 
