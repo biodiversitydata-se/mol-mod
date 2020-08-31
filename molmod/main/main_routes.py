@@ -169,7 +169,8 @@ def search_api():
         gene_lst = request.form.getlist('gene_sel')
         fw_lst = request.form.getlist('fw_prim_sel')
         rv_lst = request.form.getlist('rv_prim_sel')
-        # king_lst = request.form.getlist('kingdom_sel')
+        kingdom_lst = request.form.getlist('kingdom_sel')
+        phylum_lst = request.form.getlist('phylum_sel')
         # Set logical operator for URL filtering
         op = '?'
 
@@ -184,12 +185,19 @@ def search_api():
         if len(fw_lst) > 0:
             fw = ','.join(map(str, fw_lst))
             url += f'{op}fw_name=in.({fw})'
-            # Use 'AND' for additional criteria, if any
             op = '&'
-        # RV PRIMER
-        if len(rv_lst) > 0:
-            rv = ','.join(map(str, rv_lst))
-            url += f'{op}rv_name=in.({rv})'
+        # KINGDOM
+        if len(kingdom_lst) > 0:
+            kingdoms = ','.join(map(str, kingdom_lst))
+            url += f'{op}kingdom=in.({kingdoms})'
+            op = '&'
+        # PHYLUM
+        if len(phylum_lst) > 0:
+            phyla = ','.join(map(str, phylum_lst))
+            url += f'{op}phylum=in.({phyla})'
+            op = '&'
+
+        mpdebug(url)
 
         # Make api request
         try:
@@ -205,7 +213,6 @@ def search_api():
             df = pd.DataFrame(rdict_lst)
 
             return render_template('search_api.html', sform=sform, rform=rform, api_results=rdict_lst)
-            mpdebug('rdict_lst', rdict_lst)
 
     return render_template('search_api.html', sform=sform)
 
@@ -225,6 +232,6 @@ def other_page(page_name):
     return render_template('index.html')
 
 
-def mpdebug(name, var):
+def mpdebug(var, name=''):
     '''Prints var to console. Ex: mpdebug('gene', gene))'''
     print(f'\n\nDEBUG: Variable: {name}, Value: {var}, Type: {type(var)}', file=sys.stdout)
