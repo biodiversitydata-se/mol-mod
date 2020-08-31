@@ -158,7 +158,7 @@ def search_api():
     # If SEARCH was clicked
     if request.form.get('search_for_asv') and sform.validate_on_submit():
         # Set base URL for api search
-        url = f"{app.config['API_URL']}/app_asv_mixs"
+        url = f"{app.config['API_URL']}/app_asv_mixs_tax"
 
         # Get selected genes and/or primers
         gene_lst = request.form.getlist('gene_sel')

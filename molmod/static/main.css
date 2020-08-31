@@ -24,12 +24,15 @@ footer {
      visibility: hidden;
 }
 
-/* Not working */
-#result_table td:nth-child(2) {
+#blast_result_table td:nth-child(2) {
     word-wrap: break-word;
     max-width: 100px;
  }
-#result_table td:nth-child(3) {
+#blast_result_table td:nth-child(3) {
+    word-wrap: break-word;
+    max-width: 400px;
+}
+#api_result_table td:nth-child(2) {
     word-wrap: break-word;
     max-width: 400px;
 }
