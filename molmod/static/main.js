@@ -50,40 +50,37 @@ $(document).ready(function() {
             var rvSelS2 = $('#rv_prim_sel').select2({
                 placeholder: 'Select reverse primer(s)'
             });
+            var kingdomSelS2 = $('#kingdom_sel').select2({
+                placeholder: 'Select kingdom(s)'
+            });
+            var phylumSelS2 = $('#phylum_sel').select2({
+                placeholder: 'Select phylum/phyla'
+            });
 
-            function filterPrimerOptions (dir) {
-                /* Uses AJAX to update options in primer dropdowns
-                in response to selection in gene dropdown, by getting
-                filtered DB/API data from Flask endpoint, without reloading page */
 
-                // Get selected gene(s)
-                var gene = geneSelS2.val();
-
-                // Select fw/rv primer dropdown
-                if (dir === 'fw') { var primDrop = fwSelS2; }
-                else { var primDrop = rvSelS2; }
-
-                var url = 'http://localhost:3000/app_filter_' + dir + '_primers';
-
-                // If no selected gene, get all primers
-                if (gene.length !== 0) {
-                    url = url + '?gene=in.(' + gene + ')';
+            function filterDropOptions (filter, childDrop, apiView) {
+                var selParent = eval(filter + 'SelS2').val();
+                var url = 'http://localhost:3000/' + apiView;
+                // Filter url with selected parent(s)
+                if (selParent.length !== 0) {
+                    url = url + '?' + filter + '=in.(' + selParent + ')';
                 }
+                console.log(url);
 
                 // Make AJAX request for JSON of filtered primers
                 $.getJSON(
                     url,
                     function(data) {
                         // Save old selection & options
-                        var oldSel = primDrop.val();
-                        var oldOpt = primDrop.find('option:selected').clone();
+                        var oldSel = childDrop.val();
+                        var oldOpt = childDrop.find('option:selected').clone();
                         // Remove old options
-                        primDrop.find('option').remove();
+                        childDrop.find('option').remove();
                         // data format: [{"display":"ITS1F: CTTGGTCATTTAGAGGAAGTAA","name":"ITS1F"}]
                         // Add option for each item in returned JSON object
                         var newOpt = []
                         $.each(data, function(i,e) {
-                            primDrop.append('<option value="' + e.name + '">' + e.display + '</option>');
+                            childDrop.append('<option value="' + e.name + '">' + e.display + '</option>');
                             newOpt.push(e.name);
                         });
                         // Uncomment to keep primer selection when primers are selected
@@ -95,24 +92,80 @@ $(document).ready(function() {
                         // });
                         // Reapply old selection
                         // (otherwise existing selection disappears if user adds new gene)
-                        primDrop.val(oldSel);
+                        childDrop.val(oldSel);
                     }
                 );
             };
 
+            // function filterDropOptions (dir) {
+            //     /* Uses AJAX to update options in primer dropdowns
+            //     in response to selection in gene dropdown, by getting
+            //     filtered DB/API data from Flask endpoint, without reloading page */
+            //
+            //     // Get selected gene(s)
+            //     var gene = geneSelS2.val();
+            //
+            //     // Select fw/rv primer dropdown
+            //     if (dir === 'fw') { var primDrop = fwSelS2; }
+            //     else { var primDrop = rvSelS2; }
+            //
+            //     var url = 'http://localhost:3000/app_filter_' + dir + '_primers';
+            //
+            //     // If no selected gene, get all primers
+            //     if (gene.length !== 0) {
+            //         url = url + '?gene=in.(' + gene + ')';
+            //     }
+            //
+            //     // Make AJAX request for JSON of filtered primers
+            //     $.getJSON(
+            //         url,
+            //         function(data) {
+            //             // Save old selection & options
+            //             var oldSel = primDrop.val();
+            //             var oldOpt = primDrop.find('option:selected').clone();
+            //             // Remove old options
+            //             primDrop.find('option').remove();
+            //             // data format: [{"display":"ITS1F: CTTGGTCATTTAGAGGAAGTAA","name":"ITS1F"}]
+            //             // Add option for each item in returned JSON object
+            //             var newOpt = []
+            //             $.each(data, function(i,e) {
+            //                 primDrop.append('<option value="' + e.name + '">' + e.display + '</option>');
+            //                 newOpt.push(e.name);
+            //             });
+            //             // Uncomment to keep primer selection when primers are selected
+            //             // But then perhaps change search to primer=x OR gene=y instead of AND
+            //             // $.each(oldOpt, function(i,e) {
+            //             //     if (newOpt.indexOf(e.value) === -1){
+            //             //         primDrop.append(e);
+            //             //     }
+            //             // });
+            //             // Reapply old selection
+            //             // (otherwise existing selection disappears if user adds new gene)
+            //             primDrop.val(oldSel);
+            //         }
+            //     );
+            // };
+
             // Filter primer options if a gene was selected before reload/submit
             if (geneSelS2.val() != ''){
                 // alert('gene selected');
-                filterPrimerOptions('fw');
-                filterPrimerOptions('rv');
+                filterDropOptions ('gene', fwSelS2, 'app_filter_fw_primers');
+                filterDropOptions ('gene', rvSelS2, 'app_filter_rv_primers');
             }
-
             // Re-filter primer options when genes are selected
             geneSelS2.change(function () {
                 // alert('gene changed');
-                filterPrimerOptions('fw');
-                filterPrimerOptions('rv');
+                filterDropOptions ('gene', fwSelS2, 'app_filter_fw_primers');
+                filterDropOptions ('gene', rvSelS2, 'app_filter_rv_primers');
             });
+            // Dito for kingdom/phyla
+            if (kingdomSelS2.val() != ''){
+                filterDropOptions ('kingdom', phylumSelS2, 'app_filter_phyla');
+            }
+            kingdomSelS2.change(function () {
+                filterDropOptions ('kingdom', phylumSelS2, 'app_filter_phyla');
+            });
+
 
             // RESULT FORM            // Get tbl col holding checkboxes (to highlight when needed)
             // Convert results to jQuery dataTable

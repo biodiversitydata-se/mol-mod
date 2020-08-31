@@ -131,7 +131,10 @@ def get_drop_url(type: str, dir: str = ''):
     base = app.config['API_URL']
     url = {
         'primer': f'{base}/app_filter_{dir}_primers?select=name,display',
-        'gene':  f'{base}/app_genes'
+        'gene':  f'{base}/app_genes',
+        'kingdom': f'{base}/app_kingdoms',
+        'phylum': f'{base}/app_filter_phyla'
+
     }
     return url.get(type, '')
 
@@ -146,6 +149,8 @@ def search_api():
     sform.gene_sel.choices = request_drop_options('gene')
     sform.fw_prim_sel.choices = request_drop_options('primer', 'fw')
     sform.rv_prim_sel.choices = request_drop_options('primer', 'rv')
+    sform.kingdom_sel.choices = request_drop_options('kingdom')
+    sform.phylum_sel.choices = request_drop_options('phylum')
 
     # If any dropdowns have no options - warn about connection error
     for l in [sform.gene_sel.choices, sform.fw_prim_sel.choices, sform.rv_prim_sel.choices]:
@@ -164,6 +169,7 @@ def search_api():
         gene_lst = request.form.getlist('gene_sel')
         fw_lst = request.form.getlist('fw_prim_sel')
         rv_lst = request.form.getlist('rv_prim_sel')
+        # king_lst = request.form.getlist('kingdom_sel')
         # Set logical operator for URL filtering
         op = '?'
 
