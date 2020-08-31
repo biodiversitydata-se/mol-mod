@@ -30,7 +30,7 @@ $(document).ready(function() {
                 {'data': 'evalue'}
             ];
             // Make dataTable
-            var dTbl = makeDataTbl(blastResults, columns);
+            var dTbl = makeDataTbl('blast_result_table', blastResults, columns);
         }
         break;
 
@@ -120,14 +120,14 @@ $(document).ready(function() {
                 var columns = [
                     {'data': ''},
                     {'data': 'asv_id'},
-                    {'data': 'asv_id'},
+                    {'data': 'asv_tax'},
                     {'data': 'gene'},
                     {'data': 'sub'},
                     {'data': 'fw_name'},
                     {'data': 'rv_name'}
                 ];
                 // alert(JSON.stringify(apiResults));
-                var dTbl = makeDataTbl(apiResults, columns);
+                var dTbl = makeDataTbl('api_result_table', apiResults, columns);
             }
             break;
 
@@ -192,8 +192,8 @@ $(document).ready(function() {
 
 // Make jQuery dataTable from html table
 // hlpElem/Div needs to be passed here
-function makeDataTbl(data, columns) {
-    var dTbl = $('#result_table').DataTable( {
+function makeDataTbl(table_id, data, columns) {
+    var dTbl = $('#'+table_id).DataTable( {
         autoWidth : false,
         data : data,
         columns : columns,
