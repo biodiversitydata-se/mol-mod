@@ -83,10 +83,16 @@ def blast():
                     df['evalue'] = df['evalue'].map('{:.1e}'.format)
                     df = df.round(1)
 
+                    # Get subject sequence
+                    seq_df = get_sseq_from_blastdb(df['sacc'])
+                    # Perhaps safer to use a left join (rather than condcat) here
+                    df['asv_sequence'] = seq_df['asv_sequence']
+
                     df['sacc'] = df['sacc'].str.replace(';', '|')
 
                     # Extract asvid from sacc = id + taxonomy
                     df['asv_id'] = df['sacc'].str.split('-', expand=True)[0]
+
                     rdict = df.to_dict('records')
 
                     # Show both search and result forms on same page
@@ -197,8 +203,6 @@ def search_api():
             url += f'{op}phylum=in.({phyla})'
             op = '&'
 
-        mpdebug(url)
-
         # Make api request
         try:
             response = requests.get(url)
@@ -230,6 +234,35 @@ def other_page(page_name):
     msg = f'Sorry, page {page_name!r} does not exist.'
     flash(msg, category='error')
     return render_template('index.html')
+
+
+def get_sseq_from_blastdb(ids):
+
+    id_str = ','.join(ids.to_list())
+
+    cmd = ['blastdbcmd']
+    cmd += ['-db', 'misc/blastdb/asvdb']
+    cmd += ['-entry', id_str]
+    cmd += ['-outfmt', '%a %s']
+
+    # Spawn system process (blastdbcmd) and direct data to file handles
+    with subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE) as process:
+        # Send seq from sform to stdin, read output & error until 'eof'
+        blast_stdout, stderr = process.communicate()
+        # # Get exit status
+        returncode = process.returncode
+
+        # If blastdbcmd worked (no error)
+        if returncode == 0:
+            # Make in-memory file-like string from blast-output
+            with io.StringIO(blast_stdout.decode()) as stdout_buf:
+                df = pd.read_csv(stdout_buf, sep=' ', header=None, names=('sacc', 'asv_sequence'))
+
+                # If some hits
+                if len(df) > 0:
+                    print(tabulate(df, headers='keys', tablefmt='psql'), file=sys.stdout)
+                    return df
 
 
 def mpdebug(var, name=''):

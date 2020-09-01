@@ -27,7 +27,8 @@ $(document).ready(function() {
                 {'data': 'sacc'},
                 {'data': 'pident'},
                 {'data': 'qcovhsp'},
-                {'data': 'evalue'}
+                {'data': 'evalue'},
+                {'data': 'asv_sequence'}
             ];
             // Make dataTable
             var dTbl = makeDataTbl('blast_result_table', blastResults, columns);
@@ -260,10 +261,14 @@ function makeDataTbl(table_id, data, columns) {
         },
         {
             targets:1,
-            visible: false}],
-            select: {
-                style:    'multi',
-                selector: 'td:first-child'
+            visible: false
+        },{
+            targets:7,
+            visible: false
+        }],
+        select: {
+            style:    'multi',
+            selector: 'td:first-child'
         },
         order: [[ 3, 'asc' ]],
         // Modify layout of dataTable components:
