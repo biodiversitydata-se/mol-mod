@@ -197,6 +197,10 @@ def search_api():
             kingdoms = ','.join(map(str, kingdom_lst))
             url += f'{op}kingdom=in.({kingdoms})'
             op = '&'
+        if len(rv_lst) > 0:
+            rv = ','.join(map(str, rv_lst))
+            url += f'{op}rv_name=in.({rv})'
+            op = '&'
         # PHYLUM
         if len(phylum_lst) > 0:
             phyla = ','.join(map(str, phylum_lst))
