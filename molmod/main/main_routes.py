@@ -83,7 +83,7 @@ def blast():
                     df['evalue'] = df['evalue'].map('{:.1e}'.format)
                     df = df.round(1)
 
-                    # Get subject sequence
+                    # Get subject sequence via blastdbcmd
                     seq_df = get_sseq_from_blastdb(df['sacc'])
                     # Perhaps safer to use a left join (rather than condcat) here
                     df['asv_sequence'] = seq_df['asv_sequence']
@@ -214,7 +214,6 @@ def search_api():
         else:
             # Convert json to list of dicts
             rdict_lst = json.loads(response.text)
-            df = pd.DataFrame(rdict_lst)
 
             return render_template('search_api.html', sform=sform, rform=rform, api_results=rdict_lst)
 
