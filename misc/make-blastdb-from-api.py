@@ -50,7 +50,7 @@ def get_fasta_from_api(file, limit=None):
     '''Gets list of dictionaries from DB view via API request,
     and writes this in fasta format, using supplied file name.
     Optionally limits number of view rows to include in fasta file.'''
-    url = 'http://localhost:3000/app_asv_tax_seq'
+    url = 'http://localhost:3000/app_asvs_for_blastdb'
     if limit:
         url = f'{url}?limit={limit}'
     r = requests.get(url, headers={'Accept': 'application/json'})
