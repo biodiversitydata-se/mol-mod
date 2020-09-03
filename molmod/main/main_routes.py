@@ -224,10 +224,11 @@ def search_api():
     return render_template('search_api.html', sform=sform)
 
 
-# Perhaps use for third option on start page
+# # Perhaps use for third option on start page
 # @main_bp.route('/list_asvs', methods=['GET'])
 # def list_asvs():
-#     response = requests.get("{app.config['API_URL']}/app_asv_tax_seq")
+#     url = f"{app.config['API_URL']}/app_asvs_for_blastdb"
+#     response = requests.get(url)
 #     asvs = json.loads(response.text)
 #     return render_template('list_asvs.html', asvs=asvs)
 
