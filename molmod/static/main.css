@@ -16,7 +16,7 @@ footer {
     color: #aa4442;
 }
 
-/* Hide unstyled result form */
+/* Result form until styled as dataTable */
 #rform {
     visibility: hidden;
  }
@@ -24,15 +24,23 @@ footer {
      visibility: hidden;
 }
 
-#blast_result_table td:nth-child(2) {
+/* Query col */
+#blast_result_table td:nth-child(3) {
     word-wrap: break-word;
     max-width: 100px;
  }
-#blast_result_table td:nth-child(3) {
+/* Subject col */
+#blast_result_table td:nth-child(4) {
     word-wrap: break-word;
     max-width: 400px;
 }
-#api_result_table td:nth-child(2) {
+/* Sequence child table */
+#seq_table td:first-child {
+    word-wrap: break-word;
+    max-width: 800px;
+}
+/* ASV ID-TAxonomy col*/
+#api_result_table td:nth-child(3) {
     word-wrap: break-word;
     max-width: 400px;
 }
@@ -62,4 +70,12 @@ select.select2{
     border: 1px solid #ced4da;
     border-radius: 0.25rem;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+td.details-control {
+    background: url('https://cdn.rawgit.com/DataTables/DataTables/6c7ada53ebc228ea9bc28b1b216e793b1825d188/examples/resources/details_open.png') no-repeat center center;
+    cursor: pointer;
+}
+tr.shown td.details-control {
+    background: url('https://cdn.rawgit.com/DataTables/DataTables/6c7ada53ebc228ea9bc28b1b216e793b1825d188/examples/resources/details_close.png') no-repeat center center;
 }
