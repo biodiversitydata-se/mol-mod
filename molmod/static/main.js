@@ -21,8 +21,9 @@ $(document).ready(function() {
         // RESULT FORM
         if(typeof blastResults !== "undefined") {
             var columns = [
-                {'data': ''},
-                {'data': 'asv_id'},
+                {'data': null}, // Expand-button
+                {'data': null}, // Checkbox
+                {'data': 'asv_id'}, // Hidden
                 {'data': 'qacc'},
                 {'data': 'sacc'},
                 {'data': 'pident'},
@@ -168,19 +169,19 @@ $(document).ready(function() {
         });
 
 
-        // RESULT FORM            // Get tbl col holding checkboxes (to highlight when needed)
+        // RESULT FORM
         // Convert results to jQuery dataTable
         if(typeof apiResults !== "undefined") {
             var columns = [
-                {'data': ''},
-                {'data': 'asv_id'},
+                {'data': null}, // Expand-button
+                {'data': null}, // Checkbox
+                {'data': 'asv_id'}, // Hidden
                 {'data': 'asv_tax'},
                 {'data': 'gene'},
                 {'data': 'sub'},
                 {'data': 'fw_name'},
                 {'data': 'rv_name'},
-                // Placeholder for seq
-                {'data': 'asv_id'}
+                {'data': 'asv_sequence'}
             ];
             // alert(JSON.stringify(apiResults));
             var dTbl = makeDataTbl('api_result_table', apiResults, columns);
@@ -222,6 +223,31 @@ $(document).ready(function() {
                 $('#result_table tr td:first-child').removeClass('visHlpElem');
             }
         });
+
+        // Toggle show/hide of ASV sequence as child table
+        function format ( data ) {
+            return '<table id="seq_table">'+
+                '<tr>'+
+                    '<td>>'+data.asv_id+'<br>'+data.asv_sequence+'</td>'+
+                '</tr>'+
+            '</table>';
+        }
+        $(dTbl.table().body()).on('click', 'td.details-control', function () {
+            var tr = $(this).closest('tr');
+            var row = dTbl.row( tr );
+            if ( row.child.isShown() ) {
+                // This row is already open - close it
+                row.child.hide();
+                tr.removeClass('shown');
+            }
+            else {
+                // Open this row
+                row.child( format(row.data()) ).show();
+                tr.addClass('shown');
+            }
+        } );
+
+
         $('#rform').submit(function() {
             // Get selected ASV IDs
             var ids = $.map(dTbl.rows('.selected').data(), function (item) {
@@ -251,26 +277,15 @@ function makeDataTbl(table_id, data, columns) {
     var dTbl = $('#'+table_id).DataTable( {
         autoWidth : false,
         data : data,
-        columns : columns,
         deferRender: true,
-        columnDefs: [ {
-            targets: 0,
-            data: null,
-            defaultContent: '',
-            orderable: false,
-            className: 'select-checkbox',
-        },
-        {
-            targets:1,
-            visible: false
-        },{
-            targets:7,
-            visible: false
-        }],
-        select: {
-            style:    'multi',
-            selector: 'td:first-child'
-        },
+        columns : columns,
+        columnDefs: [
+            { targets: [0,1], defaultContent: '', orderable: false },
+            { targets: 0, className: 'details-control' },
+            { targets: 1, className: 'select-checkbox' },
+            { targets:[2,8], visible: false },
+        ],
+        select: { style: 'multi', selector: 'td:nth-child(2)' },
         order: [[ 3, 'asc' ]],
         // Modify layout of dataTable components:
         // l=Show.., f=Search, tr=table, i=Showing.., p=pagination
@@ -278,7 +293,7 @@ function makeDataTbl(table_id, data, columns) {
         "<'row'<'col-md-12't>>" +
         "<'row'<'col-md-3'B><'col-md-3'i><'col-md-6'p>>",
         buttons: [
-            'copy', 'excel', 'csv'
+            'excel', 'csv'
         ]
     });
 
