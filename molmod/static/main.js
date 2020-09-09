@@ -11,186 +11,135 @@ $(document).ready(function() {
     var currPage = $(location).attr('href').split("/").pop();
     switch(currPage) {
 
-    // BLAST PAGE
-    case 'blast':
-        // SEARCH FORM
-        // Get input seq length for display
-        $('#sequence_textarea').on('input', function(){
-            $('#sequence_count').text($(this).val().length);
-        });
-        // RESULT FORM
-        if(typeof blastResults !== "undefined") {
-            var columns = [
-                {'data': null}, // Expand-button
-                {'data': null}, // Checkbox
-                {'data': 'asv_id'}, // Hidden
-                {'data': 'qacc'},
-                {'data': 'sacc'},
-                {'data': 'pident'},
-                {'data': 'qcovhsp'},
-                {'data': 'evalue'},
-                {'data': 'asv_sequence'}
-            ];
-            // Make dataTable
-            var dTbl = makeDataTbl('blast_result_table', blastResults, columns);
-        }
-        break;
-
-    // API PAGE
-    case 'search_api':
-        // SEARCH FORM
-        // Set format for select2-dropdown boxes
-        $.fn.select2.defaults.set("theme", "bootstrap");
-
-        // Make select2-dropdowns for gene & primers
-        var geneSelS2 = $('#gene_sel').select2({
-            placeholder: 'Select target gene(s)'
-        });
-        var fwSelS2 = $('#fw_prim_sel').select2({
-            placeholder: 'Select forward primer(s)'
-        });
-        var rvSelS2 = $('#rv_prim_sel').select2({
-            placeholder: 'Select reverse primer(s)'
-        });
-        var kingdomSelS2 = $('#kingdom_sel').select2({
-            placeholder: 'Select kingdom(s)'
-        });
-        var phylumSelS2 = $('#phylum_sel').select2({
-            placeholder: 'Select phylum/phyla'
-        });
-
-
-        function filterDropOptions (filter, childDrop, apiView) {
-            var selParent = eval(filter + 'SelS2').val();
-            var url = 'http://localhost:3000/' + apiView;
-            // Filter url with selected parent(s)
-            if (selParent.length !== 0) {
-                url = url + '?' + filter + '=in.(' + selParent + ')';
+        // BLAST PAGE
+        case 'blast':
+            // SEARCH FORM
+            // Get input seq length for display
+            $('#sequence_textarea').on('input', function(){
+                $('#sequence_count').text($(this).val().length);
+            });
+            // RESULT FORM
+            if(typeof blastResults !== "undefined") {
+                var columns = [
+                    {'data': null},         // 0. Checkbox
+                    {'data': 'asv_id'},     // 1. Hidden ID
+                    {'data': 'qacc'},       // 2.
+                    {'data': 'sacc'},       // 3. Expandable
+                    {'data': 'pident'},     // 4.
+                    {'data': 'qcovhsp'},    // 5.
+                    {'data': 'evalue'},     // 6.
+                    {'data': 'asv_sequence'}// 7. Hidden seq
+                ];
+                // Make dataTable
+                var dTbl = makeDataTbl('blast_result_table', blastResults, columns);
             }
+            break;
 
-            // Make AJAX request for JSON of filtered primers
-            $.getJSON(
-                url,
-                function(data) {
-                    // Save old selection & options
-                    var oldSel = childDrop.val();
-                    var oldOpt = childDrop.find('option:selected').clone();
-                    // Remove old options
-                    childDrop.find('option').remove();
-                    // data format: [{"display":"ITS1F: CTTGGTCATTTAGAGGAAGTAA","name":"ITS1F"}]
-                    // Add option for each item in returned JSON object
-                    var newOpt = []
-                    $.each(data, function(i,e) {
-                        childDrop.append('<option value="' + e.name + '">' + e.display + '</option>');
-                        newOpt.push(e.name);
-                    });
-                    // Uncomment to keep primer selection when primers are selected
-                    // But then perhaps change search to primer=x OR gene=y instead of AND
-                    // $.each(oldOpt, function(i,e) {
-                    //     if (newOpt.indexOf(e.value) === -1){
-                    //         primDrop.append(e);
-                    //     }
-                    // });
-                    // Reapply old selection
-                    // (otherwise existing selection disappears if user adds new gene)
-                    childDrop.val(oldSel);
+        // API PAGE
+        case 'search_api':
+            // SEARCH FORM
+            // Set format for select2-dropdown boxes
+            $.fn.select2.defaults.set("theme", "bootstrap");
+
+            // Make select2-dropdowns for gene & primers
+            var geneSelS2 = $('#gene_sel').select2({
+                placeholder: 'Select target gene(s)'
+            });
+            var fwSelS2 = $('#fw_prim_sel').select2({
+                placeholder: 'Select forward primer(s)'
+            });
+            var rvSelS2 = $('#rv_prim_sel').select2({
+                placeholder: 'Select reverse primer(s)'
+            });
+            var kingdomSelS2 = $('#kingdom_sel').select2({
+                placeholder: 'Select kingdom(s)'
+            });
+            var phylumSelS2 = $('#phylum_sel').select2({
+                placeholder: 'Select phylum/phyla'
+            });
+
+
+            function filterDropOptions (filter, childDrop, apiView) {
+                var selParent = eval(filter + 'SelS2').val();
+                var url = 'http://localhost:3000/' + apiView;
+                // Filter url with selected parent(s)
+                if (selParent.length !== 0) {
+                    url = url + '?' + filter + '=in.(' + selParent + ')';
                 }
-            );
-        };
 
-        // function filterDropOptions (dir) {
-        //     /* Uses AJAX to update options in primer dropdowns
-        //     in response to selection in gene dropdown, by getting
-        //     filtered DB/API data from Flask endpoint, without reloading page */
-        //
-        //     // Get selected gene(s)
-        //     var gene = geneSelS2.val();
-        //
-        //     // Select fw/rv primer dropdown
-        //     if (dir === 'fw') { var primDrop = fwSelS2; }
-        //     else { var primDrop = rvSelS2; }
-        //
-        //     var url = 'http://localhost:3000/app_filter_' + dir + '_primers';
-        //
-        //     // If no selected gene, get all primers
-        //     if (gene.length !== 0) {
-        //         url = url + '?gene=in.(' + gene + ')';
-        //     }
-        //
-        //     // Make AJAX request for JSON of filtered primers
-        //     $.getJSON(
-        //         url,
-        //         function(data) {
-        //             // Save old selection & options
-        //             var oldSel = primDrop.val();
-        //             var oldOpt = primDrop.find('option:selected').clone();
-        //             // Remove old options
-        //             primDrop.find('option').remove();
-        //             // data format: [{"display":"ITS1F: CTTGGTCATTTAGAGGAAGTAA","name":"ITS1F"}]
-        //             // Add option for each item in returned JSON object
-        //             var newOpt = []
-        //             $.each(data, function(i,e) {
-        //                 primDrop.append('<option value="' + e.name + '">' + e.display + '</option>');
-        //                 newOpt.push(e.name);
-        //             });
-        //             // Uncomment to keep primer selection when primers are selected
-        //             // But then perhaps change search to primer=x OR gene=y instead of AND
-        //             // $.each(oldOpt, function(i,e) {
-        //             //     if (newOpt.indexOf(e.value) === -1){
-        //             //         primDrop.append(e);
-        //             //     }
-        //             // });
-        //             // Reapply old selection
-        //             // (otherwise existing selection disappears if user adds new gene)
-        //             primDrop.val(oldSel);
-        //         }
-        //     );
-        // };
+                // Make AJAX request for JSON of filtered primers
+                $.getJSON(
+                    url,
+                    function(data) {
+                        // Save old selection & options
+                        var oldSel = childDrop.val();
+                        var oldOpt = childDrop.find('option:selected').clone();
+                        // Remove old options
+                        childDrop.find('option').remove();
+                        // data format: [{"display":"ITS1F: CTTGGTCATTTAGAGGAAGTAA","name":"ITS1F"}]
+                        // Add option for each item in returned JSON object
+                        var newOpt = []
+                        $.each(data, function(i,e) {
+                            childDrop.append('<option value="' + e.name + '">' + e.display + '</option>');
+                            newOpt.push(e.name);
+                        });
+                        // Uncomment to keep primer selection when primers are selected
+                        // But then perhaps change search to primer=x OR gene=y instead of AND
+                        // $.each(oldOpt, function(i,e) {
+                        //     if (newOpt.indexOf(e.value) === -1){
+                        //         primDrop.append(e);
+                        //     }
+                        // });
+                        // Reapply old selection
+                        // (otherwise existing selection disappears if user adds new gene)
+                        childDrop.val(oldSel);
+                    }
+                );
+            };
 
-        // Filter primer options if a gene was selected before reload/submit
-        if (geneSelS2.val() != ''){
-            // alert('gene selected');
-            filterDropOptions ('gene', fwSelS2, 'app_filter_fw_primers');
-            filterDropOptions ('gene', rvSelS2, 'app_filter_rv_primers');
-        }
-        // Re-filter primer options when genes are selected
-        geneSelS2.change(function () {
-            // alert('gene changed');
-            filterDropOptions ('gene', fwSelS2, 'app_filter_fw_primers');
-            filterDropOptions ('gene', rvSelS2, 'app_filter_rv_primers');
-        });
-        // Dito for kingdom/phyla
-        if (kingdomSelS2.val() != ''){
-            filterDropOptions ('kingdom', phylumSelS2, 'app_filter_phyla');
-        }
-        kingdomSelS2.change(function () {
-            filterDropOptions ('kingdom', phylumSelS2, 'app_filter_phyla');
-        });
+            // Filter primer options if a gene was selected before reload/submit
+            if (geneSelS2.val() != ''){
+                // alert('gene selected');
+                filterDropOptions ('gene', fwSelS2, 'app_filter_fw_primers');
+                filterDropOptions ('gene', rvSelS2, 'app_filter_rv_primers');
+            }
+            // Filter primer options when genes are selected
+            geneSelS2.change(function () {
+                // alert('gene changed');
+                filterDropOptions ('gene', fwSelS2, 'app_filter_fw_primers');
+                filterDropOptions ('gene', rvSelS2, 'app_filter_rv_primers');
+            });
+            // Dito for kingdom/phyla
+            if (kingdomSelS2.val() != ''){
+                filterDropOptions ('kingdom', phylumSelS2, 'app_filter_phyla');
+            }
+            kingdomSelS2.change(function () {
+                filterDropOptions ('kingdom', phylumSelS2, 'app_filter_phyla');
+            });
 
 
-        // RESULT FORM
-        // Convert results to jQuery dataTable
-        if(typeof apiResults !== "undefined") {
-            var columns = [
-                {'data': null}, // Expand-button
-                {'data': null}, // Checkbox
-                {'data': 'asv_id'}, // Hidden
-                {'data': 'asv_tax'},
-                {'data': 'gene'},
-                {'data': 'sub'},
-                {'data': 'fw_name'},
-                {'data': 'rv_name'},
-                {'data': 'asv_sequence'}
-            ];
-            // alert(JSON.stringify(apiResults));
-            var dTbl = makeDataTbl('api_result_table', apiResults, columns);
-        }
-        break;
+            // RESULT FORM
+            // Convert results to jQuery dataTable
+            if(typeof apiResults !== "undefined") {
+                var columns = [
+                    {'data': null},         // 0. Checkbox
+                    {'data': 'asv_id'},     // 1. Hidden ID
+                    {'data': 'asv_tax'},    // 2. Expandable
+                    {'data': 'gene'},       // 3.
+                    {'data': 'sub'},        // 4.
+                    {'data': 'fw_name'},    // 5.
+                    {'data': 'rv_name'},    // 6.
+                    {'data': 'asv_sequence'}// 7. Hidden seq
+                ];
+                // alert(JSON.stringify(apiResults));
+                var dTbl = makeDataTbl('api_result_table', apiResults, columns);
+            }
+            break;
 
-    // Neither BLAST nor API
-    default:
-        break;
-}
+        // Neither BLAST nor API
+        default:
+            break;
+    }
 
     // Only show forms after Bootstrap/dataTables/Select2 styling is done
     // to avoid flash of unstyled content (FOUC)
@@ -223,29 +172,27 @@ $(document).ready(function() {
             }
         });
 
-        // Toggle show/hide of ASV sequence as child table
-        function format ( data ) {
-            return '<table id="seq_table">'+
-                '<tr>'+
-                    '<td>>'+data.asv_id+'<br>'+data.asv_sequence+'</td>'+
-                '</tr>'+
-            '</table>';
-        }
-        $(dTbl.table().body()).on('click', 'td.details-control', function () {
+        // Toggle show/hide of ASV sequence as child row
+        dTbl.on('click', 'td.details-control', function () {
             var tr = $(this).closest('tr');
-            var row = dTbl.row( tr );
-            if ( row.child.isShown() ) {
-                // This row is already open - close it
+            var row = dTbl.row(tr);
+            var data = row.data();
+            // Set no. of empty cells to show before seq, depending on table type
+            if (dTbl.table().node().id === 'blast_result_table'){
+                var tds = '<tr><td></td><td></td><td colspan="4">';
+            }
+            else { var tds = '<tr><td></td><td colspan="5">'; }
+            var childRow = $(tds+data.asv_sequence+'</td></tr>');
+            // Toggle
+            if(row.child.isShown()) {
                 row.child.hide();
-                tr.removeClass('shown');
+                tr.removeClass("shown");
             }
             else {
-                // Open this row
-                row.child( format(row.data()) ).show();
-                tr.addClass('shown');
+                row.child(childRow).show();
+                tr.addClass("shown");
             }
-        } );
-
+        });
 
         $('#rform').submit(function() {
             // Get selected ASV IDs
@@ -271,21 +218,24 @@ $(document).ready(function() {
 });
 
 // Make jQuery dataTable from html table
-// hlpElem/Div needs to be passed here
 function makeDataTbl(table_id, data, columns) {
+    if ( table_id === 'blast_result_table' ) {
+        var detNo = 3; var ordNo = 3;
+    }
+    else { var detNo = 2; var ordNo = 2; }
     var dTbl = $('#'+table_id).DataTable( {
         autoWidth : false,
         data : data,
         deferRender: true,
         columns : columns,
         columnDefs: [
-            { targets: [0,1], defaultContent: '', orderable: false },
-            { targets: 0, className: 'details-control' },
-            { targets: 1, className: 'select-checkbox' },
-            { targets:[2,8], visible: false },
+            { targets: 0, defaultContent: '', orderable: false,
+              className: 'select-checkbox' },
+            { targets: detNo, className: 'details-control' },
+            { targets:[1,7], visible: false },
         ],
-        select: { style: 'multi', selector: 'td:nth-child(2)' },
-        order: [[ 3, 'asc' ]],
+        select: { style: 'multi', selector: 'td:nth-child(1)' },
+        order: [[ ordNo, 'asc' ]],
         // Modify layout of dataTable components:
         // l=Show.., f=Search, tr=table, i=Showing.., p=pagination
         dom: "<'row'<'col-md-4'l><'col-md-8'f>>" +

@@ -23,26 +23,29 @@ footer {
 #sform {
      visibility: hidden;
 }
-
 /* Query col */
-#blast_result_table td:nth-child(3) {
+#blast_result_table td:nth-child(2) {
     word-wrap: break-word;
     max-width: 100px;
  }
 /* Subject col */
-#blast_result_table td:nth-child(4) {
+#blast_result_table td:nth-child(3) {
     word-wrap: break-word;
     max-width: 400px;
+    padding-right: 20px;
 }
-/* Sequence child table */
-#seq_table td:first-child {
-    word-wrap: break-word;
-    max-width: 800px;
+td.details-control {
+    background: url('https://cdn.rawgit.com/DataTables/DataTables/6c7ada53ebc228ea9bc28b1b216e793b1825d188/examples/resources/details_open.png') no-repeat center right;
+    cursor: pointer;
 }
-/* ASV ID-TAxonomy col*/
-#api_result_table td:nth-child(3) {
+tr.shown td.details-control {
+    background: url('https://cdn.rawgit.com/DataTables/DataTables/6c7ada53ebc228ea9bc28b1b216e793b1825d188/examples/resources/details_close.png') no-repeat center right;
+}
+/* ASV col*/
+#api_result_table td:nth-child(2) {
     word-wrap: break-word;
     max-width: 400px;
+    padding-right: 20px;
 }
 
 .hiddenElem {
@@ -70,12 +73,4 @@ select.select2{
     border: 1px solid #ced4da;
     border-radius: 0.25rem;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-}
-
-td.details-control {
-    background: url('https://cdn.rawgit.com/DataTables/DataTables/6c7ada53ebc228ea9bc28b1b216e793b1825d188/examples/resources/details_open.png') no-repeat center center;
-    cursor: pointer;
-}
-tr.shown td.details-control {
-    background: url('https://cdn.rawgit.com/DataTables/DataTables/6c7ada53ebc228ea9bc28b1b216e793b1825d188/examples/resources/details_close.png') no-repeat center center;
 }
