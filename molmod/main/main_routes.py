@@ -265,7 +265,6 @@ def get_sseq_from_blastdb(ids):
 
                 # If some hits
                 if len(df) > 0:
-                    print(tabulate(df, headers='keys', tablefmt='psql'), file=sys.stdout)
                     return df
 
 
