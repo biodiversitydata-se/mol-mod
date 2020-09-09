@@ -262,7 +262,7 @@ $(document).ready(function() {
             // Warn if no selection
             if (!$('#raw_names').val()) {
                 $('#selection_error').addClass('visHlpDiv');
-                $('#result_table tr td:first-child').addClass('visHlpElem');
+                $('.table tr td:first-child').addClass('visHlpElem');
                 return false;
             }
         });
