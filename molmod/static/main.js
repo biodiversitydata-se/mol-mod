@@ -168,7 +168,7 @@ $(document).ready(function() {
         dTbl.on( 'select', function () {
             if($('#selection_error').hasClass('visHlpDiv')){
                 $('#selection_error').removeClass('visHlpDiv');
-                $('#result_table tr td:first-child').removeClass('visHlpElem');
+                $('.table tr td:first-child').removeClass('visHlpElem');
             }
         });
 
