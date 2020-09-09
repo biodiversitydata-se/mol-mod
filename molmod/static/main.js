@@ -67,7 +67,6 @@ $(document).ready(function() {
             if (selParent.length !== 0) {
                 url = url + '?' + filter + '=in.(' + selParent + ')';
             }
-            console.log(url);
 
             // Make AJAX request for JSON of filtered primers
             $.getJSON(
