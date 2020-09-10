@@ -220,7 +220,7 @@ $(document).ready(function() {
 // Make jQuery dataTable from html table
 function makeDataTbl(table_id, data, columns) {
     if ( table_id === 'blast_result_table' ) {
-        var detNo = 3; var ordNo = 3;
+        var detNo = 3; var ordNo = 2;
     }
     else { var detNo = 2; var ordNo = 2; }
     var dTbl = $('#'+table_id).DataTable( {
