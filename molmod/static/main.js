@@ -58,13 +58,16 @@ $(document).ready(function() {
                 placeholder: 'Select phylum/phyla'
             });
 
-            // When any select2 box changes
+            // Filter every dropdown box on selection(s) made in other boxes
             $( '.select2' ).change( function () {
-                // Filter all other boxes accordingly
                 $( '.select2.form-control:not( #'+$(this).attr('id')+')').each( function () {
                     filterDropOptions($(this).attr('id'));
                 });
+            });
 
+            // Also filter on reload
+            $( '.select2.form-control').each( function () {
+                filterDropOptions($(this).attr('id'));
             });
 
             function getColNames(dropID){
@@ -139,19 +142,6 @@ $(document).ready(function() {
                     });
                 });
             }
-
-            // Filter primer options if a gene was selected before reload/submit
-            if (geneSelS2.val() != ''){
-                // alert('gene selected');
-                filterDropOptions ('fw_prim_sel');
-                filterDropOptions ('rv_prim_sel');
-            }
-            // Dito for kingdom/phyla
-            if (kingdomSelS2.val() != ''){
-                filterDropOptions ('phylum_sel');
-            }
-
-
 
             // RESULT FORM
             // Convert results to jQuery dataTable
