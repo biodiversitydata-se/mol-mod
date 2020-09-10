@@ -83,7 +83,7 @@ $(document).ready(function() {
                             childDrop.append('<option value="' + e.name + '">' + e.display + '</option>');
                             newOpt.push(e.name);
                         });
-                        // Uncomment to keep primer selection when primers are selected
+                        // Uncomment to keep primer selection when genes are selected
                         // But then perhaps change search to primer=x OR gene=y instead of AND
                         // $.each(oldOpt, function(i,e) {
                         //     if (newOpt.indexOf(e.value) === -1){
