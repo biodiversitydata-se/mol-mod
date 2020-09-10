@@ -58,64 +58,99 @@ $(document).ready(function() {
                 placeholder: 'Select phylum/phyla'
             });
 
+            // When any select2 box changes
+            $( '.select2' ).change( function () {
+                // Filter all other boxes accordingly
+                $( '.select2.form-control:not( #'+$(this).attr('id')+')').each( function () {
+                    filterDropOptions($(this).attr('id'));
+                });
 
-            function filterDropOptions (filter, childDrop, apiView) {
-                var selParent = eval(filter + 'SelS2').val();
-                var url = 'http://localhost:3000/' + apiView;
-                // Filter url with selected parent(s)
-                if (selParent.length !== 0) {
-                    url = url + '?' + filter + '=in.(' + selParent + ')';
-                }
+            });
 
-                // Make AJAX request for JSON of filtered primers
-                $.getJSON(
-                    url,
-                    function(data) {
-                        // Save old selection & options
-                        var oldSel = childDrop.val();
-                        var oldOpt = childDrop.find('option:selected').clone();
-                        // Remove old options
-                        childDrop.find('option').remove();
-                        // data format: [{"display":"ITS1F: CTTGGTCATTTAGAGGAAGTAA","name":"ITS1F"}]
-                        // Add option for each item in returned JSON object
-                        var newOpt = []
-                        $.each(data, function(i,e) {
-                            childDrop.append('<option value="' + e.name + '">' + e.display + '</option>');
-                            newOpt.push(e.name);
-                        });
-                        // Uncomment to keep primer selection when genes are selected
-                        // But then perhaps change search to primer=x OR gene=y instead of AND
-                        // $.each(oldOpt, function(i,e) {
-                        //     if (newOpt.indexOf(e.value) === -1){
-                        //         primDrop.append(e);
-                        //     }
-                        // });
-                        // Reapply old selection
-                        // (otherwise existing selection disappears if user adds new gene)
-                        childDrop.val(oldSel);
+            function getColNames(dropID){
+                /* Translates select2-box ID to corresponding API view
+                columns used in filter and display */
+                var name, display;
+                switch(dropID){
+                    case 'fw_prim_sel':
+                        name = 'fw_name';
+                        display = 'fw_display';
+                        break;
+                    case 'rv_prim_sel':
+                        name = 'rv_name';
+                        display = 'rv_display';
+                        break;
+                    default:
+                        name = dropID.replace("_sel", "");
+                        display = name;
+                        break;
                     }
-                );
-            };
+                var item = {};
+                item['name'] = name;
+                item['display'] = display;
+                return item;
+            }
+
+            function filterDropOptions(dropID){
+                var url = 'http://localhost:3000/app_filter_mixs_tax';
+                // For every other dropdown box (= row filter source)
+                $( '.select2.form-control:not( #'+dropID+' )' ).each( function () {
+                    var fltDrop = $( this );
+                    // If some selection has been made
+                    if (fltDrop.val() != ''){
+                        // Get corresponding view column
+                        var filtCol = getColNames(fltDrop.attr('id'))['name'];
+                        // Prepend with '?' if first filter to be added
+                        if (url.charAt(url.length-1) !== '?') url = url + '?';
+                        // Add selection as row filter to URL
+                        url = url + '&' + filtCol + '=in.(' + fltDrop.val() + ')';
+                    }
+                });
+                // Get view col names for focal dropdown box
+                var nameCol = getColNames(dropID)['name'];
+                var dispCol = getColNames(dropID)['display'];
+                // Prepend with '?' if no row filters were added above
+                if (url.indexOf('?') < 0) url += '?';
+                // Exclude any empty options (eg. missing phylum)
+                url = url + nameCol + '=not.eq.' +
+                    // Add column filter, and sort order to URL
+                    '&select=' + nameCol + ',' + dispCol +
+                    '&order=' + dispCol;
+                // Make API request
+                $.getJSON(url, function(data) {
+                    // data format: [{"display":"ITS1F: CTTGGTCATTTAGAGGAAGTAA","name":"ITS1F"}]
+                    $.each(data, function(i,e) {
+                        var drop = $('#' + dropID);
+                        // Save old selection(s)
+                        var oldSel = drop.val();
+                        // Remove old options
+                        drop.find('option').remove();
+                        // Add option for each unique item in returned JSON object
+                        var lookup = {};
+                        $.each(data, function(i,e) {
+                            // If new item
+                            if (!(e[dispCol] in lookup)) {
+                                lookup[e[dispCol]] = 1;
+                                drop.append('<option value="' + e[nameCol] + '">' + e[dispCol] + '</option>');
+                            }
+                        });
+                        // Reapply old selection
+                        drop.val(oldSel);
+                    });
+                });
+            }
 
             // Filter primer options if a gene was selected before reload/submit
             if (geneSelS2.val() != ''){
                 // alert('gene selected');
-                filterDropOptions ('gene', fwSelS2, 'app_filter_fw_primers');
-                filterDropOptions ('gene', rvSelS2, 'app_filter_rv_primers');
+                filterDropOptions ('fw_prim_sel');
+                filterDropOptions ('rv_prim_sel');
             }
-            // Filter primer options when genes are selected
-            geneSelS2.change(function () {
-                // alert('gene changed');
-                filterDropOptions ('gene', fwSelS2, 'app_filter_fw_primers');
-                filterDropOptions ('gene', rvSelS2, 'app_filter_rv_primers');
-            });
             // Dito for kingdom/phyla
             if (kingdomSelS2.val() != ''){
-                filterDropOptions ('kingdom', phylumSelS2, 'app_filter_phyla');
+                filterDropOptions ('phylum_sel');
             }
-            kingdomSelS2.change(function () {
-                filterDropOptions ('kingdom', phylumSelS2, 'app_filter_phyla');
-            });
+
 
 
             // RESULT FORM

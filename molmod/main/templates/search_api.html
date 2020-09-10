@@ -6,93 +6,34 @@
         <div class='row'>
             <div class='col-md-6'>
                 <h6><b>Target gene(s)</b></h6>
-                {% if sform.gene_sel.errors %}
-                    <div class='form-group has-error'>
-                {% else %}
-                    <div class='form-group'>
-                {% endif %}
-                        {{ sform.gene_sel(id='gene_sel', class='form-control select2') }}
-                        <span class='help-block'>
-                            {% for error in sform.gene_sel.errors %}
-                            {{ error }}
-                            {% endfor %}
-                        </span>
-                    </div>
+                {{ sform.gene_sel(id='gene_sel', class='form-control select2') }}
             </div>
         </div>
         <br>
         <div class='row'>
             <div class='col-md-6'>
                 <h6><b>Forward primer(s)</b></h6>
-                {% if sform.fw_prim_sel.errors %}
-                    <div class='form-group has-error'>
-                {% else %}
-                    <div class='form-group'>
-                {% endif %}
-                        {{ sform.fw_prim_sel(id='fw_prim_sel', class='form-control select2') }}
-                        <span class='help-block'>
-                            {% for error in sform.fw_prim_sel.errors %}
-                            {{ error }}
-                            {% endfor %}
-                        </span>
-                    </div>
+                {{ sform.fw_prim_sel(id='fw_prim_sel', class='form-control select2') }}
             </div>
             <div class='col-md-6'>
                 <h6><b>Reverse primer(s)</b></h6>
-                {% if sform.rv_prim_sel.errors %}
-                    <div class='form-group has-error'>
-                {% else %}
-                    <div class='form-group'>
-                {% endif %}
-                        {{ sform.rv_prim_sel(id='rv_prim_sel', class='form-control select2') }}
-                        <span class='help-block'>
-                            {% for error in sform.rv_prim_sel.errors %}
-                            {{ error }}
-                            {% endfor %}
-                        </span>
-                    </div>
+                {{ sform.rv_prim_sel(id='rv_prim_sel', class='form-control select2') }}
             </div>
         </div>
         <br>
         <hr>
-        <br>
-
         <div class='row'>
             <div class='col-md-3'>
                 <h6><b>Kingdom(s)</b></h6>
-                {% if sform.kingdom_sel.errors %}
-                    <div class='form-group has-error'>
-                {% else %}
-                    <div class='form-group'>
-                {% endif %}
-                        {{ sform.kingdom_sel(id='kingdom_sel', class='form-control select2') }}
-                        <span class='help-block'>
-                            {% for error in sform.kingdom_sel.errors %}
-                            {{ error }}
-                            {% endfor %}
-                        </span>
-                    </div>
+                {{ sform.kingdom_sel(id='kingdom_sel', class='form-control select2') }}
             </div>
             <div class='col-md-3'>
                 <h6><b>Phylum / Phyla</b></h6>
-                {% if sform.phylum_sel.errors %}
-                    <div class='form-group has-error'>
-                {% else %}
-                    <div class='form-group'>
-                {% endif %}
-                        {{ sform.phylum_sel(id='phylum_sel', class='form-control select2') }}
-                        <span class='help-block'>
-                            {% for error in sform.phylum_sel.errors %}
-                            {{ error }}
-                            {% endfor %}
-                        </span>
-                    </div>
+                {{ sform.phylum_sel(id='phylum_sel', class='form-control select2') }}
             </div>
         </div>
         <br>
         <hr>
-        <br>
-
         <div class='row'>
             <div class='col-md-2'>
                 {{ sform.search_for_asv(class='btn btn-primary', id='search_for_asv') }}
