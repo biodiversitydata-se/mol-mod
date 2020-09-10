@@ -217,27 +217,35 @@ $(document).ready(function() {
 
 });
 
-// Make jQuery dataTable from html table
+// Make jQuery dataTable
 function makeDataTbl(table_id, data, columns) {
+    // Set cols for seq expansion and sort order
+    // BLAST
     if ( table_id === 'blast_result_table' ) {
         var detNo = 3; var ordNo = 2;
     }
+    // API SEARCH
     else { var detNo = 2; var ordNo = 2; }
     var dTbl = $('#'+table_id).DataTable( {
+        // Respect CSS settings
         autoWidth : false,
         data : data,
+        // Process one page at a time, for speed
         deferRender: true,
         columns : columns,
         columnDefs: [
             { targets: 0, defaultContent: '', orderable: false,
-              className: 'select-checkbox' },
+            className: 'select-checkbox' },
+            // Add control for sequence expansion
             { targets: detNo, className: 'details-control' },
+            // Hide ID and subject seq
             { targets:[1,7], visible: false },
         ],
+        // Use checkbox col for row selection
         select: { style: 'multi', selector: 'td:nth-child(1)' },
         order: [[ ordNo, 'asc' ]],
-        // Modify layout of dataTable components:
-        // l=Show.., f=Search, tr=table, i=Showing.., p=pagination
+        // Set table layout:
+        // l=Show X.., f=Search, tr=table, i=Showing.., p=pagination
         dom: "<'row'<'col-md-4'l><'col-md-8'f>>" +
         "<'row'<'col-md-12't>>" +
         "<'row'<'col-md-3'B><'col-md-3'i><'col-md-6'p>>",
@@ -245,6 +253,5 @@ function makeDataTbl(table_id, data, columns) {
             'excel', 'csv'
         ]
     });
-
     return dTbl;
 }
