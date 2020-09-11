@@ -140,8 +140,8 @@ def get_drop_url(type: str, dir: str = ''):
         'gene':  f'{base}/app_genes',
         'kingdom': f'{base}/app_kingdoms',
         'phylum': f'{base}/app_phyla',
-        'class': f'{base}/app_class'
-
+        'class': f'{base}/app_classes',
+        'order': f'{base}/app_orders'
     }
     return url.get(type, '')
 
@@ -159,6 +159,7 @@ def search_api():
     sform.kingdom_sel.choices = request_drop_options('kingdom')
     sform.phylum_sel.choices = request_drop_options('phylum')
     sform.class_sel.choices = request_drop_options('class')
+    sform.order_sel.choices = request_drop_options('order')
 
     # If any dropdowns have no options - warn about connection error
     for l in [sform.gene_sel.choices, sform.fw_prim_sel.choices, sform.rv_prim_sel.choices]:
@@ -169,7 +170,7 @@ def search_api():
             break
 
     # If SEARCH was clicked
-    if request.form.get('search_for_asv') and sform.validate_on_submit():
+    if request.form.get('search_for_asv'):
         # Set base URL for api search
         url = f"{app.config['API_URL']}/app_search_mixs_tax"
 
@@ -180,6 +181,7 @@ def search_api():
         kingdom_lst = request.form.getlist('kingdom_sel')
         phylum_lst = request.form.getlist('phylum_sel')
         class_lst = request.form.getlist('class_sel')
+        order_lst = request.form.getlist('order_sel')
         # Set logical operator for URL filtering
         op = '?'
 
@@ -195,24 +197,28 @@ def search_api():
             fw = ','.join(map(str, fw_lst))
             url += f'{op}fw_name=in.({fw})'
             op = '&'
+        if len(rv_lst) > 0:
+            rv = ','.join(map(str, rv_lst))
+            url += f'{op}rv_name=in.({rv})'
+            op = '&'
         # KINGDOM
         if len(kingdom_lst) > 0:
             kingdoms = ','.join(map(str, kingdom_lst))
             url += f'{op}kingdom=in.({kingdoms})'
-            op = '&'
-        if len(rv_lst) > 0:
-            rv = ','.join(map(str, rv_lst))
-            url += f'{op}rv_name=in.({rv})'
             op = '&'
         # PHYLUM
         if len(phylum_lst) > 0:
             phyla = ','.join(map(str, phylum_lst))
             url += f'{op}phylum=in.({phyla})'
             op = '&'
+        # CLASS
         if len(class_lst) > 0:
-            classs = ','.join(map(str, class_lst))
-            url += f'{op}phylum=in.({classs})'
-            op = '&'
+            classes = ','.join(map(str, class_lst))
+            url += f'{op}class=in.({classes})'
+        # CLASS
+        if len(order_lst) > 0:
+            orders = ','.join(map(str, order_lst))
+            url += f'{op}oorder=in.({orders})'
 
         # Make api request
         try:

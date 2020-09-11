@@ -5,18 +5,18 @@
         {{ sform.csrf_token }}
         <div class='row'>
             <div class='col-md-6'>
-                <h6><b>Target gene(s)</b></h6>
+                <h6><b>Target gene</b></h6>
                 {{ sform.gene_sel(id='gene_sel', class='form-control select2') }}
             </div>
         </div>
         <br>
         <div class='row'>
             <div class='col-md-6'>
-                <h6><b>Forward primer(s)</b></h6>
+                <h6><b>Forward primer</b></h6>
                 {{ sform.fw_prim_sel(id='fw_prim_sel', class='form-control select2') }}
             </div>
             <div class='col-md-6'>
-                <h6><b>Reverse primer(s)</b></h6>
+                <h6><b>Reverse primer</b></h6>
                 {{ sform.rv_prim_sel(id='rv_prim_sel', class='form-control select2') }}
             </div>
         </div>
@@ -24,17 +24,22 @@
         <hr>
         <div class='row'>
             <div class='col-md-3'>
-                <h6><b>Kingdom(s)</b></h6>
+                <h6><b>Kingdom</b></h6>
                 {{ sform.kingdom_sel(id='kingdom_sel', class='form-control select2') }}
             </div>
             <div class='col-md-3'>
-                <h6><b>Phylum / Phyla</b></h6>
+                <h6><b>Phylum</b></h6>
                 {{ sform.phylum_sel(id='phylum_sel', class='form-control select2') }}
             </div>
             <div class='col-md-3'>
                 <h6><b>Class</b></h6>
                 {{ sform.class_sel(id='class_sel', class='form-control select2') }}
             </div>
+            <div class='col-md-3'>
+                <h6><b>Order</b></h6>
+                {{ sform.order_sel(id='order_sel', class='form-control select2') }}
+            </div>
+
 
         </div>
         <br>
