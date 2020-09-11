@@ -75,6 +75,7 @@ class ApiSearchForm(FlaskForm):
     kingdom_sel = SelectMultipleField('kingdom_sel', choices=[])
     phylum_sel = SelectMultipleField('phylum_sel', choices=[])
     class_sel = SelectMultipleField('class_sel', choices=[])
+    order_sel = SelectMultipleField('order_sel', choices=[])
     search_for_asv = SubmitField(u'Search')
 
     # def validate(self):

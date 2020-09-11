@@ -41,39 +41,48 @@ $(document).ready(function() {
             // Set format for select2-dropdown boxes
             $.fn.select2.defaults.set("theme", "bootstrap");
 
-            // Make select2-dropdowns for gene & primers
+            // Make select2-dropdowns
             var geneSelS2 = $('#gene_sel').select2({
-                placeholder: 'Select target gene(s)'
+                placeholder: 'Select target gene'
             });
             var fwSelS2 = $('#fw_prim_sel').select2({
-                placeholder: 'Select forward primer(s)'
+                placeholder: 'Select forward primer'
             });
             var rvSelS2 = $('#rv_prim_sel').select2({
-                placeholder: 'Select reverse primer(s)'
+                placeholder: 'Select reverse primer'
             });
             var kingdomSelS2 = $('#kingdom_sel').select2({
-                placeholder: 'Select kingdom(s)'
+                placeholder: 'Select kingdom'
             });
             var phylumSelS2 = $('#phylum_sel').select2({
-                placeholder: 'Select phylum/phyla'
+                placeholder: 'Select phylum'
             });
             var classSelS2 = $('#class_sel').select2({
                 placeholder: 'Select class'
             });
+            var orderSelS2 = $('#order_sel').select2({
+                placeholder: 'Select order'
+            });
 
             // Filter every dropdown box on selection(s) made in other boxes
-            $( '.select2' ).change( function () {
+            $('.select2').on('change', function () {
                 $( '.select2.form-control:not( #'+$(this).attr('id')+')').each( function () {
                     filterDropOptions($(this).attr('id'));
                 });
             });
 
-            // Re-apply any filter on reload as well
-            $( '.select2.form-control').each( function () {
-                if ($(this).val() != ''){
-                    filterDropOptions($(this).attr('id'));
-                }
+            // Re-apply filter(s) on reload
+            var totSel = 0;
+            //Sum no. of selections over all boxes
+            $('.select2.form-control').each( function () {
+                totSel = totSel + $(this).select2('data').length;
             });
+            // Re-filter all boxes, if at least one selection was made
+            if (totSel>0){
+                $( '.select2.form-control').each( function () {
+                    filterDropOptions($(this).attr('id'));
+                });
+            }
 
             function getColNames(dropID){
                 /* Translates select2-box ID to corresponding API view
@@ -87,6 +96,10 @@ $(document).ready(function() {
                     case 'rv_prim_sel':
                         name = 'rv_name';
                         display = 'rv_display';
+                        break;
+                    case 'order_sel':
+                        name = 'oorder';
+                        display = 'oorder';
                         break;
                     default:
                         name = dropID.replace("_sel", "");
@@ -102,7 +115,7 @@ $(document).ready(function() {
             function filterDropOptions(dropID){
                 var url = 'http://localhost:3000/app_filter_mixs_tax';
                 // For every other dropdown box (= row filter source)
-                $( '.select2.form-control:not( #'+dropID+' )' ).each( function () {
+                $('.select2.form-control:not( #' + dropID + ')').each( function () {
                     var fltDrop = $( this );
                     // If some selection has been made
                     if (fltDrop.val() != ''){
@@ -119,32 +132,26 @@ $(document).ready(function() {
                 var dispCol = getColNames(dropID)['display'];
                 // Prepend with '?' if no row filters were added above
                 if (url.indexOf('?') < 0) url += '?';
-                // Exclude any empty options (eg. missing phylum)
-                url = url + nameCol + '=not.eq.' +
-                    // Add column filter, and sort order to URL
-                    '&select=' + nameCol + ',' + dispCol +
-                    '&order=' + dispCol;
+                // Exclude empty options, add column filter and sort order
+                url = url + nameCol + '=not.eq.' + '&select=' + nameCol + ',' + dispCol + '&order=' + dispCol;
                 // Make API request
                 $.getJSON(url, function(data) {
-                    // data format: [{"display":"ITS1F: CTTGGTCATTTAGAGGAAGTAA","name":"ITS1F"}]
+                    var drop = $('#' + dropID);
+                    // Save old selection(s)
+                    var oldSel = drop.val();
+                    // Remove old options
+                    drop.find('option').remove();
+                    // Add option for each unique item in returned JSON object
+                    var lookup = {};
                     $.each(data, function(i,e) {
-                        var drop = $('#' + dropID);
-                        // Save old selection(s)
-                        var oldSel = drop.val();
-                        // Remove old options
-                        drop.find('option').remove();
-                        // Add option for each unique item in returned JSON object
-                        var lookup = {};
-                        $.each(data, function(i,e) {
-                            // If new item
-                            if (!(e[dispCol] in lookup)) {
-                                lookup[e[dispCol]] = 1;
-                                drop.append('<option value="' + e[nameCol] + '">' + e[dispCol] + '</option>');
-                            }
-                        });
-                        // Reapply old selection
-                        drop.val(oldSel);
+                        // If new item
+                        if (!(e[dispCol] in lookup)) {
+                            lookup[e[dispCol]] = 1;
+                            drop.append('<option value="' + e[nameCol] + '">' + e[dispCol] + '</option>');
+                        }
                     });
+                    // Reapply old selection
+                    drop.val(oldSel);
                 });
             }
 
