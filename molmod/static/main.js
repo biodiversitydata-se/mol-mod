@@ -57,6 +57,9 @@ $(document).ready(function() {
             var phylumSelS2 = $('#phylum_sel').select2({
                 placeholder: 'Select phylum/phyla'
             });
+            var classSelS2 = $('#class_sel').select2({
+                placeholder: 'Select class'
+            });
 
             // Filter every dropdown box on selection(s) made in other boxes
             $( '.select2' ).change( function () {
