@@ -68,9 +68,11 @@ $(document).ready(function() {
                 });
             });
 
-            // Also filter on reload
+            // Re-apply any filter on reload as well
             $( '.select2.form-control').each( function () {
-                filterDropOptions($(this).attr('id'));
+                if ($(this).val() != ''){
+                    filterDropOptions($(this).attr('id'));
+                }
             });
 
             function getColNames(dropID){
