@@ -136,10 +136,11 @@ def request_drop_options(type: str, dir: str = ''):
 def get_drop_url(type: str, dir: str = ''):
     base = app.config['API_URL']
     url = {
-        'primer': f'{base}/app_filter_{dir}_primers?select=name,display',
+        'primer': f'{base}/app_{dir}_primers?select=name,display',
         'gene':  f'{base}/app_genes',
         'kingdom': f'{base}/app_kingdoms',
-        'phylum': f'{base}/app_filter_phyla'
+        'phylum': f'{base}/app_phyla',
+        'class': f'{base}/app_class'
 
     }
     return url.get(type, '')
@@ -157,6 +158,7 @@ def search_api():
     sform.rv_prim_sel.choices = request_drop_options('primer', 'rv')
     sform.kingdom_sel.choices = request_drop_options('kingdom')
     sform.phylum_sel.choices = request_drop_options('phylum')
+    sform.class_sel.choices = request_drop_options('class')
 
     # If any dropdowns have no options - warn about connection error
     for l in [sform.gene_sel.choices, sform.fw_prim_sel.choices, sform.rv_prim_sel.choices]:
@@ -169,7 +171,7 @@ def search_api():
     # If SEARCH was clicked
     if request.form.get('search_for_asv') and sform.validate_on_submit():
         # Set base URL for api search
-        url = f"{app.config['API_URL']}/app_asv_mixs_tax"
+        url = f"{app.config['API_URL']}/app_search_mixs_tax"
 
         # Get selected genes and/or primers
         gene_lst = request.form.getlist('gene_sel')
@@ -177,6 +179,7 @@ def search_api():
         rv_lst = request.form.getlist('rv_prim_sel')
         kingdom_lst = request.form.getlist('kingdom_sel')
         phylum_lst = request.form.getlist('phylum_sel')
+        class_lst = request.form.getlist('class_sel')
         # Set logical operator for URL filtering
         op = '?'
 
@@ -205,6 +208,10 @@ def search_api():
         if len(phylum_lst) > 0:
             phyla = ','.join(map(str, phylum_lst))
             url += f'{op}phylum=in.({phyla})'
+            op = '&'
+        if len(class_lst) > 0:
+            classs = ','.join(map(str, class_lst))
+            url += f'{op}phylum=in.({classs})'
             op = '&'
 
         # Make api request
