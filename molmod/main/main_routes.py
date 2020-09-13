@@ -237,7 +237,7 @@ def search_api():
             url += f'{op}family=in.({families})'
             op = '&'
         # GENUS
-        if len(order_lst) > 0:
+        if len(genus_lst) > 0:
             genera = ','.join(map(str, genus_lst))
             url += f'{op}genus=in.({genera})'
             op = '&'
