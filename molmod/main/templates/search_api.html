@@ -39,8 +39,21 @@
                 <h6><b>Order</b></h6>
                 {{ sform.order_sel(id='order_sel', class='form-control select2') }}
             </div>
-
-
+        </div>
+        <br>
+        <div class='row'>
+            <div class='col-md-3'>
+                <h6><b>Family</b></h6>
+                {{ sform.family_sel(id='family_sel', class='form-control select2') }}
+            </div>
+            <div class='col-md-3'>
+                <h6><b>Genus</b></h6>
+                {{ sform.genus_sel(id='genus_sel', class='form-control select2') }}
+            </div>
+            <div class='col-md-3'>
+                <h6><b>Specific epithet</b></h6>
+                {{ sform.species_sel(id='species_sel', class='form-control select2') }}
+            </div>
         </div>
         <br>
         <hr>
@@ -51,8 +64,8 @@
             <div class='col-md-1'>
                 <button type='button' class='btn btn-secondary' id='clear_all'>Clear all</button>
             </div>
-
         </div>
+
     </form>
 </div>
 <br>

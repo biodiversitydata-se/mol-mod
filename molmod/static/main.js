@@ -46,32 +46,33 @@ $(document).ready(function() {
             // Make select2-dropdowns
             var geneSelS2 = $('#gene_sel').select2({
                 placeholder: 'Select target gene',
-                closeOnSelect: false,
-                allowClear: true
             });
             var fwSelS2 = $('#fw_prim_sel').select2({
                 placeholder: 'Select forward primer',
-                closeOnSelect: false
             });
             var rvSelS2 = $('#rv_prim_sel').select2({
                 placeholder: 'Select reverse primer',
-                closeOnSelect: false
             });
             var kingdomSelS2 = $('#kingdom_sel').select2({
                 placeholder: 'Select kingdom',
-                closeOnSelect: false
             });
             var phylumSelS2 = $('#phylum_sel').select2({
                 placeholder: 'Select phylum',
-                closeOnSelect: false
             });
             var classSelS2 = $('#class_sel').select2({
                 placeholder: 'Select class',
-                closeOnSelect: false
             });
             var orderSelS2 = $('#order_sel').select2({
                 placeholder: 'Select order',
-                closeOnSelect: false
+            });
+            var familySelS2 = $('#family_sel').select2({
+                placeholder: 'Select family',
+            });
+            var genusSelS2 = $('#genus_sel').select2({
+                placeholder: 'Select genus',
+            });
+            var speciesSelS2 = $('#species_sel').select2({
+                placeholder: 'Select species',
             });
 
             // Filter every dropdown box on selection(s) made in other boxes
@@ -114,6 +115,10 @@ $(document).ready(function() {
                     case 'order_sel':
                         name = 'oorder';
                         display = 'oorder';
+                        break;
+                    case 'species_sel':
+                        name = 'specific_epithet';
+                        display = 'specific_epithet';
                         break;
                     default:
                         name = dropID.replace("_sel", "");

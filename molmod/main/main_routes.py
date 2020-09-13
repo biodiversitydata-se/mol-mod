@@ -141,7 +141,10 @@ def get_drop_url(type: str, dir: str = ''):
         'kingdom': f'{base}/app_kingdoms',
         'phylum': f'{base}/app_phyla',
         'class': f'{base}/app_classes',
-        'order': f'{base}/app_orders'
+        'order': f'{base}/app_orders',
+        'family': f'{base}/app_families',
+        'genus': f'{base}/app_genera',
+        'species': f'{base}/app_species'
     }
     return url.get(type, '')
 
@@ -160,7 +163,11 @@ def search_api():
     sform.phylum_sel.choices = request_drop_options('phylum')
     sform.class_sel.choices = request_drop_options('class')
     sform.order_sel.choices = request_drop_options('order')
+    sform.family_sel.choices = request_drop_options('family')
+    sform.genus_sel.choices = request_drop_options('genus')
+    sform.species_sel.choices = request_drop_options('species')
 
+    # Fix later
     # If any dropdowns have no options - warn about connection error
     for l in [sform.gene_sel.choices, sform.fw_prim_sel.choices, sform.rv_prim_sel.choices]:
         if (len(l) == 0):
@@ -182,6 +189,9 @@ def search_api():
         phylum_lst = request.form.getlist('phylum_sel')
         class_lst = request.form.getlist('class_sel')
         order_lst = request.form.getlist('order_sel')
+        family_lst = request.form.getlist('family_sel')
+        genus_lst = request.form.getlist('genus_sel')
+        species_lst = request.form.getlist('species_sel')
         # Set logical operator for URL filtering
         op = '?'
 
@@ -215,14 +225,31 @@ def search_api():
         if len(class_lst) > 0:
             classes = ','.join(map(str, class_lst))
             url += f'{op}class=in.({classes})'
-        # CLASS
+            op = '&'
+        # ORDER
         if len(order_lst) > 0:
             orders = ','.join(map(str, order_lst))
             url += f'{op}oorder=in.({orders})'
+            op = '&'
+        # FAMILY
+        if len(family_lst) > 0:
+            families = ','.join(map(str, family_lst))
+            url += f'{op}family=in.({families})'
+            op = '&'
+        # GENUS
+        if len(order_lst) > 0:
+            genera = ','.join(map(str, genus_lst))
+            url += f'{op}genus=in.({genera})'
+            op = '&'
+        # SPECIES
+        if len(species_lst) > 0:
+            species = ','.join(map(str, species_lst))
+            url += f'{op}specific_epithet=in.({species})'
 
         # Make api request
         try:
             response = requests.get(url)
+            mpdebug(url, 'url')
             response.raise_for_status()
         except (requests.ConnectionError, requests.exceptions.HTTPError) as e:
             msg = 'Sorry, search is disabled due to DB connection failure.'
