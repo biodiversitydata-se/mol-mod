@@ -39,29 +39,39 @@ $(document).ready(function() {
         case 'search_api':
             // SEARCH FORM
             // Set format for select2-dropdown boxes
-            $.fn.select2.defaults.set("theme", "bootstrap");
+            $.fn.select2.defaults.set('theme', 'bootstrap');
+            $.fn.select2.defaults.set('closeOnSelect', 'false');
+            $.fn.select2.defaults.set('allowClear', 'true');
 
             // Make select2-dropdowns
             var geneSelS2 = $('#gene_sel').select2({
-                placeholder: 'Select target gene'
+                placeholder: 'Select target gene',
+                closeOnSelect: false,
+                allowClear: true
             });
             var fwSelS2 = $('#fw_prim_sel').select2({
-                placeholder: 'Select forward primer'
+                placeholder: 'Select forward primer',
+                closeOnSelect: false
             });
             var rvSelS2 = $('#rv_prim_sel').select2({
-                placeholder: 'Select reverse primer'
+                placeholder: 'Select reverse primer',
+                closeOnSelect: false
             });
             var kingdomSelS2 = $('#kingdom_sel').select2({
-                placeholder: 'Select kingdom'
+                placeholder: 'Select kingdom',
+                closeOnSelect: false
             });
             var phylumSelS2 = $('#phylum_sel').select2({
-                placeholder: 'Select phylum'
+                placeholder: 'Select phylum',
+                closeOnSelect: false
             });
             var classSelS2 = $('#class_sel').select2({
-                placeholder: 'Select class'
+                placeholder: 'Select class',
+                closeOnSelect: false
             });
             var orderSelS2 = $('#order_sel').select2({
-                placeholder: 'Select order'
+                placeholder: 'Select order',
+                closeOnSelect: false
             });
 
             // Filter every dropdown box on selection(s) made in other boxes
@@ -83,6 +93,10 @@ $(document).ready(function() {
                     filterDropOptions($(this).attr('id'));
                 });
             }
+
+            $('#clear_all').on('click', function () {
+                $('.select2.form-control').val(null).trigger('change');
+            });
 
             function getColNames(dropID){
                 /* Translates select2-box ID to corresponding API view
