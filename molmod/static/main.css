@@ -1,5 +1,6 @@
 /* Bypass cache in Chrome/Mac: shift + cmd + r */
 
+/* GENERAL */
 body {
     font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
@@ -16,6 +17,7 @@ footer {
     color: #aa4442;
 }
 
+/* FORMS */
 /* Result form until styled as dataTable */
 #rform {
     visibility: hidden;
@@ -23,17 +25,20 @@ footer {
 #sform {
      visibility: hidden;
 }
-/* Query col */
+
+/* RESULT TABLES */
+/* Query (user sequence ID) col */
 #blast_result_table td:nth-child(2) {
     word-wrap: break-word;
     max-width: 100px;
  }
-/* Subject col */
+/* Subject / ASV col */
 #blast_result_table td:nth-child(3), #api_result_table td:nth-child(2)  {
     word-wrap: break-word;
     max-width: 400px;
     padding-right: 20px;
 }
+/* Expandable seqs */
 td.details-control {
     background: url('https://cdn.rawgit.com/DataTables/DataTables/6c7ada53ebc228ea9bc28b1b216e793b1825d188/examples/resources/details_open.png') no-repeat center right;
     cursor: pointer;
@@ -41,6 +46,8 @@ td.details-control {
 tr.shown td.details-control {
     background: url('https://cdn.rawgit.com/DataTables/DataTables/6c7ada53ebc228ea9bc28b1b216e793b1825d188/examples/resources/details_close.png') no-repeat center right;
 }
+
+/* HELP */
 .hiddenElem {
     display: none;
 }
