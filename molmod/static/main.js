@@ -77,9 +77,7 @@ $(document).ready(function() {
 
             // Filter every dropdown box on selection(s) made in other boxes
             $('.select2.form-control').on('change', function () {
-              console.log($(this).attr('id')+' changing');
               $( '.select2.form-control:not( #'+$(this).attr('id')+')').each( function () {
-                  console.log('filtering ' + $(this).attr('id'));
                   filterDropOptions($(this).attr('id'));
               });
             });
@@ -97,13 +95,19 @@ $(document).ready(function() {
                 });
             }
 
+            // Prevent opening when clearing selection
+            $('.select2.form-control').on("select2:clearing", function (evt) {
+                $(this).on("select2:opening.cancelOpen", function (evt) {
+                    evt.preventDefault();
+                    $(this).off("select2:opening.cancelOpen");
+                });
+            });
+
             $('#clear_all').on('click', function () {
-                console.log('clear');
                 /* Clear all selections (but don't trigger normal 'change' event)
                 as this would fire multiple x(n-x) filter applications */
                 $('.select2.form-control').val(null).trigger('change.select2');
                 $('.select2.form-control').each( function () {
-                    console.log('filtering '+$(this).attr('id'));
                     filterDropOptions($(this).attr('id'));
                 });
             });
