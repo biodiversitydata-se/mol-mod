@@ -249,7 +249,6 @@ def search_api():
         # Make api request
         try:
             response = requests.get(url)
-            mpdebug(url, 'url')
             response.raise_for_status()
         except (requests.ConnectionError, requests.exceptions.HTTPError) as e:
             msg = 'Sorry, search is disabled due to DB connection failure.'
