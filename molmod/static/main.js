@@ -75,34 +75,12 @@ $(document).ready(function() {
                 placeholder: 'Select species',
             });
 
-            // Filter every dependent(!) dropdown box on selection(s) made in other boxes
+            // Filter every dropdown box on selection(s) made in other boxes
             $('.select2').on('change', function () {
-                // Indices of filter box
-                var fltT = $('.taxon').index(this);
-                var fltM = $('.mol').index(this);
-                // Iterate over other boxes
-                $('.select2.form-control:not( #' + $(this).attr('id') + ')').each( function () {
-                    var depID = $(this).attr('id');
-                    // Indices of dependent box
-                    depT = $('.taxon').index(this);
-                    depM = $('.mol').index(this);
-                    // If filter box was taxon class...
-                    if (fltT > -1) {
-                        // filter more specific taxon boxes, and all mol boxes
-                        if(depT > fltT || depT === -1){
-                            filterDropOptions($(this));
-                        }
-                    }
-                    // If filter box was mol class...
-                    else {
-                        // filter more specific mol boxes, and all taxon boxes
-                        if(depM > fltM || depM === -1){
-                            filterDropOptions($(this));
-                        }
-                    }
+                $( '.select2.form-control:not( #'+$(this).attr('id')+')').each( function () {
+                    filterDropOptions($(this).attr('id'));
                 });
             });
-
 
             // Re-apply filter(s) on reload
             var totSel = 0;
@@ -113,7 +91,7 @@ $(document).ready(function() {
             // Re-filter all boxes, if at least one selection was made
             if (totSel>0){
                 $( '.select2.form-control').each( function () {
-                    filterDropOptions($(this));
+                    filterDropOptions($(this).attr('id'));
                 });
             }
 
@@ -122,8 +100,8 @@ $(document).ready(function() {
             });
 
             function getColNames(dropID){
-                /* Translates select2-box ID to corresponding column
-                name in API view */
+                /* Translates select2-box ID to corresponding API view
+                columns used in filter and display */
                 var name, display;
                 switch(dropID){
                     case 'fw_prim_sel':
@@ -153,51 +131,19 @@ $(document).ready(function() {
                 return item;
             }
 
-            function filterURLcol(fltDrop, url){
-                /* Adds selection(s) in dropdown box as URL row filter */
-                // If some selection has been made
-                if (fltDrop.val() != ''){
-                    // Get corresponding view column
-                    var filtCol = getColNames(fltDrop.attr('id'))['name'];
-                    // Prepend with '?' if first filter to be added
-                    if (url.charAt(url.length-1) !== '?') url = url + '?';
-                    // Add selection as row filter to URL
-                    url = url + '&' + filtCol + '=in.(' + fltDrop.val() + ')';
-                }
-                return url;
-            }
-
-            function filterDropOptions(depDrop){
-                /* Compares index values of dropdown box with selection
-                (=filter box) to remaining dropdown boxes,
-                and filters options in the latter if they are dependent,
-                i.e. more specific or belong to the other class (taxon vs. mol) */
+            function filterDropOptions(dropID){
                 var url = 'http://localhost:3000/app_filter_mixs_tax';
-                var depT = $('.taxon').index(depDrop);
-                var depM = $('.mol').index(depDrop);
-                var dropID = depDrop.attr('id');
-                // Iterate over (potential) filter boxes
-                $('.select2.form-control:not( #' + depDrop.attr('id') + ')').each( function () {
-                    // Indices of filter box
-                    fltT = $('.taxon').index(this);
-                    fltM = $('.mol').index(this);
-                    // If filter box was taxon ...
-                    if (fltT > -1) {
-                        // filter more specific taxon boxes, and all mol boxes
-                        if(depT > fltT || depT === -1){
-                            // alert('filtrera ' + depID);
-                            url = filterURLcol($(this), url);
-                            console.log(url);
-                        }
-                    }
-                    // If focal box was molecular ...
-                    else {
-                        // filter more specific mol boxes, and all taxon boxes
-                        if(depM > fltM || depM === -1){
-                            // alert('filtrera ' + depID);
-                            url = filterURLcol($(this), url);
-                            console.log(url);
-                        }
+                // For every other dropdown box (= row filter source)
+                $('.select2.form-control:not( #' + dropID + ')').each( function () {
+                    var fltDrop = $( this );
+                    // If some selection has been made
+                    if (fltDrop.val() != ''){
+                        // Get corresponding view column
+                        var filtCol = getColNames(fltDrop.attr('id'))['name'];
+                        // Prepend with '?' if first filter to be added
+                        if (url.charAt(url.length-1) !== '?') url = url + '?';
+                        // Add selection as row filter to URL
+                        url = url + '&' + filtCol + '=in.(' + fltDrop.val() + ')';
                     }
                 });
                 // Get view col names for focal dropdown box
