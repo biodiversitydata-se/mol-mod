@@ -66,7 +66,7 @@
 {% if rform %}
 <div class='container' id='result'>
     <script>
-        var blastResults = {{ blast_results|tojson }};
+        var blastResults = {{ blast_results | safe }};
     </script>
     <form action={{ rform.batch_url }} method='post' id='rform' name='rform'>
         {{ rform.csrf_token }}

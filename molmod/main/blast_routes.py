@@ -69,10 +69,11 @@ def blast():
                     # Extract asvid from sacc = id + taxonomy
                     df['asv_id'] = df['sacc'].str.split('-', expand=True)[0]
 
-                    rdict = df.to_dict('records')
+                    # rdict = df.to_dict('records')
+                    rjson = df.to_json(orient="records")
 
                     # Show both search and result forms on same page
-                    return render_template('blast.html', sform=sform, rform=rform, blast_results=rdict)
+                    return render_template('blast.html', sform=sform, rform=rform, blast_results=rjson)
 
         # If BLAST error
         else:
