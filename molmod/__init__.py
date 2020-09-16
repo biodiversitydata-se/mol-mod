@@ -18,7 +18,9 @@ def create_app():
     CSRFProtect(app)
 
     with app.app_context():
-        from molmod.main import main_routes
+        from molmod.main import main_routes, search_routes, blast_routes
         app.register_blueprint(main_routes.main_bp)
+        app.register_blueprint(blast_routes.blast_bp)
+        app.register_blueprint(search_routes.search_bp)
 
     return app
