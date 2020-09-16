@@ -35,8 +35,8 @@ $(document).ready(function() {
             }
             break;
 
-        // API PAGE
-        case 'search_api':
+        // (API) SEARCH PAGE
+        case 'search':
             // SEARCH FORM
             // Set format for select2-dropdown boxes
             $.fn.select2.defaults.set('theme', 'bootstrap');
