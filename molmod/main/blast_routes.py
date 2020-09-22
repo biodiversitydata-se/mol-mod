@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 import io
-
+import json
+import requests
 import subprocess
 
 import pandas as pd
@@ -59,15 +60,18 @@ def blast():
                     df['evalue'] = df['evalue'].map('{:.1e}'.format)
                     df = df.round(1)
 
-                    # Get subject sequence via blastdbcmd
-                    seq_df = get_sseq_from_blastdb(df['sacc'])
-                    # Perhaps safer to use a left join (rather than condcat) here
-                    df['asv_sequence'] = seq_df['asv_sequence']
+                    # # Get subject sequence via blastdbcmd
+                    # seq_df = get_sseq_from_blastdb(df['sacc'])
+                    # # Perhaps safer to use a left join (rather than condcat) here
+                    # df['asv_sequence'] = seq_df['asv_sequence']
 
                     df['sacc'] = df['sacc'].str.replace(';', '|')
 
                     # Extract asvid from sacc = id + taxonomy
                     df['asv_id'] = df['sacc'].str.split('-', expand=True)[0]
+
+                    ndict = get_sseq_from_api(df['asv_id'].tolist())
+                    df['asv_sequence'] = df['asv_id'].map(ndict)
 
                     # rdict = df.to_dict('records')
                     rjson = df.to_json(orient="records")
@@ -90,29 +94,15 @@ def blast():
     return render_template('blast.html', sform=sform)
 
 
-def get_sseq_from_blastdb(ids):
-
-    id_str = ','.join(ids.to_list())
-
-    cmd = ['blastdbcmd']
-    cmd += ['-db', 'misc/blastdb/asvdb']
-    cmd += ['-entry', id_str]
-    cmd += ['-outfmt', '%a %s']
-
-    # Spawn system process (blastdbcmd) and direct data to file handles
-    with subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE) as process:
-        # Send seq from sform to stdin, read output & error until 'eof'
-        blast_stdout, stderr = process.communicate()
-        # # Get exit status
-        returncode = process.returncode
-
-        # If blastdbcmd worked (no error)
-        if returncode == 0:
-            # Make in-memory file-like string from blast-output
-            with io.StringIO(blast_stdout.decode()) as stdout_buf:
-                df = pd.read_csv(stdout_buf, sep=' ', header=None, names=('sacc', 'asv_sequence'))
-
-                # If some hits
-                if len(df) > 0:
-                    return df
+def get_sseq_from_api(asv_ids: list = []):
+    url = "http://localhost:3000/rpc/app_seq_from_id"
+    payload = json.dumps({'ids': asv_ids})
+    headers = {'Content-Type': 'application/json'}
+    try:
+        response = requests.request("POST", url, headers=headers, data=payload)
+        sdict = {item['asv_id']: item['asv_sequence'] for item in json.loads(response.text)}
+        return sdict
+    except:
+        msg = 'Sorry, but ASV sequences were not successfully returned.'
+        flash(msg, category='error')
+        return {}
