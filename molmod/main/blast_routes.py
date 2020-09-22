@@ -65,9 +65,9 @@ def blast():
                     # Extract asvid from sacc = id + taxonomy
                     df['asv_id'] = df['sacc'].str.split('-', expand=True)[0]
 
-                    # Get Subject sequence (unavailable in blast(n))
-                    ndict = get_sseq_from_api(df['asv_id'].tolist())
-                    df['asv_sequence'] = df['asv_id'].map(ndict)
+                    # Get Subject sequence via ID
+                    sdict = get_sseq_from_api(df['asv_id'].tolist())
+                    df['asv_sequence'] = df['asv_id'].map(sdict)
 
                     rjson = df.to_json(orient="records")
 
