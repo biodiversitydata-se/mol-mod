@@ -10,6 +10,7 @@ from flask import Blueprint, current_app as app, flash, request
 from flask import render_template, url_for
 
 from molmod.forms import (BlastResultForm, BlastSearchForm)
+from molmod.main.main_routes import mpdebug
 
 blast_bp = Blueprint('blast_bp', __name__,
                      template_folder='templates')
@@ -92,6 +93,7 @@ def get_sseq_from_api(asv_ids: list = []):
     ''' Requests Subject sequences from API, as these are not available in BLAST response'''
     url = "http://localhost:3000/rpc/app_seq_from_id"
     payload = json.dumps({'ids': asv_ids})
+    mpdebug(payload)
     headers = {'Content-Type': 'application/json'}
     try:
         response = requests.request("POST", url, headers=headers, data=payload)
