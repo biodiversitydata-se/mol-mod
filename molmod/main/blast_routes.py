@@ -56,24 +56,18 @@ def blast():
 
                 # If some hit(s)
                 else:
-                    # Set single decimal for Sci not & float
+                    # Improve display
                     df['evalue'] = df['evalue'].map('{:.1e}'.format)
                     df = df.round(1)
-
-                    # # Get subject sequence via blastdbcmd
-                    # seq_df = get_sseq_from_blastdb(df['sacc'])
-                    # # Perhaps safer to use a left join (rather than condcat) here
-                    # df['asv_sequence'] = seq_df['asv_sequence']
-
                     df['sacc'] = df['sacc'].str.replace(';', '|')
 
                     # Extract asvid from sacc = id + taxonomy
                     df['asv_id'] = df['sacc'].str.split('-', expand=True)[0]
 
+                    # Get Subject sequence (unavailable in blast(n))
                     ndict = get_sseq_from_api(df['asv_id'].tolist())
                     df['asv_sequence'] = df['asv_id'].map(ndict)
 
-                    # rdict = df.to_dict('records')
                     rjson = df.to_json(orient="records")
 
                     # Show both search and result forms on same page
@@ -95,6 +89,7 @@ def blast():
 
 
 def get_sseq_from_api(asv_ids: list = []):
+    ''' Requests Subject sequences from API, as these are not available in BLAST response'''
     url = "http://localhost:3000/rpc/app_seq_from_id"
     payload = json.dumps({'ids': asv_ids})
     headers = {'Content-Type': 'application/json'}
