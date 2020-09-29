@@ -28,18 +28,7 @@ $(document).ready(function() {
             // $.fn.select2.defaults.set('closeOnSelect', false);
             $.fn.select2.defaults.set('allowClear', true);
 
-            // // Make select2-dropdowns
-            // var geneSelS2 = $('#gene_sel').select2({
-            //     placeholder: 'Select target gene',
-            // });
-            // var fwSelS2 = $('#fw_prim_sel').select2({
-            //     placeholder: 'Select forward primer',
-            // });
-            // var rvSelS2 = $('#rv_prim_sel').select2({
-            //     placeholder: 'Select reverse primer',
-            // });
-
-            $('select.taxon').each( function () {
+            $('select').each( function () {
                 makeSel2drop($(this));
             });
 
@@ -146,19 +135,22 @@ $(document).ready(function() {
 });
 // Make select2 dropdowns
 function makeSel2drop(drop){
-    var rank = drop.attr('id');
+    var field = drop.attr('id');
     drop.select2({
-        placeholder: 'Select taxa',
+        placeholder: 'Select option(s)',
         delay: 250,
         // minimumInputLength: 3 ,
         ajax: {
-            url: '/request_tax_options/'+rank,
+            url: '/request_drop_options/' + field,
             dataType: 'json',
             type: 'POST',
             data: function(params) {
                 return {
                     term: params.term || '',
                     page: params.page || 1,
+                    gene: $('#gene').val().toString(),
+                    fw_prim: $('#fw_prim').val().toString(),
+                    rv_prim: $('#rv_prim').val().toString(),
                     kingdom: $('#kingdom').val().toString(),
                     phylum: $('#phylum').val().toString(),
                     classs: $('#classs').val().toString(),
