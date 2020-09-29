@@ -8,6 +8,7 @@ import subprocess
 import pandas as pd
 from flask import Blueprint, current_app as app, flash, request
 from flask import render_template, url_for
+from flask import jsonify
 
 from molmod.forms import (BlastResultForm, BlastSearchForm)
 from molmod.main.main_routes import mpdebug
@@ -22,26 +23,32 @@ def blast():
     sform = BlastSearchForm()
     rform = BlastResultForm()
 
-    # If BLAST was clicked, and settings are valid
+    # If BLAST was clicked
     if request.form.get('blast_for_seq') and sform.validate_on_submit():
+        return render_template('blast.html', sform=sform, rform=rform)
 
-        # Collect BLAST cmd items into list
-        cmd = ['blastn']  # [sform.blast_algorithm.data]
-        cmd += ['-perc_identity', str(sform.min_identity.data)]
-        cmd += ['-qcov_hsp_perc', str(sform.min_qry_cover.data)]
-        cmd += ['-db', app.config['BLAST_DB']]
-        names = ['qacc', 'sacc', 'pident', 'qcovhsp', 'evalue']
-        cmd += ['-outfmt', f'6 {" ".join(names)}']
-        cmd += ['-num_threads', '4']
-        # default: 59 sec, 4/6/8 - 35 sec ca.
+    return render_template('blast.html', sform=sform)
 
-        # Spawn system process (BLAST) and direct data to file handles
-        with subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE) as process:
-            # Send seq from sform to stdin, read output & error until 'eof'
-            blast_stdout, stderr = process.communicate(input=sform.sequence.data.encode())
-            # Get exit status
-            returncode = process.returncode
+
+@blast_bp.route('/blast_run', methods=['POST'])
+def blast_run():
+
+    # Collect BLAST cmd items into list
+    cmd = ['blastn']  # [sform.blast_algorithm.data]
+    cmd += ['-perc_identity', request.form['min_identity']]
+    cmd += ['-qcov_hsp_perc', request.form['min_qry_cover']]
+    cmd += ['-db', app.config['BLAST_DB']]
+    names = ['qacc', 'sacc', 'pident', 'qcovhsp', 'evalue']
+    cmd += ['-outfmt', f'6 {" ".join(names)}']
+    cmd += ['-num_threads', '4']
+
+    # Spawn system process (BLAST) and direct data to file handles
+    with subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE) as process:
+        # Send seq from sform to stdin, read output & error until 'eof'
+        blast_stdout, stderr = process.communicate(input=request.form['sequence'].encode())
+        # Get exit status
+        returncode = process.returncode
 
         # If BLAST worked (no error)
         if returncode == 0:
@@ -52,48 +59,33 @@ def blast():
 
                 # If no hits
                 if len(df) == 0:
-                    msg = 'No hits were found in the BLAST search'
-                    flash(msg, category='error')
+                    return jsonify({"data": []})
 
                 # If some hit(s)
                 else:
-                    # Improve display
+                    # Set single decimal for Sci not & float
                     df['evalue'] = df['evalue'].map('{:.1e}'.format)
                     df = df.round(1)
+                    # Print taxonomy on new line
                     df['sacc'] = df['sacc'].str.replace(';', '|')
-
                     # Extract asvid from sacc = id + taxonomy
                     df['asv_id'] = df['sacc'].str.split('-', expand=True)[0]
-
                     # Get Subject sequence via ID
                     sdict = get_sseq_from_api(df['asv_id'].tolist())
                     df['asv_sequence'] = df['asv_id'].map(sdict)
 
-                    rjson = df.to_json(orient="records")
-
-                    # Show both search and result forms on same page
-                    return render_template('blast.html', sform=sform, rform=rform, blast_results=rjson)
+                    return jsonify({'data': df.to_dict('records')})
 
         # If BLAST error
         else:
-            msg = 'Sorry, the BLAST query was not successful.'
-            flash(msg, category='error')
-
-            # Logging the error - Not sure if this is working
-            print('BLAST ERROR, cmd: {}'.format(cmd))
-            print('BLAST ERROR, returncode: {}'.format(returncode))
-            print('BLAST ERROR, output: {}'.format(blast_stdout))
-            print('BLAST ERROR, stderr: {}'.format(stderr))
-
-    # If no valid submission (or no hits), show search form (incl. any error messages)
-    return render_template('blast.html', sform=sform)
+            # Error will be handled by JQuery
+            return None
 
 
 def get_sseq_from_api(asv_ids: list = []):
     ''' Requests Subject sequences from API, as these are not available in BLAST response'''
     url = "http://localhost:3000/rpc/app_seq_from_id"
     payload = json.dumps({'ids': asv_ids})
-    mpdebug(payload)
     headers = {'Content-Type': 'application/json'}
     try:
         response = requests.request("POST", url, headers=headers, data=payload)
