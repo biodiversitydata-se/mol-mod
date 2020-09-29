@@ -25,34 +25,34 @@
         <div class='row'>
             <div class='col-md-3'>
                 <h6><b>Kingdom</b></h6>
-                {{ sform.kingdom_sel(id='kingdom_sel', class='form-control select2 taxon') }}
+                {{ sform.kingdom(id='kingdom', class='form-control select2 taxon') }}
             </div>
             <div class='col-md-3'>
                 <h6><b>Phylum</b></h6>
-                {{ sform.phylum_sel(id='phylum_sel', class='form-control select2 taxon') }}
+                {{ sform.phylum(id='phylum', class='form-control select2 taxon') }}
             </div>
             <div class='col-md-3'>
                 <h6><b>Class</b></h6>
-                {{ sform.class_sel(id='class_sel', class='form-control select2 taxon') }}
+                {{ sform.classs(id='classs', class='form-control select2 taxon') }}
             </div>
             <div class='col-md-3'>
                 <h6><b>Order</b></h6>
-                {{ sform.order_sel(id='order_sel', class='form-control select2 taxon') }}
+                {{ sform.oorder(id='oorder', class='form-control select2 taxon') }}
             </div>
         </div>
         <br>
         <div class='row'>
             <div class='col-md-3'>
                 <h6><b>Family</b></h6>
-                {{ sform.family_sel(id='family_sel', class='form-control select2 taxon') }}
+                {{ sform.family(id='family', class='form-control select2 taxon') }}
             </div>
             <div class='col-md-3'>
                 <h6><b>Genus</b></h6>
-                {{ sform.genus_sel(id='genus_sel', class='form-control select2 taxon') }}
+                {{ sform.genus(id='genus', class='form-control select2 taxon') }}
             </div>
             <div class='col-md-3'>
                 <h6><b>Specific epithet</b></h6>
-                {{ sform.species_sel(id='species_sel', class='form-control select2 taxon') }}
+                {{ sform.species(id='species', class='form-control select2 taxon') }}
             </div>
         </div>
         <br>
@@ -71,9 +71,6 @@
 <br>
 <br>
 {% if rform %}
-<script>
-    var apiResults = {{ api_results|tojson }};
-</script>
 <div class='container' id='result'>
     <form action={{ rform.batch_url }} method='post' id='rform' name='rform'>
         {{ rform.csrf_token }}
