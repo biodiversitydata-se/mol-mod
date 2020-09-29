@@ -56,7 +56,7 @@ def request_drop_options(field):
     page = request.form['page']
     # See https://stackoverflow.com/questions/32533757/select2-v4-how-to-paginate-results-using-ajax for pagination
 
-    url = "http://localhost:3000/rpc/tax_drop_options"
+    url = "http://localhost:3000/rpc/app_drop_options"
     payload = json.dumps({'field': field, 'term': term, 'gene': sel['gene'], 'fw_prim': sel['fw_prim'], 'rv_prim': sel['rv_prim'], 'kingdom': sel['kingdom'], 'phylum': sel['phylum'], 'classs': sel[
                          'classs'], 'oorder': sel['oorder'], 'family': sel['family'], 'genus': sel['genus'], 'species': sel['species']})
     headers = {'Content-Type': 'application/json'}
@@ -95,33 +95,33 @@ def search_run():
     # Modify URL according to selections
     # GENE
     if len(gene_lst) > 0:
-        genes = ','.join(map(str, gene_lst))
-        url += f'?gene=in.({genes})'
+        gene = ','.join(map(str, gene_lst))
+        url += f'?gene=in.({gene})'
         # Use 'AND' for additional criteria, if any
         op = '&'
     # FW PRIMER
     if len(fw_lst) > 0:
-        fw = ','.join(map(str, fw_lst))
-        url += f'{op}fw_name=in.({fw})'
+        fw_prim = ','.join(map(str, fw_lst))
+        url += f'{op}fw_prim=in.({fw_prim})'
         op = '&'
     if len(rv_lst) > 0:
-        rv = ','.join(map(str, rv_lst))
-        url += f'{op}rv_name=in.({rv})'
+        rv_prim = ','.join(map(str, rv_lst))
+        url += f'{op}rv_prim=in.({rv_prim})'
         op = '&'
     # KINGDOM
     if len(kingdom_lst) > 0:
-        kingdoms = ','.join(map(str, kingdom_lst))
-        url += f'{op}kingdom=in.({kingdoms})'
+        kingdom = ','.join(map(str, kingdom_lst))
+        url += f'{op}kingdom=in.({kingdom})'
         op = '&'
     # PHYLUM
     if len(phylum_lst) > 0:
-        phyla = ','.join(map(str, phylum_lst))
-        url += f'{op}phylum=in.({phyla})'
+        phylum = ','.join(map(str, phylum_lst))
+        url += f'{op}phylum=in.({phylum})'
         op = '&'
     # CLASS
     if len(class_lst) > 0:
-        classes = ','.join(map(str, class_lst))
-        url += f'{op}class=in.({classes})'
+        classs = ','.join(map(str, class_lst))
+        url += f'{op}classs=in.({classs})'
         op = '&'
     # ORDER
     if len(order_lst) > 0:
@@ -130,18 +130,18 @@ def search_run():
         op = '&'
     # FAMILY
     if len(family_lst) > 0:
-        families = ','.join(map(str, family_lst))
-        url += f'{op}family=in.({families})'
+        family = ','.join(map(str, family_lst))
+        url += f'{op}family=in.({family})'
         op = '&'
     # GENUS
     if len(genus_lst) > 0:
-        genera = ','.join(map(str, genus_lst))
-        url += f'{op}genus=in.({genera})'
+        genus = ','.join(map(str, genus_lst))
+        url += f'{op}genus=in.({genus})'
         op = '&'
     # SPECIES
     if len(species_lst) > 0:
         species = ','.join(map(str, species_lst))
-        url += f'{op}specific_epithet=in.({species})'
+        url += f'{op}species=in.({species})'
 
     # Make api request
     try:

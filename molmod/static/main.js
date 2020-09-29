@@ -51,8 +51,8 @@ $(document).ready(function() {
                 {'data': 'asv_tax'},    // 2. Expandable
                 {'data': 'gene'},       // 3.
                 {'data': 'sub'},        // 4.
-                {'data': 'fw_name'},    // 5.
-                {'data': 'rv_name'},    // 6.
+                {'data': 'fw_prim'},    // 5.
+                {'data': 'rv_prim'},    // 6.
                 {'data': 'asv_sequence'}// 7. Hidden seq
             ];
             var dTbl = makeDataTbl('api_result_table', columns);
