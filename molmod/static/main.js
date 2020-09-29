@@ -1,102 +1,50 @@
 /* Changes may require cache bypass, in Chrome/Mac: shift + cmd + r */
-/* Perhaps change later to only run if BLAST or API search */
-
 $(document).ready(function() {
-    /* Code to run when page has finished loading */
+    var hlpDiv = $('#selection_error'); // For no-selection error
 
-    // Get div holding no-selection error msg (to make visible when needed)
-    var hlpDiv = $('#selection_error');
-
-    // Get page name from URL
     var currPage = $(location).attr('href').split("/").pop();
     switch(currPage) {
 
         // BLAST PAGE
         case 'blast':
-            // SEARCH FORM
-            // Get input seq length for display
-            $('#sequence_textarea').on('input', function(){
-                $('#sequence_count').text($(this).val().length);
-            });
-            // RESULT FORM
-            if(typeof blastResults !== "undefined") {
-                var columns = [
-                    {'data': null},         // 0. Checkbox
-                    {'data': 'asv_id'},     // 1. Hidden ID
-                    {'data': 'qacc'},       // 2.
-                    {'data': 'sacc'},       // 3. Expandable
-                    {'data': 'pident'},     // 4.
-                    {'data': 'qcovhsp'},    // 5.
-                    {'data': 'evalue'},     // 6.
-                    {'data': 'asv_sequence'}// 7. Hidden seq
-                ];
-                // Make dataTable
-                var dTbl = makeDataTbl('blast_result_table', blastResults, columns);
-            }
+            var columns = [
+                {'data': ''},         // 0. Checkbox
+                {'data': 'asv_id'},     // 1. Hidden ID
+                {'data': 'qacc'},       // 2.
+                {'data': 'sacc'},       // 3. Expandable
+                {'data': 'pident'},     // 4.
+                {'data': 'qcovhsp'},    // 5.
+                {'data': 'evalue'},     // 6.
+                {'data': 'asv_sequence'}// 7. Hidden seq
+            ];
+            var dTbl = makeDataTbl('blast_result_table', columns);
             break;
 
-        // (API) SEARCH PAGE
+        // API SEARCH PAGE
         case 'search':
-            // SEARCH FORM
+
             // Set format for select2-dropdown boxes
             $.fn.select2.defaults.set('theme', 'bootstrap');
             // $.fn.select2.defaults.set('closeOnSelect', false);
             $.fn.select2.defaults.set('allowClear', true);
 
-            // Make select2-dropdowns
-            var geneSelS2 = $('#gene_sel').select2({
-                placeholder: 'Select target gene',
-            });
-            var fwSelS2 = $('#fw_prim_sel').select2({
-                placeholder: 'Select forward primer',
-            });
-            var rvSelS2 = $('#rv_prim_sel').select2({
-                placeholder: 'Select reverse primer',
-            });
-            var kingdomSelS2 = $('#kingdom_sel').select2({
-                placeholder: 'Select kingdom',
-            });
-            var phylumSelS2 = $('#phylum_sel').select2({
-                placeholder: 'Select phylum',
-            });
-            var classSelS2 = $('#class_sel').select2({
-                placeholder: 'Select class',
-            });
-            var orderSelS2 = $('#order_sel').select2({
-                placeholder: 'Select order',
-            });
-            var familySelS2 = $('#family_sel').select2({
-                placeholder: 'Select family',
-            });
-            var genusSelS2 = $('#genus_sel').select2({
-                placeholder: 'Select genus',
-            });
-            var speciesSelS2 = $('#species_sel').select2({
-                placeholder: 'Select species',
-            });
+            // // Make select2-dropdowns
+            // var geneSelS2 = $('#gene_sel').select2({
+            //     placeholder: 'Select target gene',
+            // });
+            // var fwSelS2 = $('#fw_prim_sel').select2({
+            //     placeholder: 'Select forward primer',
+            // });
+            // var rvSelS2 = $('#rv_prim_sel').select2({
+            //     placeholder: 'Select reverse primer',
+            // });
 
-            // Filter every dropdown box on selection(s) made in other boxes
-            $('.select2.form-control').on('change', function () {
-              $( '.select2.form-control:not( #'+$(this).attr('id')+')').each( function () {
-                  filterDropOptions($(this).attr('id'));
-              });
+            $('select.taxon').each( function () {
+                makeSel2drop($(this));
             });
-
-            // Re-apply filter(s) on reload
-            var totSel = 0;
-            //Sum no. of selections over all boxes
-            $('.select2.form-control').each( function () {
-                totSel = totSel + $(this).select2('data').length;
-            });
-            // Re-filter all boxes, if at least one selection was made
-            if (totSel>0){
-                $('.select2.form-control').each( function () {
-                    filterDropOptions($(this).attr('id'));
-                });
-            }
 
             // Prevent opening when clearing selection
-            $('.select2.form-control').on("select2:clearing", function (evt) {
+            $('select.taxon').on("select2:clearing", function (evt) {
                 $(this).on("select2:opening.cancelOpen", function (evt) {
                     evt.preventDefault();
                     $(this).off("select2:opening.cancelOpen");
@@ -104,116 +52,27 @@ $(document).ready(function() {
             });
 
             $('#clear_all').on('click', function () {
-                /* Clear all selections (but don't trigger normal 'change' event)
-                as this would fire multiple x(n-x) filter applications */
                 $('.select2.form-control').val(null).trigger('change.select2');
-                $('.select2.form-control').each( function () {
-                    filterDropOptions($(this).attr('id'));
-                });
             });
 
-            function getColNames(dropID){
-                /* Translates select2-box ID to corresponding API view
-                columns used in filter and display */
-                var name, display;
-                switch(dropID){
-                    case 'fw_prim_sel':
-                        name = 'fw_name';
-                        display = 'fw_display';
-                        break;
-                    case 'rv_prim_sel':
-                        name = 'rv_name';
-                        display = 'rv_display';
-                        break;
-                    case 'order_sel':
-                        name = 'oorder';
-                        display = 'oorder';
-                        break;
-                    case 'species_sel':
-                        name = 'specific_epithet';
-                        display = 'specific_epithet';
-                        break;
-                    default:
-                        name = dropID.replace("_sel", "");
-                        display = name;
-                        break;
-                    }
-                var item = {};
-                item['name'] = name;
-                item['display'] = display;
-                return item;
-            }
-
-            function filterDropOptions(dropID){
-                var url = 'http://localhost:3000/app_filter_mixs_tax';
-                // For every other dropdown box (= row filter source)
-                $('.select2.form-control:not( #' + dropID + ')').each( function () {
-                    var fltDrop = $( this );
-                    // If some selection has been made
-                    if (fltDrop.val() != ''){
-                        // Get corresponding view column
-                        var filtCol = getColNames(fltDrop.attr('id'))['name'];
-                        // Prepend with '?' if first filter to be added
-                        if (url.charAt(url.length-1) !== '?') url = url + '?';
-                        // Add selection as row filter to URL
-                        url = url + '&' + filtCol + '=in.(' + fltDrop.val() + ')';
-                    }
-                });
-                // Get view col names for focal dropdown box
-                var nameCol = getColNames(dropID)['name'];
-                var dispCol = getColNames(dropID)['display'];
-                // Prepend with '?' if no row filters were added above
-                if (url.indexOf('?') < 0) url += '?';
-                // Exclude empty options, add column filter and sort order
-                url = url + nameCol + '=not.eq.' + '&select=' + nameCol + ',' + dispCol + '&order=' + dispCol;
-                // Make API request
-                $.getJSON(url, function(data) {
-                    var drop = $('#' + dropID);
-                    // Save old selection(s)
-                    var oldSel = drop.val();
-                    // Remove old options
-                    drop.find('option').remove();
-                    // Add option for each unique item in returned JSON object
-                    var lookup = {};
-                    $.each(data, function(i,e) {
-                        // If new item
-                        if (!(e[dispCol] in lookup)) {
-                            lookup[e[dispCol]] = 1;
-                            drop.append('<option value="' + e[nameCol] + '">' + e[dispCol] + '</option>');
-                        }
-                    });
-                    // Reapply old selection
-                    drop.val(oldSel);
-                });
-            }
-
             // RESULT FORM
-            // Convert results to jQuery dataTable
-            if(typeof apiResults !== "undefined") {
-                var columns = [
-                    {'data': null},         // 0. Checkbox
-                    {'data': 'asv_id'},     // 1. Hidden ID
-                    {'data': 'asv_tax'},    // 2. Expandable
-                    {'data': 'gene'},       // 3.
-                    {'data': 'sub'},        // 4.
-                    {'data': 'fw_name'},    // 5.
-                    {'data': 'rv_name'},    // 6.
-                    {'data': 'asv_sequence'}// 7. Hidden seq
-                ];
-                // alert(JSON.stringify(apiResults));
-                var dTbl = makeDataTbl('api_result_table', apiResults, columns);
-            }
-            break;
+            var columns = [
+                {'data': null},         // 0. Checkbox
+                {'data': 'asv_id'},     // 1. Hidden ID
+                {'data': 'asv_tax'},    // 2. Expandable
+                {'data': 'gene'},       // 3.
+                {'data': 'sub'},        // 4.
+                {'data': 'fw_name'},    // 5.
+                {'data': 'rv_name'},    // 6.
+                {'data': 'asv_sequence'}// 7. Hidden seq
+            ];
+            var dTbl = makeDataTbl('api_result_table', columns);
 
-        // Neither BLAST nor API
-        default:
             break;
     }
 
-    // Only show forms after Bootstrap/dataTables/Select2 styling is done
-    // to avoid flash of unstyled content (FOUC)
-    $('#rform').css("visibility", "visible");
-    $('#sform').css("visibility", "visible");
+    // Only show after Bootstrap/dataTables/Select2 styling
+    $('#rform, #sform').css("visibility", "visible");
 
     // ANY RESULT FORM
     if(typeof dTbl !== "undefined") {
@@ -285,42 +144,80 @@ $(document).ready(function() {
     }
 
 });
+// Make select2 dropdowns
+function makeSel2drop(drop){
+    var rank = drop.attr('id');
+    drop.select2({
+        placeholder: 'Select taxa',
+        delay: 250,
+        // minimumInputLength: 3 ,
+        ajax: {
+            url: '/request_tax_options/'+rank,
+            dataType: 'json',
+            type: 'POST',
+            data: function(params) {
+                return {
+                    term: params.term || '',
+                    page: params.page || 1,
+                    kingdom: $('#kingdom').val().toString(),
+                    phylum: $('#phylum').val().toString(),
+                    classs: $('#classs').val().toString(),
+                    oorder: $('#oorder').val().toString(),
+                    family: $('#family').val().toString(),
+                    genus: $('#genus').val().toString(),
+                    species: $('#species').val().toString()
+                }
+            },
+            cache: true,
+            beforeSend: function(xhr, settings) {
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", $('#csrf_token').val())
+                }
+            },
+            processResults: function (data) { // select2 format
+                return { results: data };
+            }
+        }
+    });
+}
 
-// Make jQuery dataTable
-function makeDataTbl(table_id, data, columns) {
-    // Set cols for seq expansion and sort order
+// Make dataTable
+function makeDataTbl(table_id, columns) {
+    $.fn.dataTable.ext.errMode = 'none';
     // BLAST
     if ( table_id === 'blast_result_table' ) {
-        var detNo = 3; var ordNo = 2;
+        var detNo = 3; var ordNo = 2; var url = '/blast_run';
     }
     // API SEARCH
-    else { var detNo = 2; var ordNo = 2; }
-    var dTbl = $('#'+table_id).DataTable( {
-        // Respect CSS settings
-        autoWidth : false,
-        data : data,
-        // Process one page at a time, for speed
-        deferRender: true,
+    else {
+        var detNo = 2; var ordNo = 2; var url = '/search_run';
+    }
+    var dTbl = $('#'+table_id)
+        .on('error.dt', function (e, settings, techNote, message) {
+            console.log( 'An error has been reported by DataTables: ', message );
+            $('#flash_container').html('Sorry, the query was not successful. Please, contact support if this error persists.');
+        })
+        .DataTable({
+        deferRender: true, // Process one page at a time
+        autoWidth : false, // Respect CSS settings
+        ajax: {
+            url: url,
+            type: 'POST',
+            data: function () { return $("#sform").serialize(); } // Includes CSRF-token
+        },
         columns : columns,
         columnDefs: [
-            { targets: 0, defaultContent: '', orderable: false,
-            className: 'select-checkbox' },
-            // Add control for sequence expansion
-            { targets: detNo, className: 'details-control' },
-            // Hide ID and subject seq
-            { targets:[1,7], visible: false },
+            { targets: 0, orderable: false, defaultContent: '', className: 'select-checkbox' },
+            { targets: detNo, className: 'details-control' }, // Seq expansion
+            { targets:[1,7], visible: false }, // Hidden ID & seq
         ],
-        // Use checkbox col for row selection
-        select: { style: 'multi', selector: 'td:nth-child(1)' },
+        select: { style: 'multi', selector: 'td:nth-child(1)' }, // Checkbox selection
         order: [[ ordNo, 'asc' ]],
-        // Set table layout:
-        // l=Show X.., f=Search, tr=table, i=Showing.., p=pagination
+        // Layout: l=Show.., f=Search, tr=table, i=Showing.., p=pagination
         dom: "<'row'<'col-md-4'l><'col-md-8'f>>" +
         "<'row'<'col-md-12't>>" +
         "<'row'<'col-md-3'B><'col-md-3'i><'col-md-6'p>>",
-        buttons: [
-            'excel', 'csv'
-        ]
+        buttons: [ 'excel', 'csv' ]
     });
     return dTbl;
 }
