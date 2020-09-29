@@ -22,10 +22,10 @@ def search():
     sform = ApiSearchForm()
     rform = ApiResultForm()
 
-    # Get seubmitted dropdown options
-    # sform.gene_sel.choices = request_drop_options('gene')
-    # sform.fw_prim_sel.choices = request_drop_options('primer', 'fw')
-    # sform.rv_prim_sel.choices = request_drop_options('primer', 'rv')sform.kingdom.choices = [(x, x) for x in request.form.getlist('kingdom')]
+    # Get submitted dropdown options
+    sform.gene.choices = [(x, x) for x in request.form.getlist('gene')]
+    sform.fw_prim.choices = [(x, x) for x in request.form.getlist('fw_prim')]
+    sform.rv_prim.choices = [(x, x) for x in request.form.getlist('rv_prim')]
     sform.kingdom.choices = [(x, x) for x in request.form.getlist('kingdom')]
     sform.phylum.choices = [(x, x) for x in request.form.getlist('phylum')]
     sform.classs.choices = [(x, x) for x in request.form.getlist('classs')]
@@ -41,15 +41,15 @@ def search():
     return render_template('search.html', sform=sform)
 
 
-@search_bp.route('/request_tax_options/<rank>', methods=['GET', 'POST'])
-def request_tax_options(rank):
+@search_bp.route('/request_drop_options/<field>', methods=['GET', 'POST'])
+def request_drop_options(field):
     sel = {}
-    for r in ['kingdom', 'phylum', 'classs', 'oorder', 'family', 'genus', 'species']:
+    for f in ['gene', 'fw_prim', 'rv_prim', 'kingdom', 'phylum', 'classs', 'oorder', 'family', 'genus', 'species']:
         # Don't filter current dropdown
-        if r == rank:
-            sel[r] = []
+        if f == field:
+            sel[f] = []
         else:
-            sel[r] = get_selected(r)
+            sel[f] = get_selected(f)
 
     # For select2 search and pagination
     term = request.form['term']
@@ -57,7 +57,7 @@ def request_tax_options(rank):
     # See https://stackoverflow.com/questions/32533757/select2-v4-how-to-paginate-results-using-ajax for pagination
 
     url = "http://localhost:3000/rpc/tax_drop_options"
-    payload = json.dumps({'rank': rank, 'term': term, 'kingdom': sel['kingdom'], 'phylum': sel['phylum'], 'classs': sel[
+    payload = json.dumps({'field': field, 'term': term, 'gene': sel['gene'], 'fw_prim': sel['fw_prim'], 'rv_prim': sel['rv_prim'], 'kingdom': sel['kingdom'], 'phylum': sel['phylum'], 'classs': sel[
                          'classs'], 'oorder': sel['oorder'], 'family': sel['family'], 'genus': sel['genus'], 'species': sel['species']})
     headers = {'Content-Type': 'application/json'}
     try:
@@ -67,9 +67,9 @@ def request_tax_options(rank):
         return {[]}
 
 
-def get_selected(ranks: str):
-    # Replace [''] with [] for zero-selection ranks
-    return [t for t in request.form[ranks].split(',') if t]
+def get_selected(field: str):
+    # Replace [''] with [] for zero-selection fields
+    return [v for v in request.form[field].split(',') if v]
 
 
 @search_bp.route('/search_run', methods=['POST'])
@@ -79,9 +79,9 @@ def search_run():
     url = f"{app.config['API_URL']}/app_search_mixs_tax"
 
     # Get selected genes and/or primers
-    gene_lst = request.form.getlist('gene_sel')
-    fw_lst = request.form.getlist('fw_prim_sel')
-    rv_lst = request.form.getlist('rv_prim_sel')
+    gene_lst = request.form.getlist('gene')
+    fw_lst = request.form.getlist('fw_prim')
+    rv_lst = request.form.getlist('rv_prim')
     kingdom_lst = request.form.getlist('kingdom')
     phylum_lst = request.form.getlist('phylum')
     class_lst = request.form.getlist('classs')
