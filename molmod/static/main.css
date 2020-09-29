@@ -33,7 +33,7 @@ footer {
     word-wrap: break-word;
     max-width: 100px;
     min-width: 100px;
- }
+}
 /* Subject / ASV col */
 #blast_result_table td:nth-child(3),
 #blast_result_table th:nth-child(3),
@@ -43,6 +43,14 @@ footer {
     max-width: 400px;
     min-width: 400px;
     padding-right: 30px;
+}
+#api_result_table td:nth-child(5),
+#api_result_table th:nth-child(5),
+#api_result_table td:nth-child(6),
+#api_result_table th:nth-child(6) {
+    word-wrap: break-word;
+    max-width: 100px;
+    min-width: 100px;
 }
 
 /* Expandable seqs */
