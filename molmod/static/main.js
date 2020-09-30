@@ -148,16 +148,16 @@ function makeSel2drop(drop){
                 return {
                     term: params.term || '',
                     page: params.page || 1,
-                    gene: $('#gene').val().toString(),
-                    fw_prim: $('#fw_prim').val().toString(),
-                    rv_prim: $('#rv_prim').val().toString(),
-                    kingdom: $('#kingdom').val().toString(),
-                    phylum: $('#phylum').val().toString(),
-                    classs: $('#classs').val().toString(),
-                    oorder: $('#oorder').val().toString(),
-                    family: $('#family').val().toString(),
-                    genus: $('#genus').val().toString(),
-                    species: $('#species').val().toString()
+                    gene: $('#gene').val() || null,
+                    fw_prim: $('#fw_prim').val() || null,
+                    rv_prim: $('#rv_prim').val() || null,
+                    kingdom: $('#kingdom').val() || null,
+                    phylum: $('#phylum').val() || null,
+                    classs: $('#classs').val() || null,
+                    oorder: $('#oorder').val() || null,
+                    family: $('#family').val() || null,
+                    genus: $('#genus').val() || null,
+                    species: $('#species').val() || null
                 }
             },
             cache: true,

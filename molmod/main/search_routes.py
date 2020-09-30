@@ -43,33 +43,25 @@ def search():
 
 @search_bp.route('/request_drop_options/<field>', methods=['GET', 'POST'])
 def request_drop_options(field):
-    sel = {}
-    for f in ['gene', 'fw_prim', 'rv_prim', 'kingdom', 'phylum', 'classs', 'oorder', 'family', 'genus', 'species']:
-        # Don't filter current dropdown
-        if f == field:
-            sel[f] = []
-        else:
-            sel[f] = get_selected(f)
-
-    # For select2 search and pagination
-    term = request.form['term']
-    page = request.form['page']
+    '''Forwards ajax request for filtered dropdown options to
+    postgREST/postgres function, and returns JSON'''
+    # Make dict of posted filters (e.g. kingdom received as kingdom[])
+    # but exclude current field to allow multiple choice
+    payload = {k.replace('[]', ''): request.form.getlist(k)
+               for k, v in request.form.items() if k.replace('[]', '') not in ['term', 'page', field]}
+    # Add (typed search) term, page , and field to be filtered
+    payload.update({'field': field, 'term': request.form['term']})
+    # page = request.form['page']
     # See https://stackoverflow.com/questions/32533757/select2-v4-how-to-paginate-results-using-ajax for pagination
 
     url = "http://localhost:3000/rpc/app_drop_options"
-    payload = json.dumps({'field': field, 'term': term, 'gene': sel['gene'], 'fw_prim': sel['fw_prim'], 'rv_prim': sel['rv_prim'], 'kingdom': sel['kingdom'], 'phylum': sel['phylum'], 'classs': sel[
-                         'classs'], 'oorder': sel['oorder'], 'family': sel['family'], 'genus': sel['genus'], 'species': sel['species']})
+    payload = json.dumps(payload)
     headers = {'Content-Type': 'application/json'}
     try:
         response = requests.request("POST", url, headers=headers, data=payload)
         return response.text
     except:
         return {[]}
-
-
-def get_selected(field: str):
-    # Replace [''] with [] for zero-selection fields
-    return [v for v in request.form[field].split(',') if v]
 
 
 @search_bp.route('/search_run', methods=['POST'])
