@@ -24,6 +24,7 @@ def search():
 
     # Get submitted dropdown options
     sform.gene.choices = [(x, x) for x in request.form.getlist('gene')]
+    sform.sub.choices = [(x, x) for x in request.form.getlist('sub')]
     sform.fw_prim.choices = [(x, x) for x in request.form.getlist('fw_prim')]
     sform.rv_prim.choices = [(x, x) for x in request.form.getlist('rv_prim')]
     sform.kingdom.choices = [(x, x) for x in request.form.getlist('kingdom')]
@@ -76,6 +77,7 @@ def search_run():
 
     # Get selected genes and/or primers
     gene_lst = request.form.getlist('gene')
+    sub_lst = request.form.getlist('sub')
     fw_lst = request.form.getlist('fw_prim')
     rv_lst = request.form.getlist('rv_prim')
     kingdom_lst = request.form.getlist('kingdom')
@@ -94,6 +96,11 @@ def search_run():
         gene = ','.join(map(str, gene_lst))
         url += f'?gene=in.({gene})'
         # Use 'AND' for additional criteria, if any
+        op = '&'
+    # SUBREGION
+    if len(sub_lst) > 0:
+        sub = ','.join(map(str, sub_lst))
+        url += f'{op}sub=in.({sub})'
         op = '&'
     # FW PRIMER
     if len(fw_lst) > 0:
