@@ -4,10 +4,15 @@
     <form action='' method='post' id='sform' name='sform' class='search_function' >
         {{ sform.csrf_token }}
         <div class='row'>
-            <div class='col-md-6'>
+            <div class='col-md-3'>
                 <h6><b>Target gene</b></h6>
                 {{ sform.gene(id='gene', class='form-control select2') }}
             </div>
+            <div class='col-md-3'>
+                <h6><b>Target subregion</b></h6>
+                {{ sform.sub(id='sub', class='form-control select2') }}
+            </div>
+
         </div>
         <br>
         <div class='row'>
