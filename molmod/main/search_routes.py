@@ -22,7 +22,7 @@ def search():
     sform = ApiSearchForm()
     rform = ApiResultForm()
 
-    # Get submitted dropdown options
+    # Feed selected dropdown options back to client
     sform.gene.choices = [(x, x) for x in request.form.getlist('gene')]
     sform.sub.choices = [(x, x) for x in request.form.getlist('sub')]
     sform.fw_prim.choices = [(x, x) for x in request.form.getlist('fw_prim')]
@@ -35,22 +35,21 @@ def search():
     sform.genus.choices = [(x, x) for x in request.form.getlist('genus')]
     sform.species.choices = [(x, x) for x in request.form.getlist('species')]
 
-    # If SEARCH was clicked
+    # Only include result form if SEARCH was clicked
     if request.form.get('search_for_asv'):
         return render_template('search.html', sform=sform, rform=rform)
-
     return render_template('search.html', sform=sform)
 
 
 @search_bp.route('/request_drop_options/<field>', methods=['GET', 'POST'])
 def request_drop_options(field):
     '''Forwards ajax request for filtered dropdown options to
-    postgREST/postgres function, and returns JSON with options and page'''
-    # Make dict of posted filters (e.g. selected kingdom(s), received as 'kingdom[]' (lst))
+    postgREST/postgres function, and returns paginated JSON result'''
+    # Make dict of posted filters (e.g. selected kingdom(s), received as 'kingdom[]')
     # but exclude current field, to allow multiple choice
     payload = {k.replace('[]', ''): request.form.getlist(k)
                for k, v in request.form.items() if k.replace('[]', '') not in ['term', 'page', field]}
-    # Add (typed search) term, and field to be filtered (str)
+    # Add (typed search) term, and field to be filtered, as str
     payload.update({'field': field, 'term': request.form['term']})
     # Add pagination
     limit = 25
@@ -145,6 +144,8 @@ def search_run():
     if len(species_lst) > 0:
         species = ','.join(map(str, species_lst))
         url += f'{op}species=in.({species})'
+
+    mpdebug(url)
 
     # Make api request
     try:
