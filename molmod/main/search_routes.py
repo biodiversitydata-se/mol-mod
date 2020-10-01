@@ -44,24 +44,28 @@ def search():
 @search_bp.route('/request_drop_options/<field>', methods=['GET', 'POST'])
 def request_drop_options(field):
     '''Forwards ajax request for filtered dropdown options to
-    postgREST/postgres function, and returns JSON'''
-    # Make dict of posted filters (e.g. kingdom received as kingdom[])
-    # but exclude current field to allow multiple choice
+    postgREST/postgres function, and returns JSON with options and page'''
+    # Make dict of posted filters (e.g. selected kingdom(s), received as 'kingdom[]' (lst))
+    # but exclude current field, to allow multiple choice
     payload = {k.replace('[]', ''): request.form.getlist(k)
                for k, v in request.form.items() if k.replace('[]', '') not in ['term', 'page', field]}
-    # Add (typed search) term, page , and field to be filtered
+    # Add (typed search) term, and field to be filtered (str)
     payload.update({'field': field, 'term': request.form['term']})
-    # page = request.form['page']
-    # See https://stackoverflow.com/questions/32533757/select2-v4-how-to-paginate-results-using-ajax for pagination
-
+    # Add pagination
+    limit = 25
+    offset = (int(request.form['page']) - 1) * limit
+    payload.update({'nlimit': limit, 'noffset': offset})
     url = "http://localhost:3000/rpc/app_drop_options"
     payload = json.dumps(payload)
     headers = {'Content-Type': 'application/json'}
     try:
         response = requests.request("POST", url, headers=headers, data=payload)
-        return response.text
     except:
         return {[]}
+    else:
+        results = json.loads(response.text)[0]['data']['results']
+        count = json.loads(response.text)[0]['data']['count']
+        return {'results': results, 'pagination': {'more': (offset + limit) < count}}
 
 
 @search_bp.route('/search_run', methods=['POST'])

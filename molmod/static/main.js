@@ -165,9 +165,6 @@ function makeSel2drop(drop){
                 if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
                     xhr.setRequestHeader("X-CSRFToken", $('#csrf_token').val())
                 }
-            },
-            processResults: function (data) { // select2 format
-                return { results: data };
             }
         }
     });
