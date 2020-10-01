@@ -149,6 +149,7 @@ function makeSel2drop(drop){
                     term: params.term || '',
                     page: params.page || 1,
                     gene: $('#gene').val() || null,
+                    sub: $('#sub').val() || null,
                     fw_prim: $('#fw_prim').val() || null,
                     rv_prim: $('#rv_prim').val() || null,
                     kingdom: $('#kingdom').val() || null,
