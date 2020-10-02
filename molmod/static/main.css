@@ -18,33 +18,24 @@ footer {
 }
 
 /* FORMS */
-/* Result form until styled as dataTable */
-
-#rform {
+#rform, #sform {
     visibility: hidden;
- }
-#sform {
-     visibility: hidden;
 }
+
 /* RESULT TABLES */
 /* Query (user sequence ID) col */
-#blast_result_table td:nth-child(2),
-#blast_result_table th:nth-child(2){
+.qacc {
     word-wrap: break-word;
     max-width: 100px;
     min-width: 100px;
 }
-/* Subject / ASV col */
-#blast_result_table td:nth-child(3),
-#blast_result_table th:nth-child(3),
-#api_result_table td:nth-child(2),
-#api_result_table th:nth-child(2)  {
+/* Subject / ASV col (also for child rows)*/
+.asv,.child{
     word-wrap: break-word;
     max-width: 400px;
     min-width: 400px;
     padding-right: 30px;
 }
-
 /* Expandable seqs */
 td.details-control {
     background: url('img/details_open.png') no-repeat top 13px right 10px;

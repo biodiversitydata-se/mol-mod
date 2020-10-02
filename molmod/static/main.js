@@ -10,7 +10,7 @@ $(document).ready(function() {
             var columns = [
                 { data: null, orderable: false, defaultContent: '', className: 'select-checkbox'},
                 { data: 'asv_id', visible: false },
-                { data: 'qacc'},
+                { data: 'qacc', className: 'qacc'},
                 { data: 'sacc', className: 'details-control asv'},
                 { data: 'pident'},
                 { data: 'qcovhsp'},
@@ -100,10 +100,10 @@ $(document).ready(function() {
             // Set no. of empty cells to show before data
             // BLAST
             if (dTbl.table().node().id === 'blast_result_table'){
-                var tds = '<tr><td></td><td></td><td colspan="4">';
+                var tds = '<tr><td></td><td></td><td class="child" colspan="4">';
             }
             // SEARCH
-            else { var tds = '<tr><td></td><td colspan="5">'; }
+            else { var tds = '<tr><td></td><td class="child" colspan="5">'; }
             var childRow = $(tds+data+'</td></tr>');
             // Toggle show/hide
             if(row.child.isShown()) {
