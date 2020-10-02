@@ -194,6 +194,8 @@ function makeDataTbl(url, columns) {
             data: function () { return $("#sform").serialize(); } // Includes CSRF-token
         },
         columns : columns,
+        // Add indicator
+        processing: true,
         order: [[2, 'asc']], // Required for non-orderable col 0
         select: { style: 'multi', selector: 'td:nth-child(1)' }, // Checkbox selection
         // Layout: l=Show.., f=Search, tr=table, i=Showing.., p=pagination
