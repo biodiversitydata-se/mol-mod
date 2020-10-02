@@ -150,7 +150,7 @@ function makeSel2drop(drop){
             dataType: 'json',
             type: 'POST',
             data: function(params) {
-                // console.log(field, params.term, params.page);
+                console.log(field, params.term, params.page);
                 return {
                     term: params.term || '',
                     page: params.page || 1,
