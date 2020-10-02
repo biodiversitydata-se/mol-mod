@@ -8,16 +8,16 @@ $(document).ready(function() {
         // BLAST PAGE
         case 'blast':
             var columns = [
-                {'data': ''},         // 0. Checkbox
-                {'data': 'asv_id'},     // 1. Hidden ID
-                {'data': 'qacc'},       // 2.
-                {'data': 'sacc'},       // 3. Expandable
-                {'data': 'pident'},     // 4.
-                {'data': 'qcovhsp'},    // 5.
-                {'data': 'evalue'},     // 6.
-                {'data': 'asv_sequence'}// 7. Hidden seq
+                { data: null, orderable: false, defaultContent: '', className: 'select-checkbox'},
+                { data: 'asv_id', visible: false },
+                { data: 'qacc'},
+                { data: 'sacc', className: 'details-control asv'},
+                { data: 'pident'},
+                { data: 'qcovhsp'},
+                { data: 'evalue'},
+                { data: 'asv_sequence', visible: false }
             ];
-            var dTbl = makeDataTbl('blast_result_table', columns);
+            var dTbl = makeDataTbl('blast_run', columns);
             break;
 
         // API SEARCH PAGE
@@ -44,18 +44,21 @@ $(document).ready(function() {
                 $('.select2.form-control').val(null).trigger('change.select2');
             });
 
-            // RESULT FORM
             var columns = [
-                {'data': null},         // 0. Checkbox
-                {'data': 'asv_id'},     // 1. Hidden ID
-                {'data': 'asv_tax'},    // 2. Expandable
-                {'data': 'gene'},       // 3.
-                {'data': 'sub'},        // 4.
-                {'data': 'fw_name'},    // 5.
-                {'data': 'rv_name'},    // 6.
-                {'data': 'asv_sequence'}// 7. Hidden seq
+                { data: null, orderable: false, defaultContent: '', className: 'select-checkbox' },
+                { data: 'asv_id', visible: false },
+                { data: 'asv_tax', className: 'details-control asv' },
+                { data: 'gene'},
+                { data: 'sub'},
+                // { data: 'fw_name', className: 'details-control fwPrim' },
+                // { data: 'rv_name', className: 'details-control rvPrim' },
+                { data: 'fw_name' },
+                { data: 'rv_name' },
+                { data: 'asv_sequence', visible: false },
+                { data: 'fw_sequence', visible: false },
+                { data: 'rv_sequence', visible: false }
             ];
-            var dTbl = makeDataTbl('api_result_table', columns);
+            var dTbl = makeDataTbl('/search_run', columns);
 
             break;
     }
@@ -93,14 +96,16 @@ $(document).ready(function() {
         dTbl.on('click', 'td.details-control', function () {
             var tr = $(this).closest('tr');
             var row = dTbl.row(tr);
-            var data = row.data();
-            // Set no. of empty cells to show before seq, depending on table type
+            var data = row.data().asv_sequence;
+            // Set no. of empty cells to show before data
+            // BLAST
             if (dTbl.table().node().id === 'blast_result_table'){
                 var tds = '<tr><td></td><td></td><td colspan="4">';
             }
+            // SEARCH
             else { var tds = '<tr><td></td><td colspan="5">'; }
-            var childRow = $(tds+data.asv_sequence+'</td></tr>');
-            // Toggle
+            var childRow = $(tds+data+'</td></tr>');
+            // Toggle show/hide
             if(row.child.isShown()) {
                 row.child.hide();
                 tr.removeClass("shown");
@@ -172,17 +177,9 @@ function makeSel2drop(drop){
 }
 
 // Make dataTable
-function makeDataTbl(table_id, columns) {
+function makeDataTbl(url, columns) {
     $.fn.dataTable.ext.errMode = 'none';
-    // BLAST
-    if ( table_id === 'blast_result_table' ) {
-        var detNo = 3; var ordNo = 2; var url = '/blast_run';
-    }
-    // API SEARCH
-    else {
-        var detNo = 2; var ordNo = 2; var url = '/search_run';
-    }
-    var dTbl = $('#'+table_id)
+    var dTbl = $('.table')
         .on('error.dt', function (e, settings, techNote, message) {
             console.log( 'An error has been reported by DataTables: ', message );
             $('#flash_container').html('Sorry, the query was not successful. Please, contact support if this error persists.');
@@ -196,13 +193,8 @@ function makeDataTbl(table_id, columns) {
             data: function () { return $("#sform").serialize(); } // Includes CSRF-token
         },
         columns : columns,
-        columnDefs: [
-            { targets: 0, orderable: false, defaultContent: '', className: 'select-checkbox' },
-            { targets: detNo, className: 'details-control' }, // Seq expansion
-            { targets:[1,7], visible: false }, // Hidden ID & seq
-        ],
+        order: [[2, 'desc']],
         select: { style: 'multi', selector: 'td:nth-child(1)' }, // Checkbox selection
-        order: [[ ordNo, 'asc' ]],
         // Layout: l=Show.., f=Search, tr=table, i=Showing.., p=pagination
         dom: "<'row'<'col-md-4'l><'col-md-8'f>>" +
         "<'row'<'col-md-12't>>" +

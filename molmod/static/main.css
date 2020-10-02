@@ -44,14 +44,6 @@ footer {
     min-width: 400px;
     padding-right: 30px;
 }
-#api_result_table td:nth-child(5),
-#api_result_table th:nth-child(5),
-#api_result_table td:nth-child(6),
-#api_result_table th:nth-child(6) {
-    word-wrap: break-word;
-    max-width: 100px;
-    min-width: 100px;
-}
 
 /* Expandable seqs */
 td.details-control {
