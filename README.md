@@ -80,16 +80,64 @@ export PGRST_DB_URI='postgres://authenticator:xxx@localhost:5432/asv-postgrest'
 # Check
 lsof -Pnl +M -i4
 ```
-
-### Environmental variables
-Required environmental variable SECRET_KEY (used for global CSRF protection) can be set in your Conda environment:
-```
-conda activate [your-env-name]
-# List existing
-conda env config vars list
-# Set var
-conda env config vars set SECRET_KEY=[your-secret-key]
-conda activate [your-env-name]
+#### Conda
+I use [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file) for package & environment management, i.e. not python venv.
+```bash
+# Install
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+sh Miniconda3-latest-Linux-x86_64.sh
+# [yes, yes, yes]
+conda config --set auto_activate_base false
+# Create conda environment from file 
+# (if anything fails to install, it may help to change to less specific versions of packages)
+conda env create -f environment-linux.yml
+conda activate flapp
+conda env config vars set SECRET_KEY='xxx'
+conda env config vars set PGRST_DB_URI='xxx'
+conda activate flapp
 # Check var
 echo $SECRET_KEY
+```
+
+#### Flask app
+```bash
+git clone https://github.com/biodiversitydata-se/mol-mod.git
+```
+
+#### Gunicorn, systemd + nginx
+```bash
+# Add new app service
+sudo nano /etc/systemd/system/molmod.service
+# Add the following:
+Description=Gunicorn instance to serve molmod app
+After=network.target
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/mol-mod
+Environment="FLASK_ENV=development"
+ExecStart=/bin/bash -c 'source /home/ubuntu/miniconda3/etc/profile.d/conda.sh; \
+    conda activate flapp; \
+    gunicorn --workers 3 --bind unix:molmod.sock -m 007 wsgi:app'
+[Install]
+WantedBy=multi-user.target
+# The following should create a molmod-sock file - used by nginx
+sudo systemctl start molmod
+# To auto-start after reboot (but requires db & api to run as well)
+sudo systemctl enable molmod
+# Start service
+sudo systemctl start molmod
+# Configure nginx
+sudo nano /etc/nginx/sites-available/molmod
+# And add:
+server {
+listen 80;
+  server_name 89.45.233.130 molecular2.infrabas.se;
+location / {
+  include proxy_params;
+  proxy_pass http://unix:/home/ubuntu/mol-mod/molmod.sock;
+  }
+}
+sudo ln -s /etc/nginx/sites-available/molmod /etc/nginx/sites-enabled
+sudo systemctl start nginx
 ```
