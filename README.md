@@ -26,6 +26,7 @@ ufw allow 5432/tcp
 # Install
 sudo apt update
 sudo apt install postgresql postgresql-contrib
+
 # Listen for connections from client applications on any TCP/IP address
 sudo nano /etc/postgresql/12/main/postgresql.conf
 # ..and add:
@@ -37,11 +38,13 @@ host   all             all              0.0.0.0/0               md5
 host   all             all              ::/0                    md5
 # Restart service
 sudo service postgresql restart
-# In local/source db: 
+
+[ # In local/source db: 
 # Dump roles
-pg_dumpall -g > roles.sql
+pg_dumpall -g > db-roles.sql
 # Dump db
-pg_dump asv-postgrest > db-dump.sql
+pg_dump asv-postgrest > db-dump.sql ]
+
 # On server:
 # Add current linux user & user db (as postgres user)
 sudo -u postgres createuser --superuser $USER
