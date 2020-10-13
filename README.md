@@ -21,7 +21,7 @@ Flask + jQuery app for BLAST and metadata search of sequence-based occurrences i
 ufw allow 5432/tcp
 ```
 (also needed to open port on the security group applied to cloud server)
-#### PostgreSQL
+#### PostgreSQL (DB)
 ```bash
 # Install
 sudo apt update
@@ -39,7 +39,8 @@ host   all             all              ::/0                    md5
 # Restart service
 sudo service postgresql restart
 
-[ # In local/source db: 
+[ If not using dumps from *misc* folder:
+# In local/source db: 
 # Dump roles
 pg_dumpall -g > db-roles.sql
 # Dump db
@@ -57,6 +58,27 @@ psql --single-transaction asv-postgrest < ~/mp-temp/db-dump
 # Set pwd for postgres user 
 psql
 ALTER ROLE postgres WITH PASSWORD 'xxx';
+```
+
+#### PostgREST (API server)
+```bash
+# Install
+mkdir postgrest
+cd postgrest
+wget -c https://github.com/PostgREST/postgrest/releases/download/v7.0.1/postgrest-v7.0.1-linux-x64-static.tar.xz
+tar xfJ postgrest-v7.0.1-linux-x64-static.tar.xz
+```
+Then copy file *postgrest.conf* from *misc* to *postgrest* folder.
+Requires environmental variable *PGRST_DB_URI* to be set, e.g. by running:
+```bash
+export PGRST_DB_URI='postgres://authenticator:xxx@localhost:5432/asv-postgrest' 
+```
+...or by setting it in conda environment (se header below). 
+```bash
+# Start service (and direct output to log)
+./postgrest postgrest.conf </dev/null >postgrest.log 2>&1 &
+# Check
+lsof -Pnl +M -i4
 ```
 
 ### Environmental variables
