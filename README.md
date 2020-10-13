@@ -12,7 +12,6 @@ Flask + jQuery app for BLAST and metadata search of sequence-based occurrences i
 ### Files and folders
 * **molmod:** Flask app
 * **misc:** Auxiliary files needed to run app, e.g. DB dump, API config and some test query files for BLAST.
-* **environment.yml:** [Conda file](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file)
 
 ### Notes from my setup on server
 #### Firewall (ufw)
