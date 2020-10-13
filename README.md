@@ -38,12 +38,12 @@ host   all             all              ::/0                    md5
 # Restart service
 sudo service postgresql restart
 
-[ If not using dumps from *misc* folder:
+# If not using dumps from *misc* folder:
 # In local/source db: 
 # Dump roles
 pg_dumpall -g > db-roles.sql
 # Dump db
-pg_dump asv-postgrest > db-dump.sql ]
+pg_dump asv-postgrest > db-dump.sql 
 
 # On server:
 # Add current linux user & user db (as postgres user)
