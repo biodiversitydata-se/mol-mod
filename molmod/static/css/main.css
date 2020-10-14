@@ -35,11 +35,11 @@ body {
 }
 /* Expandable seqs */
 td.details-control {
-    background: url('img/details_open.png') no-repeat top 13px right 10px;
+    background: url('../img/details_open.png') no-repeat top 13px right 10px;
     cursor: pointer;
 }
 tr.shown td.details-control {
-    background: url('img/details_close.png') no-repeat top 13px right 10px;
+    background: url('../img/details_close.png') no-repeat top 13px right 10px;
 }
 
 /* HELP */
