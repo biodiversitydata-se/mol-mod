@@ -41,16 +41,15 @@ td.details-control {
 tr.shown td.details-control {
     background: url('../img/details_close.png') no-repeat top 13px right 10px;
 }
-
 /* HELP */
 .hiddenElem {
     display: none;
 }
 .visHlpElem {
-    background-color: #f2e4e4;
+    background-color: #f4c8bd !important;
 }
 .visHlpDiv {
     display: block;
     text-align: right;
-    color: #aa4442;
+    color: #c44d34;
 }
