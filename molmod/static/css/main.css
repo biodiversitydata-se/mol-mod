@@ -1,12 +1,9 @@
 /* Bypass cache in Chrome/Mac: shift + cmd + r */
 
 /* GENERAL */
+
 body {
     font-family: Roboto, 'Helvetica Neue', sans-serif;
-}
-
-footer {
-    padding: 15px;
 }
 
 .main-content {
@@ -38,22 +35,27 @@ footer {
 }
 /* Expandable seqs */
 td.details-control {
-    background: url('img/details_open.png') no-repeat top 13px right 10px;
+    background: url('../img/details_open.png') no-repeat top 13px right 10px;
     cursor: pointer;
 }
 tr.shown td.details-control {
-    background: url('img/details_close.png') no-repeat top 13px right 10px;
+    background: url('../img/details_close.png') no-repeat top 13px right 10px;
 }
-
+/* Override ALA for selected table rows */
+.table-striped>tbody>tr.selected:nth-child(odd)>td,
+.table-striped>tbody>tr.selected:nth-child(even)>td {
+    color: black !important;
+    background-color: #f8dbd3 !important;
+}
 /* HELP */
 .hiddenElem {
     display: none;
 }
 .visHlpElem {
-    background-color: #f2e4e4;
+    background-color: #f8dbd3 !important;
 }
 .visHlpDiv {
     display: block;
     text-align: right;
-    color: #aa4442;
+    color: #c44d34;
 }
