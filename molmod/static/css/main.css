@@ -56,6 +56,6 @@ tr.shown td.details-control {
 }
 .visHlpDiv {
     display: block;
-    text-align: right;
+    text-align: left;
     color: #c44d34;
 }
