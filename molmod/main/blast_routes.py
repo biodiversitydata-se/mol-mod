@@ -13,6 +13,9 @@ from flask import jsonify
 from molmod.forms import (BlastResultForm, BlastSearchForm)
 from molmod.main.main_routes import mpdebug
 
+from ..config import get_config
+CONFIG = get_config()
+
 blast_bp = Blueprint('blast_bp', __name__,
                      template_folder='templates')
 
@@ -84,7 +87,7 @@ def blast_run():
 
 def get_sseq_from_api(asv_ids: list = []):
     ''' Requests Subject sequences from API, as these are not available in BLAST response'''
-    url = "http://localhost:3000/rpc/app_seq_from_id"
+    url = f"{CONFIG.POSTGREST}/rpc/app_seq_from_id"
     payload = json.dumps({'ids': asv_ids})
     headers = {'Content-Type': 'application/json'}
     try:

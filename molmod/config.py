@@ -16,6 +16,7 @@ def get_env_variable(name):
 
 class Config:
     SECRET_KEY = get_env_variable('SECRET_KEY') or 'you-will-never-guess'
+    POSTGREST = get_env_variable('POSTGREST_HOST') or 'http://localhost:3000'
     DEBUG = False
     TESTING = False
 
