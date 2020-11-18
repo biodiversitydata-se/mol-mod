@@ -1,0 +1,68 @@
+version: "3.8"
+services:
+  postgres:
+    restart: always
+    image: postgres:13
+    container_name: asv-db
+    volumes:
+      - ./misc/db-roles.sql:/docker-entrypoint-initdb.d/01_roles.sql
+      # I put the database files in a local directory so that it's easy to clear
+      # them.
+      - ./postgres-data:/var/lib/postgresql/data
+    # We load user and password information from the default environment
+    # variable file
+    env_file:
+      - .env
+    # You can define the variables one-by-one if you think it's more clear.
+    #
+    # Currently we also need trust authentication.
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    #   - POSTGRES_DB=${POSTGRES_DB}
+    #   - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    #   - POSTGRES_USER=${POSTGRES_USER}
+    #   - POSTGRES_HOST=${POSTGRES_HOST}
+    #   - POSTGRES_PORT=${POSTGRES_PORT}
+    #   - PGRST_DB_ANON_ROLE=${PGRST_DB_ANON_ROLE}
+    #   - PGRST_DB_ANON_PASS=${PGRST_DB_ANON_PASS}
+    ports:
+      - 5432:5432
+  postgrest:
+    # https://hub.docker.com/r/postgrest/postgrest
+    restart: always
+    image: postgrest/postgrest:v7.0.1
+    container_name: asv-rest
+    ports:
+      - 3000:3000
+    # Get most environment variables from the default .env file
+    env_file:
+      - .env
+    environment:
+      # Construct a postgres connection URI variable
+      - PGRST_DB_URI=postgres://authenticator:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      # These are the other variables that are used, if you prefer to specify
+      # them individually:
+      #
+      # - PGRST_DB_SCHEMA=${PGRST_DB_SCHEMA}
+      # - PGRST_DB_ANON_ROLE=${PGRST_DB_ANON_ROLE}
+      # - PGRST_SERVER_PROXY_URI=${PGRST_SERVER_PROXY_URI}
+    depends_on:
+      - postgres
+  develop:
+    # We run the flask server here
+    container_name: asv-main
+    build:
+      context: ./
+      dockerfile: docker/develop
+    volumes:
+      - type: bind
+        source: ./
+        target: /code
+    env_file:
+      - .env
+    environment:
+      - FLASK_DEBUG=1
+    ports:
+      - 5000:5000
+    depends_on:
+      - postgrest
