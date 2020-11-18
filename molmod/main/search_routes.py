@@ -11,6 +11,8 @@ from werkzeug.exceptions import HTTPException
 from molmod.forms import (ApiResultForm, ApiSearchForm)
 from molmod.main.main_routes import mpdebug
 
+from ..config import get_config
+CONFIG = get_config()
 
 search_bp = Blueprint('search_bp', __name__,
                       template_folder='templates')
@@ -55,7 +57,7 @@ def request_drop_options(field):
     limit = 25
     offset = (int(request.form['page']) - 1) * limit
     payload.update({'nlimit': limit, 'noffset': offset})
-    url = "http://localhost:3000/rpc/app_drop_options"
+    url = f"{CONFIG.POSTGREST}/rpc/app_drop_options"
     payload = json.dumps(payload)
     headers = {'Content-Type': 'application/json'}
     try:
