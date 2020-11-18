@@ -3,3 +3,4 @@ __pycache__/
 test.py
 postgres-data/
 venv/
+personal/
