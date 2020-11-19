@@ -1,0 +1,23 @@
+#FROM python:3.8-buster
+FROM conda/miniconda3-centos7
+
+RUN mkdir /code
+COPY /environment-linux.yml /code
+
+WORKDIR /code
+
+# setup conda shell
+RUN conda init bash
+
+# install conda files
+RUN conda config --set auto_activate_base false
+RUN conda env create -f environment-linux.yml
+
+# activate environment by hand, as the conda environment in
+# docker containers work slightly different to regular conda
+# environments.
+ENV FLASK_APP=molmod
+ENV FLASK_ENV=development
+ENV FLASK_RUN_HOST="0.0.0.0"
+ENV SECRET_KEY="very_secret_key"
+CMD ["conda", "run", "-n", "flapp", "python3", "-m", "flask", "run"]
