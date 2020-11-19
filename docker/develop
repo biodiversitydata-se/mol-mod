@@ -5,7 +5,6 @@
 
 # https://hub.docker.com/r/ncbi/blast/tags
 FROM ncbi/blast:2.10.1
-#FROM python:3.9-slim-buster
 
 # create dir
 RUN mkdir /code
