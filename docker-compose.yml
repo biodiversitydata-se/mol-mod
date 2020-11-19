@@ -74,3 +74,20 @@ services:
       - 5000:5000
     depends_on:
       - postgrest
+  conda:
+    # We run the conda environment in a container
+    container_name: asv-conda
+    build:
+      context: ./
+      dockerfile: docker/conda
+    volumes:
+      - type: bind
+        source: ./
+        target: /code
+    env_file:
+      - .env
+    ports:
+      # we bind to a different port so that we don't collide with develop
+      - 5001:5000
+    depends_on:
+      - postgrest
