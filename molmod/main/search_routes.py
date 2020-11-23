@@ -72,9 +72,23 @@ def request_drop_options(field):
 
 @search_bp.route('/search_run', methods=['POST'])
 def search_run():
-
     # Set base URL for api search
-    url = f"{app.config['API_URL']}/app_search_mixs_tax"
+    url = f"{CONFIG.POSTGREST}/app_search_mixs_tax"
+
+    # Example on reducing lines of code using for loops
+    # search_filters = ['gene', 'sub', 'fw_prim', 'rv_prim', 'kingdom', 'phylum', 'classs', 'oorder', 'family', 'genus',
+    #                  'species']
+
+    # selected_genes_and_primers = {}
+    # for search_filter in search_filters:
+    #    value = request.form.getlist(search_filter)
+    #    if value:
+    #        selected_genes_and_primers[search_filter] = ','.join(map(str, value))
+
+    # if selected_genes_and_primers:
+    #    url += '?'
+    #    for search_filter, value in selected_genes_and_primers.items():
+    #        url += f'&{search_filter}=in.({value})'
 
     # Get selected genes and/or primers
     gene_lst = request.form.getlist('gene')
