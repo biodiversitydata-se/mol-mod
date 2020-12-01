@@ -6,9 +6,6 @@ Uses some (e.g. BLAST) code from [Baltic sea Reference Metagenome web server](ht
 ### Overview
 Flask + jQuery app for BLAST and metadata search of sequence-based occurrences in SBDI, via separate BLAST and Amplicon Sequence Variant (ASV) databases. Views of the ASV db are exposed via [postgREST server](https://postgrest.org/en/v7.0.0/index.html), and accessed in API calls (for metadata search part). The BLAST db was also pre-built from one of these views, using additional python code (see **misc/make-blastdb-from-api.py**).
 
-### Branches
-* **taxonid:** 'master' branch
-
 ### Files and folders
 * **molmod:** Flask app
 * **misc:** Auxiliary files needed to run app, e.g. DB dump, API config and some test query files for BLAST.
