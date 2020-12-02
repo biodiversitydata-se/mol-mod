@@ -5,7 +5,7 @@ import os
 from flask import Flask
 from flask_wtf.csrf import CSRFProtect
 
-from config import get_config
+from .config import get_config
 
 
 def create_app():

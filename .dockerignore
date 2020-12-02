@@ -1,0 +1,5 @@
+docker/
+misc/
+postgres-data/
+venv/
+personal/
