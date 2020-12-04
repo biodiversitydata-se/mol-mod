@@ -9,7 +9,7 @@ FORMAT="tar" # change to 'plain' for plain SQL
 if [[ "$1" == "-h" ]]
 then
   cat << HELP
-USAGE: ./baskup.sh [restore [filename] | data]
+USAGE: ./backup.sh [restore [filename] | data]
 
 Given no arguments, this script will use the variables in .env to create a
 database backup.
