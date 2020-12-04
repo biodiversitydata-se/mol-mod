@@ -1,6 +1,4 @@
 version: "3.8"
-volumes:
-  db-data:
 services:
   postgres:
     restart: always
@@ -15,8 +13,7 @@ services:
       - ./misc/db-roles.sql:/docker-entrypoint-initdb.d/03-roles.sql
       # I put the database files in a local directory so that it's easy to clear
       # them.
-      #- ./postgres-data:/var/lib/postgresql/data
-      - db-data:/var/lib/postgresql/data
+      - ./postgres-data:/var/lib/postgresql/data
     # We load user and password information from the default environment
     # variable file
     env_file:
