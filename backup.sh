@@ -6,7 +6,7 @@ TIMESTAMP=$(date +"%Y-%m-%d_%H%M")
 CONTAINER="asv-db"
 FORMAT="tar" # change to 'plain' for plain SQL
 
-if [[ "$1" == "-h" ]]
+if [[ "$1" == "-h" ]] | [[ "$1" == "--help" ]]
 then
   cat << HELP
 USAGE: ./backup.sh [restore [filename] | data]
