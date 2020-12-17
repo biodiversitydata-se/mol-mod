@@ -2,7 +2,9 @@
 import sys
 
 from flask import Blueprint, flash
-from flask import redirect, render_template
+from flask import render_template
+
+from flask import current_app as app
 
 
 main_bp = Blueprint('main_bp', __name__,
@@ -12,7 +14,6 @@ main_bp = Blueprint('main_bp', __name__,
 # Temp - for debugging
 @main_bp.route('/test')
 def test():
-    # var = app.config
     var = app.instance_path
     return render_template('test.html', var=var)
 
@@ -37,4 +38,5 @@ def other_page(page_name):
 
 def mpdebug(var, name=''):
     '''Prints var to console. Ex: mpdebug('gene', gene))'''
-    print(f'\n\nDEBUG: Variable: {name}, Value: {var}, Type: {type(var)}', file=sys.stdout)
+    print(f'\n\nDEBUG: Variable: {name}, Value: {var}, Type: {type(var)}',
+          file=sys.stdout)
