@@ -2,10 +2,9 @@
 
 import json
 
-import pandas as pd
 import requests
-from flask import Blueprint, current_app as app, flash, jsonify
-from flask import make_response, redirect, render_template, request, url_for
+from flask import Blueprint
+from flask import render_template, request
 from werkzeug.exceptions import HTTPException
 
 from molmod.forms import (ApiResultForm, ApiSearchForm)
@@ -47,10 +46,12 @@ def search():
 def request_drop_options(field):
     '''Forwards ajax request for filtered dropdown options to
     postgREST/postgres function, and returns paginated JSON result'''
-    # Make dict of posted filters (e.g. selected kingdom(s), received as 'kingdom[]')
+    # Make dict of posted filters
+    # (e.g. selected kingdom(s), received as 'kingdom[]')
     # but exclude current field, to allow multiple choice
     payload = {k.replace('[]', ''): request.form.getlist(k)
-               for k, v in request.form.items() if k.replace('[]', '') not in ['term', 'page', field]}
+               for k, v in request.form.items() if k.replace('[]', '')
+               not in ['term', 'page', field]}
     # Add (typed search) term, and field to be filtered, as str
     payload.update({'field': field, 'term': request.form['term']})
     # Add pagination
@@ -62,12 +63,13 @@ def request_drop_options(field):
     headers = {'Content-Type': 'application/json'}
     try:
         response = requests.request("POST", url, headers=headers, data=payload)
-    except:
+    except Exception:
         return {[]}
     else:
         results = json.loads(response.text)[0]['data']['results']
         count = json.loads(response.text)[0]['data']['count']
-        return {'results': results, 'pagination': {'more': (offset + limit) < count}}
+        return {'results': results,
+                'pagination': {'more': (offset + limit) < count}}
 
 
 @search_bp.route('/search_run', methods=['POST'])

@@ -7,11 +7,10 @@ import subprocess
 
 import pandas as pd
 from flask import Blueprint, current_app as app, flash, request
-from flask import render_template, url_for
+from flask import render_template
 from flask import jsonify
 
 from molmod.forms import (BlastResultForm, BlastSearchForm)
-from molmod.main.main_routes import mpdebug
 
 from ..config import get_config
 CONFIG = get_config()
@@ -49,7 +48,9 @@ def blast_run():
     with subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE) as process:
         # Send seq from sform to stdin, read output & error until 'eof'
-        blast_stdout, stderr = process.communicate(input=request.form['sequence'].encode())
+        blast_stdout, stderr = process.communicate(
+            input=request.form['sequence'].encode()
+        )
         # Get exit status
         returncode = process.returncode
 
@@ -58,7 +59,10 @@ def blast_run():
             # Make in-memory file-like string from blast-output
             with io.StringIO(blast_stdout.decode()) as stdout_buf:
                 # Read into dataframe
-                df = pd.read_csv(stdout_buf, sep='\t', index_col=None, header=None, names=names)
+                df = pd.read_csv(
+                    stdout_buf, sep='\t', index_col=None,
+                    header=None, names=names
+                )
 
                 # If no hits
                 if len(df) == 0:
@@ -86,15 +90,18 @@ def blast_run():
 
 
 def get_sseq_from_api(asv_ids: list = []):
-    ''' Requests Subject sequences from API, as these are not available in BLAST response'''
+    ''' Requests Subject sequences from API,
+        as these are not available in BLAST response'''
     url = f"{CONFIG.POSTGREST}/rpc/app_seq_from_id"
     payload = json.dumps({'ids': asv_ids})
     headers = {'Content-Type': 'application/json'}
     try:
         response = requests.request("POST", url, headers=headers, data=payload)
-        sdict = {item['asv_id']: item['asv_sequence'] for item in json.loads(response.text)}
+        sdict = {item['asv_id']: item['asv_sequence']
+                 for item in json.loads(response.text)
+                 }
         return sdict
-    except:
-        msg = 'Sorry, but ASV sequences were not successfully returned.'
+    except Exception:
+        msg = 'Sorry, but no ASV sequences were successfully returned.'
         flash(msg, category='error')
         return {}
