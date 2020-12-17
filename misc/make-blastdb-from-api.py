@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
 '''
-Creates BLAST DB from Amplicon Sequence Variant (ASV) DB view (PostgreSQL),
-exposed via API (PostgREST), and BLASTs TSV query seqs against this DB (as a test).
-Saves output to dataframe, and prints table to screen.
+Creates BLAST DB from Amplicon Sequence Variant (ASV) DB view
+(PostgreSQL), exposed via API (PostgREST), and BLASTs TSV query
+seqs against this DB (as a test). Saves output to dataframe,
+and prints table to screen.
 '''
 import json
 import os
 import subprocess
 from io import StringIO
-from subprocess import check_output
 
 import pandas as pd
 import requests
@@ -25,7 +25,8 @@ def main():
     get_fasta_from_api(target_fa)
 
     # Make BLAST db from fasta file
-    subprocess.call(f"makeblastdb -in {target_fa} -out {db} -dbtype nucl -parse_seqids", shell=True)
+    subprocess.call(f'''makeblastdb -in {target_fa} -out {db} -dbtype nucl
+        -parse_seqids''', shell=True)
     # Remove fasta file
     os.remove(target_fa)
 
@@ -38,9 +39,8 @@ def blast_to_df(qry_pth, db_pth, id, cov):
     # BLAST query against target
     hdrs = ["qseqid", "sseqid", "pident", "qlen", "slen", "length", "qcovs",
             "qcovhsp", "mismatch", "gapopen", "evalue", "bitscore"]
-    cmd = f"blastn -query {qry_pth} -db {db_pth} -perc_identity {id} -qcov_hsp_perc {cov} \
-    -outfmt '6 {' '.join(hdrs)}'"
-    # print(cmd)
+    cmd = f'''blastn -query {qry_pth} -db {db_pth} -perc_identity {id}
+        -qcov_hsp_perc {cov} -outfmt '6 {' '.join(hdrs)}'''
     output = subprocess.check_output(cmd, shell=True, universal_newlines=True)
     outp_df = pd.read_csv(StringIO(output), sep='\t', names=hdrs)
     return outp_df
