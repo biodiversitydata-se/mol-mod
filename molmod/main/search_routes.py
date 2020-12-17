@@ -169,7 +169,7 @@ def search_run():
     try:
         response = requests.get(url)
         response.raise_for_status()
-    except (requests.ConnectionError, requests.exceptions.HTTPError) as e:
+    except (requests.ConnectionError, requests.exceptions.HTTPError):
         # msg = 'Sorry, search is disabled due to DB connection failure.'
         # # return "Error: " + str(e)
         # flash(msg, category='error')
