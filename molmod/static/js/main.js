@@ -8,7 +8,7 @@ $(document).ready(function() {
         // BLAST PAGE
         case 'blast':
             $('#sequence_textarea').on('input', function(){
-                $('#sequence_count').text($(this).val().length);
+                $('#sequence_count').text($(this).val().length+'/500000 characters');
             });
             var columns = [
                 { data: null, orderable: false, defaultContent: '', className: 'select-checkbox'},
