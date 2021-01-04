@@ -22,14 +22,10 @@ def fasta_length_check(form, field):
     if len(field.data) < 1:
         raise ValidationError('Please submit an input sequence')
     if len(field.data) > 500000:
-        raise ValidationError('Input sequence must be less than 500000 characters')
+        raise ValidationError('''Input sequence must be less
+                              than 500000 characters''')
     if field.data[0] != '>':
         raise ValidationError('Input sequence must be in fasta format')
-    # Count number of fasta headers:
-    all_headers = [line for line in field.data.split(
-        '\n') if (not len(line) == 0) and (line[0] == '>')]
-    # if len(all_headers) != 1:
-    #     raise ValidationError('Only one input sequence at a time is allowed')
 
 
 def identity_check(form, field):
@@ -55,7 +51,8 @@ def cover_check(form, field):
 
 
 class BlastSearchForm(FlaskForm):
-    sequence = TextAreaField(u'sequence', [fasta_length_check], default=DEFAULT_BLAST_GENE)
+    sequence = TextAreaField(u'sequence',
+                             [fasta_length_check], default=DEFAULT_BLAST_GENE)
     min_identity = IntegerField(u'min_identity', [identity_check], default=97)
     min_qry_cover = IntegerField(u'min_qry_cover', [cover_check], default=100)
     blast_for_seq = SubmitField(u'BLAST')
