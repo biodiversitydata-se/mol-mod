@@ -1,6 +1,9 @@
 {% extends 'layout.html' %}
 {% block body %}
 <div class='container'>
+    <div>
+        <p><h3>Search for ASVs and Bioatlas records using BLAST</h3></p>
+    </div>
     <form action='' method='post' id='sform' name='sform' class='search_function'>
         {{ sform.csrf_token }}
         <div class='row'>
