@@ -21,7 +21,7 @@ $(document).ready(function() {
             break;
 
         // API SEARCH PAGE
-        case 'search':
+        case 'filter':
 
             // Set format for select2-dropdown boxes
             $.fn.select2.defaults.set('theme', 'bootstrap');
@@ -58,7 +58,7 @@ $(document).ready(function() {
                 { data: 'fw_sequence', visible: false },
                 { data: 'rv_sequence', visible: false }
             ];
-            var dTbl = makeDataTbl('/search_run', columns);
+            var dTbl = makeDataTbl('/filter_run', columns);
 
             break;
     }

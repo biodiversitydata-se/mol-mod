@@ -64,7 +64,7 @@
         <hr>
         <div class='row'>
             <div class='col-md-1'>
-                {{ sform.search_for_asv(class='btn btn-primary', id='search_for_asv') }}
+                {{ sform.filter_asvs(class='btn btn-primary', id='filter_asvs') }}
             </div>
             <div class='col-md-1'>
                 <button type='button' class='btn btn-default' id='clear_all'>Clear all</button>
@@ -81,7 +81,7 @@
         {{ rform.csrf_token }}
         <div class='row'>
             <div class='col-md-12'>
-                <table id='api_result_table' class='dataframe table table-striped'>
+                <table id='filter_result_table' class='dataframe table table-striped'>
                     <thead>
                         <tr>
                             <th style="text-align: center"><input type="checkbox" id="select_all" /></th>
