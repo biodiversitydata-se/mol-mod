@@ -4,7 +4,7 @@
     <div class="container">
         <h1>Swedish ASV database</h1>
         <p>Welcome to the database of Swedish Amplicon Sequence Variants (ASVs)
-            <br> - an interface to sequence-based observations in <a href="https://bioatlas.se/">Biodiversity Atlas Sweden.</a>
+            <br> - an interface to sequence-based observations in <a href="https://bioatlas.se/">Biodiversity Atlas Sweden</a>
         </p>
     </div>
 </div>
@@ -12,12 +12,12 @@
 <div class="container">
     <div class="row">
         <div class="col-md-6">
-            <p>Search for ASVs and Bioatlas occurrences <br>using the Basic Local Alignment Search Tool (BLAST).
+            <p>Search for ASVs and Bioatlas records using<br>the Basic Local Alignment Search Tool (BLAST)
             </p>
             <p><a class="btn btn-primary" id=blast_link href="{{ url_for('blast_bp.blast') }}" role="button">BLAST</a></p>
         </div>
         <div class="col-md-6">
-            <p>Search for ASVs and Bioatlas occurrences <br>using filters on target genes, primers and taxonomy.
+            <p>Search for ASVs and Bioatlas records using<br>filters on target genes, primers and taxonomy
             </p>
             <p><a class="btn btn-primary"  id=filter_link href="{{ url_for('filter_bp.search') }}" role="button">Filter</a></p>
         </div>
