@@ -7,6 +7,9 @@ $(document).ready(function() {
 
         // BLAST PAGE
         case 'blast':
+            $('#sequence_textarea').on('input', function(){
+                $('#sequence_count').text($(this).val().length);
+            });
             var columns = [
                 { data: null, orderable: false, defaultContent: '', className: 'select-checkbox'},
                 { data: 'asv_id', visible: false },
