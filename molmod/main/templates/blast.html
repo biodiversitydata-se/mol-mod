@@ -2,7 +2,16 @@
 {% block body %}
 <div class='container'>
     <div>
-        <p><h3>Search for ASVs and Bioatlas records using BLAST</h3></p>
+        <br>
+        <h3>Search for ASVs and Bioatlas records using BLAST</h3>
+        <br>
+        <p>Use the Basic Local Alignment Search Tool (BLAST)
+           to find Amplicon Sequence Variants (ASVs)
+           and Bioatlas occurrences matching your supplied query sequence(s).
+           Filter BLAST hits on the minimum percentage of identical matches
+           and/or aligned query nucleotides.
+       </p>
+
     </div>
     <form action='' method='post' id='sform' name='sform' class='search_function'>
         {{ sform.csrf_token }}
@@ -13,8 +22,10 @@
                 {% else %}
                     <div class='form-group'>
                 {% endif %}
-                        <h6><b>Query sequence(s) </b>
-                            <span id='sequence_count'>2108</span>/500000 characters</h6>
+                        <p>
+                            <b>Query sequence(s), in fasta format
+                            <span style='float: right' id='sequence_count'>2108/500000 characters</span></b>
+                        </p>
                         {{ sform.sequence(id='sequence_textarea', rows=8, cols=80, maxlength='500000', class='form-control') }}
                         <span id='helpBlock2' class='help-block'>
                             {% for error in sform.sequence.errors %}
@@ -26,7 +37,7 @@
         </div>
         <div class='row'>
             <div class='col-md-3'>
-                <h6><b>Minimum identity (%)</b></h6>
+                <p><b>Minimum identity (%)</b></p>
                 {% if sform.min_identity.errors %}
                     <div class='form-group has-error'>
                 {% else %}
@@ -41,7 +52,7 @@
                     </div>
             </div>
             <div class='col-md-3'>
-                <h6><b>Minimum query coverage (%)</b></h6>
+                <p><b>Minimum query coverage (%)</b></p>
                 {% if sform.min_qry_cover.errors %}
                     <div class='form-group has-error'>
                 {% else %}
