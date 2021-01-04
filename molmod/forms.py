@@ -3,7 +3,7 @@
 from flask import current_app as app
 from flask_wtf import FlaskForm
 from wtforms import (BooleanField, IntegerField, SelectMultipleField,
-                     StringField, SubmitField, TextAreaField, ValidationError)
+                     SubmitField, TextAreaField, ValidationError)
 
 DEFAULT_BLAST_GENE = """>test-seq-1
 TGGGGAATTTTGCGCAATGGGGGAAACCCTGACGCAGCAACGCCGCGTGGAGGATGAAGTCCCTTGGGACGTAAACTCCTTTCGACCGGGACGATTATGACGGTACCGGTGGAAGAAGCCCCGGCTAACTTCGTGCCAGCAGCCGCGGTAATACGAGGGGGGCAAGCGTTGTTCGGAATTATTGGGCGTAAAGGGCGCGTAGGCGGTGCGGTAAGTCACCTGTGAAACCTCTGGGCTCAACCCAGAGCCTGCAGGCGAAACTGCCGTGCTGGAGTATGGGAGAGGTGCGTGGAATTCCCGGTGTAGCGGTGAAATGCGTAGATATCGGGAGGAACACCTGTGGCGAAAGCGGCGCACTGGACCATAACTGACGCTGAGGCGCGAAAGCTAGGGGAGCAAACA
@@ -37,7 +37,7 @@ def identity_check(form, field):
     if field.data is not None:
         try:
             data_i = int(field.data)
-        except:
+        except Exception:
             return None
         if data_i < 0 or data_i > 100:
             raise ValidationError('Value between 0 and 100, please.')
@@ -48,7 +48,7 @@ def cover_check(form, field):
     if field.data is not None:
         try:
             data_i = int(field.data)
-        except:
+        except Exception:
             return None
         if data_i < 0 or data_i > 100:
             raise ValidationError('Value between 0 and 100, please.')
