@@ -67,7 +67,7 @@ class BlastResultForm(FlaskForm):
     redirect_url = app.config['REDIRECT_URL']
 
 
-class ApiSearchForm(FlaskForm):
+class FilterSearchForm(FlaskForm):
     gene = SelectMultipleField('gene', choices=[])
     sub = SelectMultipleField('sub', choices=[])
     fw_prim = SelectMultipleField('fw_prim', choices=[])
@@ -80,7 +80,7 @@ class ApiSearchForm(FlaskForm):
     genus = SelectMultipleField('genus', choices=[])
     species = SelectMultipleField('species', choices=[])
 
-    search_for_asv = SubmitField(u'Search')
+    filter_asvs = SubmitField(u'Filter')
 
     # def validate(self):
     #     '''Requires at least one selected gene or primer'''
@@ -99,7 +99,7 @@ class ApiSearchForm(FlaskForm):
     #     return result
 
 
-class ApiResultForm(FlaskForm):
+class FilterResultForm(FlaskForm):
     asv_id = BooleanField(u'asv_id')
     batch_url = app.config['BATCH_SEARCH_URL']
     redirect_url = app.config['REDIRECT_URL']

@@ -7,21 +7,21 @@ from flask import Blueprint
 from flask import render_template, request
 from werkzeug.exceptions import HTTPException
 
-from molmod.forms import (ApiResultForm, ApiSearchForm)
+from molmod.forms import (FilterResultForm, FilterSearchForm)
 from molmod.main.main_routes import mpdebug
 
 from ..config import get_config
 CONFIG = get_config()
 
-search_bp = Blueprint('search_bp', __name__,
+filter_bp = Blueprint('filter_bp', __name__,
                       template_folder='templates')
 
 
-@search_bp.route('/search', methods=['GET', 'POST'])
+@filter_bp.route('/filter', methods=['GET', 'POST'])
 def search():
 
-    sform = ApiSearchForm()
-    rform = ApiResultForm()
+    sform = FilterSearchForm()
+    rform = FilterResultForm()
 
     # Feed selected dropdown options back to client
     sform.gene.choices = [(x, x) for x in request.form.getlist('gene')]
@@ -37,12 +37,12 @@ def search():
     sform.species.choices = [(x, x) for x in request.form.getlist('species')]
 
     # Only include result form if SEARCH was clicked
-    if request.form.get('search_for_asv'):
-        return render_template('search.html', sform=sform, rform=rform)
-    return render_template('search.html', sform=sform)
+    if request.form.get('filter_asvs'):
+        return render_template('filter.html', sform=sform, rform=rform)
+    return render_template('filter.html', sform=sform)
 
 
-@search_bp.route('/request_drop_options/<field>', methods=['GET', 'POST'])
+@filter_bp.route('/request_drop_options/<field>', methods=['GET', 'POST'])
 def request_drop_options(field):
     '''Forwards ajax request for filtered dropdown options to
     postgREST/postgres function, and returns paginated JSON result'''
@@ -72,8 +72,8 @@ def request_drop_options(field):
                 'pagination': {'more': (offset + limit) < count}}
 
 
-@search_bp.route('/search_run', methods=['POST'])
-def search_run():
+@filter_bp.route('/filter_run', methods=['POST'])
+def filter_run():
     # Set base URL for api search
     url = f"{CONFIG.POSTGREST}/app_search_mixs_tax"
 
