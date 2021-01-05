@@ -5,13 +5,10 @@
         <br>
         <h3>Search for ASVs and Bioatlas records using BLAST</h3>
         <br>
-        <p>Use the Basic Local Alignment Search Tool (BLAST)
-           to find Amplicon Sequence Variants (ASVs)
-           and Bioatlas occurrences matching your supplied query sequence(s).
-           Filter BLAST hits on the minimum percentage of identical matches
-           and/or aligned query nucleotides.
+        <p>Use the Basic Local Alignment Search Tool (BLAST) to find Amplicon
+           Sequence Variants (ASVs) and Bioatlas occurrence records that match your query sequence(s) and alignment criteria
        </p>
-
+       <br>
     </div>
     <form action='' method='post' id='sform' name='sform' class='search_function'>
         {{ sform.csrf_token }}
@@ -23,21 +20,26 @@
                     <div class='form-group'>
                 {% endif %}
                         <p>
-                            <b>Query sequence(s), in fasta format
-                            <span style='float: right' id='sequence_count'>2108/500000 characters</span></b>
+                            <b>Query sequence(s)</b>
+                            <br>Nucleotide sequence(s), in fasta format, to be matched against ASVs (subject sequences) in reference database
+                            <span style='float: right' id='sequence_count'>2108/500000 characters</span>
                         </p>
-                        {{ sform.sequence(id='sequence_textarea', rows=8, cols=80, maxlength='500000', class='form-control') }}
-                        <span id='helpBlock2' class='help-block'>
-                            {% for error in sform.sequence.errors %}
-                            {{ error }}
-                            {% endfor %}
-                        </span>
+                            {{ sform.sequence(id='sequence_textarea', rows=8, cols=80, maxlength='500000', class='form-control') }}
+                            <span id='helpBlock2' class='help-block'>
+                                {% for error in sform.sequence.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </span>
                     </div>
             </div>
         </div>
+        <br>
         <div class='row'>
             <div class='col-md-3'>
-                <p><b>Minimum identity (%)</b></p>
+                <p>
+                    <b>Minimum identity (Id %)</b>
+                        <br>Share of exact matches between aligned query and subject bases
+                </p>
                 {% if sform.min_identity.errors %}
                     <div class='form-group has-error'>
                 {% else %}
@@ -52,7 +54,10 @@
                     </div>
             </div>
             <div class='col-md-3'>
-                <p><b>Minimum query coverage (%)</b></p>
+                <p>
+                    <b>Minimum query coverage (Cov %)</b>
+                    <br>Share of aligned query bases, either matching or mismatching subject
+                </p>
                 {% if sform.min_qry_cover.errors %}
                     <div class='form-group has-error'>
                 {% else %}
@@ -67,6 +72,7 @@
                     </div>
             </div>
         </div>
+        <br>
         <div class='row'>
             <div class='col-md-4'>
                 {{ sform.blast_for_seq(class='btn btn-primary', id='blast_for_seq') }}
