@@ -42,6 +42,8 @@ def blast_run():
     cmd += ['-db', app.config['BLAST_DB']]
     names = ['qacc', 'sacc', 'pident', 'qcovhsp', 'evalue']
     cmd += ['-outfmt', f'6 {" ".join(names)}']
+    # Only report x best High Scorting Pair(s) per sequence hit
+    # cmd += ['-max_hsps', '1']
     cmd += ['-num_threads', '4']
 
     # Spawn system process (BLAST) and direct data to file handles
