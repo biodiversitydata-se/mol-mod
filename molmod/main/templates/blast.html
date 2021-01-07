@@ -38,8 +38,8 @@
         <div class='row'>
             <div class='col-md-3'>
                 <p>
-                    <b>Minimum identity (Id %)</b>
-                        <br>Percentage of exact matches between aligned query and subject bases
+                    <b>Min. identity (Id %)</b>
+                        <br>Share of exact base matches
                 </p>
                 {% if sform.min_identity.errors %}
                     <div class='form-group has-error'>
@@ -56,8 +56,8 @@
             </div>
             <div class='col-md-3'>
                 <p>
-                    <b>Minimum query coverage (Cov %)</b>
-                    <br>Percentage of aligned query bases, matching or mismatching subject
+                    <b>Min. query coverage (Cov %)</b>
+                    <br>Share of aligned query bases
                 </p>
                 {% if sform.min_qry_cover.errors %}
                     <div class='form-group has-error'>
