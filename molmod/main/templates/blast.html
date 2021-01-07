@@ -6,7 +6,8 @@
         <h3>Search for ASVs and Bioatlas records using BLAST</h3>
         <br>
         <p>Use the Basic Local Alignment Search Tool (BLAST) to find Amplicon
-           Sequence Variants (ASVs) and Bioatlas occurrence records that match your query sequence(s) and alignment criteria
+           Sequence Variants (ASVs), and associated Bioatlas occurrence records,
+           that match your query sequence(s) and alignment criteria
        </p>
        <br>
     </div>
@@ -38,7 +39,7 @@
             <div class='col-md-3'>
                 <p>
                     <b>Minimum identity (Id %)</b>
-                        <br>Share of exact matches between aligned query and subject bases
+                        <br>Percentage of exact matches between aligned query and subject bases
                 </p>
                 {% if sform.min_identity.errors %}
                     <div class='form-group has-error'>
@@ -56,7 +57,7 @@
             <div class='col-md-3'>
                 <p>
                     <b>Minimum query coverage (Cov %)</b>
-                    <br>Share of aligned query bases, either matching or mismatching subject
+                    <br>Percentage of aligned query bases, matching or mismatching subject
                 </p>
                 {% if sform.min_qry_cover.errors %}
                     <div class='form-group has-error'>

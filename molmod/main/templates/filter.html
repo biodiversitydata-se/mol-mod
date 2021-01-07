@@ -1,6 +1,18 @@
 {% extends "layout.html" %}
 {% block body %}
 <div class='container'>
+    <div>
+        <br>
+        <h3>Search for ASVs and Bioatlas records using filters</h3>
+        <br>
+        <p>Combine filters on sequencing details and taxonomy to find Amplicon
+           Sequence Variants (ASVs) and associated Bioatlas occurrence records.
+           <br>Selected filters are combined with logical AND,
+           and limit available options in remaining dropdowns
+       </p>
+       <br>
+    </div>
+
     <form action='' method='post' id='sform' name='sform' class='search_function' >
         {{ sform.csrf_token }}
         <div class='row'>
