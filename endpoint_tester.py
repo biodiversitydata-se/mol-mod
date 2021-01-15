@@ -21,9 +21,11 @@ except ModuleNotFoundError:
     sys.stderr.write(" $ pip3 install -r molmod/requirements.txt\n")
     sys.exit(1)
 
-# There is an abstract method for error reporting in HTMLParser, but it wouldn't
-# help us to implement it.
-#pylint: disable=abstract-method
+# There is an abstract method for error reporting in HTMLParser,
+# but it wouldn't help us to implement it.
+# pylint: disable=abstract-method
+
+
 class CSRFFinder(HTMLParser):
     """
     Simple HTMLParser that reports the `value` of any tag that has
@@ -38,6 +40,7 @@ class CSRFFinder(HTMLParser):
         if attr_dict.get('id', None) == 'csrf_token':
             self.csrf_token = attr_dict.get('value', None)
 
+
 class EndpointTester():
     """
     This class keeps track of an endpoint, it's current statistics, and the
@@ -46,7 +49,7 @@ class EndpointTester():
 
     # Pylint prefers to have a max of 5 arguments, but I think we need all 6 to
     # keep the class easy to use.
-    #pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments
     def __init__(self, host, endpoint, protocol='GET', data=None, csrf=''):
         """
         Sets the endpoint, protocol, and optional data for the request to test.
@@ -86,7 +89,8 @@ class EndpointTester():
         """
         req_type = {'GET': requests.get, 'POST': requests.post}[self.protocol]
         endpoint = f'{self.host}/{self.endpoint}'
-        func = partial(req_type, endpoint, headers=self.headers, data=self.data)
+        func = partial(req_type, endpoint, headers=self.headers,
+                       data=self.data)
 
         # test to see that we're testing a valid request
         test = func()
@@ -108,7 +112,7 @@ class EndpointTester():
 
 if __name__ == '__main__':
     HOST = 'http://localhost:5000'
-    ENDPOINTS = [('request_drop_options/gene', 'POST', {'term':'', 'page':1},
+    ENDPOINTS = [('request_drop_options/gene', 'POST', {'term': '', 'page': 1},
                   'filter')]
     TESTERS = [EndpointTester(HOST, *e) for e in ENDPOINTS]
 

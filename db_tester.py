@@ -13,7 +13,7 @@ import subprocess
 from datetime import datetime
 
 # load database connection variables from the environment file
-ENV={}
+ENV = {}
 for line in open('.env'):
     line = line.strip()
     if not line or line[0] == '#':
@@ -21,11 +21,13 @@ for line in open('.env'):
     option, value = line.split('=')
     ENV[option] = value.strip("'")
 
+
 def random_string(length, letters="abcdefghijklmnopqrstuvwxyz"):
     """
     Returns a random string  of length `length` from a set of letters.
     """
     return "".join([random.choice(letters) for _ in range(length)])
+
 
 def execute_on_db(query):
     """
@@ -71,6 +73,7 @@ def execute_on_db(query):
 
     return retvals
 
+
 def print_datasets():
     """
     This function prints a human readable list of which datasets are currently
@@ -91,6 +94,7 @@ def print_datasets():
         for dataset in test:
             logging.info("  - %s", dataset['id'])
 
+
 def insert_random_sampling_event(dataset):
     """
     Inserts a sampling event into the given dataset, with all required fields
@@ -99,27 +103,28 @@ def insert_random_sampling_event(dataset):
     event_id = f"{dataset}-{uuid.uuid1().hex}"
     event_date = datetime.today().strftime('%Y-%m-%d')
     sampling_protocol = 'test'
-    sample_size_value = random.randint(10,1000)
+    sample_size_value = random.randint(10, 1000)
     location_id = 'test'
     decimal_latitude = random.random() * 180 - 90
     decimal_longitude = random.random() * 360 - 180
 
-    execute_on_db(f"""INSERT INTO sampling_event(event_id, dataset_id,
-                                                 event_date, sampling_protocol,
-                                                 sample_size_value, location_id,
-                                                 decimal_latitude,
-                                                 decimal_longitude
-                                                 )
-                        VALUES('{event_id}', '{dataset}', '{event_date}',
-                               '{sampling_protocol}', '{sample_size_value}',
-                               '{location_id}',
-                               '{decimal_latitude}', '{decimal_longitude}');
-                    """)
+    execute_on_db(f"""INSERT INTO sampling_event(
+                      event_id, dataset_id,
+                      event_date, sampling_protocol,
+                      sample_size_value, location_id,
+                      decimal_latitude, decimal_longitude)
+                      VALUES('{event_id}', '{dataset}', '{event_date}',
+                             '{sampling_protocol}', '{sample_size_value}',
+                             '{location_id}',
+                             '{decimal_latitude}', '{decimal_longitude}');
+                   """)
     return event_id
+
 
 def insert_random_mixs(dataset):
     """
-    inserts random values into the mixs table. One entry for each sampling event
+    inserts random values into the mixs table.
+    One entry for each sampling event
     in the given dataset.
     """
     events = execute_on_db(f"""SELECT event_id FROM sampling_event
@@ -157,7 +162,9 @@ def insert_random_mixs(dataset):
 # I want all columns as variables in this function, so I want to have a lot
 # of local variables.
 #
-#pylint: disable=too-many-locals
+# pylint: disable=too-many-locals
+
+
 def insert_random_asvs(dataset, number, batch=100):
     """
     Inserts `number` random asv's into the dataset, prefixed with the dataset
@@ -166,7 +173,7 @@ def insert_random_asvs(dataset, number, batch=100):
     current_batch = []
     for _ in range(int(number)):
         asv_id = f'{dataset}-{uuid.uuid1().hex}'[:36]
-        length = random.randint(200,2500)
+        length = random.randint(200, 2500)
         sequence = random_string(length, "ACTG")
         current_batch += [f"('{asv_id}', '{sequence}')"]
         if len(current_batch) >= batch:
@@ -176,6 +183,7 @@ def insert_random_asvs(dataset, number, batch=100):
     if current_batch:
         execute_on_db(f"""INSERT INTO asv(asv_id, asv_sequence)
                             VALUES {",".join(current_batch)};""")
+
 
 def insert_random_taxon_annotations(dataset, batch=100):
     """
@@ -245,7 +253,7 @@ def insert_random_occurences(event_id, dataset, occurences, batch=100):
     for _ in range(occurences):
         occurence_id = f'{dataset}-{uuid.uuid1().hex}'
         asv_id = random.choice(asvs)
-        organism_quantity = random.randint(1,1000)
+        organism_quantity = random.randint(1, 1000)
         previous_identifications = ''
         asv_id_alias = ''
         current_batch += [f"""('{occurence_id}', '{event_id}', '{asv_id}',
@@ -267,6 +275,7 @@ def insert_random_occurences(event_id, dataset, occurences, batch=100):
                                             asv_id_alias)
                     VALUES {",".join(current_batch)};"""
         execute_on_db(query)
+
 
 def insert_dataset(num_datasets, occurrences):
     """
@@ -300,6 +309,7 @@ def insert_dataset(num_datasets, occurrences):
         # and finally occurrences
         insert_random_occurences(event_id, dataset, occurrences)
 
+
 def purge_test_datasets():
     """
     Removes all datasets where the dataset_id start with TEST, as well as all
@@ -328,6 +338,7 @@ def purge_test_datasets():
     logging.info("Removing test datasets")
     execute_on_db("DELETE FROM dataset WHERE dataset_id LIKE 'TEST%';")
 
+
 if __name__ == '__main__':
     import argparse
 
@@ -337,11 +348,11 @@ if __name__ == '__main__':
                         help=("The database action to perform. Valid options "
                               "are 'list', 'insert', and 'purge'."))
     PARSER.add_argument("--datasets", "-d", type=int, default=1,
-                        help=("sets the number of test datasets to insert into "
-                              "the database, when running 'insert'"))
+                        help=("sets the number of test datasets to insert "
+                              "into the database, when running 'insert'"))
     PARSER.add_argument("--occurrences", "-o", type=int, default=10000,
-                        help=("sets the number of occurrences to insert to new "
-                              "test datasets"))
+                        help=("sets the number of occurrences to insert to "
+                              "new test datasets"))
     PARSER.add_argument("--host", default='http://localhost:5000',
                         help="sets the host for testing endpoints")
     PARSER.add_argument("--replicates", "-r", type=int, default=100,
