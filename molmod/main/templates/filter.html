@@ -5,16 +5,20 @@
         <br>
         <h3>Search for ASVs and Bioatlas records using filters</h3>
         <br>
-        <p>Combine filters on sequencing details and taxonomy to find Amplicon
-           Sequence Variants (ASVs) and associated Bioatlas occurrence records.
+        <p>Find Amplicon Sequence Variants (ASVs) and associated Bioatlas
+           occurrence records using filter search.
            <br>Selected filters are combined with logical AND,
            and limit available options in remaining dropdowns
        </p>
-       <br>
+       <hr>
     </div>
-
     <form action='' method='post' id='sform' name='sform' class='search_function' >
         {{ sform.csrf_token }}
+        <div class='row'>
+            <div class='col-md-3'>
+                <p><i>Sequencing details</i></p>
+            </div>
+        </div>
         <div class='row'>
             <div class='col-md-3'>
                 <p><b>Target gene</b></p>
@@ -39,6 +43,11 @@
         </div>
         <br>
         <hr>
+        <div class='row'>
+            <div class='col-md-3'>
+                <p><i>Taxonomy</i></p>
+            </div>
+        </div>
         <div class='row'>
             <div class='col-md-3'>
                 <p><b>Kingdom</b></p>
