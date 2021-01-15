@@ -7,9 +7,9 @@
         <br>
         <p>Use the Basic Local Alignment Search Tool (BLAST) to find Amplicon
            Sequence Variants (ASVs), and associated Bioatlas occurrence records,
-           that match your query sequence(s) and alignment criteria
+           <br>matching your sequences and alignment criteria
        </p>
-       <br>
+    <hr>
     </div>
     <form action='' method='post' id='sform' name='sform' class='search_function'>
         {{ sform.csrf_token }}
@@ -22,7 +22,7 @@
                 {% endif %}
                         <p>
                             <b>Query sequence(s)</b>
-                            <br>Nucleotide sequence(s), in fasta format, to be matched against ASVs (subject sequences) in reference database
+                            <br>Nucleotide sequence(s), in fasta format, to compare against ASVs (subject sequences) in reference database
                             <span style='float: right' id='sequence_count'>2108/500000 characters</span>
                         </p>
                             {{ sform.sequence(id='sequence_textarea', rows=8, cols=80, maxlength='500000', class='form-control') }}
@@ -39,7 +39,7 @@
             <div class='col-md-3'>
                 <p>
                     <b>Min. identity (Id %)</b>
-                        <br>Share of exact base matches
+                        <br>Share of exact matches in alignment
                 </p>
                 {% if sform.min_identity.errors %}
                     <div class='form-group has-error'>
