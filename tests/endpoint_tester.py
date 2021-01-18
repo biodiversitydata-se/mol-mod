@@ -112,8 +112,14 @@ class EndpointTester():
 
 if __name__ == '__main__':
     HOST = 'http://localhost:5000'
-    ENDPOINTS = [('request_drop_options/gene', 'POST', {'term': '', 'page': 1},
-                  'filter')]
+    ENDPOINTS = [
+        ('request_drop_options/gene', 'POST', {'term': '', 'page': 1}, 'filter'),
+        ('request_drop_options/sub', 'POST', {'term': '', 'page': 1}, 'filter'),
+        # ('request_drop_options/fw_primer', 'POST', {'term': '', 'page': 1}, 'filter'),
+        # ('request_drop_options/rv_primer', 'POST', {'term': '', 'page': 1}, 'filter'),
+        ('request_drop_options/kingdom', 'POST', {'term': '', 'page': 1}, 'filter'),
+        ('request_drop_options/phylum', 'POST', {'term': '', 'page': 1}, 'filter')
+    ]
     TESTERS = [EndpointTester(HOST, *e) for e in ENDPOINTS]
 
     for tester in TESTERS:
