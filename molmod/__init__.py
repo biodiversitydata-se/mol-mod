@@ -13,7 +13,7 @@ def create_app():
     CSRFProtect(app)
 
     with app.app_context():
-        from molmod.main import main_routes, filter_routes, blast_routes
+        from molmod.routes import main_routes, filter_routes, blast_routes
         app.register_blueprint(main_routes.main_bp)
         app.register_blueprint(blast_routes.blast_bp)
         app.register_blueprint(filter_routes.filter_bp)
