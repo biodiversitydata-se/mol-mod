@@ -3,6 +3,7 @@ from flask import Flask
 from flask_wtf.csrf import CSRFProtect
 
 from .config import get_config
+from . import errors
 
 
 def create_app():
@@ -16,5 +17,6 @@ def create_app():
         app.register_blueprint(main_routes.main_bp)
         app.register_blueprint(blast_routes.blast_bp)
         app.register_blueprint(filter_routes.filter_bp)
+        errors.init_app(app)
 
     return app
