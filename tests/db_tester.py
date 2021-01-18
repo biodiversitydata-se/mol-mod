@@ -14,7 +14,7 @@ from datetime import datetime
 
 # load database connection variables from the environment file
 ENV = {}
-for line in open('.env'):
+for line in open('../.env'):
     line = line.strip()
     if not line or line[0] == '#':
         continue
