@@ -95,7 +95,8 @@ class EndpointTester():
         # test to see that we're testing a valid request
         test = func()
         if test.ok:
-            self.mean_time = 1000*timeit.timeit(func, number=num_requests)
+            tot_time = timeit.timeit(func, number=num_requests)
+            self.mean_time = 1000 * tot_time / num_requests
         else:
             print("Error: invalid request")
 
