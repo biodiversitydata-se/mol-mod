@@ -18,9 +18,8 @@ def error_handler(error):
     # For other Exceptions, use general Server error info
     else:
         code = 500
-        name = error.name
-        description = (f"We encountered an error{name}"
-                       "while trying to fulfill your request")
+        description = ("<p>We encountered an error"
+                       "while trying to fulfill your request</p>")
         name = 'Internal Server Error'
     # Format in specific page, if available (eg. 404), otherwise use generic
     templates_to_try = ['error_{}.html'.format(code), 'error_generic.html']

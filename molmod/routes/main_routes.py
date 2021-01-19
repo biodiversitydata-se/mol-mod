@@ -14,5 +14,5 @@ def index():
 
 @main_bp.route('/about')
 def about():
-    abort(500)
+    # abort(301)
     return render_template('about.html')
