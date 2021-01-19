@@ -3,8 +3,8 @@ from werkzeug.exceptions import default_exceptions, HTTPException
 
 
 def error_handler(error):
-    msg = "Request resulted in {}".format(error)
-    current_app.logger.warning(msg, exc_info=error)
+    # msg = "Request resulted in {}".format(error)
+    # current_app.logger.warning(msg, exc_info=error)
 
     if isinstance(error, HTTPException):
         description = error.get_description(request.environ)
