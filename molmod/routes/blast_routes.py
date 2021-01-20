@@ -40,6 +40,7 @@ def blast_run():
     cmd += ['-perc_identity', request.form['min_identity']]
     cmd += ['-qcov_hsp_perc', request.form['min_qry_cover']]
     cmd += ['-db', app.config['BLAST_DB']]
+    # cmd += ['-db', 'fake-path-to-no-db']
     names = ['qacc', 'sacc', 'pident', 'qcovhsp', 'evalue']
     cmd += ['-outfmt', f'6 {" ".join(names)}']
     # Only report x best High Scorting Pair(s) per sequence hit
@@ -55,9 +56,12 @@ def blast_run():
         )
         # Get exit status
         returncode = process.returncode
+        returntxt = translate_returncode(returncode)
 
         # If BLAST worked (no error)
         if returncode == 0:
+            app.logger.debug(f'BLAST returned {returntxt}')
+
             # Make in-memory file-like string from blast-output
             with io.StringIO(blast_stdout.decode()) as stdout_buf:
                 # Read into dataframe
@@ -87,8 +91,10 @@ def blast_run():
 
         # If BLAST error
         else:
-            # Error will be handled by JQuery
-            return None
+            app.logger.error(f'BLAST returned {returntxt}')
+
+    # Error msg will be sent by JQuery
+    return None
 
 
 def get_sseq_from_api(asv_ids: list = []):
@@ -104,6 +110,18 @@ def get_sseq_from_api(asv_ids: list = []):
                  }
         return sdict
     except Exception:
-        msg = 'Sorry, but no ASV sequences were successfully returned.'
-        flash(msg, category='error')
         return {}
+
+
+def translate_returncode(returncode):
+    error_dict = {
+        0: "Success",
+        1: "Error in query sequence(s) or BLAST options",
+        2: "Error in BLAST database",
+        3: "Error in BLAST engine",
+        4: "Out of memory",
+        5: "Network error connecting to NCBI to fetch sequence data",
+        6: "Error creating output files",
+        255: "Unknown error"
+    }
+    return error_dict[returncode]
