@@ -20,11 +20,13 @@ os.environ['POSTGREST_HOST'] = 'localhost'
 try:
     from molmod import create_app
 except ImportError:
-    print("Error: Couldn't import flask. Make sure that you have activated your"
-          " conda or virtual environment.")
+    print("Error: Couldn't import flask. "
+          "Make sure that you have activated your "
+          "conda or virtual environment.")
     sys.exit(1)
 
 APP = create_app()
+
 
 class FlaskTest(unittest.TestCase):
     """
@@ -65,6 +67,7 @@ class EndpointTest(FlaskTest):
         """
         self.assertEqual(self.app.get("/blast").status_code, 200)
 
+
 class BlastTest(FlaskTest):
     """
     These are also flask endpoints, so they could be in the same class as the
@@ -80,13 +83,14 @@ class BlastTest(FlaskTest):
         Checks that the blast endpoint accepts blast forms.
         """
         correct_form = {'sequence': '>test\nATGTCGATGT',
-                        'min_identify': 99, 'min_qry_cover': 100,}
+                        'min_identify': 99, 'min_qry_cover': 100, }
 
         success = self.app.post("/blast", data=correct_form)
         self.assertEqual(success.status_code, 200)
 
         # This should include more tests to see that the form doesn't accept
         # malformed forms, and returns the appropriate errors and status codes.
+
 
 if __name__ == "__main__":
     unittest.main()

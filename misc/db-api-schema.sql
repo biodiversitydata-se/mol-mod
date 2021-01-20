@@ -9,7 +9,7 @@ CREATE SCHEMA api;
 
 
 CREATE VIEW api.app_filter_mixs_tax AS
- SELECT DISTINCT m.target_gene AS gene,
+ SELECT m.target_gene AS gene,
     m.target_subfragment AS sub,
     ((((m.pcr_primer_name_forward)::text || ': '::text) || (m.pcr_primer_forward)::text))::character varying AS fw_prim,
     ((((m.pcr_primer_name_reverse)::text || ': '::text) || (m.pcr_primer_reverse)::text))::character varying AS rv_prim,
@@ -20,14 +20,13 @@ CREATE VIEW api.app_filter_mixs_tax AS
     ta.family,
     ta.genus,
     ta.specific_epithet AS species
-   FROM :data_schema.asv a,
-    :data_schema.mixs m,
-    :data_schema.occurrence o,
-    :data_schema.taxon_annotation ta
-  WHERE ((a.asv_id = o.asv_id) AND ((o.event_id)::text = (m.event_id)::text) AND (a.asv_id = ta.asv_id));
+   FROM :data_schema.mixs m
+   JOIN :data_schema.occurrence o ON o.event_id = m.event_id
+   JOIN :data_schema.asv a ON a.asv_id = o.asv_id
+   JOIN :data_schema.taxon_annotation ta ON a.asv_id = ta.asv_id;
 
 CREATE VIEW api.app_search_mixs_tax AS
- SELECT DISTINCT a.asv_id,
+ SELECT a.asv_id,
     concat_ws('|'::text, concat_ws(''::text, a.asv_id, '-', ta.kingdom), ta.phylum, ta.class, ta.oorder, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS asv_tax,
     a.asv_sequence,
     m.target_gene AS gene,
@@ -45,11 +44,10 @@ CREATE VIEW api.app_search_mixs_tax AS
     ta.family,
     ta.genus,
     ta.specific_epithet AS species
-   FROM :data_schema.asv a,
-    :data_schema.mixs m,
-    :data_schema.occurrence o,
-    :data_schema.taxon_annotation ta
-  WHERE ((a.asv_id = o.asv_id) AND ((o.event_id)::text = (m.event_id)::text) AND (a.asv_id = ta.asv_id))
+   FROM :data_schema.mixs m
+   JOIN :data_schema.occurrence o ON o.event_id = m.event_id
+   JOIN :data_schema.asv a ON a.asv_id = o.asv_id
+   JOIN :data_schema.taxon_annotation ta ON a.asv_id = ta.asv_id
   ORDER BY a.asv_id, a.asv_sequence, m.target_gene, m.target_subfragment, (((m.pcr_primer_name_forward)::text || ': '::text) || (m.pcr_primer_forward)::text), (((m.pcr_primer_name_reverse)::text || ': '::text) || (m.pcr_primer_reverse)::text);
 
 CREATE FUNCTION api.app_drop_options(field text, noffset bigint, nlimit integer, term text DEFAULT ''::text, kingdom text[] DEFAULT '{}'::text[], phylum text[] DEFAULT '{}'::text[], classs text[] DEFAULT '{}'::text[], oorder text[] DEFAULT '{}'::text[], family text[] DEFAULT '{}'::text[], genus text[] DEFAULT '{}'::text[], species text[] DEFAULT '{}'::text[], gene text[] DEFAULT '{}'::text[], sub text[] DEFAULT '{}'::text[], fw_prim text[] DEFAULT '{}'::text[], rv_prim text[] DEFAULT '{}'::text[]) RETURNS TABLE(data json)
