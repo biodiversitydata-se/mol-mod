@@ -7,7 +7,10 @@ def error_handler(error):
     Handles (almost any) error,
     and renders specific or generic error page
     """
-    # msg = "Request resulted in {}".format(error)
+    msg = "Request \"[37m{} {}[0m\" resulted in {}".format(
+        request.method, request.path, error)
+    current_app.logger.warning(msg)
+    # For full trace
     # current_app.logger.warning(msg, exc_info=error)
 
     # For 4XX and 5XX level HTTP errors, save specific info
