@@ -5,10 +5,8 @@ import json
 import requests
 from flask import Blueprint
 from flask import render_template, request
-from werkzeug.exceptions import HTTPException
 
 from molmod.forms import (FilterResultForm, FilterSearchForm)
-from molmod.main.main_routes import mpdebug
 
 from ..config import get_config
 CONFIG = get_config()
@@ -162,8 +160,6 @@ def filter_run():
     if len(species_lst) > 0:
         species = ','.join(map(str, species_lst))
         url += f'{op}species=in.({species})'
-
-    mpdebug(url)
 
     # Make api request
     try:
