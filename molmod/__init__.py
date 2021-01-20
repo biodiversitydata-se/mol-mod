@@ -2,6 +2,7 @@
 
 import os
 import json
+import logging
 
 from logging.config import dictConfig
 
@@ -29,6 +30,11 @@ def create_app():
     app = Flask(__name__, instance_relative_config=False)
     app.config.from_object(get_config())
 
+    # for some reason we need to explicitly set the flask log level. All other
+    # log settings are taken from the global log
+    app.logger.setLevel(logging.root.level)
+
+    # enable cross-site resource forgery protections
     CSRFProtect(app)
 
     with app.app_context():
