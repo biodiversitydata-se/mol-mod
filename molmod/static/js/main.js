@@ -185,8 +185,9 @@ function makeDataTbl(url, columns) {
     $.fn.dataTable.ext.errMode = 'none';
     var dTbl = $('.table')
         .on('error.dt', function (e, settings, techNote, message) {
-            console.log( 'An error has been reported by DataTables: ', message );
-            $('#flash_container').html('Sorry, the query was not successful. Please, contact support if this error persists.');
+            console.info( 'An error has been reported by DataTables: ', message );
+            $('#flash_container').html('Sorry, something unexpected happened during your query. '
+              + 'Please, contact support if this error persists.');
         })
         .DataTable({
         deferRender: true, // Process one page at a time
