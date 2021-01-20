@@ -7,6 +7,8 @@ def error_handler(error):
     Handles (almost any) error,
     and renders specific or generic error page
     """
+    # Needed to log actual error codes
+    # as all handled errors otherwise give INFO + 200
     msg = "Request \"[37m{} {}[0m\" resulted in {}".format(
         request.method, request.path, error)
     current_app.logger.warning(msg)
