@@ -1,4 +1,4 @@
-from flask import current_app, Markup, render_template, request
+from flask import Markup, render_template, request
 from werkzeug.exceptions import default_exceptions, HTTPException
 
 
@@ -38,5 +38,5 @@ def init_app(app):
     # Werkzeug, see https://werkzeug.palletsprojects.com/en/1.0.x/exceptions/
     for exception in default_exceptions:
         app.register_error_handler(exception, error_handler)
-    # Other exceptions, eg.
+    # Other exceptions
     app.register_error_handler(Exception, error_handler)
