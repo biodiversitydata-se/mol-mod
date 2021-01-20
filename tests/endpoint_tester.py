@@ -116,8 +116,8 @@ if __name__ == '__main__':
     ENDPOINTS = [
         ('request_drop_options/gene', 'POST', {'term': '', 'page': 1}, 'filter'),
         ('request_drop_options/sub', 'POST', {'term': '', 'page': 1}, 'filter'),
-        # ('request_drop_options/fw_primer', 'POST', {'term': '', 'page': 1}, 'filter'),
-        # ('request_drop_options/rv_primer', 'POST', {'term': '', 'page': 1}, 'filter'),
+        ('request_drop_options/fw_prim', 'POST', {'term': '', 'page': 1}, 'filter'),
+        ('request_drop_options/rv_prim', 'POST', {'term': '', 'page': 1}, 'filter'),
         ('request_drop_options/kingdom', 'POST', {'term': '', 'page': 1}, 'filter'),
         ('request_drop_options/phylum', 'POST', {'term': '', 'page': 1}, 'filter')
     ]
