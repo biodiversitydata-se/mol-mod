@@ -189,6 +189,7 @@ function makeDataTbl(url, columns) {
             $('#flash_container').html('Sorry, something unexpected happened during your query. '
               + 'Please, contact support if this error persists.');
             $("#show_occurrences").prop("disabled",true);
+            dTbl.buttons().disable();
         })
         .DataTable({
         deferRender: true, // Process one page at a time
@@ -197,7 +198,10 @@ function makeDataTbl(url, columns) {
             url: url,
             type: 'POST',
             dataSrc: function ( json ) {
-                if (json.data.length < 1) $("#show_occurrences").prop("disabled",true);
+                if (json.data.length < 1) {
+                    $("#show_occurrences").prop("disabled",true);
+                    dTbl.buttons().disable();
+                }
                 return json.data;
             } ,
             data: function () { return $("#sform").serialize(); } // Includes CSRF-token
