@@ -6,7 +6,7 @@ import requests
 import subprocess
 
 import pandas as pd
-from flask import Blueprint, current_app as app, flash, request
+from flask import Blueprint, current_app as app, request
 from flask import render_template
 from flask import jsonify
 
@@ -85,32 +85,38 @@ def blast_run():
                     df['asv_id'] = df['sacc'].str.split('-', expand=True)[0]
                     # Get Subject sequence via ID
                     sdict = get_sseq_from_api(df['asv_id'].tolist())
-                    df['asv_sequence'] = df['asv_id'].map(sdict)
+                    if sdict:
+                        app.logger.debug(f'{len(sdict)} '
+                                         'unique sequences returned från API')
+                        df['asv_sequence'] = df['asv_id'].map(sdict)
+                        return jsonify({'data': df.to_dict('records')})
+                    app.logger.error('No sequences returned från API')
+                    return None
 
-                    return jsonify({'data': df.to_dict('records')})
 
         # If BLAST error
         else:
             app.logger.error(f'BLAST returned {returntxt}')
 
-    # Error msg will be sent by JQuery
+    # Will send 500 to client and error msg will be sent from there
     return None
 
 
 def get_sseq_from_api(asv_ids: list = []):
     ''' Requests Subject sequences from API,
-        as these are not available in BLAST response'''
+        as these are not available in regular BLAST response'''
     url = f"{CONFIG.POSTGREST}/rpc/app_seq_from_id"
     payload = json.dumps({'ids': asv_ids})
     headers = {'Content-Type': 'application/json'}
     try:
         response = requests.request("POST", url, headers=headers, data=payload)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        app.logger.error(f'API request for subject sequences returned: {e}')
+    else:
         sdict = {item['asv_id']: item['asv_sequence']
-                 for item in json.loads(response.text)
-                 }
+                 for item in json.loads(response.text)}
         return sdict
-    except Exception:
-        return {}
 
 
 def translate_returncode(returncode):
