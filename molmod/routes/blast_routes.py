@@ -119,7 +119,9 @@ def get_sseq_from_api(asv_ids: list = []):
         return sdict
 
 
-def translate_returncode(returncode):
+def translate_returncode(returncode: int):
+    '''Translates returncode from BLAST subprocess,
+       into msg that can be passed to app log'''
     error_dict = {
         0: "Success",
         1: "Error in query sequence(s) or BLAST options",
