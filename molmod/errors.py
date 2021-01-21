@@ -9,9 +9,8 @@ def error_handler(error):
     """
     # Needed to log actual error codes
     # as all handled errors otherwise give INFO + 200
-    msg = "Request \"[37m{} {}[0m\" resulted in {}".format(
-        request.method, request.path, error)
-    current_app.logger.warning(msg)
+    app.logger.warning('Request "%s %s" resulted in %s',
+                       request.method, request.path, error)
     # For full trace
     # current_app.logger.warning(msg, exc_info=error)
 
