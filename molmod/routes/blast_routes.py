@@ -95,7 +95,7 @@ def blast_run():
 
         # If BLAST error
         else:
-            app.logger.error(f'BLAST returned {returntxt}')
+            app.logger.error(f'BLAST returned {returntxt} {stderr.decode()}')
 
     # Will send 500 to client and error msg will be sent from there
     return None
