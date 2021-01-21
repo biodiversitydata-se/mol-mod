@@ -19,7 +19,7 @@ def create_app():
     # Figure out environment to set log config
     environment = os.getenv('FLASK_ENV')
     if environment != 'production':
-        environment == 'develop'
+        environment = 'develop'
 
     # Load log config, and create the log before the flask app, so that the
     # flask app picks up the config when it's created.
@@ -30,9 +30,17 @@ def create_app():
     app = Flask(__name__, instance_relative_config=False)
     app.config.from_object(get_config())
 
-    # for some reason we need to explicitly set the flask log level. All other
-    # log settings are taken from the global log
-    app.logger.setLevel(logging.root.level)
+    # Request information is written to the werkzeug log, so we make sure that
+    # this log is set to the same level as the flask log. In case traffic should
+    # be logged to a different log than the rest of the app - add a separate
+    # handler to this log.
+    werkzeug_log = logging.getLogger('werkzeug')
+    werkzeug_log.setLevel(logging.root.level)
+
+    # Note that if the environment is set to 'develop', then the config module
+    # will set FLASK_DEBUG=1, which will also set the log-level to DEBUG. if you
+    # wish to override this, you can change the log level explicitly here, as:
+    # app.logger.setLevel(logging.root.level)
 
     # enable cross-site resource forgery protections
     CSRFProtect(app)

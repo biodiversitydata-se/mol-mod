@@ -54,4 +54,7 @@ def get_config():
     elif env == 'test':
         return TestConfig()
 
+    # also set FLASK_DEBUG during development
+    os.environ['FLASK_DEBUG'] = '1'
+
     return DevelopmentConfig()
