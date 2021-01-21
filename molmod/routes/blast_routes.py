@@ -106,12 +106,12 @@ def get_sseq_from_api(asv_ids: list = []):
     ''' Requests Subject sequences from API,
         as these are not available in regular BLAST response'''
     url = f"{CONFIG.POSTGREST}/rpc/app_seq_from_id"
-    payload = json.dumps({'ids': asv_ids})
+    payload = json.dumps({'idsx': asv_ids})
     headers = {'Content-Type': 'application/json'}
     try:
         response = requests.request("POST", url, headers=headers, data=payload)
         response.raise_for_status()
-    except requests.exceptions.RequestException as e:
+    except (requests.exceptions.RequestException, Exception) as e:
         app.logger.error(f'API request for subject sequences returned: {e}')
     else:
         sdict = {item['asv_id']: item['asv_sequence']
