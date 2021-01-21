@@ -188,7 +188,7 @@ function makeDataTbl(url, columns) {
             console.info( 'An error has been reported by DataTables: ', message );
             $('#flash_container').html('Sorry, something unexpected happened during your query. '
               + 'Please, contact support if this error persists.');
-            $("#show_occurrences").hide();
+            $("#show_occurrences").prop("disabled",true);
         })
         .DataTable({
         deferRender: true, // Process one page at a time
@@ -197,7 +197,7 @@ function makeDataTbl(url, columns) {
             url: url,
             type: 'POST',
             dataSrc: function ( json ) {
-                if (json.data.length < 1) $("#show_occurrences").hide();
+                if (json.data.length < 1) $("#show_occurrences").prop("disabled",true);
                 return json.data;
             } ,
             data: function () { return $("#sform").serialize(); } // Includes CSRF-token
