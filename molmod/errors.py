@@ -1,4 +1,4 @@
-from flask import Markup, render_template, request
+from flask import current_app as app, Markup, render_template, request
 from werkzeug.exceptions import default_exceptions, HTTPException
 
 
@@ -7,8 +7,10 @@ def error_handler(error):
     Handles (almost any) error,
     and renders specific or generic error page
     """
-    # msg = "Request resulted in {}".format(error)
-    # current_app.logger.warning(msg, exc_info=error)
+    # Add to log actual error, as Werkzeug logs handled errors as 200
+    msg = 'Request "{} {}" resulted in {}'.format(
+        request.path, request.method, error)
+    app.logger.warning(msg)
 
     # For 4XX and 5XX level HTTP errors, save specific info
     if isinstance(error, HTTPException):
