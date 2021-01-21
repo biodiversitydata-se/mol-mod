@@ -9,7 +9,7 @@ def error_handler(error):
     """
     # Add to log actual error, as Werkzeug logs handled errors as 200
     msg = 'Request "{} {}" resulted in {}'.format(
-        request.path, request.method, error)
+        request.method, request.path, error)
     app.logger.warning(msg)
 
     # For 4XX and 5XX level HTTP errors, save specific info
