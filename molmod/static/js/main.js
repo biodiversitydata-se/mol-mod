@@ -186,7 +186,7 @@ function makeDataTbl(url, columns) {
     var dTbl = $('.table')
         .on('error.dt', function (e, settings, techNote, message) {
             console.info( 'An error has been reported by DataTables: ', message );
-            $('#flash_container').html('Sorry, something unexpected happened during your query. '
+            $('#flash_container').html('Sorry, something unexpected happened during the search. '
               + 'Please, contact support if this error persists.');
             $("#show_occurrences").prop("disabled",true);
             dTbl.buttons().disable();

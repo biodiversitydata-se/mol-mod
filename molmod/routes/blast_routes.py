@@ -91,14 +91,15 @@ def blast_run():
                         df['asv_sequence'] = df['asv_id'].map(sdict)
                         return jsonify({'data': df.to_dict('records')})
                     app.logger.error('No sequences returned från API')
-                    return None
 
         # If BLAST error
         else:
             app.logger.error(f'BLAST returned {returntxt} {stderr.decode()}')
 
-    # Will send 500 to client and error msg will be sent from there
-    return None
+    # If error: Return '' instead of None, to avoid logging Werkzeug stack
+    # (visible on next request for some reason).
+    # jQuery will display custom error msg
+    return ''
 
 
 def get_sseq_from_api(asv_ids: list = []):
