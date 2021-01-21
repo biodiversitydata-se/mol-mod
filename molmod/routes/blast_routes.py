@@ -93,7 +93,6 @@ def blast_run():
                     app.logger.error('No sequences returned från API')
                     return None
 
-
         # If BLAST error
         else:
             app.logger.error(f'BLAST returned {returntxt}')
