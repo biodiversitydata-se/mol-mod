@@ -7,10 +7,12 @@ def error_handler(error):
     Handles (almost any) error,
     and renders specific or generic error page
     """
-    # Add to log actual error, as Werkzeug logs handled errors as 200
-    msg = 'Request "{} {}" resulted in {}'.format(
-        request.method, request.path, error)
-    app.logger.warning(msg)
+    # Needed to log actual error codes
+    # as all handled errors otherwise give INFO + 200
+    app.logger.warning('Request "%s %s" resulted in %s',
+                       request.method, request.path, error)
+    # For full trace
+    # current_app.logger.warning(msg, exc_info=error)
 
     # For 4XX and 5XX level HTTP errors, save specific info
     if isinstance(error, HTTPException):
