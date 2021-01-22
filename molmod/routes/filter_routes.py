@@ -38,7 +38,7 @@ def filter():
     return render_template('filter.html', sform=sform)
 
 
-@filter_bp.route('/request_drop_options/<field>', methods=['GET', 'POST'])
+@filter_bp.route('/request_drop_options/<field>', methods=['POST'])
 def request_drop_options(field):
     '''Forwards (select2) AJAX request for filtered dropdown options to
     postgREST/postgres function, and returns paginated JSON result'''
