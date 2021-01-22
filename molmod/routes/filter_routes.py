@@ -16,8 +16,11 @@ filter_bp = Blueprint('filter_bp', __name__,
 
 
 @filter_bp.route('/filter', methods=['GET', 'POST'])
-def search():
-
+def filter():
+    '''Endpoint for both filter search and results. Search form dropdowns
+       are populates via (select2) AJAX call to '/request_drop_options/';
+       result tables on submit via (DataTables) AJAX call to '/filter_run'.
+    '''
     sform = FilterSearchForm()
     rform = FilterResultForm()
 
