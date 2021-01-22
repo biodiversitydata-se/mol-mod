@@ -187,6 +187,13 @@ function makeSel2drop(drop){
                 if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
                     xhr.setRequestHeader("X-CSRFToken", $('#csrf_token').val())
                 }
+            },
+            error: function (jqXHR, status, error) {
+                // console.log(error);
+                $('#filt_err_container').html('Sorry, something unexpected happened during page load. '
+                  + 'Please, contact support if this error persists.');
+                $('.btn').prop('disabled',true);
+                return { results: [] };
             }
         }
     });

@@ -59,8 +59,9 @@ def request_drop_options(field):
     headers = {'Content-Type': 'application/json'}
     try:
         response = requests.request("POST", url, headers=headers, data=payload)
-    except Exception:
-        return {[]}
+        response.raise_for_status()
+    except Exception as e:
+        app.logger.error(f'API request for select options resulted in: {e}')
     else:
         results = json.loads(response.text)[0]['data']['results']
         count = json.loads(response.text)[0]['data']['count']
