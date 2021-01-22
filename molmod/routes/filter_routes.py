@@ -21,17 +21,14 @@ def search():
     sform = FilterSearchForm()
     rform = FilterResultForm()
 
-    filters = ['gene', 'sub', 'fw_prim', 'rv_prim',
-               'kingdom', 'phylum', 'classs', 'oorder', 'family',
-               'genus', 'species']
+    filters = [f.name for f in sform if f.type == 'SelectMultipleField']
+
     # Reapply any dropdown selections after FILTER submit
-    for filter in filters:
-        selected = [
-            (x, x) for x in request.form.getlist(filter) if x
-        ]
+    for f in filters:
+        selected = [(x, x) for x in request.form.getlist(f) if x]
         if selected:
-            sform[filter].choices = selected
-            app.logger.debug(f'Selected {filter}: {selected}')
+            sform[f].choices = selected
+            app.logger.debug(f'Selected {f}: {selected}')
 
     # Only include result form if FILTER button was clicked
     if request.form.get('filter_asvs'):
