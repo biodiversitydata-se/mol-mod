@@ -34,9 +34,10 @@ def blast():
 
 @blast_bp.route('/blast_run', methods=['POST'])
 def blast_run():
-    '''Composes BLAST cmd from variables from datatables AJAX request,
-       and executes this as subprocess. Adds subject sequences via function,
-       and returns JSON (or empty string if error occurs)'''
+    '''Composes BLAST cmd from data received in (DataTable) AJAX request,
+       and executes this in subprocess. Adds subject sequences to
+       output, via separate function, and returns JSON
+       (or empty string if error occurs)'''
 
     # Collect BLAST cmd items into list
     cmd = ['blastn']  # [sform.blast_algorithm.data]
