@@ -1,6 +1,7 @@
 /* Changes may require cache bypass, in Chrome/Mac: shift + cmd + r */
 $(document).ready(function() {
-    var hlpDiv = $('#selection_error'); // For no-selection error
+
+    var hlpDiv = $('#selection_error'); // For displaying no-selection warning
 
     var currPage = $(location).attr('href').split("/").pop();
     switch(currPage) {
@@ -10,6 +11,7 @@ $(document).ready(function() {
             $('#sequence_textarea').on('input', function(){
                 $('#sequence_count').text($(this).val().length+'/500000 characters');
             });
+            // Define columns for BLAST search result table
             var columns = [
                 { data: null, orderable: false, defaultContent: '', className: 'select-checkbox'},
                 { data: 'asv_id', visible: false },
@@ -20,17 +22,18 @@ $(document).ready(function() {
                 { data: 'evalue'},
                 { data: 'asv_sequence', visible: false }
             ];
+            // Make BLAST search result table
             var dTbl = makeDataTbl('blast_run', columns);
             break;
 
-        // API SEARCH PAGE
+        // FILTER PAGE
         case 'filter':
 
             // Set format for select2-dropdown boxes
             $.fn.select2.defaults.set('theme', 'bootstrap');
-            // $.fn.select2.defaults.set('closeOnSelect', false);
             $.fn.select2.defaults.set('allowClear', true);
 
+            // Make select2-boxes from each <select> element on page
             $('select').each( function () {
                 makeSel2drop($(this));
             });
@@ -47,32 +50,32 @@ $(document).ready(function() {
                 $('.select2.form-control').val(null).trigger('change.select2');
             });
 
+            // Define columns for FILTER search result table
             var columns = [
                 { data: null, orderable: false, defaultContent: '', className: 'select-checkbox' },
                 { data: 'asv_id', visible: false },
                 { data: 'asv_tax', className: 'details-control asv' },
                 { data: 'gene'},
                 { data: 'sub'},
-                // { data: 'fw_name', className: 'details-control fwPrim' },
-                // { data: 'rv_name', className: 'details-control rvPrim' },
                 { data: 'fw_name' },
                 { data: 'rv_name' },
                 { data: 'asv_sequence', visible: false },
                 { data: 'fw_sequence', visible: false },
                 { data: 'rv_sequence', visible: false }
             ];
+            // Make FILTER search result table
             var dTbl = makeDataTbl('/filter_run', columns);
-
             break;
     }
 
-    // Only show after Bootstrap/dataTables/Select2 styling
+    // Show forms after Bootstrap/dataTables/Select2 styling is done
+    // to avoid Flash of unstyled content
     $('#rform, #sform').css("visibility", "visible");
 
-    // ANY RESULT FORM
+    // If we have a (FILTER or BLAST search) result table
     if(typeof dTbl !== "undefined") {
 
-        // Add Select-all function to hdr checkbox
+        // Add Select/Deselect-all function to checkbox in table header
         dTbl.on('click', '#select_all', function () {
             if ($('#select_all:checked').val() === 'on')
                 dTbl.rows().select();
@@ -80,14 +83,14 @@ $(document).ready(function() {
                 dTbl.rows().deselect();
         });
 
-        // Uncheck hdr checkbox if any row is unselected
+        // Uncheck header checkbox if any row is deselected
         dTbl.on( 'deselect', function () {
             if ($('#select_all:checked').val() === 'on'){
                 $('#select_all:checked').prop("checked", false);
             }
         });
 
-        // Remove no-selection warnings if they exist
+        // Remove no-selection warnings when any row is selected
         dTbl.on( 'select', function () {
             if($('#selection_error').hasClass('visHlpDiv')){
                 $('#selection_error').removeClass('visHlpDiv');
@@ -96,6 +99,7 @@ $(document).ready(function() {
         });
 
         // Toggle show/hide of ASV sequence as child row
+        // when +/- button (or whole cell, actually) is clicked
         dTbl.on('click', 'td.details-control', function () {
             var tr = $(this).closest('tr');
             var row = dTbl.row(tr);
@@ -119,8 +123,9 @@ $(document).ready(function() {
             }
         });
 
+        // Prepare ASV id:s for POST to Bioatlas
         $('#rform').submit(function() {
-            // Get selected ASV IDs
+            // Get selected ASV IDs from table
             var ids = $.map(dTbl.rows('.selected').data(), function (item) {
                 return item['asv_id']
             });
@@ -128,10 +133,10 @@ $(document).ready(function() {
             ids = ids.filter(function(item, i, ids) {
                 return i == ids.indexOf(item);
             });
-            // Add IDs to textarea
+            // Add IDs to hidden textarea, one row per ID
             $('#raw_names').val(ids.join('\n'));
 
-            // Warn if no selection
+            // Warn and abort if no selection has been made in table
             if (!$('#raw_names').val()) {
                 $('#selection_error').addClass('visHlpDiv');
                 $('.table tr td:first-child').addClass('visHlpElem');
@@ -141,23 +146,30 @@ $(document).ready(function() {
     }
 
 });
-// Make select2 dropdowns
+
 function makeSel2drop(drop){
+    // Makes select2 dropdown from <select> element, eg. target gene
+    // and populates this with data from AJAX request to Flask endpoint
+    // Uses server-side pagination, i.e. first receives rows 1:x,
+    // and then rows x+1:2x when user scrolls past x
     var field = drop.attr('id');
     drop.select2({
         placeholder: 'Select option(s)',
+        //Avoid sending requests before user has finished typing search term
         delay: 250,
+        // Alt. to delay
         // minimumInputLength: 3 ,
         ajax: {
-            url: '/request_drop_options/' + field,
+            url: '/request_drop_options/' + field, // Flask endpoint
             dataType: 'json',
             type: 'POST',
             data: function(params) {
-                console.log(field, params.term, params.page);
+                // console.log(field, params.term, params.page);
                 return {
-                    term: params.term || '',
-                    page: params.page || 1,
-                    gene: $('#gene').val() || null,
+                    // Collect form (or default) values to send to Flask
+                    term: params.term || '', // Entered search term
+                    page: params.page || 1, // For pagination
+                    gene: $('#gene').val() || null, // Selected gene options...
                     sub: $('#sub').val() || null,
                     fw_prim: $('#fw_prim').val() || null,
                     rv_prim: $('#rv_prim').val() || null,
@@ -180,14 +192,19 @@ function makeSel2drop(drop){
     });
 }
 
-// Make dataTable
 function makeDataTbl(url, columns) {
+    // Makes DataTables-table of (FILTER or BLAST search) results
+    // received in AJAX request to Flask endpoint
+    // Pagination handled by client
     $.fn.dataTable.ext.errMode = 'none';
     var dTbl = $('.table')
+        // Handle errors, including serverside BLAST errors causing response
+        // to be empty string instead of JSON
         .on('error.dt', function (e, settings, techNote, message) {
-            console.info( 'An error has been reported by DataTables: ', message );
+            // console.log( 'An error has been reported by DataTables: ', message );
             $('#flash_container').html('Sorry, something unexpected happened during the search. '
               + 'Please, contact support if this error persists.');
+            // Disable Bioatlas POST option and data export
             $("#show_occurrences").prop("disabled",true);
             dTbl.buttons().disable();
         })
@@ -197,17 +214,21 @@ function makeDataTbl(url, columns) {
         ajax: {
             url: url,
             type: 'POST',
+            // Disable Bioatlas POST option and data export if no results found
             dataSrc: function ( json ) {
+                // If (no errors but) no results were found
                 if (json.data.length < 1) {
+                    // Disable Bioatlas POST option and data export
                     $("#show_occurrences").prop("disabled",true);
                     dTbl.buttons().disable();
                 }
                 return json.data;
             } ,
-            data: function () { return $("#sform").serialize(); } // Includes CSRF-token
+            // Include CSRF-token in POST
+            data: function () { return $("#sform").serialize(); }
         },
         columns : columns,
-        processing: true, // Add indicator
+        processing: true, // Show 'Loading' indicator
         order: [[2, 'asc']], // Required for non-orderable col 0
         select: { style: 'multi', selector: 'td:nth-child(1)' }, // Checkbox selection
         // Layout: l=Show.., f=Search, tr=table, i=Showing.., p=pagination
