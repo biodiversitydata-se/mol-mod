@@ -90,8 +90,8 @@ def filter_run():
     try:
         response = requests.get(url)
         response.raise_for_status()
-    except (requests.ConnectionError, requests.exceptions.HTTPError):
-        return None
+    except (requests.ConnectionError, requests.exceptions.HTTPError) as e:
+        app.logger.error(f'API request for filtered occurences returned: {e}')
     else:
         # Convert json to list of dicts
         return {"data": json.loads(response.text)}
