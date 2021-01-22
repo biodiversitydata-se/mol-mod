@@ -202,7 +202,7 @@ function makeDataTbl(url, columns) {
         // to be empty string instead of JSON
         .on('error.dt', function (e, settings, techNote, message) {
             // console.log( 'An error has been reported by DataTables: ', message );
-            $('#flash_container').html('Sorry, something unexpected happened during the search. '
+            $('#search_err_container').html('Sorry, something unexpected happened during the search. '
               + 'Please, contact support if this error persists.');
             // Disable Bioatlas POST option and data export
             $("#show_occurrences").prop("disabled",true);
