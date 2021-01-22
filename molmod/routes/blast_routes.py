@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import io
 import json
 import requests
@@ -12,7 +10,7 @@ from flask import jsonify
 
 from molmod.forms import (BlastResultForm, BlastSearchForm)
 
-from ..config import get_config
+from molmod.config import get_config
 CONFIG = get_config()
 
 blast_bp = Blueprint('blast_bp', __name__,
@@ -21,11 +19,14 @@ blast_bp = Blueprint('blast_bp', __name__,
 
 @blast_bp.route('/blast', methods=['GET', 'POST'])
 def blast():
+    '''Displays both blast search and result forms. Result table is
+       populated on submit via (DataTables) AJAX call to '/blast_run'.
+    '''
 
     sform = BlastSearchForm()
     rform = BlastResultForm()
 
-    # If BLAST was clicked
+    # Only include result form if BLAST button was clicked
     if request.form.get('blast_for_seq') and sform.validate_on_submit():
         return render_template('blast.html', sform=sform, rform=rform)
 
