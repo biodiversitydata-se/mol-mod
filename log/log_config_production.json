@@ -1,15 +1,18 @@
 {
   "version": 1,
   "formatters": {"default": {
-      "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s"
+      "format": "%(asctime)s %(levelname)s in %(module)s: %(message)s",
+      "datefmt": "%y%m%d %H:%M:%S"
   }},
-  "handlers": {"wsgi": {
-      "class": "logging.StreamHandler",
-      "stream": "ext://flask.logging.wsgi_errors_stream",
-      "formatter": "default"
-  }},
+  "handlers": {
+      "file": {
+          "class": "logging.FileHandler",
+          "filename": "molmod.log",
+          "formatter": "default"
+      }
+  },
   "root": {
       "level": "WARNING",
-      "handlers": ["wsgi"]
+      "handlers": ["file"]
   }
 }
