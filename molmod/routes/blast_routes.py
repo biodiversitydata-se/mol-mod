@@ -52,20 +52,25 @@ def blast_run():
     # cmd += ['-max_hsps', '1']
     cmd += ['-num_threads', '4']
 
-    # Spawn system process (BLAST) and direct data to file handles
-    with subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE) as process:
-        # Send seq from sform to stdin, read output & error until 'eof'
-        blast_stdout, stderr = process.communicate(
-            input=request.form['sequence'].encode()
-        )
-        # Get exit status
-        returncode = process.returncode
-        returntxt = translate_returncode(returncode)
+    try:
+        # Spawn system process (BLAST) and direct data to file handles
+        with subprocess.Popen(cmd, stdin=subprocess.PIPE,
+                              stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE) as process:
+            # Send seq from sform to stdin, read output & error until 'eof'
+            blast_stdout, stderr = process.communicate(
+                input=request.form['sequence'].encode()
+            )
+            # Get exit status
+            returncode = process.returncode
 
+    except (Exception) as e:
+        app.logger.error(f'Subprocess returned: {e}')
+
+    else:
         # If BLAST worked (no error)
         if returncode == 0:
-            app.logger.debug(f'BLAST returned {returntxt}')
+            app.logger.debug('BLAST success')
 
             # Make in-memory file-like string from blast-output
             with io.StringIO(blast_stdout.decode()) as stdout_buf:
@@ -87,19 +92,20 @@ def blast_run():
                     # Print taxonomy on new line
                     df['sacc'] = df['sacc'].str.replace(';', '|')
                     # Extract asvid from sacc = id + taxonomy
-                    df['asv_id'] = df['sacc'].str.split('-', expand=True)[0]
+                    df['asv_id'] = df['sacc'].str.split(
+                        '-', expand=True)[0]
                     # Get Subject sequence via ID
                     sdict = get_sseq_from_api(df['asv_id'].tolist())
                     if sdict:
                         app.logger.debug(f'{len(sdict)} '
-                                         'unique sequences returned från API')
+                                         'unique sequences returned from API')
                         df['asv_sequence'] = df['asv_id'].map(sdict)
                         return jsonify({'data': df.to_dict('records')})
                     app.logger.error('No sequences returned från API')
 
-        # If BLAST error
+            # If BLAST error
         else:
-            app.logger.error(f'BLAST returned {returntxt} {stderr.decode()}')
+            app.logger.error(f'{stderr.decode()}')
 
     # If error: Return '' instead of None, to avoid logging Werkzeug stack
     # (visible on next request for some reason).
@@ -122,19 +128,3 @@ def get_sseq_from_api(asv_ids: list = []):
         sdict = {item['asv_id']: item['asv_sequence']
                  for item in json.loads(response.text)}
         return sdict
-
-
-def translate_returncode(returncode: int):
-    '''Translates returncode from BLAST subprocess,
-       into msg that can be passed to app log'''
-    error_dict = {
-        0: "Success",
-        1: "Error in query sequence(s) or BLAST options",
-        2: "Error in BLAST database",
-        3: "Error in BLAST engine",
-        4: "Out of memory",
-        5: "Network error connecting to NCBI to fetch sequence data",
-        6: "Error creating output files",
-        255: "Unknown error"
-    }
-    return error_dict[returncode]
