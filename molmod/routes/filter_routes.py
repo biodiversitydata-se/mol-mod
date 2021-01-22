@@ -3,12 +3,12 @@
 import json
 
 import requests
-from flask import Blueprint
+from flask import Blueprint, current_app as app
 from flask import render_template, request
 
 from molmod.forms import (FilterResultForm, FilterSearchForm)
 
-from ..config import get_config
+from molmod.config import get_config
 CONFIG = get_config()
 
 filter_bp = Blueprint('filter_bp', __name__,
