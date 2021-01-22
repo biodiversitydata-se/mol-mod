@@ -35,8 +35,8 @@ $(document).ready(function() {
                 makeSel2drop($(this));
             });
 
-            // Prevent opening when clearing selection
-            $('select.taxon').on("select2:clearing", function (evt) {
+            // Prevent list from opening when clearing selection with 'x'
+            $('select').on("select2:clearing", function (evt) {
                 $(this).on("select2:opening.cancelOpen", function (evt) {
                     evt.preventDefault();
                     $(this).off("select2:opening.cancelOpen");
