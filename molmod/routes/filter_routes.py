@@ -7,8 +7,8 @@ from flask import Blueprint, current_app as app
 from flask import render_template, request
 
 from molmod.forms import (FilterResultForm, FilterSearchForm)
-
 from molmod.config import get_config
+
 CONFIG = get_config()
 
 filter_bp = Blueprint('filter_bp', __name__,
@@ -21,20 +21,19 @@ def search():
     sform = FilterSearchForm()
     rform = FilterResultForm()
 
-    # Feed selected dropdown options back to client
-    sform.gene.choices = [(x, x) for x in request.form.getlist('gene')]
-    sform.sub.choices = [(x, x) for x in request.form.getlist('sub')]
-    sform.fw_prim.choices = [(x, x) for x in request.form.getlist('fw_prim')]
-    sform.rv_prim.choices = [(x, x) for x in request.form.getlist('rv_prim')]
-    sform.kingdom.choices = [(x, x) for x in request.form.getlist('kingdom')]
-    sform.phylum.choices = [(x, x) for x in request.form.getlist('phylum')]
-    sform.classs.choices = [(x, x) for x in request.form.getlist('classs')]
-    sform.oorder.choices = [(x, x) for x in request.form.getlist('oorder')]
-    sform.family.choices = [(x, x) for x in request.form.getlist('family')]
-    sform.genus.choices = [(x, x) for x in request.form.getlist('genus')]
-    sform.species.choices = [(x, x) for x in request.form.getlist('species')]
+    filters = ['gene', 'sub', 'fw_prim', 'rv_prim',
+               'kingdom', 'phylum', 'classs', 'oorder', 'family',
+               'genus', 'species']
+    # Reapply any dropdown selections after FILTER submit
+    for filter in filters:
+        selected = [
+            (x, x) for x in request.form.getlist(filter) if x
+        ]
+        if selected:
+            sform[filter].choices = selected
+            app.logger.debug(f'Selected {filter}: {selected}')
 
-    # Only include result form if SEARCH was clicked
+    # Only include result form if FILTER button was clicked
     if request.form.get('filter_asvs'):
         return render_template('filter.html', sform=sform, rform=rform)
     return render_template('filter.html', sform=sform)
