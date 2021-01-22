@@ -7,12 +7,13 @@ def error_handler(error):
     Handles (almost any) error,
     and renders specific or generic error page
     """
-    # Needed to log actual error codes
-    # as all handled errors otherwise give INFO + 200
-    app.logger.warning('Request "%s %s" resulted in %s',
-                       request.method, request.path, error)
-    # For full trace
-    # current_app.logger.warning(msg, exc_info=error)
+
+    # Set log level based on error code
+    msg = (f'Request \"{request.method} {request.path}\" resulted in: {error}')
+    if error.code >= 500:
+        app.logger.error(msg)
+    else:
+        app.logger.warning(msg)
 
     # For 4XX and 5XX level HTTP errors, save specific info
     if isinstance(error, HTTPException):
