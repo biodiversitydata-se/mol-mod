@@ -56,6 +56,7 @@ def request_drop_options(field):
     payload.update({'nlimit': limit, 'noffset': offset})
     url = f"{CONFIG.POSTGREST}/rpc/app_drop_options"
     payload = json.dumps(payload)
+    app.logger.debug(f'Payload sent to /rpc/app_drop_options: {payload}')
     headers = {'Content-Type': 'application/json'}
     try:
         response = requests.request("POST", url, headers=headers, data=payload)
