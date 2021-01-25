@@ -16,7 +16,7 @@ filter_bp = Blueprint('filter_bp', __name__,
 @filter_bp.route('/filter', methods=['GET', 'POST'])
 def filter():
     '''Displays both filter search and result forms. Search form dropdowns
-       are populates via (select2) AJAX call to '/request_drop_options/';
+       are populates via (Select2) AJAX call to '/request_drop_options/';
        result tables on submit via (DataTables) AJAX call to '/filter_run'.
     '''
 
@@ -38,9 +38,10 @@ def filter():
 
 
 @filter_bp.route('/request_drop_options/<field>', methods=['POST'])
-def request_drop_options(field):
-    '''Forwards (select2) AJAX request for filtered dropdown options to
-    postgREST/postgres function, and returns paginated JSON result'''
+def request_drop_options(field) -> dict:
+    '''Forwards (Select2) AJAX request for filtered dropdown options to
+    postgREST/postgres function, and returns paginated data in dict
+    with Select2-specific format'''
 
     # Make dict of selected list values while renaming list keys,
     # e.g. 'kingdom[]' to 'kingdom'
@@ -76,9 +77,10 @@ def request_drop_options(field):
 
 
 @filter_bp.route('/filter_run', methods=['POST'])
-def filter_run():
+def filter_run() -> dict:
     '''Composes API request for filtered ASV occurrences, based on data
-       received in (DataTable) AJAX request, and returns JSON response'''
+       received in (DataTable) AJAX request, and returns dict
+       with DataTables-specific format'''
 
     # Set base URL for API search
     url = f"{CONFIG.POSTGREST}/app_search_mixs_tax"
@@ -100,5 +102,4 @@ def filter_run():
     except (requests.ConnectionError, requests.exceptions.HTTPError) as e:
         app.logger.error(f'API request for filtered occurences returned: {e}')
     else:
-        # Convert json to list of dicts
         return {"data": json.loads(response.text)}
