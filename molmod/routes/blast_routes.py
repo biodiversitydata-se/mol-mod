@@ -36,7 +36,7 @@ def blast():
 def blast_run():
     '''Composes BLAST cmd from data received in (DataTable) AJAX request,
        and executes this in subprocess. Adds subject sequences to
-       output, via separate function, and returns JSON
+       output, via separate function, and returns JSON Response>
        (or empty string if error occurs)'''
 
     # Collect BLAST cmd items into list
@@ -98,7 +98,6 @@ def blast_run():
                         app.logger.debug(f'{len(sdict)} '
                                          'unique sequences returned from API')
                         df['asv_sequence'] = df['asv_id'].map(sdict)
-
                         return jsonify({'data': df.to_dict('records')})
                     app.logger.error('No sequences returned från API')
 
@@ -112,7 +111,7 @@ def blast_run():
     return ''
 
 
-def get_sseq_from_api(asv_ids: list = []):
+def get_sseq_from_api(asv_ids: list = []) -> dict:
     ''' Requests Subject sequences from API,
         as these are not available in regular BLAST response'''
 

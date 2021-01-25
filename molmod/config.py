@@ -3,7 +3,7 @@
 import os
 
 
-def get_env_variable(name):
+def get_env_variable(name: str):
     '''
     Gets env var or warns if missing
     '''
