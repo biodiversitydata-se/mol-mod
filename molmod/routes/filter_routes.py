@@ -19,6 +19,7 @@ def filter():
        are populates via (select2) AJAX call to '/request_drop_options/';
        result tables on submit via (DataTables) AJAX call to '/filter_run'.
     '''
+
     sform = FilterSearchForm()
     rform = FilterResultForm()
 
@@ -40,6 +41,7 @@ def filter():
 def request_drop_options(field):
     '''Forwards (select2) AJAX request for filtered dropdown options to
     postgREST/postgres function, and returns paginated JSON result'''
+
     # Make dict of selected list values while renaming list keys,
     # e.g. 'kingdom[]' to 'kingdom'
     payload = {k.replace('[]', ''): request.form.getlist(k)
@@ -48,12 +50,15 @@ def request_drop_options(field):
                # and current field, to allow multiple selections in list
                # (otherwise, first selection removes all other options)
                not in ['term', 'page', field]}
+
     # Add name of field to be filtered, and (user-typed search) term
     payload.update({'field': field, 'term': request.form['term']})
     # Add pagination
     limit = 25
     offset = (int(request.form['page']) - 1) * limit
     payload.update({'nlimit': limit, 'noffset': offset})
+
+    # Send API request
     url = f"{CONFIG.POSTGREST}/rpc/app_drop_options"
     payload = json.dumps(payload)
     app.logger.debug(f'Payload sent to /rpc/app_drop_options: {payload}')
