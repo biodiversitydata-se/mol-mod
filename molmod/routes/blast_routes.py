@@ -9,8 +9,8 @@ from flask import render_template
 from flask import jsonify
 
 from molmod.forms import (BlastResultForm, BlastSearchForm)
-
 from molmod.config import get_config
+
 CONFIG = get_config()
 
 blast_bp = Blueprint('blast_bp', __name__,
@@ -29,7 +29,6 @@ def blast():
     # Only include result form if BLAST button was clicked
     if request.form.get('blast_for_seq') and sform.validate_on_submit():
         return render_template('blast.html', sform=sform, rform=rform)
-
     return render_template('blast.html', sform=sform)
 
 
@@ -52,8 +51,8 @@ def blast_run():
     # cmd += ['-max_hsps', '1']
     cmd += ['-num_threads', '4']
 
+    # Spawn system process (BLAST) and direct data to file handles
     try:
-        # Spawn system process (BLAST) and direct data to file handles
         with subprocess.Popen(cmd, stdin=subprocess.PIPE,
                               stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE) as process:
@@ -63,10 +62,8 @@ def blast_run():
             )
             # Get exit status
             returncode = process.returncode
-
     except (Exception) as e:
         app.logger.error(f'Subprocess returned: {e}')
-
     else:
         # If BLAST worked (no error)
         if returncode == 0:
@@ -94,12 +91,14 @@ def blast_run():
                     # Extract asvid from sacc = id + taxonomy
                     df['asv_id'] = df['sacc'].str.split(
                         '-', expand=True)[0]
+
                     # Get Subject sequence via ID
                     sdict = get_sseq_from_api(df['asv_id'].tolist())
                     if sdict:
                         app.logger.debug(f'{len(sdict)} '
                                          'unique sequences returned from API')
                         df['asv_sequence'] = df['asv_id'].map(sdict)
+
                         return jsonify({'data': df.to_dict('records')})
                     app.logger.error('No sequences returned från API')
 
@@ -116,6 +115,8 @@ def blast_run():
 def get_sseq_from_api(asv_ids: list = []):
     ''' Requests Subject sequences from API,
         as these are not available in regular BLAST response'''
+
+    # Send API request
     url = f"{CONFIG.POSTGREST}/rpc/app_seq_from_id"
     payload = json.dumps({'ids': asv_ids})
     headers = {'Content-Type': 'application/json'}
