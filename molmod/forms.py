@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import re
+
 from flask import current_app as app
 from flask_wtf import FlaskForm
 from wtforms import (BooleanField, IntegerField, SelectMultipleField,
@@ -17,8 +19,7 @@ TGGGGAATTTTGCGCAATGGGGGAAACCCTGACGCAGCAACGCCGCGTGGAGGATGAAGTCCCTTGGGACGTAAACTCCT
 TGGGGAATTTTGCGCAATGGGGGAAACCCTGACGCAGCAACGCCGCGTGGAGGATGAAGCCCCTTGGGGTGTAAACTCCTTTCGACCGGGAAAATTATGATGGTACCGGTGGAAGAAGCACCGGCTAACTCTGTGCCAGCAGCCGCGGTAATACAGAGGGTGCGAGCGTTGTTCGGAATTATTGGGCGTAAAGGGCGCGTAGGCGGTGCGGTAAGTCACCTGTGAAATCCCCAGGCTTAACTTGGGGCCTGCAGGCGAAACTGCCGTGCTGGAGGGTGGGAGAGGTGCGTGGAATTCCCGGTGTAGCGGTGAAATGCGTAGATATCGGGAGGAACACCTGTGGCGAAAGCGGCGCACTGGACCACTACTGACGCTGAGGCGCGAAAGCTAGGGGAGCAAACA
 >068f2c0a7c0fcf9cef0becb9f166d479"""
 
-
-def fasta_length_check(form, field):
+def fasta_check(form, field):
     if len(field.data) < 1:
         raise ValidationError('Please submit an input sequence')
     if len(field.data) > 500000:
@@ -26,7 +27,47 @@ def fasta_length_check(form, field):
                               than 500000 characters''')
     if field.data[0] != '>':
         raise ValidationError('Input sequence must be in fasta format')
+    # check that this is actually a valid fasta file, that we can process
 
+    fasta_chars = r'AaCcGgTtUuIiRrYyKkMmSsWwBbDdHhVvNn\-'
+    title_pattern = r'^>[\w.,\-]+$'
+    seq_pattern = f'^[{fasta_chars}]+$'
+
+    # I tried to use re.fullmatch here, but it became _very_ slow, so I wrote
+    # this very simple parser instead. This has the added bonus that it gives
+    # user friendly validation messages.
+    hasSeq = True
+    isHeader = True
+    currentHeader = ''
+    # add an empty last row to catch empty headers easily
+    for row in re.split('[\r\n]+', field.data):
+        row = row.strip()
+        # allow empty lines
+        if len(row) == 0:
+            continue
+        # if we have a second header without first getting a sequence for the
+        # last header
+        if row.startswith('>'):
+            if not hasSeq:
+                raise ValidationError('All Fasta headers require a sequece')
+            isHeader = True
+            hasSeq=False
+            currentHeader = row
+
+        if isHeader:
+            if not re.match(title_pattern, row):
+                raise ValidationError('Malformed header: %s' % row)
+            isHeader = False
+        else:
+            if re.match(seq_pattern, row):
+                hasSeq=True
+            else:
+                raise ValidationError('Unknown characters in %s: %s' % (
+                                      currentHeader,
+                                      re.sub(f'[{fasta_chars}]+', '', row)
+                                      ))
+    if not hasSeq:
+        raise ValidationError('All Fasta headers require a sequece')
 
 def identity_check(form, field):
     # Check max value, min value
@@ -51,8 +92,8 @@ def cover_check(form, field):
 
 
 class BlastSearchForm(FlaskForm):
-    sequence = TextAreaField(u'sequence',
-                             [fasta_length_check], default=DEFAULT_BLAST_GENE)
+    sequence = TextAreaField(u'sequence', [fasta_check],
+                             default=DEFAULT_BLAST_GENE)
     min_identity = IntegerField(u'min_identity', [identity_check], default=97)
     min_qry_cover = IntegerField(u'min_qry_cover', [cover_check], default=100)
     blast_for_seq = SubmitField(u'BLAST')
