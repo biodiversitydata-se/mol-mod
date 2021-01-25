@@ -4,8 +4,7 @@ from werkzeug.exceptions import default_exceptions, HTTPException
 
 def error_handler(error):
     """
-    Handles (almost any) error,
-    and renders specific or generic error page
+    Logs errors and renders specific, if available, or generic error page
     """
 
     # Set log level based on error code
@@ -20,12 +19,14 @@ def error_handler(error):
         code = error.code
         description = error.get_description(request.environ)
         name = error.name
+
     # For other Exceptions, use general Server error info
     else:
         code = 500
         description = ("<p>We encountered an error"
                        "while trying to fulfill your request</p>")
         name = 'Internal Server Error'
+
     # Format in specific page, if available (eg. 404), otherwise use generic
     templates_to_try = ['error_{}.html'.format(code), 'error_generic.html']
     return render_template(templates_to_try,
