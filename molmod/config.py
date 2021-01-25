@@ -29,7 +29,8 @@ class DevelopmentConfig(Config):
     DEBUG = True
     BLAST_DB = 'misc/blastdb/asvdb'
     # For POST requests from search result forms to BioAtlas/SBDI
-    BATCH_SEARCH_URL = 'http://molecular.infrabas.se/biocache-service/occurrences/batchSearch'
+    BATCH_SEARCH_URL = 'http://molecular.infrabas.se/' \
+                       'biocache-service/occurrences/batchSearch'
     REDIRECT_URL = 'http://molecular.infrabas.se/ala-hub/occurrences/search'
     # PostgREST
     API_URL = 'http://localhost:3000'
