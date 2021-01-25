@@ -17,7 +17,8 @@ TGGGGAATTTTGCGCAATGGGGGAAACCCTGACGCAGCAACGCCGCGTGGAGGATGAAGTCCCTTGGGACGTAAACTCCT
 TGGGGAATTTTGCGCAATGGGGGAAACCCTGACGCAGCAACGCCGCGTGGAGGATGAAGTCCCTTGGGACGTAAACTCCTTTCGACTGGGAAGATAATGACGGTACCAGTGGAAGAAGCCCCGGCTAACTTCGTGCCAGCAGCCGCGGTAATACGAGGGGGGCGAGCGTTGTTCGGAATTATTGGGCGTAAAGGGCGCGTAGGCGGTGCGGTAAGTCACCTGTGAAACCTCTGGGCTCAACTCAGAGCCTGCAGGCGAAACTGCCGTGCTGGAGGGTGGGAGAGGTGCGTGGAATTCCCGGTGTAGCGGTGAAATGCGTAGATATCGGGAGGAACACCTGTGGCGAAAGCGGCGCACTGGACCACTTCTGACGCTGAGGCGCGAAAGCTAGGGGAGCAAACA
 >test-seq-5
 TGGGGAATTTTGCGCAATGGGGGAAACCCTGACGCAGCAACGCCGCGTGGAGGATGAAGCCCCTTGGGGTGTAAACTCCTTTCGACCGGGAAAATTATGATGGTACCGGTGGAAGAAGCACCGGCTAACTCTGTGCCAGCAGCCGCGGTAATACAGAGGGTGCGAGCGTTGTTCGGAATTATTGGGCGTAAAGGGCGCGTAGGCGGTGCGGTAAGTCACCTGTGAAATCCCCAGGCTTAACTTGGGGCCTGCAGGCGAAACTGCCGTGCTGGAGGGTGGGAGAGGTGCGTGGAATTCCCGGTGTAGCGGTGAAATGCGTAGATATCGGGAGGAACACCTGTGGCGAAAGCGGCGCACTGGACCACTACTGACGCTGAGGCGCGAAAGCTAGGGGAGCAAACA
->068f2c0a7c0fcf9cef0becb9f166d479"""
+"""
+
 
 def fasta_check(form, field):
     if len(field.data) < 1:
@@ -25,10 +26,8 @@ def fasta_check(form, field):
     if len(field.data) > 500000:
         raise ValidationError('''Input sequence must be less
                               than 500000 characters''')
-    if field.data[0] != '>':
-        raise ValidationError('Input sequence must be in fasta format')
-    # check that this is actually a valid fasta file, that we can process
 
+    # Check that this is actually a valid fasta file, that we can process
     fasta_chars = r'AaCcGgTtUuIiRrYyKkMmSsWwBbDdHhVvNn\-'
     title_pattern = r'^>[\w.,\-]+$'
     seq_pattern = f'^[{fasta_chars}]+$'
@@ -39,19 +38,19 @@ def fasta_check(form, field):
     hasSeq = True
     isHeader = True
     currentHeader = ''
-    # add an empty last row to catch empty headers easily
+    # Add an empty last row to catch empty headers easily
     for row in re.split('[\r\n]+', field.data):
         row = row.strip()
-        # allow empty lines
+        # Allow empty lines
         if len(row) == 0:
             continue
-        # if we have a second header without first getting a sequence for the
+        # If we have a second header without first getting a sequence for the
         # last header
         if row.startswith('>'):
             if not hasSeq:
                 raise ValidationError('All Fasta headers require a sequece')
             isHeader = True
-            hasSeq=False
+            hasSeq = False
             currentHeader = row
 
         if isHeader:
@@ -60,7 +59,7 @@ def fasta_check(form, field):
             isHeader = False
         else:
             if re.match(seq_pattern, row):
-                hasSeq=True
+                hasSeq = True
             else:
                 raise ValidationError('Unknown characters in %s: %s' % (
                                       currentHeader,
@@ -68,6 +67,7 @@ def fasta_check(form, field):
                                       ))
     if not hasSeq:
         raise ValidationError('All Fasta headers require a sequece')
+
 
 def identity_check(form, field):
     # Check max value, min value
@@ -117,24 +117,7 @@ class FilterSearchForm(FlaskForm):
     family = SelectMultipleField('family', choices=[])
     genus = SelectMultipleField('genus', choices=[])
     species = SelectMultipleField('species', choices=[])
-
     filter_asvs = SubmitField(u'Filter')
-
-    # def validate(self):
-    #     '''Requires at least one selected gene or primer'''
-    #     if not FlaskForm.validate(self):
-    #         return False
-    #     result = True
-    #     g = self.gene_sel
-    #     fw = self.fw_prim_sel
-    #     rv = self.rv_prim_sel
-    #     tot = len(g.data) + len(fw.data) + len(rv.data)
-    #     if tot == 0:
-    #         g.errors.append('Please, select at least one gene or primer.')
-    #         fw.errors.append('')
-    #         rv.errors.append('')
-    #         result = False
-    #     return result
 
 
 class FilterResultForm(FlaskForm):
