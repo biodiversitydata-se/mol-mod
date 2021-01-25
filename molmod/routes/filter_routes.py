@@ -40,13 +40,15 @@ def filter():
 def request_drop_options(field):
     '''Forwards (select2) AJAX request for filtered dropdown options to
     postgREST/postgres function, and returns paginated JSON result'''
-    # Make dict of posted filters
-    # (e.g. selected kingdom(s), received as 'kingdom[]')
-    # but exclude current field, to allow multiple choice
+    # Make dict of selected list values while renaming list keys,
+    # e.g. 'kingdom[]' to 'kingdom'
     payload = {k.replace('[]', ''): request.form.getlist(k)
                for k, v in request.form.items() if k.replace('[]', '')
+               # Exclude non-list form items, as .getlist is not applicable,
+               # and current field, to allow multiple selections in list
+               # (otherwise, first selection removes all other options)
                not in ['term', 'page', field]}
-    # Add (typed search) term, and field to be filtered, as str
+    # Add name of field to be filtered, and (user-typed search) term
     payload.update({'field': field, 'term': request.form['term']})
     # Add pagination
     limit = 25
