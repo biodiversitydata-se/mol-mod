@@ -109,5 +109,6 @@ CREATE TABLE IF NOT EXISTS public.taxon_annotation (
 );
 
 CREATE INDEX IF NOT EXISTS taxon_asv ON public.taxon_annotation(asv_id);
+CREATE INDEX IF NOT EXISTS mixs_id ON public.mixs(id);
 CREATE INDEX IF NOT EXISTS occurrence_event ON public.occurrence(event_id);
 CREATE INDEX IF NOT EXISTS occurrence_asv ON public.occurrence(asv_id);
