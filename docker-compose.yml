@@ -4,6 +4,7 @@ services:
     restart: always
     image: postgres:13
     container_name: asv-db
+    user: postgres
     volumes:
       # These files are read during database startup, and can be used to define
       # the database schema and roles. The files are read in file name order, so
