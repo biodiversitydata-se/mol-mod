@@ -21,9 +21,9 @@ CREATE VIEW api.app_filter_mixs_tax AS
     ta.genus,
     ta.specific_epithet AS species
    FROM :data_schema.mixs m
-   JOIN :data_schema.occurrence o ON o.event_id = m.event_id
-   JOIN :data_schema.asv a ON a.asv_id = o.asv_id
-   JOIN :data_schema.taxon_annotation ta ON a.asv_id = ta.asv_id;
+   JOIN :data_schema.occurrence o ON o.event_id = m.id
+   JOIN :data_schema.asv a ON a.id = o.asv_id
+   JOIN :data_schema.taxon_annotation ta ON a.id = ta.asv_id;
 
 CREATE VIEW api.app_search_mixs_tax AS
  SELECT a.asv_id,
@@ -45,9 +45,9 @@ CREATE VIEW api.app_search_mixs_tax AS
     ta.genus,
     ta.specific_epithet AS species
    FROM :data_schema.mixs m
-   JOIN :data_schema.occurrence o ON o.event_id = m.event_id
-   JOIN :data_schema.asv a ON a.asv_id = o.asv_id
-   JOIN :data_schema.taxon_annotation ta ON a.asv_id = ta.asv_id
+   JOIN :data_schema.occurrence o ON o.event_id = m.id
+   JOIN :data_schema.asv a ON a.id = o.asv_id
+   JOIN :data_schema.taxon_annotation ta ON a.id = ta.asv_id
   ORDER BY a.asv_id, a.asv_sequence, m.target_gene, m.target_subfragment, (((m.pcr_primer_name_forward)::text || ': '::text) || (m.pcr_primer_forward)::text), (((m.pcr_primer_name_reverse)::text || ': '::text) || (m.pcr_primer_reverse)::text);
 
 CREATE FUNCTION api.app_drop_options(field text, noffset bigint, nlimit integer, term text DEFAULT ''::text, kingdom text[] DEFAULT '{}'::text[], phylum text[] DEFAULT '{}'::text[], classs text[] DEFAULT '{}'::text[], oorder text[] DEFAULT '{}'::text[], family text[] DEFAULT '{}'::text[], genus text[] DEFAULT '{}'::text[], species text[] DEFAULT '{}'::text[], gene text[] DEFAULT '{}'::text[], sub text[] DEFAULT '{}'::text[], fw_prim text[] DEFAULT '{}'::text[], rv_prim text[] DEFAULT '{}'::text[]) RETURNS TABLE(data json)
@@ -87,17 +87,17 @@ END
 $_$;
 
 CREATE VIEW api.app_asvs_for_blastdb AS
- SELECT ta.asv_id,
+ SELECT a.asv_id,
     concat_ws(';'::text, ta.kingdom, ta.phylum, ta.class, ta.oorder, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS higher_taxonomy,
-    asv.asv_sequence
-   FROM (:data_schema.asv
-     JOIN :data_schema.taxon_annotation ta ON ((asv.asv_id = ta.asv_id)))
+    a.asv_sequence
+   FROM (:data_schema.asv a
+     JOIN :data_schema.taxon_annotation ta ON ((a.id = ta.asv_id)))
   WHERE ((ta.status)::text = 'valid'::text);
 
-CREATE FUNCTION api.app_seq_from_id(ids character varying[]) RETURNS SETOF :data_schema.asv
+CREATE FUNCTION api.app_seq_from_id(ids character varying[]) RETURNS TABLE(asv_id CHARACTER(36), ASV_SEQUENCE CHARACTER VARYING)
     LANGUAGE sql IMMUTABLE
     AS $$
-   SELECT asv_id, asv_sequence FROM api.app_asvs_for_blastdb a WHERE asv_id IN (
+   SELECT asv_id, asv_sequence FROM api.app_asvs_for_blastdb WHERE asv_id IN (
 	   SELECT unnest(ids)
 	)
 $$;
