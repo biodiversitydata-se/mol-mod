@@ -6,17 +6,17 @@ SET client_encoding = 'UTF8';
 CREATE SCHEMA IF NOT EXISTS public;
 
 CREATE TABLE IF NOT EXISTS public.dataset (
-    id SERIAL PRIMARY KEY,
+    pid SERIAL PRIMARY KEY,
     dataset_id character varying UNIQUE,
     insertion_time timestamp without time zone,
     provider_email character varying
 );
 
 CREATE TABLE IF NOT EXISTS public.sampling_event (
-    id SERIAL PRIMARY KEY,
+    pid SERIAL PRIMARY KEY,
     event_id character varying UNIQUE,
     material_sample_id character varying,
-    dataset_id integer REFERENCES public.dataset(id) NOT NULL,
+    dataset_pid integer REFERENCES public.dataset(pid) NOT NULL,
     event_date character varying NOT NULL,
     sampling_protocol character varying NOT NULL,
     sample_size_value integer NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS public.sampling_event (
 );
 
 CREATE TABLE IF NOT EXISTS public.mixs (
-    id integer PRIMARY KEY REFERENCES public.sampling_event(id),
+    pid integer PRIMARY KEY REFERENCES public.sampling_event(pid),
     sop character varying,
     target_gene character varying NOT NULL,
     target_subfragment character varying NOT NULL,
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS public.mixs (
 );
 
 CREATE TABLE IF NOT EXISTS public.emof (
-    id SERIAL PRIMARY KEY,
+    pid SERIAL PRIMARY KEY,
     measurement_id character varying UNIQUE,
     measurement_type character varying,
     measurement_type_id character varying,
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS public.emof (
     measurement_unit_id character varying,
     measurement_accuracy character varying,
     measurement_remarks character varying,
-    event_id integer NOT NULL REFERENCES public.sampling_event(id),
+    event_pid integer NOT NULL REFERENCES public.sampling_event(pid),
     measurement_determined_date character varying,
     measurement_determined_by character varying,
     measurement_method character varying
@@ -69,16 +69,16 @@ CREATE TABLE IF NOT EXISTS public.emof (
 
 
 CREATE TABLE IF NOT EXISTS public.asv (
-    id SERIAL PRIMARY KEY,
+    pid SERIAL PRIMARY KEY,
     asv_id character(36) UNIQUE,
     asv_sequence character varying NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS public.occurrence (
-    id SERIAL PRIMARY KEY,
+    pid SERIAL PRIMARY KEY,
     occurrence_id character varying UNIQUE,
-    event_id integer REFERENCES public.sampling_event(id) NOT NULL,
-    asv_id integer REFERENCES public.asv(id) NOT NULL,
+    event_pid integer REFERENCES public.sampling_event(pid) NOT NULL,
+    asv_pid integer REFERENCES public.asv(pid) NOT NULL,
     organism_quantity integer NOT NULL,
     previous_identifications character varying NOT NULL,
     asv_id_alias character varying NOT NULL,
@@ -86,8 +86,8 @@ CREATE TABLE IF NOT EXISTS public.occurrence (
 );
 
 CREATE TABLE IF NOT EXISTS public.taxon_annotation (
-    annotation_id SERIAL PRIMARY KEY,
-    asv_id  integer REFERENCES public.asv(id) NOT NULL,
+    pid SERIAL PRIMARY KEY,
+    asv_pid  integer REFERENCES public.asv(pid) NOT NULL,
     status character varying NOT NULL,
     kingdom character varying,
     phylum character varying,
@@ -108,7 +108,7 @@ CREATE TABLE IF NOT EXISTS public.taxon_annotation (
     taxon_rank character varying
 );
 
-CREATE INDEX IF NOT EXISTS taxon_asv ON public.taxon_annotation(asv_id);
-CREATE INDEX IF NOT EXISTS mixs_id ON public.mixs(id);
-CREATE INDEX IF NOT EXISTS occurrence_event ON public.occurrence(event_id);
-CREATE INDEX IF NOT EXISTS occurrence_asv ON public.occurrence(asv_id);
+CREATE INDEX IF NOT EXISTS taxon_asv ON public.taxon_annotation(asv_pid);
+CREATE INDEX IF NOT EXISTS mixs_id ON public.mixs(pid);
+CREATE INDEX IF NOT EXISTS occurrence_event ON public.occurrence(event_pid);
+CREATE INDEX IF NOT EXISTS occurrence_asv ON public.occurrence(asv_pid);
