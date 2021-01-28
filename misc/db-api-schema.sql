@@ -50,6 +50,57 @@ CREATE OR REPLACE VIEW api.dwc_oc_mixs AS
    JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid
    JOIN :data_schema.asv asv ON asv.pid = oc.asv_pid;
 
+CREATE OR REPLACE VIEW api.dwc_oc_occurrence AS
+ SELECT ds.dataset_id AS "datasetID",
+    se.event_id AS "eventID",
+    se.event_id_alias,
+    oc.occurrence_id AS "occurrenceID",
+    oc.asv_id_alias,
+    'MaterialSample'::text AS "basisOfRecord",
+    se.event_date AS "eventDate",
+    se.location_id AS "locationID",
+    se.verbatim_locality AS "verbatimLocality",
+    se.municipality,
+    se.country,
+    se.minimum_elevation_in_meters AS "minimumElevationInMeters",
+    se.maximum_elevation_in_meters AS "maximumElevationInMeters",
+    se.minimum_depth_in_meters AS "minimumDepthInMeters",
+    se.maximum_depth_in_meters AS "maximumDepthInMeters",
+    se.decimal_latitude AS "decimalLatitude",
+    se.decimal_longitude AS "decimalLongitude",
+    se.geodetic_datum AS "geodeticDatum",
+    se.coordinate_uncertainty_in_meters AS "coordinateUncertaintyInMeters",
+    oc.associated_sequences AS "associatedSequences",
+    se.recorded_by AS "recordedBy",
+    se.material_sample_id AS "materialSampleID",
+    se.sample_size_value AS "sampleSizeValue",
+    'DNA sequence reads'::text AS "sampleSizeUnit",
+    se.sampling_protocol AS "samplingProtocol",
+    'DNA sequence reads'::text AS "organismQuantityType",
+    oc.organism_quantity AS "organismQuantity",
+    a.asv_id AS "taxonID",
+    ta.scientific_name AS "scientificName",
+    ta.taxon_rank AS "taxonRank",
+    ta.kingdom,
+    ta.phylum,
+    ta.oorder AS "order",
+    ta.class,
+    ta.family,
+    ta.genus,
+    ta.specific_epithet AS specificepithet,
+    ta.infraspecific_epithet AS infraspecificepithet,
+    ta.otu,
+    ta.taxon_remarks AS "taxonRemarks",
+    ta.date_identified AS "dateIdentified",
+    ta.identification_references AS "identificationReferences",
+    (((ta.annotation_algorithm::text || ' annotation confidence (at lowest specified taxon): '::text) || ta.annotation_confidence) || ', against reference database: '::text) || ta.reference_db::text AS "identificationRemarks",
+    'Identified by data provider as: '::text || oc.previous_identifications::text AS "previousIdentifications"
+   FROM :data_schema.sampling_event se
+   JOIN :data_schema.occurrence oc ON oc.event_pid = se.pid
+   JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid
+   JOIN :data_schema.asv a ON a.pid = oc.asv_pid
+   JOIN :data_schema.taxon_annotation ta ON a.pid = ta.asv_pid
+   AND ta.status::text = 'valid';
 
 CREATE VIEW api.app_filter_mixs_tax AS
  SELECT m.target_gene AS gene,
