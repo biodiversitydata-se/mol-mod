@@ -7,6 +7,26 @@
 
 CREATE SCHEMA api;
 
+CREATE OR REPLACE VIEW api.dwc_oc_emof AS
+ SELECT ds.dataset_id AS "datasetID",
+    se.event_id AS "eventID",
+    oc.occurrence_id AS "occurrenceID",
+    emof.measurement_id AS "measurementID",
+    emof.measurement_type AS "measurementType",
+    emof.measurement_type_id AS "measurementTypeID",
+    emof.measurement_unit AS "measurementUnit",
+    emof.measurement_unit_id AS "measurementUnitID",
+    emof.measurement_value AS "measurementValue",
+    emof.measurement_value_id AS "measurementValueID",
+    emof.measurement_accuracy AS "measurementAccuracy",
+    emof.measurement_determined_date AS "measurementDeterminedDate",
+    emof.measurement_determined_by AS "measurementDeterminedBy",
+    emof.measurement_method AS "measurementMethod",
+    emof.measurement_remarks AS "measurementRemarks"
+   FROM :data_schema.emof
+   JOIN :data_schema.sampling_event se ON emof.event_pid = se.pid
+   JOIN :data_schema.occurrence oc ON oc.event_pid = se.pid
+   JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid;
 
 CREATE VIEW api.app_filter_mixs_tax AS
  SELECT m.target_gene AS gene,
