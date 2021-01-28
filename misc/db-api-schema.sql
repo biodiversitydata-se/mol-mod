@@ -28,6 +28,29 @@ CREATE OR REPLACE VIEW api.dwc_oc_emof AS
    JOIN :data_schema.occurrence oc ON oc.event_pid = se.pid
    JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid;
 
+CREATE OR REPLACE VIEW api.dwc_oc_mixs AS
+ SELECT ds.dataset_id AS "datasetID",
+    se.event_id AS "eventID",
+    oc.occurrence_id AS "occurrenceID",
+    asv.asv_id AS "taxonID",
+    mixs.sop,
+    mixs.pcr_primer_name_forward,
+    mixs.pcr_primer_name_reverse,
+    mixs.pcr_primer_forward,
+    mixs.pcr_primer_reverse,
+    mixs.target_gene,
+    mixs.target_subfragment,
+    asv.asv_sequence AS "DNA_sequence",
+    mixs.env_broad_scale,
+    mixs.env_local_scale,
+    mixs.env_medium
+   FROM :data_schema.mixs
+   JOIN :data_schema.sampling_event se ON mixs.pid = se.pid
+   JOIN :data_schema.occurrence oc ON oc.event_pid = se.pid
+   JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid
+   JOIN :data_schema.asv asv ON asv.pid = oc.asv_pid;
+
+
 CREATE VIEW api.app_filter_mixs_tax AS
  SELECT m.target_gene AS gene,
     m.target_subfragment AS sub,
