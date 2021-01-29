@@ -11,14 +11,12 @@ services:
       - ./misc/db-data-schema.sql:/docker-entrypoint-initdb.d/01-data-schema.sql
       - ./misc/db-api-schema.sql:/docker-entrypoint-initdb.d/02-api-schema.sql
       - ./misc/db-roles.sql:/docker-entrypoint-initdb.d/03-roles.sql
-      # Database files are stored in a local directory so that it's easy to
-      # clear them
+      # Database files stored in an easily cleared local directory
       - ./postgres-data:/var/lib/postgresql/data
-    # User and password information is loaded from the default environment
-    # variable file.
+    # User and password information
     env_file:
       - .env
-    # For debugging (e.g. in pgAdmin), use this syntax to connect a host port
+    # For debugging (e.g. in pgAdmin), connect a host port
     # to a container port (HOST:CONTAINER), but keep closed in production
     # ports:
     #   - 5432:5432
@@ -27,7 +25,6 @@ services:
     restart: always
     image: postgrest/postgrest:v7.0.1
     container_name: asv-rest
-    # See postgres service
     # ports:
     #   - 3000:3000
     # Get most environment variables from the default .env file
@@ -45,7 +42,6 @@ services:
     volumes:
       - ./blast-databases:/blastdbs
   main:
-    # We run the flask server here
     container_name: asv-main
     build:
       context: ./
