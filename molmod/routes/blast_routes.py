@@ -46,10 +46,10 @@ def blast_run():
     # convert to json to be able to manipulate the data
 
     form = dict(request.form.lists())
-    form['db'] = app.config['BLAST_DB']
+    form['db'] = APP.config['BLAST_DB']
     response = requests.post('http://blast-worker:5000/', json=form)
     if not response.ok:
-        app.logger.error(response.text)
+        APP.logger.error(response.text)
         # If error: Return '' instead of None, to avoid logging Werkzeug stack
         # (visible on next request for some reason).
         # jQuery will display custom error msg
@@ -96,7 +96,7 @@ def get_sseq_from_api(asv_ids: list) -> dict:
         response = requests.request("POST", url, headers=headers, data=payload)
         response.raise_for_status()
     except requests.exceptions.RequestException as ex:
-        app.logger.error('API request for subject sequences returned: %s', ex)
+        APP.logger.error('API request for subject sequences returned: %s', ex)
     else:
         sdict = {item['asv_id']: item['asv_sequence']
                  for item in json.loads(response.text)}
