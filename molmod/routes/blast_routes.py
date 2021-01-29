@@ -44,10 +44,9 @@ def blast_run():
     a JSON Response (or an empty string if error occurs).
     """
 
-    # convert to json to be able to manipulate the data
-
+    # Convert form data to JSON to be able to manipulate the data
     form = dict(request.form.lists())
-    form['db'] = APP.config['BLAST_DB']
+    form['db'] = CONFIG.BLAST_DB
     response = requests.post('http://blast-worker:5000/', json=form)
     if not response.ok:
         APP.logger.error(response.text)
