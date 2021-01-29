@@ -17,6 +17,7 @@ def get_env_variable(name: str):
 class Config:
     SECRET_KEY = get_env_variable('SECRET_KEY') or 'you-will-never-guess'
     POSTGREST = get_env_variable('POSTGREST_HOST') or 'http://localhost:3000'
+    BLAST_DB = get_env_variable('BLAST_DB')
     DEBUG = False
     TESTING = False
 
@@ -27,7 +28,6 @@ class ProductionConfig(Config):
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    BLAST_DB = 'misc/blastdb/asvdb'
     # For POST requests from search result forms to BioAtlas/SBDI
     BATCH_SEARCH_URL = 'http://molecular.infrabas.se/' \
                        'biocache-service/occurrences/batchSearch'
