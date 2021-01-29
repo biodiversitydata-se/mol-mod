@@ -57,6 +57,12 @@ services:
       # - PGRST_SERVER_PROXY_URI=${PGRST_SERVER_PROXY_URI}
     depends_on:
       - postgres
+  blast-worker:
+    build:
+      context: ./
+      dockerfile: docker/blast
+    volumes:
+      - ./blast-databases:/blastdbs
   develop:
     # We run the flask server here
     container_name: asv-main
