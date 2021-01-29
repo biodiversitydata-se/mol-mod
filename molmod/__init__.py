@@ -19,7 +19,7 @@ def create_app():
     # Figure out environment to set log config
     environment = os.getenv('FLASK_ENV')
     if environment != 'production':
-        environment = 'develop'
+        environment = 'development'
 
     # Load log config, and create the log before the flask app, so that the
     # flask app picks up the config when it's created.
@@ -37,7 +37,7 @@ def create_app():
     werkzeug_log = logging.getLogger('werkzeug')
     werkzeug_log.setLevel(logging.root.level)
 
-    # Note that if the environment is set to 'develop', then the config module
+    # Note that if the environment is set to 'development', then the config module
     # will set FLASK_DEBUG=1, which will also set the log-level to DEBUG. if you
     # wish to override this, you can change the log level explicitly here, as:
     # app.logger.setLevel(logging.root.level)
