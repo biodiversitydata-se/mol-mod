@@ -11,7 +11,7 @@ from flask import Blueprint, current_app as app, request
 from flask import render_template
 from flask import jsonify
 
-#pylint: disable=import-error
+# pylint: disable=import-error
 from molmod.forms import (BlastResultForm, BlastSearchForm)
 from molmod.config import get_config
 
@@ -40,8 +40,8 @@ def blast():
 def blast_run():
     """
     Sends the blast run request to one of the available blast workers, and then
-    adds subject sequences to the output, via a separate function, and returns a
-    JSON Response (or an empty string if error occurs).
+    adds subject sequences to the output, via a separate function, and returns
+    a JSON Response (or an empty string if error occurs).
     """
 
     # convert to json to be able to manipulate the data
