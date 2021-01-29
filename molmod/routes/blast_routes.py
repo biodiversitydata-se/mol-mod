@@ -1,13 +1,12 @@
 """
 This module contains the routes that are involved in blast processing and
-annotation. The blast-worker containers are called from the /blast_run endpoint
-in this module.
+result display. The blast-worker containers are called from the
+/blast_run endpoint in this module.
 """
 import json
 
 import requests
-
-from flask import Blueprint, current_app as app, request
+from flask import Blueprint, current_app as APP, request
 from flask import render_template
 from flask import jsonify
 
