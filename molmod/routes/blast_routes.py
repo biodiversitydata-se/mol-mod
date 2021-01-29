@@ -1,5 +1,5 @@
 """
-This module contains the routes that are involved in blast processing and
+This module contains routes involved in blast processing and
 result display. The blast-worker containers are called from the
 /blast_run endpoint in this module.
 """
@@ -23,7 +23,8 @@ blast_bp = Blueprint('blast_bp', __name__,
 @blast_bp.route('/blast', methods=['GET', 'POST'])
 def blast():
     '''Displays both blast search and result forms. Result table is
-       populated on submit via (DataTables) AJAX call to '/blast_run'.
+       populated on submit via (DataTables) AJAX call to '/blast_run'
+       which in turn calls a blast-worker container.
     '''
 
     sform = BlastSearchForm()
