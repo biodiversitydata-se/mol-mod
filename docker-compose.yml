@@ -44,12 +44,12 @@ services:
       dockerfile: docker/blast
     volumes:
       - ./blast-databases:/blastdbs
-  develop:
+  main:
     # We run the flask server here
     container_name: asv-main
     build:
       context: ./
-      dockerfile: docker/develop
+      dockerfile: docker/main
     volumes:
       - type: bind
         source: ./
