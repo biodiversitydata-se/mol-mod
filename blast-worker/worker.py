@@ -9,8 +9,7 @@ import os
 import subprocess
 from flask import Flask, jsonify, request
 
-# Start the server
-
+# Start server
 APP = Flask(__name__)
 APP.jobs = 0
 
@@ -43,13 +42,13 @@ def main():
     # required values.
     #
 
-    field_names = ['qacc', 'sacc', 'pident', 'qcovhsp', 'evalue']
-
     try:
         form = request.json
 
+        field_names = ['qacc', 'sacc', 'pident', 'qcovhsp', 'evalue']
+
         # Collect BLAST cmd items into list
-        cmd = ['blastn']  # [sform.blast_algorithm.data]
+        cmd = ['blastn']
         cmd += ['-perc_identity', unlist(form['min_identity'])]
         cmd += ['-qcov_hsp_perc', unlist(form['min_qry_cover'])]
         cmd += ['-db', os.path.join('/blastdbs', form['db'])]
