@@ -14,12 +14,14 @@ from flask import Flask, jsonify, request
 APP = Flask(__name__)
 APP.jobs = 0
 
+
 def unlist(value):
     """
     If the given value is a list, returns the first list entry, otherwise it
     returns the value.
     """
     return value[0] if isinstance(value, list) else value
+
 
 @APP.route('/status')
 def status():
@@ -56,7 +58,7 @@ def main():
         # cmd += ['-max_hsps', '1']
         cmd += ['-num_threads', '4']
     except KeyError as err:
-        #pylint: disable=no-member
+        # pylint: disable=no-member
         APP.logger.error(f'command formatting: {err}')
         return str(err), 500
 
@@ -67,24 +69,24 @@ def main():
     APP.jobs += 1
     try:
         with subprocess.Popen(cmd, stdin=subprocess.PIPE,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE) as process:
+                              stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE) as process:
             # Send seq from sform to stdin, read output & error until 'eof'
             stdout, stderr = process.communicate(
                 input="\n".join(form['sequence']).encode()
             )
     # We want to make sure to catch everything here so that the workers can
     # keep working
-    #pylint: disable=broad-except
+    # pylint: disable=broad-except
     except Exception as ex:
-        #pylint: disable=no-member
+        # pylint: disable=no-member
         APP.logger.error("BLAST error: %s", ex)
 
     APP.jobs -= 1
 
     # If BLAST worked (no error)
     if process.returncode == 0:
-        #pylint: disable=no-member
+        # pylint: disable=no-member
         APP.logger.info('BLAST success')
 
         #
@@ -113,6 +115,6 @@ def main():
 
     # If BLAST error
     err = stderr.decode()
-    #pylint: disable=no-member
+    # pylint: disable=no-member
     APP.logger.error(err)
     return err, 500
