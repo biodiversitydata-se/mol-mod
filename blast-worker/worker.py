@@ -56,9 +56,10 @@ def main():
         # Only report x best High Scorting Pair(s) per sequence hit
         # cmd += ['-max_hsps', '1']
         cmd += ['-num_threads', '4']
+
     except KeyError as err:
         # pylint: disable=no-member
-        APP.logger.error(f'command formatting: {err}')
+        APP.logger.error(f'Command formatting resulted in: {err}')
         return str(err), 500
 
     #
