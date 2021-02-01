@@ -1,3 +1,7 @@
+"""
+This module contains routes involved in filter search and
+result display.
+"""
 import json
 
 import requests
@@ -40,8 +44,7 @@ def filter():
 @filter_bp.route('/request_drop_options/<field>', methods=['POST'])
 def request_drop_options(field) -> dict:
     '''Forwards (Select2) AJAX request for filtered dropdown options to
-    postgREST/postgres function, and returns paginated data in dict
-    with Select2-specific format'''
+    API, and returns paginated data in dict with Select2-specific format'''
 
     # Make dict of selected list values while renaming list keys,
     # e.g. 'kingdom[]' to 'kingdom'
@@ -59,7 +62,10 @@ def request_drop_options(field) -> dict:
     offset = (int(request.form['page']) - 1) * limit
     payload.update({'nlimit': limit, 'noffset': offset})
 
+    #
     # Send API request
+    #
+
     url = f"{CONFIG.POSTGREST}/rpc/app_drop_options"
     payload = json.dumps(payload)
     APP.logger.debug(f'Payload sent to /rpc/app_drop_options: {payload}')
@@ -85,7 +91,10 @@ def filter_run() -> dict:
     # Set base URL for API search
     url = f"{CONFIG.POSTGREST}/app_search_mixs_tax"
 
+    #
     # Append row filters based on POST:ed dropdown selections
+    #
+
     filters = [f for f in request.form if f != 'csrf_token']
     selections = {f: ','.join(
         map(str, request.form.getlist(f))) for f in filters}
@@ -95,7 +104,10 @@ def filter_run() -> dict:
             url += f'&{filter}=in.({value})'
     APP.logger.debug(f'URL for API request: {url}')
 
-    # Make API request
+    #
+    # Send API request
+    #
+
     try:
         response = requests.get(url)
         response.raise_for_status()
