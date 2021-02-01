@@ -16,8 +16,8 @@ APP.jobs = 0
 
 def unlist(value):
     """
-    If the given value is a list, returns the first list entry, otherwise it
-    returns the value.
+    If given value is a list, it returns the first list entry,
+    otherwise it returns the value.
     """
     return value[0] if isinstance(value, list) else value
 
@@ -33,8 +33,8 @@ def status():
 @APP.route('/', methods=['POST'])
 def main():
     """
-    Composes a BLAST command from a (DataTable) AJAX request, and executes the
-    command using subprocess.
+    Composes a BLAST command from a (DataTable) AJAX request, forwarded from
+    molmod endpoint /blast_run, and executes the command using subprocess.
     """
 
     #
@@ -63,7 +63,7 @@ def main():
         return str(err), 500
 
     #
-    # Execute the actual BLAST search using subprocess.
+    # Execute BLAST search using subprocess.
     #
 
     APP.jobs += 1
@@ -75,8 +75,7 @@ def main():
             stdout, stderr = process.communicate(
                 input="\n".join(form['sequence']).encode()
             )
-    # We want to make sure to catch everything here so that the workers can
-    # keep working
+    # Make sure to catch everything so that workers can keep working
     # pylint: disable=broad-except
     except Exception as ex:
         # pylint: disable=no-member
@@ -90,8 +89,7 @@ def main():
         APP.logger.info('BLAST success')
 
         #
-        # Format the results as json instead of tsv so that it's easier for the
-        # app to parse.
+        # Format results as JSON, to make it easier to parse.
         #
 
         raw = stdout.decode()
@@ -100,8 +98,8 @@ def main():
             row = row.strip()
             if not row:
                 continue
-            # format the results as a dictionary using the list of field names,
-            # transforming numerical strings into numbers.
+            # Format as dictionary using list of field names,
+            # transforming numerical strings into numbers
             result = {}
             for i, field in enumerate(row.split()):
                 try:
