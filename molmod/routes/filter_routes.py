@@ -1,7 +1,7 @@
 import json
 
 import requests
-from flask import Blueprint, current_app as app
+from flask import Blueprint, current_app as APP
 from flask import render_template, request
 
 from molmod.forms import (FilterResultForm, FilterSearchForm)
@@ -29,7 +29,7 @@ def filter():
         selected = [(x, x) for x in request.form.getlist(f) if x]
         if selected:
             sform[f].choices = selected
-            app.logger.debug(f'Reapplied selections: {f}: {selected}')
+            APP.logger.debug(f'Reapplied selections: {f}: {selected}')
 
     # Only include result form if FILTER button was clicked
     if request.form.get('filter_asvs'):
@@ -62,13 +62,13 @@ def request_drop_options(field) -> dict:
     # Send API request
     url = f"{CONFIG.POSTGREST}/rpc/app_drop_options"
     payload = json.dumps(payload)
-    app.logger.debug(f'Payload sent to /rpc/app_drop_options: {payload}')
+    APP.logger.debug(f'Payload sent to /rpc/app_drop_options: {payload}')
     headers = {'Content-Type': 'application/json'}
     try:
         response = requests.request("POST", url, headers=headers, data=payload)
         response.raise_for_status()
     except Exception as e:
-        app.logger.error(f'API request for select options resulted in: {e}')
+        APP.logger.error(f'API request for select options resulted in: {e}')
     else:
         results = json.loads(response.text)[0]['data']['results']
         count = json.loads(response.text)[0]['data']['count']
@@ -93,13 +93,13 @@ def filter_run() -> dict:
         url += '?'
         for filter, value in selections.items():
             url += f'&{filter}=in.({value})'
-    app.logger.debug(f'URL for API request: {url}')
+    APP.logger.debug(f'URL for API request: {url}')
 
     # Make API request
     try:
         response = requests.get(url)
         response.raise_for_status()
     except (requests.ConnectionError, requests.exceptions.HTTPError) as e:
-        app.logger.error(f'API request for filtered occurences returned: {e}')
+        APP.logger.error(f'API request for filtered occurences returned: {e}')
     else:
         return {"data": json.loads(response.text)}
