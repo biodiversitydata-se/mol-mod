@@ -66,7 +66,7 @@ def fasta_check(form, field):
                                       re.sub(f'[{fasta_chars}]+', '', row)
                                       ))
     if not hasSeq:
-        raise ValidationError('All Fasta headers require a sequece')
+        raise ValidationError('All Fasta headers require a sequence')
 
 
 def identity_check(form, field):
