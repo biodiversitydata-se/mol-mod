@@ -49,6 +49,4 @@ def create_app():
         app.register_blueprint(filter_routes.filter_bp)
         errors.init_app(app)
 
-        app.logger.debug(f'root path {app.root_path}')
-
     return app
