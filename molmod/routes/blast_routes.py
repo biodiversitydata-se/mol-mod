@@ -39,12 +39,11 @@ def blast():
 @blast_bp.route('/blast_run', methods=['POST'])
 def blast_run():
     """
-    Sends the blast run request to one of the available blast workers, and then
+    Sends blast run request to one of the available blast workers, and then
     adds subject sequences to the output, via a separate function, and returns
     a JSON Response (or an empty string if error occurs).
     """
 
-    # Convert form data to JSON to be able to manipulate the data
     form = dict(request.form.lists())
     form['db'] = CONFIG.BLAST_DB
     response = requests.post('http://blast-worker:5000/', json=form)
@@ -55,17 +54,19 @@ def blast_run():
         # jQuery will display custom error msg
         return ''
 
+    #
     # If there are results, format them and add subject sequence before
     # returning.
+    #
 
     results = response.json()
     results = results['data'] if 'data' in results else results
 
-    # format result fields
+    # Format result fields
     for result in results:
         # Set single decimal for Sci not & float
         result['evalue'] = f'{result["evalue"]:.1e}'
-        # set identity and coverage as single decimal floats
+        # Set identity and coverage as single decimal floats
         result['pident'] = f'{result["pident"]:.1f}'
         result['qcovhsp'] = f'{result["qcovhsp"]:.1f}'
 
@@ -74,7 +75,7 @@ def blast_run():
         # Extract asvid from sacc = id + taxonomy
         result['asv_id'] = result['sacc'].split('-')[0]
 
-    # Get Subject sequence via ID, and add them to the results
+    # Get Subject sequence via ID, and add to the results
     asv_ids = [f['asv_id'] for f in results]
     sdict = get_sseq_from_api(asv_ids)
     for result in results:
