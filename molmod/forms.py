@@ -48,7 +48,7 @@ def fasta_check(form, field):
         # last header
         if row.startswith('>'):
             if not hasSeq:
-                raise ValidationError('All Fasta headers require a sequece')
+                raise ValidationError('All Fasta headers require a sequence')
             isHeader = True
             hasSeq = False
             currentHeader = row
