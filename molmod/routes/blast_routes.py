@@ -78,6 +78,10 @@ def blast_run():
     # Get Subject sequence via ID, and add to the results
     asv_ids = [f['asv_id'] for f in results]
     sdict = get_sseq_from_api(asv_ids)
+    # If no sequences were retrieved, don't show any results
+    if sdict is None:
+        return ''
+    APP.logger.debug(f'dict is {sdict}')
     for result in results:
         if result['asv_id'] in sdict:
             result['asv_sequence'] = sdict[result['asv_id']]
@@ -96,8 +100,9 @@ def get_sseq_from_api(asv_ids: list) -> dict:
     try:
         response = requests.request("POST", url, headers=headers, data=payload)
         response.raise_for_status()
-    except requests.exceptions.RequestException as ex:
+    except Exception as ex:
         APP.logger.error('API request for subject sequences returned: %s', ex)
+        return None
     else:
         sdict = {item['asv_id']: item['asv_sequence']
                  for item in json.loads(response.text)}
