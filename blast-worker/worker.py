@@ -67,6 +67,8 @@ def main():
     #
 
     APP.jobs += 1
+    APP.logger.debug(f'Job count is {APP.jobs}')
+
     try:
         with subprocess.Popen(cmd, stdin=subprocess.PIPE,
                               stdout=subprocess.PIPE,
@@ -75,44 +77,51 @@ def main():
             stdout, stderr = process.communicate(
                 input="\n".join(form['sequence']).encode()
             )
+
     # Make sure to catch everything so that workers can keep working
     # pylint: disable=broad-except
     except Exception as ex:
         # pylint: disable=no-member
-        APP.logger.error("BLAST error: %s", ex)
+        APP.logger.error("Subprocess error: %s", ex)
+        return str(ex), 500
 
-    APP.jobs -= 1
+    else:
+        # If BLAST returns success response
+        if process.returncode == 0:
+            # pylint: disable=no-member
+            APP.logger.info('BLAST success')
 
-    # If BLAST worked (no error)
-    if process.returncode == 0:
+            #
+            # Format results as JSON, to make it easier to parse.
+            #
+
+            raw = stdout.decode()
+            results = []
+            for row in raw.split('\n'):
+                row = row.strip()
+                if not row:
+                    continue
+                # Format as dictionary using list of field names,
+                # transforming numerical strings into numbers
+                result = {}
+                for i, field in enumerate(row.split()):
+                    try:
+                        value = float(field)
+                    except ValueError:
+                        value = field
+                    result[field_names[i]] = value
+                results += [result]
+
+            return jsonify(data=results)
+
+        # If BLAST returns error (even if subprocess worked),
+        # e.g. 2: Error in BLAST database
+        err = stderr.decode()
         # pylint: disable=no-member
-        APP.logger.info('BLAST success')
+        APP.logger.error("%s", err.strip())
+        return err, 500
 
-        #
-        # Format results as JSON, to make it easier to parse.
-        #
-
-        raw = stdout.decode()
-        results = []
-        for row in raw.split('\n'):
-            row = row.strip()
-            if not row:
-                continue
-            # Format as dictionary using list of field names,
-            # transforming numerical strings into numbers
-            result = {}
-            for i, field in enumerate(row.split()):
-                try:
-                    value = float(field)
-                except ValueError:
-                    value = field
-                result[field_names[i]] = value
-            results += [result]
-
-        return jsonify(data=results)
-
-    # If BLAST error
-    err = stderr.decode()
-    # pylint: disable=no-member
-    APP.logger.error(err)
-    return err, 500
+    # Decrease job count, irrespective of success or failure
+    finally:
+        APP.jobs -= 1
+        APP.logger.debug(f'Final job count is {APP.jobs}')

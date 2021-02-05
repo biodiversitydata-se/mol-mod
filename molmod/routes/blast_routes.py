@@ -48,7 +48,7 @@ def blast_run():
     form['db'] = CONFIG.BLAST_DB
     response = requests.post('http://blast-worker:5000/', json=form)
     if not response.ok:
-        APP.logger.error(response.text)
+        APP.logger.error('No BLAST hits returned from worker')
         # If error: Return '' instead of None, to avoid logging Werkzeug stack
         # (visible on next request for some reason).
         # jQuery will display custom error msg
@@ -78,13 +78,19 @@ def blast_run():
     # Get Subject sequence via ID, and add to the results
     asv_ids = [f['asv_id'] for f in results]
     sdict = get_sseq_from_api(asv_ids)
-    # If no sequences were retrieved, don't show any results
+
+    # If no, or incomplete set of, sequences were retrieved,
+    # don't show any result rows at all
     if sdict is None:
+        APP.logger.error('No sequences were returned from DB')
         return ''
-    APP.logger.debug(f'dict is {sdict}')
-    for result in results:
-        if result['asv_id'] in sdict:
-            result['asv_sequence'] = sdict[result['asv_id']]
+    else:
+        for result in results:
+            if result['asv_id'] in sdict:
+                result['asv_sequence'] = sdict[result['asv_id']]
+            else:
+                APP.logger.error(f"No seq found for {result['asv_id']}")
+                return ''
 
     return jsonify(data=results)
 
