@@ -7,13 +7,6 @@ def error_handler(error):
     Logs errors and renders specific, if available, or generic error page
     """
 
-    # Set log level based on error code
-    msg = (f'Request \"{request.method} {request.path}\" resulted in: {error}')
-    if error.code >= 500:
-        app.logger.error(msg)
-    else:
-        app.logger.warning(msg)
-
     # For 4XX and 5XX level HTTP errors, save specific info
     if isinstance(error, HTTPException):
         code = error.code
@@ -27,7 +20,14 @@ def error_handler(error):
                        "while trying to fulfill your request</p>")
         name = 'Internal Server Error'
 
-    # Format in specific page, if available (eg. 404), otherwise use generic
+    # Set log level based on error code
+    msg = (f'Request \"{request.method} {request.path}\" resulted in: {error}')
+    if code >= 500:
+        app.logger.error(msg)
+    else:
+        app.logger.warning(msg)
+
+    # Format specific page, if available (eg. 404), otherwise use generic
     templates_to_try = ['error_{}.html'.format(code), 'error_generic.html']
     return render_template(templates_to_try,
                            code=code,
