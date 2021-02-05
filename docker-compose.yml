@@ -18,8 +18,8 @@ services:
       - .env
     # For debugging (e.g. in pgAdmin), connect a host port
     # to a container port (HOST:CONTAINER), but keep closed in production
-    ports:
-      - 5432:5432
+    # ports:
+    #   - 5432:5432
   postgrest:
     # https://hub.docker.com/r/postgrest/postgrest
     restart: always
