@@ -7,7 +7,8 @@ file, and uses these to generate sql insert queries.
 import json
 import logging
 
-from typing import Mapping
+from collections import OrderedDict
+from typing import List, Mapping, Tuple
 
 import pandas
 
@@ -26,6 +27,59 @@ def as_snake_case(text: str) -> str:
         output += char.lower()
     return output
 
+def order_tables(tables: list, references: List[Tuple[str, str]]) -> list:
+    """
+    Orders the `tables` list so that no table is before a table it references,
+    according to the `references` dict (using  Kahn's algorithm).
+    """
+    if not references:
+        return tables
+
+    # copy and modify references a bit into a list of edges
+    edges = [(o, t.split('.')[0]) for o,t in references]
+
+    # make sets of origin and target nodes
+    origin_nodes = {o for o,t in edges}
+    target_nodes = {t for o,t in edges}
+
+    # figure out isolated nodes
+    isolated = set(tables).difference(origin_nodes, target_nodes)
+
+    # figure out all start-only nodes
+    start_nodes = {o for o,t in edges}.difference({t for o,t in edges})
+    if not start_nodes:
+        raise ValueError("Cyclic references")
+
+    sorted_tables = []
+    while start_nodes:
+        # add start node to sorted list
+        start = start_nodes.pop()
+        sorted_tables += [start]
+        to_remove = []
+
+        # remove all edges from start node
+        for i, edge in enumerate(edges):
+            if edge[0] == start:
+                to_remove += [i]
+        targets = []
+        for i in sorted(to_remove, reverse=True):
+            edge = edges.pop(i)
+            targets += [edge[1]]
+
+        # ... and add all nodes without incoming edges to start_nodes
+        for target in targets:
+            for edge in edges:
+                if edge[1] == target:
+                    break
+            else:
+                start_nodes.add(target)
+
+    # add isolated tables at the end
+    sorted_tables += list(isolated)
+
+    # and finally, reverse the list, so that referenced tables are inserted
+    # before the references are needed
+    return sorted_tables[::-1]
 
 class DBMapper():
     """
@@ -119,4 +173,10 @@ class DBMapper():
             # ... and some empty columns too ...
             data[table] = data[table].dropna(axis='columns', how='all')
 
-        return data
+        # parse all references to figure out insertion order, and make sure that
+        # there are no reference loops
+        ordered_tables = OrderedDict()
+        for table in order_tables(list(data.keys()), references):
+            ordered_tables[table] = data[table]
+
+        return ordered_tables
