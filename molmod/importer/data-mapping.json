@@ -1,0 +1,34 @@
+{
+  "dataset": {
+    "targetTable": "dataset",
+    "returning": ["pid"],
+    "datasetId": {},
+    "providerEmail": {}
+  },
+  "event": {
+    "targetTable": "sampling_event",
+    "returning": "pid",
+    "dataset_pid": {
+      "references": "dataset.pid"
+    },
+    "event_id": {},
+    "event_id_alias": {},
+    "materialSampleId": {},
+    "eventDate": {},
+    "samplingProtocol": {},
+    "sampleSizeValue": {},
+    "locationID": {},
+    "decimalLatitude": {},
+    "decimalLongitude": {},
+    "geodeticDatum": {},
+    "coordinateUncertaintyInMeters": {},
+    "recordedBy": {},
+    "verbatimLocality": {},
+    "municipality": {},
+    "country": {},
+    "minimumElevationInMeters": {},
+    "maximumElevationInMeters": {},
+    "minimumDepthInMeters": {},
+    "maximumDepthInMeters": {}
+  }
+}
