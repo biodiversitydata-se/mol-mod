@@ -6,10 +6,25 @@ the future.
 """
 
 import os
+import json
 import subprocess
+from logging.config import dictConfig
+
 from flask import Flask, jsonify, request
 
+#
 # Start server
+#
+
+# Figure out environment to set log config
+environment = os.getenv('FLASK_ENV')
+if environment != 'production':
+    environment = 'development'
+
+# Load log config, and create log before flask app
+log_config = json.load(open(f'log/log_config_{environment}.json'))
+dictConfig(log_config)
+
 APP = Flask(__name__)
 APP.jobs = 0
 
@@ -89,7 +104,7 @@ def main():
         # If BLAST returns success response
         if process.returncode == 0:
             # pylint: disable=no-member
-            APP.logger.info('BLAST success')
+            APP.logger.debug('BLAST success')
 
             #
             # Format results as JSON, to make it easier to parse.

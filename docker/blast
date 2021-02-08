@@ -2,6 +2,7 @@
 FROM ncbi/blast:2.10.1
 
 ADD blast-worker/ /worker
+ADD log/ /worker/log
 
 WORKDIR /worker
 
