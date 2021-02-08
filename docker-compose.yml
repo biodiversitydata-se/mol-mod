@@ -1,10 +1,28 @@
 version: "3.8"
+# logging:
+# the docker-compose logging documentation is at:
+# https://docs.docker.com/compose/compose-file/compose-file-v3/#logging
+# logging options are documented at:
+# https://docs.docker.com/config/containers/logging/configure/
+#
+# Logging is generally configured on the service level, that is - you define
+# a logging entry for every service. This can be useful, but for now we use the
+# extension field syntax to define a logger that we reuse for all services.
+#
+x-logging:
+  &default-logging
+  driver: "json-file" # this is the default logger
+  options:
+    max-size: '20m'
+    max-file: '5'
+    compress: 'true'
+
 services:
   postgres:
     restart: always
     image: postgres:13
     container_name: asv-db
-    user: postgres
+    logging: *default-logging
     volumes:
       # Files read (in alphanumeric order) during database startup,
       # and used to define database schema and roles
@@ -25,6 +43,10 @@ services:
     restart: always
     image: postgrest/postgrest:v7.0.1
     container_name: asv-rest
+    logging: *default-logging
+    # for debugging, this syntax can be used to connect a host port to a
+    # container port (HOST:CONTAINER), but the containers can connect to each
+    # other regardless.
     # ports:
     #   - 3000:3000
     # Get most environment variables from the default .env file
@@ -39,6 +61,7 @@ services:
     build:
       context: ./
       dockerfile: docker/blast
+    logging: *default-logging
     volumes:
       - ./blast-databases:/blastdbs
   develop:
@@ -46,6 +69,7 @@ services:
     build:
       context: ./
       dockerfile: docker/develop
+    logging: *default-logging
     volumes:
       - type: bind
         source: ./
