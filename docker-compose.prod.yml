@@ -1,0 +1,58 @@
+version: "3.8"
+x-logging:
+  &default-logging
+  driver: "local"
+  options:
+    max-size: '20m'
+    max-file: '5'
+    compress: 'true'
+
+volumes:
+  postgres-db:
+  blast-db:
+
+services:
+  postgres:
+    restart: always
+    image: postgres:13
+    container_name: asv-db
+    logging: *default-logging
+    volumes:
+      - ./misc/db-data-schema.sql:/docker-entrypoint-initdb.d/01-data-schema.sql
+      - ./misc/db-api-schema.sql:/docker-entrypoint-initdb.d/02-api-schema.sql
+      - ./misc/db-roles.sql:/docker-entrypoint-initdb.d/03-roles.sql
+      - postgres-db:/var/lib/postgresql/data
+    env_file:
+      - .env
+  postgrest:
+    restart: always
+    image: postgrest/postgrest:v7.0.1
+    container_name: asv-rest
+    logging: *default-logging
+    env_file:
+      - .env
+    environment:
+      - PGRST_DB_URI=postgres://authenticator:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+    depends_on:
+      - postgres
+  blast-worker:
+    image: bioatlas/molmod-blast:${TAG:-latest}
+    build:
+      context: ./
+      dockerfile: docker/blast
+    logging: *default-logging
+    volumes:
+      - blast-db:/blastdbs
+  asv-main:
+    restart: always
+    image: bioatlas/molmod:${TAG:-latest}
+    build:
+      context: ./
+      dockerfile: docker/production
+    logging: *default-logging
+    env_file:
+      - .env
+    ports:
+      - 5000:5000
+    depends_on:
+      - postgrest
