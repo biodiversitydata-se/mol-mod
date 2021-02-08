@@ -61,6 +61,7 @@ services:
     build:
       context: ./
       dockerfile: docker/blast
+    logging: *default-logging
     volumes:
       - ./blast-databases:/blastdbs
   develop:
