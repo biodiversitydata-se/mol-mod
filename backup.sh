@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 # variables
 DIR="misc"
