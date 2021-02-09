@@ -74,6 +74,9 @@ def order_tables(tables: list, references: List[Tuple[str, str]]) -> list:
             else:
                 start_nodes.add(target)
 
+    if edges:
+        raise ValueError("Cyclic references")
+
     # add isolated tables at the end
     sorted_tables += list(isolated)
 

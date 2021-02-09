@@ -6,7 +6,7 @@ Unit tests for the molmod importer db-mapper.
 import unittest
 
 #pylint: disable=import-error
-from db_mapper import as_snake_case
+from db_mapper import as_snake_case, order_tables
 
 class AsSnakeCaseTest(unittest.TestCase):
     """
@@ -25,3 +25,39 @@ class AsSnakeCaseTest(unittest.TestCase):
         Checks that the function returns the same string when given snake_case.
         """
         self.assertEqual("snake_case", as_snake_case("snake_case"))
+
+
+class OrderTabledTest(unittest.TestCase):
+    """
+    Tests that the `order_tables` function behaves according to expectation.
+    """
+
+    def test_valid_paths(self):
+        """
+        Checks that the function returns valid orders for valid paths. Note that
+        there can be multiple correct solutions.
+        """
+        tables = list('ABCDEFGHIJ')
+        references = [('B', 'A'), ('D', 'B'), ('C', 'A'), ('D', 'E')]
+        result = order_tables(tables, references)
+        # check that all references are in order
+        for source, target in references:
+            self.assertGreater(result.index(source), result.index(target))
+        # check that all tables are present in the output
+        for table in tables:
+            self.assertGreaterEqual(result.index(table), 0)
+        # check that no tables are present more than once
+        self.assertEqual(len(result), len(tables))
+
+    def test_circular_paths(self):
+        """
+        Checks that the function raises the correct exceptions when given
+        circular paths.
+        """
+        tests = [(list('ABCD'),
+                  [('A', 'B'), ('B', 'C'), ('C', 'D'), ('D', 'A')]),
+                 (list('ABCDE'),
+                  [('A', 'B'), ('B', 'C'), ('C', 'D'), ('D', 'B'), ('C', 'E')])
+                 ]
+        for table, ref in tests:
+            self.assertRaises(ValueError, order_tables, table, ref)
