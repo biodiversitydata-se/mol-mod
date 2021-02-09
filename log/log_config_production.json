@@ -5,14 +5,14 @@
       "datefmt": "%y%m%d %H:%M:%S"
   }},
   "handlers": {
-      "file": {
-          "class": "logging.FileHandler",
-          "filename": "molmod.log",
+      "wsgi": {
+          "class": "logging.StreamHandler",
+          "stream": "ext://flask.logging.wsgi_errors_stream",
           "formatter": "default"
       }
   },
   "root": {
       "level": "WARNING",
-      "handlers": ["file"]
+      "handlers": ["wsgi"]
   }
 }

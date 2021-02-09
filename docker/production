@@ -1,0 +1,19 @@
+FROM python:3.9-buster
+
+RUN mkdir -p /app
+RUN mkdir -p /app/molmod
+RUN mkdir -p /app/log
+
+COPY molmod/ /app/molmod/
+COPY log/ /app/log/
+COPY wsgi.py /app/
+COPY config/uwsgi-config.ini /app/
+RUN chown -R www-data:www-data /app/
+
+WORKDIR /app
+
+RUN pip3 install -r molmod/requirements.txt
+RUN pip3 install uwsgi
+
+ENV FLASK_ENV="production"
+CMD ["uwsgi", "--ini", "uwsgi-config.ini", "--uid", "www-data"]

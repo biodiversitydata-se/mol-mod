@@ -48,7 +48,7 @@ def blast_run():
     form['db'] = CONFIG.BLAST_DB
     response = requests.post('http://blast-worker:5000/', json=form)
     if not response.ok:
-        APP.logger.error('No BLAST hits returned from worker')
+        APP.logger.error('Error response returned from worker')
         # If error: Return '' instead of None, to avoid logging Werkzeug stack
         # (visible on next request for some reason).
         # jQuery will display custom error msg
