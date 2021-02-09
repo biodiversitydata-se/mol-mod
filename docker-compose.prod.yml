@@ -41,6 +41,8 @@ services:
       context: ./
       dockerfile: docker/blast
     logging: *default-logging
+    environment:
+      - FLASK_ENV=production
     volumes:
       - blast-db:/blastdbs
   asv-main:
