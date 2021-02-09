@@ -35,8 +35,8 @@ def order_tables(tables: list, references: List[Tuple[str, str]]) -> list:
     if not references:
         return tables
 
-    # copy and modify references a bit into a list of edges
-    edges = [(o, t.split('.')[0]) for o,t in references]
+    # copy references into a list of edges
+    edges = list(references)
 
     # make sets of origin and target nodes
     origin_nodes = {o for o,t in edges}
@@ -95,7 +95,8 @@ class DBMapper():
         Reads a JSON mapping file.
         """
         logging.info("Reading data mapping file")
-        self.mapping = json.load(open(filename))
+        with open(filename) as mapping_file:
+            self.mapping = json.load(mapping_file)
 
     @property
     def sheets(self):
@@ -109,7 +110,9 @@ class DBMapper():
         Formats an SQL insert query using the given table name and data frame,
         as well as data from the loaded data mapping file.
         """
-        quoted_fields = ', '.join([f'"{c}"' for c in data.columns])
+        # sometimes there are columns that need to be ignored in the data, so we
+        # get the column names from the mapping.
+        quoted_fields = ', '.join([f'"{c}"' for c in self.get_fields(table)])
 
         # format values, so that strings are quoted
         values = []
@@ -130,6 +133,34 @@ class DBMapper():
             query += f" RETURNING {mapping[0]['returning']}"
 
         return query + ";"
+
+    def get_fields(self, sheet):
+        """
+        Returns all target fields for `sheet` from the current mapping.
+        """
+        mapping = self.mapping.get(sheet, None)
+        if not mapping:
+            return None
+        fields = []
+        for field in mapping:
+            target = self.target_field(sheet, field)
+            if not target:
+                continue
+            fields += [target]
+        return fields
+
+    def target_field(self, sheet, field):
+        """
+        Returns the target field name for the given `field` in `sheet`.
+        """
+        mapping = self.mapping.get(sheet, None)
+        if not mapping or field in ['targetTable', 'returning']:
+            return None
+        info = mapping[field]
+        target_field = info.get('field', None)
+        if not target_field:
+            target_field = as_snake_case(field)
+        return target_field
 
     def reorder_data(self, data: PandasDict) -> PandasDict:
         """
@@ -156,16 +187,14 @@ class DBMapper():
             field_mapping = {}
             # parse field data into field names and validators
             for field, info in self.mapping[sheet].items():
-                # ignore the "targetTable" and "returning" fields
-                if field in ['targetTable', 'returning']:
-                    continue
-                target_field = info.get('field', None)
+                target_field = self.target_field(sheet, field)
                 if not target_field:
-                    target_field = as_snake_case(field)
+                    continue
                 field_mapping[field] = target_field
                 # keep track of references for table ordering
-                if info.get('references', None):
-                    references += [(table, info.get('references'))]
+                ref = info.get('references', None)
+                if ref:
+                    references += [(table, ref['table'])]
 
             # then rename all the fields
             data[table].rename(columns=field_mapping, inplace=True)
@@ -181,5 +210,17 @@ class DBMapper():
         ordered_tables = OrderedDict()
         for table in order_tables(list(data.keys()), references):
             ordered_tables[table] = data[table]
+
+        # also update the mapping, now that we use target tables instead of
+        # source sheets
+        sheet_mapping = []
+        for sheet, mapping in self.mapping.items():
+            sheet_mapping += [(sheet, self.mapping[sheet]['targetTable'])]
+
+        for sheet, table in sheet_mapping:
+            if sheet != table:
+                mapping = self.mapping[sheet]
+                del self.mapping[sheet]
+                self.mapping[table] = mapping
 
         return ordered_tables
