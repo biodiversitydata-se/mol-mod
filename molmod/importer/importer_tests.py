@@ -3,10 +3,14 @@
 Unit tests for the molmod importer db-mapper.
 """
 
+import json
+import tempfile
 import unittest
 
+from pandas import DataFrame
+
 #pylint: disable=import-error
-from db_mapper import as_snake_case, order_tables
+from db_mapper import as_snake_case, DBMapper, order_tables
 
 class AsSnakeCaseTest(unittest.TestCase):
     """
@@ -61,3 +65,45 @@ class OrderTabledTest(unittest.TestCase):
                  ]
         for table, ref in tests:
             self.assertRaises(ValueError, order_tables, table, ref)
+
+
+class DBMapperTests(unittest.TestCase):
+    """
+    Tests the functions of DBMapper.
+    """
+
+    MAPPINGS = {
+        'simple': {"A": {"targetTable": "a_values",
+                         "AId": {},
+                         "AValue": {}},
+                   "B": {"targetTable": "b_values",
+                         "returning": "b_id",
+                         "BId": {},
+                         "val": {"field": "b_value"}}
+                   }
+    }
+
+    def test_sheets(self):
+        """
+        Tests that the `sheets` property returns the correct data when a mapping
+        is loaded.
+        """
+        for mapping in self.MAPPINGS.values():
+            with tempfile.NamedTemporaryFile('w+') as mapping_file:
+                json.dump(mapping, mapping_file)
+                mapping_file.seek(0)
+                mapper = DBMapper(mapping_file.name)
+                self.assertEqual(mapper.sheets, list(mapping.keys()))
+
+    def test_get_fields(self):
+        """
+        Tests the field formatting of the DBMapper. This function implicitly
+        tests the `target_field` function as well.
+        """
+        mapping = self.MAPPINGS['simple']
+        with tempfile.NamedTemporaryFile('w+') as mapping_file:
+            json.dump(mapping, mapping_file)
+            mapping_file.seek(0)
+            mapper = DBMapper(mapping_file.name)
+            self.assertEqual(mapper.get_fields("A"), ['a_id', 'a_value'])
+            self.assertEqual(mapper.get_fields("B"), ['b_id', 'b_value'])
