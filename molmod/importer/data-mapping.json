@@ -85,5 +85,11 @@
     "measurementDeterminedBy": {},
     "measurementMethod": {},
     "measurementRemarks": {}
+  },
+  "asv-table": {
+    "targetTable": "asv",
+    "returning": "pid",
+    "asv_id_alias": {"field": "asv_id"},
+    "DNA_sequence": {"field": "asv_sequence"}
   }
 }
