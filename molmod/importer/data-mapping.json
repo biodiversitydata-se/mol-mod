@@ -37,5 +37,28 @@
     "maximumElevationInMeters": {},
     "minimumDepthInMeters": {},
     "maximumDepthInMeters": {}
+  },
+  "mixs": {
+    "targetTable": "mixs",
+    "pid": {
+      "references": {
+        "table": "sampling_event",
+        "field": "pid",
+        "join": {
+          "from": "event_id",
+          "to": "event_id"
+        }
+      }
+    },
+    "sop": {},
+    "target_gene": {},
+    "target_subfragment": {},
+    "pcr_primer_name_forward": {},
+    "pcr_primer_name_reverse": {},
+    "pcr_primer_forward": {},
+    "pcr_primer_reverse": {},
+    "env_broad_scale": {},
+    "env_local_scale": {},
+    "env_medium": {}
   }
 }
