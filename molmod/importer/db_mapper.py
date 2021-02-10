@@ -196,7 +196,8 @@ class DBMapper():
                 ref = settings['references']
 
                 target = data[ref['table']].set_index(ref['join']['to'])
-                joined = data[table].join(target, on=ref['join']['from'])
+                joined = data[table].join(target, lsuffix="_joined",
+                                          on=ref['join']['from'])
                 data[table][field] = joined[ref['field']]
 
     def reorder_data(self, data: PandasDict) -> PandasDict:
