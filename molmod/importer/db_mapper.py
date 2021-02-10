@@ -112,13 +112,15 @@ class DBMapper():
         """
         # sometimes there are columns that need to be ignored in the data, so we
         # get the column names from the mapping.
-        quoted_fields = ', '.join([f'"{c}"' for c in self.get_fields(table)])
+        fields = self.get_fields(table)
+        quoted_fields = ', '.join([f'"{c}"' for c in fields])
 
         # format values, so that strings are quoted
         values = []
-        for row in data.values:
+        for i in range(len(data.values)):
             formatted_row = []
-            for value in row:
+            for field in fields:
+                value = data[field][i]
                 if isinstance(value, str):
                     formatted_row += [f"'{value}'"]
                 else:
