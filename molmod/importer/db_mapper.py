@@ -138,10 +138,21 @@ class DBMapper():
         query = f"INSERT INTO {table} ({quoted_fields}) VALUES {values}"
         mapping = [m for t,m in self.mapping.items() \
                              if m['targetTable'] == table]
-        if mapping and mapping[0]['returning']:
+        if mapping and self.is_returning(table):
             query += f" RETURNING {mapping[0]['returning']}"
 
         return query + ";"
+
+    def is_returning(self, table):
+        """
+        Returns `True` is the given table has a 'returning' key in the mapping,
+        and that key has a value. Return `False` otherwise.
+        """
+        if table not in self.mapping:
+            return False
+
+        returning = self.mapping[table].get('returning', None)
+        return True if returning else False
 
     def get_fields(self, sheet):
         """
