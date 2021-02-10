@@ -60,5 +60,30 @@
     "env_broad_scale": {},
     "env_local_scale": {},
     "env_medium": {}
+  },
+  "emof": {
+    "targetTable": "emof",
+    "event_pid": {
+      "references": {
+        "table": "sampling_event",
+        "field": "pid",
+        "join": {
+          "from": "event_id_alias",
+          "to": "event_id_alias"
+        }
+      }
+    },
+    "measurementId": {},
+    "measurementType": {},
+    "measurementTypeId": {},
+    "measurementValue": {},
+    "measurementValueId": {},
+    "measurementUnit": {},
+    "measurementUnitId": {},
+    "measurementAccuracy": {},
+    "measurementDeterminedDate": {},
+    "measurementDeterminedBy": {},
+    "measurementMethod": {},
+    "measurementRemarks": {}
   }
 }
