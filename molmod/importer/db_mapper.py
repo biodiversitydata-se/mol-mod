@@ -5,6 +5,7 @@ file, and uses these to generate sql insert queries.
 """
 
 import json
+import math
 import logging
 
 from collections import OrderedDict
@@ -98,6 +99,16 @@ class DBMapper():
         with open(filename) as mapping_file:
             self.mapping = json.load(mapping_file)
 
+    def _format_value(self, value):
+        """
+        Formats `value` in a manner that's suitable for postgres insert queries.
+        """
+        if isinstance(value, str):
+            return f"'{value}'"
+        elif math.isnan(value):
+            return "'NaN'"
+        return value
+
     @property
     def sheets(self):
         """
@@ -120,11 +131,7 @@ class DBMapper():
         for i in range(len(data.values)):
             formatted_row = []
             for field in fields:
-                value = data[field][i]
-                if isinstance(value, str):
-                    formatted_row += [f"'{value}'"]
-                else:
-                    formatted_row += [value]
+                formatted_row.append(self._format_value(data[field][i]))
             values += [f'({", ".join(map(str, formatted_row))})']
 
         values = ', '.join(values)
