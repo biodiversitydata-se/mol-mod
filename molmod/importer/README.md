@@ -46,3 +46,22 @@ can be written as:
       "targetTable": "sampling_event"
   }
 ```
+
+Columns can also be set to reference other table columns in the import data.
+This is done with the following syntax:
+```
+<column>: {
+  "references": {
+    "table": <db-table-name>,
+    "field": <db-column>,
+    "join": {
+      "from": <source column>,
+      "to": <target column>
+    }
+  }
+}
+```
+
+Note that the tables need to be joined on a different field than the reference
+field.
+
