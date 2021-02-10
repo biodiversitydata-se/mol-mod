@@ -109,10 +109,11 @@ class MolModImporter():
             self.cursor.execute(query)
 
             # retrieve results (if returning) and update data
-            retvals = self.cursor.fetchall()
-            if retvals:
-                for col in retvals[0].keys():
-                    data[col] = [r[col] for r in retvals]
+            if self.data_mapping.is_returning(table):
+                retvals = self.cursor.fetchall()
+                if retvals:
+                    for col in retvals[0].keys():
+                        data[col] = [r[col] for r in retvals]
 
         if dry_run:
             logging.info("Dry run, rolling back changes")
