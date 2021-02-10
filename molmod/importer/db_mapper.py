@@ -171,6 +171,23 @@ class DBMapper():
             target_field = as_snake_case(field)
         return target_field
 
+    def update_references(self, table, data):
+        """
+        Updates all the references in `table` with values from `data`.
+        """
+
+        if table not in self.mapping:
+            return
+        mapping = self.mapping[table]
+        logging.debug("updating table references for %s", table)
+        for field, settings in mapping.items():
+            if 'references' in settings:
+                ref = settings['references']
+
+                target = data[ref['table']].set_index(ref['join']['to'])
+                joined = data[table].join(target, on=ref['join']['from'])
+                data[table][field] = joined[ref['field']]
+
     def reorder_data(self, data: PandasDict) -> PandasDict:
         """
         Takes a pandas sheet dictionary and reorders the data according to the

@@ -1,7 +1,7 @@
 {
   "dataset": {
     "targetTable": "dataset",
-    "returning": ["pid"],
+    "returning": "pid",
     "datasetId": {},
     "providerEmail": {}
   },
@@ -9,7 +9,14 @@
     "targetTable": "sampling_event",
     "returning": "pid",
     "dataset_pid": {
-      "references": "dataset.pid"
+      "references": {
+        "table": "dataset",
+        "field": "pid",
+        "join": {
+          "from": "dataset",
+          "to": "dataset_id"
+        }
+      }
     },
     "event_id": {},
     "event_id_alias": {},
@@ -17,7 +24,7 @@
     "eventDate": {},
     "samplingProtocol": {},
     "sampleSizeValue": {},
-    "locationID": {},
+    "locationId": {},
     "decimalLatitude": {},
     "decimalLongitude": {},
     "geodeticDatum": {},
