@@ -101,6 +101,9 @@ class MolModImporter():
         for table, data in self.data.items():
             logging.info(" - %s", table)
 
+            # check for references, and update fields
+            self.data_mapping.update_references(table, self.data)
+
             # execute query
             query = self.data_mapping.as_query(table, data)
             self.cursor.execute(query)
