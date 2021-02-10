@@ -212,7 +212,8 @@ class DBMapper():
             # that are NaN only
             data[table] = data[table].dropna(how='all')
             # ... and some empty columns too ...
-            data[table] = data[table].dropna(axis='columns', how='all')
+            data[table] = data[table].drop(data[table].filter(regex="Unnamed"),
+                                           axis='columns')
 
         # parse all references to figure out insertion order, and make sure that
         # there are no reference loops
