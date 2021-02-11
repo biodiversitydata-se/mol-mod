@@ -9,12 +9,11 @@ import json
 import math
 import logging
 
-from pandas import Timestamp
-
 from collections import OrderedDict
 from typing import List, Mapping, Tuple
 
 import pandas
+from pandas import Timestamp
 
 # Define pandas dict of sheets type. This is what's returned from read_excel()
 PandasDict = Mapping[str, pandas.DataFrame]
@@ -102,11 +101,12 @@ class DBMapper():
         with open(filename) as mapping_file:
             self.mapping = json.load(mapping_file)
 
-    def _format_value(self, value):
+    @staticmethod
+    def _format_value(value):
         """
         Formats `value` in a manner that's suitable for postgres insert queries.
         """
-        if isinstance(value, str) or isinstance(value, Timestamp):
+        if isinstance(value, (str, Timestamp)):
             return f"'{value}'"
         if value is None:
             return 'NULL'
@@ -166,7 +166,7 @@ class DBMapper():
             return False
 
         returning = self.mapping[table].get('returning', None)
-        return True if returning else False
+        return bool(returning)
 
     def get_fields(self, sheet):
         """
