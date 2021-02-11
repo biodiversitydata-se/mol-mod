@@ -91,5 +91,46 @@
     "returning": "pid",
     "asv_id_alias": {"field": "asv_id"},
     "DNA_sequence": {"field": "asv_sequence"}
+  },
+  "annotation": {
+    "targetTable": "taxon_annotation",
+    "asv_pid": {
+      "references": {
+        "table": "asv",
+        "field": "pid",
+        "join": {
+          "from": "asv_id",
+          "to": "asv_id"
+        }
+      }
+    },
+    "status": {
+      "default": "valid"
+    },
+    "kingdom": {},
+    "phylum": {},
+    "class": {},
+    "order": {
+      "field": "oorder"
+    },
+    "family": {},
+    "genus": {},
+    "specificEpithet": {},
+    "infraspecificEpithet": {},
+    "otu": {},
+    "date_identified": {},
+    "identification_references": {
+      "default": null
+    },
+    "reference_db": {},
+    "annotation_algorithm": {},
+    "annotation_confidence": {
+      "default": null
+    },
+    "taxon_remarks": {
+      "default": null
+    },
+    "scientificName": {},
+    "taxonRank": {}
   }
 }
