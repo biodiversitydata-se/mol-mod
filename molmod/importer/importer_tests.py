@@ -4,10 +4,11 @@ Unit tests for the molmod importer db-mapper.
 """
 
 import json
+import math
 import tempfile
 import unittest
 
-from pandas import DataFrame
+from pandas import DataFrame, Timestamp
 
 #pylint: disable=import-error
 from db_mapper import as_snake_case, DBMapper, order_tables
@@ -107,3 +108,21 @@ class DBMapperTests(unittest.TestCase):
             mapper = DBMapper(mapping_file.name)
             self.assertEqual(mapper.get_fields("A"), ['a_id', 'a_value'])
             self.assertEqual(mapper.get_fields("B"), ['b_id', 'b_value'])
+
+    def test_format_value(self):
+        """
+        Tests the `_format_value` function of DBMapper. This function is
+        supposed to return values formatted for sql queries.
+        """
+        vals = [(1, 1), (1.5, 1.5), ('text', "'text'"), (None, 'NULL'),
+                (Timestamp(year=2021, month=2, day=1), "'2021-02-01 00:00:00'"),
+                ("", "''"), (math.nan, "'NaN'")
+                ]
+
+        mapping = self.MAPPINGS['simple']
+        with tempfile.NamedTemporaryFile('w+') as mapping_file:
+            json.dump(mapping, mapping_file)
+            mapping_file.seek(0)
+            mapper = DBMapper(mapping_file.name)
+            for value, result in vals:
+                self.assertEqual(mapper._format_value(value), result)
