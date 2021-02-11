@@ -8,7 +8,8 @@ has the following syntax:
   {
     <excel-sheet>: {
       <column>: {
-        [field: <database-field>]
+        [field: <database-field>],
+        [default: <any value>]
       },
       targetTable: <string>,
       [returning: <string>]
@@ -18,7 +19,8 @@ has the following syntax:
 
 If the returning field is present, the insert queries will be instructed to
 fetch the given field(s). These will then be added to the loaded data and be
-available for joins.
+available for joins. For cases where a column might be missing from the input
+data, fields can have a `default` value set.
 
 For brevity, `field` can be removed from the column description, and then the
 snake case representation of the column will be used.
