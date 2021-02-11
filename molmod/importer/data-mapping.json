@@ -132,5 +132,32 @@
     },
     "scientificName": {},
     "taxonRank": {}
+  },
+  "occurrence": {
+    "targetTable": "occurrence",
+    "event_pid": {
+      "references": {
+        "table": "sampling_event",
+        "field": "pid",
+        "join": {
+          "from": "event_id",
+          "to": "event_id"
+        }
+      }
+    },
+    "asv_pid": {
+      "references": {
+        "table": "asv",
+        "field": "pid",
+        "join": {
+          "from": "asv_id_alias",
+          "to": "asv_id"
+        }
+      }
+    },
+    "organism_quantity": {},
+    "previous_identifications": {},
+    "asv_id_alias": {},
+    "associated_sequences": {}
   }
 }
