@@ -126,3 +126,16 @@ class DBMapperTests(unittest.TestCase):
             mapper = DBMapper(mapping_file.name)
             for value, result in vals:
                 self.assertEqual(mapper._format_value(value), result)
+
+    def test_is_returning(self):
+        """
+        Tests the `is_returning` function of DBMapper.
+        """
+        mapping = self.MAPPINGS['simple']
+        with tempfile.NamedTemporaryFile('w+') as mapping_file:
+            json.dump(mapping, mapping_file)
+            mapping_file.seek(0)
+            mapper = DBMapper(mapping_file.name)
+
+            self.assertFalse(mapper.is_returning('A'))
+            self.assertTrue(mapper.is_returning('B'))
