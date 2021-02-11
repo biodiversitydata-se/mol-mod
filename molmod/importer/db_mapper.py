@@ -4,9 +4,12 @@ The DBMapper class takes a dictionary of pandas data frames and a json mapping
 file, and uses these to generate sql insert queries.
 """
 
+import sys
 import json
 import math
 import logging
+
+from pandas import Timestamp
 
 from collections import OrderedDict
 from typing import List, Mapping, Tuple
@@ -103,9 +106,11 @@ class DBMapper():
         """
         Formats `value` in a manner that's suitable for postgres insert queries.
         """
-        if isinstance(value, str):
+        if isinstance(value, str) or isinstance(value, Timestamp):
             return f"'{value}'"
-        elif math.isnan(value):
+        if value is None:
+            return 'NULL'
+        if math.isnan(value):
             return "'NaN'"
         return value
 
@@ -131,7 +136,16 @@ class DBMapper():
         for i in range(len(data.values)):
             formatted_row = []
             for field in fields:
-                formatted_row.append(self._format_value(data[field][i]))
+                try:
+                    value = data[field][i]
+                except KeyError:
+                    if "default" in self.mapping[table][field]:
+                        value = self.mapping[table][field]["default"]
+                    else:
+                        logging.error("Could not insert %s values", table)
+                        logging.error("Missing %s value on line '%s'", field, i)
+                        sys.exit(1)
+                formatted_row.append(self._format_value(value))
             values += [f'({", ".join(map(str, formatted_row))})']
 
         values = ', '.join(values)
