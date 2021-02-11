@@ -139,3 +139,18 @@ class DBMapperTests(unittest.TestCase):
 
             self.assertFalse(mapper.is_returning('A'))
             self.assertTrue(mapper.is_returning('B'))
+
+    def test_target_field(self):
+        """
+        Tests `DBMapper.target_field`.
+        """
+        mapping = self.MAPPINGS['simple']
+        with tempfile.NamedTemporaryFile('w+') as mapping_file:
+            json.dump(mapping, mapping_file)
+            mapping_file.seek(0)
+            mapper = DBMapper(mapping_file.name)
+
+            self.assertEqual(mapper.target_field('A', 'AId'), 'a_id')
+            self.assertEqual(mapper.target_field('A', 'AValue'), 'a_value')
+            self.assertEqual(mapper.target_field('B', 'BId'), 'b_id')
+            self.assertEqual(mapper.target_field('B', 'val'), 'b_value')
