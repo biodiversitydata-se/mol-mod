@@ -11,6 +11,14 @@ volumes:
   postgres-db:
   blast-db:
 
+secrets:
+  postgres_pass:
+    file: .secret.postgres_pass
+  postgrest_anon_pass:
+    file: .secret.anon_pass
+  postgrest_config:
+    file: .secret.postgrest_config
+
 services:
   postgres:
     restart: always
@@ -24,15 +32,26 @@ services:
       - postgres-db:/var/lib/postgresql/data
     env_file:
       - .env
+    secrets:
+      - postgres_pass
+      - postgrest_anon_pass
+    environment:
+      - POSTGRES_PASSWORD_FILE=./run/secrets/postgres_pass
+      - PGRST_DB_ANON_PASS_FILE=./run/secrets/postgrest_anon_pass
   postgrest:
     restart: always
-    image: postgrest/postgrest:v7.0.1
+    image: bioatlas/molmod-postgrest:${TAG:-latest}
+    build:
+      context: ./
+      dockerfile: docker/postgrest
     container_name: asv-rest
     logging: *default-logging
     env_file:
       - .env
+    secrets:
+      - postgrest_config
     environment:
-      - PGRST_DB_URI=postgres://authenticator:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      - POSTGREST_CONFIG_FILE=./run/secrets/postgrest_config
     depends_on:
       - postgres
   blast-worker:
