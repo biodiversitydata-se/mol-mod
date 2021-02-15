@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os
-
+import secrets
 
 def get_env_variable(name: str):
     '''
@@ -15,7 +15,7 @@ def get_env_variable(name: str):
 
 
 class Config:
-    SECRET_KEY = get_env_variable('SECRET_KEY') or 'you-will-never-guess'
+    SECRET_KEY = secrets.token_hex()
     POSTGREST = get_env_variable('POSTGREST_HOST') or 'http://localhost:3000'
     BLAST_DB = get_env_variable('BLAST_DB')
     DEBUG = False
