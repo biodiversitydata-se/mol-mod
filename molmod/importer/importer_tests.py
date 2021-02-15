@@ -24,6 +24,7 @@ class AsSnakeCaseTest(unittest.TestCase):
         """
         self.assertEqual("this_is_snake_case", as_snake_case("ThisIsSnakeCase"))
         self.assertEqual("i_am_a_snake", as_snake_case("IAmASnake"))
+        self.assertEqual("i_have_an_id_value", as_snake_case("IHaveAnIDValue"))
 
     def test_snake_case(self):
         """
