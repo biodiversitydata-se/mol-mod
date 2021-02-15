@@ -22,11 +22,15 @@ PandasDict = Mapping[str, pandas.DataFrame]
 def as_snake_case(text: str) -> str:
     """
     Converts CamelCase to snake_case.
+
+    As a special case, this function converts `ID` to `_id` instead of `_i_d`.
     """
     output = ""
     for i, char in enumerate(text):
         if char.isupper() and i != 0:
-            output += "_"
+            # preserve _id
+            if not (char == 'D' and text[i-1] == 'I'):
+                output += "_"
         output += char.lower()
     return output
 
