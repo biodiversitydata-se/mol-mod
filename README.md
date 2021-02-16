@@ -12,7 +12,7 @@ docker available you can create the docker environment with:
 ```
 Once the system is running, you can insert the default data in the database:
 ```
-  $ ./backup.sh restore db-dump-data_2020-11-18.sql.tar
+  $ ./backup.sh restore
 ```
 
 The development site should now be available at http://localhost:5000.
@@ -22,11 +22,6 @@ development (except for changes in worker.py, as it is copied into container at 
 be used as such.
 
 ### Production environment
-To test the production system, you will first need to simulate a 'real' .env file (to be auto-generated later):
-```
-$ cp .env.template .env
-```
-
 Docker-compose operations (in production) are simplified using a Makefile. Pull the images and start the server with:
 ```
 $ make run
