@@ -9,6 +9,7 @@ Script to generate the secrets needed for deployment. These secrets are:
 import logging
 import os
 import secrets
+import sys
 
 
 def generate_secret(filename):
@@ -84,6 +85,7 @@ if __name__ == '__main__':
     ARGS = PARSER.parse_args()
 
     logging.basicConfig(level=(10*(ARGS.quiet - ARGS.verbose)))
+    # E.g. -vv -> (30-10*2=10) debug, -q -> (30+10*1=40) error
 
     PG_PASS = generate_secret('.secret.postgres_pass')
     PG_ANON = generate_secret('.secret.anon_pass')
