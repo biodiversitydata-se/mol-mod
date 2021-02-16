@@ -88,7 +88,7 @@ class MolModImporter():
             logging.error(err)
             sys.exit(1)
 
-    def insert_data(self, dry_run=False):
+    def insert_data(self, dry_run: bool = False, batch_size: int = 0):
         """
         Executes insert queries for the currently loaded data. The data is
         inserted in a single transaction, committing all changes once all
@@ -104,16 +104,32 @@ class MolModImporter():
             # check for references, and update fields
             self.data_mapping.update_references(table, self.data)
 
-            # execute query
-            query = self.data_mapping.as_query(table, data)
-            self.cursor.execute(query)
+            total = len(data.values)
+            if batch_size <= 0:
+                batch_size = total
 
-            # retrieve results (if returning) and update data
-            if self.data_mapping.is_returning(table):
-                retvals = self.cursor.fetchall()
-                if retvals:
+            update_vals = {}
+
+            # execute query
+            inserted = 0
+            while total > inserted:
+                stop = min(total, inserted + batch_size)
+                logging.debug("inserting %s to %s", inserted, stop)
+                query = self.data_mapping.as_query(table, data,
+                                                    inserted, batch_size)
+                self.cursor.execute(query)
+                inserted += batch_size
+
+                # update the return values
+                if self.data_mapping.is_returning(table):
+                    retvals = self.cursor.fetchall()
                     for col in retvals[0].keys():
-                        data[col] = [r[col] for r in retvals]
+                        if col not in update_vals:
+                            update_vals[col] = []
+                        update_vals[col] += [c[col] for c in retvals]
+
+            for col in update_vals:
+                data[col] = update_vals[col]
 
         if dry_run:
             logging.info("Dry run, rolling back changes")
@@ -153,6 +169,9 @@ if __name__ == '__main__':
                               "rollback to the database so that it remains "
                               "unaffected. Note that this will still increment "
                               "id sequences."))
+    PARSER.add_argument('--batch_size', type=int, default=100,
+                        help=("Sets the max number of rows to be inserted for "
+                              "each insert query."))
     PARSER.add_argument('-v', '--verbose', action="count", default=0,
                         help="Increase logging verbosity (default: warning).")
     PARSER.add_argument('-q', '--quiet', action="count", default=3,
@@ -170,4 +189,4 @@ if __name__ == '__main__':
 
     IMPORTER = MolModImporter(sys.stdin)
     IMPORTER.prepare_data()
-    IMPORTER.insert_data(ARGS.dry_run)
+    IMPORTER.insert_data(ARGS.dry_run, ARGS.batch_size)

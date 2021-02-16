@@ -125,7 +125,7 @@ class DBMapper():
         """
         return list(self.mapping.keys())
 
-    def as_query(self, table: str, data: pandas.DataFrame):
+    def as_query(self, table: str, data: pandas.DataFrame, start: int = 0, count: int = 0):
         """
         Formats an SQL insert query using the given table name and data frame,
         as well as data from the loaded data mapping file.
@@ -137,7 +137,10 @@ class DBMapper():
 
         # format values, so that strings are quoted
         values = []
-        for i in range(len(data.values)):
+        stop = start
+        stop += count if count > 0 else len(data.values)
+        stop = min(len(data.values), stop)
+        for i in range(start, stop):
             formatted_row = []
             for field in fields:
                 try:
