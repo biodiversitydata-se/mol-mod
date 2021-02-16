@@ -6,14 +6,15 @@ Script to generate the secrets needed for deployment. These secrets are:
  - postgrest config file (in .secret.postgrest_config)
 """
 
-import os
 import logging
+import os
 import secrets
+
 
 def generate_secret(filename):
     """
-    Generates a single secret value (using `secrets.token_hex()`) and save it in
-    the given `filename`. The permissions of the filename will be set to 400.
+    Generates single secret value (using `secrets.token_hex()`) and saves it
+    as given `filename`. The permissions of the filename will be set to 400.
     """
 
     logging.info("generating secret token")
@@ -27,6 +28,7 @@ def generate_secret(filename):
     os.chmod(filename, 0o400)
 
     return secret
+
 
 def write_config(config_file, template_file, **variables):
     """
@@ -63,7 +65,6 @@ if __name__ == '__main__':
     import argparse
 
     PARSER = argparse.ArgumentParser(description=__doc__)
-
 
     PARSER.add_argument('-e', '--env', default='.env',
                         help="environment file for non-secret variables")
