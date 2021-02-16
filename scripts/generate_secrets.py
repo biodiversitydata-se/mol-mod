@@ -20,14 +20,19 @@ def generate_secret(filename):
     logging.info("generating secret token")
     secret = secrets.token_hex()
 
-    with open(filename, 'w') as secret_file:
+    try:
+        with open(filename, 'w') as secret_file:
+            secret_file.write(secret)
+    except PermissionError:
+        logging.error("Secret token already stored in %s.\nPlease, "
+                      "delete all '.secret.*' files and try again!", filename)
+        sys.exit(1)
+    else:
         logging.info("writing secret token to %s", filename)
-        secret_file.write(secret)
+        logging.info("setting permissions to 400 for %s", filename)
+        os.chmod(filename, 0o400)
 
-    logging.info("setting permissions to 400 for %s", filename)
-    os.chmod(filename, 0o400)
-
-    return secret
+        return secret
 
 
 def write_config(config_file, template_file, **variables):
