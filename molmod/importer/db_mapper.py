@@ -4,12 +4,11 @@ The DBMapper class takes a dictionary of pandas data frames and a json mapping
 file, and uses these to generate sql insert queries.
 """
 
+import json
+import logging
+import math
 import re
 import sys
-import json
-import math
-import logging
-
 from collections import OrderedDict
 from typing import List, Mapping, Tuple
 
@@ -35,6 +34,7 @@ def as_snake_case(text: str) -> str:
         output += char.lower()
     return output
 
+
 def order_tables(tables: list, references: List[Tuple[str, str]]) -> list:
     """
     Orders the `tables` list so that no table is before a table it references,
@@ -47,14 +47,14 @@ def order_tables(tables: list, references: List[Tuple[str, str]]) -> list:
     edges = list(references)
 
     # make sets of origin and target nodes
-    origin_nodes = {o for o,t in edges}
-    target_nodes = {t for o,t in edges}
+    origin_nodes = {o for o, t in edges}
+    target_nodes = {t for o, t in edges}
 
     # figure out isolated nodes
     isolated = set(tables).difference(origin_nodes, target_nodes)
 
     # figure out all start-only nodes
-    start_nodes = {o for o,t in edges}.difference({t for o,t in edges})
+    start_nodes = {o for o, t in edges}.difference({t for o, t in edges})
     if not start_nodes:
         raise ValueError("Cyclic references")
 
@@ -92,6 +92,7 @@ def order_tables(tables: list, references: List[Tuple[str, str]]) -> list:
     # before the references are needed
     return sorted_tables[::-1]
 
+
 class DBMapper():
     """
     Reads a JSON mapping file, and can then be used to convert data in
@@ -109,7 +110,7 @@ class DBMapper():
     @staticmethod
     def _format_value(value):
         """
-        Formats `value` in a manner that's suitable for postgres insert queries.
+        Formats `value` in a manner suitable for postgres insert queries.
         """
         if isinstance(value, (str, Timestamp)):
             return f"'{value}'"
@@ -126,13 +127,14 @@ class DBMapper():
         """
         return list(self.mapping.keys())
 
-    def as_query(self, table: str, data: pandas.DataFrame, start: int = 0, count: int = 0):
+    def as_query(self, table: str, data: pandas.DataFrame,
+                 start: int = 0, count: int = 0):
         """
         Formats an SQL insert query using the given table name and data frame,
         as well as data from the loaded data mapping file.
         """
-        # sometimes there are columns that need to be ignored in the data, so we
-        # get the column names from the mapping.
+        # sometimes there are columns that need to be ignored in the data,
+        # so we get the column names from the mapping.
         fields = self.get_fields(table)
         quoted_fields = ', '.join([f'"{c}"' for c in fields])
 
@@ -151,15 +153,16 @@ class DBMapper():
                         value = self.mapping[table][field]["default"]
                     else:
                         logging.error("Could not insert %s values", table)
-                        logging.error("Missing %s value on line '%s'", field, i)
+                        logging.error("Missing %s value on line '%s'",
+                                      field, i)
                         sys.exit(1)
                 formatted_row.append(self._format_value(value))
             values += [f'({", ".join(map(str, formatted_row))})']
 
         values = ', '.join(values)
         query = f"INSERT INTO {table} ({quoted_fields}) VALUES {values}"
-        mapping = [m for t,m in self.mapping.items() \
-                             if m['targetTable'] == table]
+        mapping = [m for t, m in self.mapping.items()
+                   if m['targetTable'] == table]
         if mapping and self.is_returning(table):
             query += f" RETURNING {mapping[0]['returning']}"
 
@@ -271,7 +274,6 @@ class DBMapper():
             table = self.mapping[sheet]['targetTable']
             data[table] = data.pop(sheet)
 
-
             # figure out a mapping from the current fields to the new fields
             field_mapping = {}
             # parse field data into field names and validators
@@ -288,15 +290,15 @@ class DBMapper():
             # then rename all the fields
             data[table].rename(columns=field_mapping, inplace=True)
 
-            # sometimes pandas reads a lot of empty lines, so we filter all rows
-            # that are NaN only
+            # sometimes pandas reads a lot of empty lines,
+            # so we filter all rows that are NaN only
             data[table] = data[table].dropna(how='all')
             # ... and some empty columns too ...
             data[table] = data[table].drop(data[table].filter(regex="Unnamed"),
                                            axis='columns')
 
-        # parse all references to figure out insertion order, and make sure that
-        # there are no reference loops
+        # parse all references to figure out insertion order,
+        # and make sure that there are no reference loops
         ordered_tables = OrderedDict()
         for table in order_tables(list(data.keys()), references):
             ordered_tables[table] = data[table]
