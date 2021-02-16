@@ -4,6 +4,7 @@ The DBMapper class takes a dictionary of pandas data frames and a json mapping
 file, and uses these to generate sql insert queries.
 """
 
+import re
 import sys
 import json
 import math
@@ -220,6 +221,35 @@ class DBMapper():
                 joined = data[table].join(target, lsuffix="_joined",
                                           on=ref['join']['from'])
                 data[table][field] = joined[ref['field']]
+
+    def validate(self, table: str, data: pandas.DataFrame) -> bool:
+        """
+        Runs any validation defined for `table` in `self.mapping` on `data`.
+
+        Returns `True` if all values validated, or no validation was defined,
+        `False` otherwise.
+        """
+        if table not in self.mapping:
+            logging.warning('unknown table %s in validation', table)
+            return True
+
+        valid = True
+        for field, settings in self.mapping[table].items():
+            previous_mistake = False
+            if 'validation' in settings:
+                validator = re.compile(settings['validation'])
+                data_field = self.target_field(table, field)
+                for value in data[data_field]:
+                    if not validator.fullmatch(str(value)):
+                        valid = False
+                        if not previous_mistake:
+                            logging.warning(" - malformed value for %s",
+                                            data_field)
+                            logging.warning(' - validator: "%s"',
+                                            settings['validation'])
+                            previous_mistake = True
+                        logging.warning("offending value: %s", value)
+        return valid
 
     def reorder_data(self, data: PandasDict) -> PandasDict:
         """

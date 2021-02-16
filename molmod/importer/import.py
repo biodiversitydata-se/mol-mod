@@ -144,6 +144,17 @@ class MolModImporter():
         """
         self.data = self.data_mapping.reorder_data(self.data)
 
+    def run_validation(self):
+        """
+        Runs the validation regexp for all values to see that they match.
+        """
+        logging.info("Validating tables")
+        valid = True
+        for table, data in self.data.items():
+            logging.info(" -- %s", table)
+            valid &= self.data_mapping.validate(table, data)
+        return valid
+
     def set_mapping(self, filename: str):
         """
         Reads `filename`, as JSON, into `self.data_mapping`, which will be used
@@ -164,7 +175,7 @@ if __name__ == '__main__':
 
     PARSER = argparse.ArgumentParser(description=__doc__)
 
-    PARSER.add_argument('--dry_run', action='store_true',
+    PARSER.add_argument('--dry-run', action='store_true',
                         help=("Performs all transactions, but then issues a "
                               "rollback to the database so that it remains "
                               "unaffected. Note that this will still increment "
@@ -172,6 +183,8 @@ if __name__ == '__main__':
     PARSER.add_argument('--batch_size', type=int, default=100,
                         help=("Sets the max number of rows to be inserted for "
                               "each insert query."))
+    PARSER.add_argument('--no-validation', action="store_true",
+                        help="Do NOT validate the data before insertion.")
     PARSER.add_argument('-v', '--verbose', action="count", default=0,
                         help="Increase logging verbosity (default: warning).")
     PARSER.add_argument('-q', '--quiet', action="count", default=3,
@@ -189,4 +202,9 @@ if __name__ == '__main__':
 
     IMPORTER = MolModImporter(sys.stdin)
     IMPORTER.prepare_data()
-    IMPORTER.insert_data(ARGS.dry_run, ARGS.batch_size)
+    if not ARGS.no_validation:
+        if not IMPORTER.run_validation():
+            logging.error("Data did not pass validation")
+            sys.exit(1)
+        logging.info("Data passed validation")
+   # IMPORTER.insert_data(ARGS.dry_run, ARGS.batch_size)
