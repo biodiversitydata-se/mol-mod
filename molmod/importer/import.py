@@ -4,22 +4,21 @@ The mol-mod data importer takes an excel file stream, then rearranges and
 inserts the data into the database.
 """
 
-import os
-import sys
 import json
-import select
 import logging
-
+import os
+import select
+import sys
 from io import BytesIO
 from typing import Any
 
 import pandas
 import psycopg2
+from db_mapper import DBMapper
 from psycopg2.extras import DictCursor
 
-from db_mapper import DBMapper
-
 DEFAULT_MAPPING = os.path.join(os.path.dirname(__file__), 'data-mapping.json')
+
 
 class MolModImporter():
     """
@@ -27,7 +26,7 @@ class MolModImporter():
     and insert it into the database.
     """
 
-    def __init__(self, indata: Any, mapping_file: str=DEFAULT_MAPPING):
+    def __init__(self, indata: Any, mapping_file: str = DEFAULT_MAPPING):
         """
         Initializes an importer with an input stream or filename. The `indata`
         variable should be any acceptable input to `pandas.read-excel`, as
@@ -41,11 +40,13 @@ class MolModImporter():
         # Read data mapping file to make sure that it's also available
         self.set_mapping(mapping_file)
 
-        # pandas require a seekable stream to read excel, and most piped streams
-        # are not seekable. To circumvent this, we check the stream, and read it
-        # into a separate stream if needed.
+        # pandas require a seekable stream to read excel, and most piped
+        # streams are not seekable. To circumvent this, we check the stream,
+        # and read it into a separate stream if needed.
+
         if not indata.seekable():
-            logging.debug("input stream is not seekable, reading into BytesIO.")
+            logging.debug("input stream is not seekable, "
+                          "reading into BytesIO.")
             # Note that this reads the entire file into memory.
             indata = BytesIO(indata.buffer.raw.read())
         else:
@@ -66,9 +67,9 @@ class MolModImporter():
         creates a database connection. A simple query to list datasets is then
         used to verify the connection.
 
-        Pandas has a function for automatically inserting into databases, but it
-        relies on sqlalchemy, so we use sqlalchemy here even though it's not
-        used in the main app.
+        Pandas has a function for automatically inserting into databases,
+        but it relies on sqlalchemy, so we use sqlalchemy here
+        even though it's not used in the main app.
         """
         try:
             self.conn = psycopg2.connect(
@@ -116,7 +117,7 @@ class MolModImporter():
                 stop = min(total, inserted + batch_size)
                 logging.debug("inserting %s to %s", inserted, stop)
                 query = self.data_mapping.as_query(table, data,
-                                                    inserted, batch_size)
+                                                   inserted, batch_size)
                 self.cursor.execute(query)
                 inserted += batch_size
 
@@ -140,7 +141,7 @@ class MolModImporter():
 
     def prepare_data(self):
         """
-        Reorders the loaded data according to the currently loaded data mapping.
+        Reorders loaded data according to currently loaded data mapping.
         """
         self.data = self.data_mapping.reorder_data(self.data)
 
@@ -169,6 +170,7 @@ class MolModImporter():
             logging.error("Invalid JSON in mapping file: %s", err)
         sys.exit(1)
 
+
 if __name__ == '__main__':
 
     import argparse
@@ -178,7 +180,7 @@ if __name__ == '__main__':
     PARSER.add_argument('--dry-run', action='store_true',
                         help=("Performs all transactions, but then issues a "
                               "rollback to the database so that it remains "
-                              "unaffected. Note that this will still increment "
+                              "unaffected. This will still increment "
                               "id sequences."))
     PARSER.add_argument('--batch_size', type=int, default=100,
                         help=("Sets the max number of rows to be inserted for "
@@ -195,7 +197,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=(10*(ARGS.quiet - ARGS.verbose)))
 
     # check if there is streaming data available from stdin.
-    if not select.select([sys.stdin],[],[],0.0)[0]:
+    if not select.select([sys.stdin], [], [], 0.0)[0]:
         logging.error("An excel input stream is required")
         PARSER.print_help()
         sys.exit(1)
