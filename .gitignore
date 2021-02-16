@@ -4,5 +4,4 @@ test.py
 postgres-data/
 venv/
 personal/
-.env
 .secret.*
