@@ -75,7 +75,7 @@ if __name__ == '__main__':
                         help="environment file for non-secret variables")
     PARSER.add_argument('-t', '--template',
                         default='config/postgrest.conf.template',
-                        help="environment file for non-secret variables")
+                        help="postgrest config template file")
     PARSER.add_argument('-v', '--verbose', action="count", default=0,
                         help="Increase logging verbosity (default: warning).")
     PARSER.add_argument('-q', '--quiet', action="count", default=3,
