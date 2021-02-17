@@ -42,21 +42,18 @@ ps:
 clean:
 	docker-compose -f $(compose) down -v
 
-<<<<<<< HEAD
 # Generate passwords, or use existing
 secrets:
 	python3 ./scripts/generate_secrets.py --skip-existing
 
-# Restore latest db dump
-restore:
-	./backup.sh restore
-
-# Copy blast database files into worker
-=======
 wait:
 	$(info Waiting for services to start)
 	sleep 10
 
->>>>>>> ac4198ebd180a9a809f19cc400b8d41c577859db
+# Restore latest db dump in db container
+restore:
+	./backup.sh restore
+
+# Copy blastdb into worker container
 blast:
 	for file in blast-databases/*; do docker cp $$file mol-mod_blast-worker_1:/blastdbs/; done;
