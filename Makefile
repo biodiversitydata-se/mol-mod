@@ -28,3 +28,6 @@ down:
 
 logs:
 	docker-compose -f $(compose) logs -f
+
+secrets:
+	python3 ./scripts/generate_secrets.py
