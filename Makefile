@@ -31,3 +31,6 @@ logs:
 
 secrets:
 	python3 ./scripts/generate_secrets.py
+
+ps:
+	docker-compose -f $(compose) ps
