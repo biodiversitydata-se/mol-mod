@@ -34,3 +34,6 @@ secrets:
 
 ps:
 	docker-compose -f $(compose) ps
+
+restore:
+	bash ./backup.sh restore
