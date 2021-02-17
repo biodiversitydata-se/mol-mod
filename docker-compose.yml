@@ -17,6 +17,14 @@ x-logging:
     max-file: '5'
     compress: 'true'
 
+secrets:
+  postgres_pass:
+    file: .secret.postgres_pass
+  postgrest_anon_pass:
+    file: .secret.anon_pass
+  postgrest_config:
+    file: .secret.postgrest_config
+
 services:
   postgres:
     restart: always
@@ -34,27 +42,26 @@ services:
     # User and password information
     env_file:
       - .env
-    # For debugging (e.g. in pgAdmin), connect a host port
-    # to a container port (HOST:CONTAINER), but keep closed in production
-    # ports:
-    #   - 5432:5432
+    secrets:
+      - postgres_pass
+      - postgrest_anon_pass
+    environment:
+      - POSTGRES_PASSWORD_FILE=./run/secrets/postgres_pass
+      - PGRST_DB_ANON_PASS_FILE=./run/secrets/postgrest_anon_pass
   postgrest:
     # https://hub.docker.com/r/postgrest/postgrest
     restart: always
-    image: postgrest/postgrest:v7.0.1
+    build:
+      context: ./
+      dockerfile: docker/postgrest
     container_name: asv-rest
     logging: *default-logging
-    # for debugging, this syntax can be used to connect a host port to a
-    # container port (HOST:CONTAINER), but the containers can connect to each
-    # other regardless.
-    # ports:
-    #   - 3000:3000
-    # Get most environment variables from the default .env file
     env_file:
       - .env
+    secrets:
+      - postgrest_config
     environment:
-      # Construct a postgres connection URI variable
-      - PGRST_DB_URI=postgres://authenticator:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      - POSTGREST_CONFIG_FILE=./run/secrets/postgrest_config
     depends_on:
       - postgres
   blast-worker:

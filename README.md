@@ -4,15 +4,25 @@ Module for handling sequence-based occurrence data in [Biodiversity Atlas Sweden
 ### Overview
 Flask + jQuery app for BLAST and metadata search of sequence-based occurrences in SBDI, via separate BLAST and Amplicon Sequence Variant (ASV) databases. Views of the ASV db are exposed via [postgREST server](https://postgrest.org/en/v7.0.0/index.html), and accessed in API calls (for metadata search part). The BLAST db was also pre-built from one of these views, using additional python code (see **misc/make-blastdb-from-api.py**).
 
+### Prerequisites
+The application can be run as a docker-compose environment, assuming you have [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
+
 ### Development environment
-The development system can be run as a docker-compose environment. If you have
-docker available you can create the docker environment with:
+In development, postgres data and config files are written to bind-mounted dir *postgres-data*, which needs to be deleted if you later want to regenerate the db from schema files and dumps in *misc* dir. This is also required when you generate new passwords and API config file (secrets).
+```
+  $ rm -R postgres-data/
+```
+Generate secrets, or reuse old:
+```
+  $ ./scripts/generate_secrets.py --skip-existing
+```
+Then, start up services:
 ```
   $ docker-compose up
 ```
-Once the system is running, you can insert the default data in the database:
+Once the system is running, you can insert the default data into the database:
 ```
-  $ ./backup.sh restore db-dump-data_2020-11-18.sql.tar
+  $ ./backup.sh restore
 ```
 
 The development site should now be available at http://localhost:5000.
@@ -21,22 +31,36 @@ The server will automatically rebuild on changes to the python code for ease of
 development (except for changes in worker.py, as it is copied into container at startup, i.e. not mounted from host). Note that this setup is not intended for production, and should not
 be used as such.
 
+To stop and remove containers as well as remove network and volumes:
+```
+  $ docker-compose down -v
+```
+You may also want to get rid of dangling images and associated volumes:
+```
+  $ docker system prune --volumes
+```
+
 ### Production environment
-To test the production system, you will first need to simulate a 'real' .env file (to be auto-generated later):
+In production, postgres and blastdb data are instead saved to named volumes (mol-mod_postgres-db & mol-mod_blast-db), and compose operations are simplified using a Makefile.
+
+Again, you need to either generate secrets, or reuse old:
 ```
-$ cp .env.template .env
+  $ make secrets
+```
+Then, to pull images and start up services:
+```
+  $ make run
+```
+Once the system is running, you can insert the default data in the database, and copy blastdb files into worker container:
+```
+  $ make restore
+  $ make blast
+```
+If you want to stop and restart clean, use the following shortcut (see details in Makefile):
+```
+  $ make rebuild
 ```
 
-Docker-compose operations (in production) are simplified using a Makefile. Pull the images and start the server with:
-```
-$ make run
-```
-
-Finally, you will need to put some data on the volumes as well, this can be done using:
-```
-$ ./backup.sh restore
-for file in blast-databases/*; do docker cp $file mol-mod_blast-worker_1:/blastdbs/; done
-```
 Note that the blast-worker uses the same Dockerfile for both development and production, but that we set FLASK_ENV=production in docker-compose.prod.yml.
 
 ### Testing
