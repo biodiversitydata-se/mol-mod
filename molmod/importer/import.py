@@ -9,6 +9,7 @@ import logging
 import os
 import select
 import sys
+import tempfile
 from io import BytesIO
 from typing import Any
 
@@ -26,7 +27,7 @@ class MolModImporter():
     and insert it into the database.
     """
 
-    def __init__(self, indata: Any, mapping_file: str = DEFAULT_MAPPING):
+    def __init__(self, data_file: str, mapping_file: str = DEFAULT_MAPPING):
         """
         Initializes an importer with an input stream or filename. The `indata`
         variable should be any acceptable input to `pandas.read-excel`, as
@@ -40,23 +41,12 @@ class MolModImporter():
         # Read data mapping file to make sure that it's also available
         self.set_mapping(mapping_file)
 
-        # pandas require a seekable stream to read excel, and most piped
-        # streams are not seekable. To circumvent this, we check the stream,
-        # and read it into a separate stream if needed.
-
-        if not indata.seekable():
-            logging.debug("input stream is not seekable, "
-                          "reading into BytesIO.")
-            # Note that this reads the entire file into memory.
-            indata = BytesIO(indata.buffer.raw.read())
-        else:
-            logging.debug("stream is seekable")
-
         self.data = {}
         # read one sheet at the time, so that we can catch any missing sheets
         for sheet in self.data_mapping.sheets:
             try:
-                self.data[sheet] = pandas.read_excel(indata, sheet_name=sheet)
+                self.data[sheet] = pandas.read_excel(data_file,
+                                                     sheet_name=sheet)
             except KeyError:
                 logging.warning("Input sheet '%s' not found. Skipping.", sheet)
         logging.info("Excel file read")
@@ -205,11 +195,15 @@ if __name__ == '__main__':
         PARSER.print_help()
         sys.exit(1)
 
-    IMPORTER = MolModImporter(sys.stdin)
-    IMPORTER.prepare_data()
-    if not ARGS.no_validation:
-        if not IMPORTER.run_validation():
-            logging.error("Data did not pass validation")
-            sys.exit(1)
-        logging.info("Data passed validation")
-   # IMPORTER.insert_data(ARGS.dry_run, ARGS.batch_size)
+    # write stdin to a temporary file
+    with tempfile.NamedTemporaryFile('rb+') as temp:
+        temp.write(sys.stdin.buffer.raw.read())
+
+        IMPORTER = MolModImporter(temp.name)
+        IMPORTER.prepare_data()
+        if not ARGS.no_validation:
+            if not IMPORTER.run_validation():
+                logging.error("Data did not pass validation")
+                sys.exit(1)
+            logging.info("Data passed validation")
+        IMPORTER.insert_data(ARGS.dry_run, ARGS.batch_size)
