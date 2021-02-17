@@ -83,6 +83,10 @@ services:
         target: /code
     env_file:
       - .env
+    secrets:
+      - postgres_pass
+    environment:
+      - POSTGRES_PASSWORD_FILE=./run/secrets/postgres_pass
     ports:
       - 5000:5000
     depends_on:
