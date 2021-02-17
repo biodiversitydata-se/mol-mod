@@ -37,3 +37,6 @@ ps:
 
 restore:
 	bash ./backup.sh restore
+
+clean:
+	docker-compose -f $(compose) down -v
