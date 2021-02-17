@@ -3,6 +3,7 @@
 # the molmod produciton environment (locally).
 #
 compose = docker-compose.prod.yml
+SHELL = bash
 
 all: build
 
@@ -36,7 +37,10 @@ ps:
 	docker-compose -f $(compose) ps
 
 restore:
-	bash ./backup.sh restore
+	./backup.sh restore
 
 clean:
 	docker-compose -f $(compose) down -v
+
+blast:
+	for file in blast-databases/*; do docker cp $$file mol-mod_blast-worker_1:/blastdbs/; done;
