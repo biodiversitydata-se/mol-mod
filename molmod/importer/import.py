@@ -61,20 +61,23 @@ class MolModImporter():
                 logging.warning("Input sheet '%s' not found. Skipping.", sheet)
         logging.info("Excel file read")
 
-    def _connect_db(self):
+    def _connect_db(self, pass_file='/run/secrets/postgres_pass'):
         """
         Uses environment variables to set postgres connection settings, and
         creates a database connection. A simple query to list datasets is then
         used to verify the connection.
-
-        Pandas has a function for automatically inserting into databases,
-        but it relies on sqlalchemy, so we use sqlalchemy here
-        even though it's not used in the main app.
         """
+        try:
+            with open(pass_file) as password:
+                password = password.read()
+        except FileNotFoundError:
+            logging.error("Could not read postgres password from %s", pass_file)
+            sys.exit(1)
+
         try:
             self.conn = psycopg2.connect(
                 user=os.getenv('POSTGRES_USER', 'psql'),
-                password=os.getenv('POSTGRES_PASSWORD', ''),
+                password=password,
                 database=os.getenv('POSTGRES_DB', 'db'),
                 host=os.getenv('POSTGRES_HOST', 'localhost'),
                 port=os.getenv('POSTGRES_PORT', '5432')
