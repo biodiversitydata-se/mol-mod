@@ -9,6 +9,8 @@ all: build
 
 run: pull up
 
+rebuild: clean secrets build up restore blast
+
 build:
 	docker-compose -f $(compose) build --no-cache
 
