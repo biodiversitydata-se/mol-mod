@@ -10,6 +10,7 @@ import os
 import select
 import sys
 import tempfile
+import tarfile
 from io import BytesIO
 from typing import Any
 
@@ -42,14 +43,30 @@ class MolModImporter():
         self.set_mapping(mapping_file)
 
         self.data = {}
+
+        is_tar = tarfile.is_tarfile(data_file)
+        if is_tar:
+            tar = tarfile.open(data_file)
         # read one sheet at the time, so that we can catch any missing sheets
         for sheet in self.data_mapping.sheets:
             try:
-                self.data[sheet] = pandas.read_excel(data_file,
-                                                     sheet_name=sheet)
+                if is_tar:
+                    # find the correct file in the tar archive
+                    content = None
+                    for member in tar:
+                        if member.name.split('.')[0] == sheet:
+                            csv_file = tar.extractfile(member)
+                            content = BytesIO(csv_file.read())
+                            csv_file.close()
+                    if not content:
+                        raise KeyError
+                    self.data[sheet] = pandas.read_csv(content)
+                else:
+                    self.data[sheet] = pandas.read_excel(data_file,
+                                                         sheet_name=sheet)
             except KeyError:
                 logging.warning("Input sheet '%s' not found. Skipping.", sheet)
-        logging.info("Excel file read")
+        logging.info("%s file read", "Tar" if is_tar else "Excel")
 
     def _connect_db(self, pass_file='/run/secrets/postgres_pass'):
         """
