@@ -9,7 +9,7 @@ all: build
 
 run: pull up
 
-rebuild: clean secrets build up restore blast
+rebuild: clean secrets build up wait restore blast
 
 build:
 	docker-compose -f $(compose) build --no-cache
@@ -43,6 +43,10 @@ restore:
 
 clean:
 	docker-compose -f $(compose) down -v
+
+wait:
+	$(info Waiting for services to start)
+	sleep 10
 
 blast:
 	for file in blast-databases/*; do docker cp $$file mol-mod_blast-worker_1:/blastdbs/; done;
