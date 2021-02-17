@@ -31,7 +31,7 @@ logs:
 	docker-compose -f $(compose) logs -f
 
 secrets:
-	python3 ./scripts/generate_secrets.py
+	python3 ./scripts/generate_secrets.py --skip-existing
 
 ps:
 	docker-compose -f $(compose) ps
