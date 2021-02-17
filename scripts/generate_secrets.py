@@ -33,7 +33,8 @@ def generate_secret(filename, skip_existing: bool = False):
             secret_file.write(secret)
     except PermissionError:
         logging.error("Secret token already stored in %s.\nPlease, "
-                      "delete all '.secret.*' files and try again!", filename)
+                      "delete all '.secret.*' files to generate new secrets, "
+                      "or use --skip-existing arg to reuse old.", filename)
         sys.exit(1)
     else:
         logging.info("writing secret token to %s", filename)

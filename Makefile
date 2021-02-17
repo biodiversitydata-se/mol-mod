@@ -11,6 +11,7 @@ run: pull up
 
 rebuild: clean secrets build up restore blast
 
+# Build service, or rebuild to implement changes in Dockerfile
 build:
 	docker-compose -f $(compose) build --no-cache
 
@@ -20,29 +21,35 @@ pull:
 push:
 	docker-compose -f $(compose) push
 
+# Start service in background
 up:
 	docker-compose -f $(compose) up -d
 
 stop:
 	docker-compose -f $(compose) stop
 
+# Stop and remove containers
 down:
 	docker-compose -f $(compose) down
 
 logs:
 	docker-compose -f $(compose) logs -f
 
-secrets:
-	python3 ./scripts/generate_secrets.py --skip-existing
-
 ps:
 	docker-compose -f $(compose) ps
 
-restore:
-	./backup.sh restore
-
+# Stop and remove containers, and remove network and volumes
 clean:
 	docker-compose -f $(compose) down -v
 
+# Generate passwords, or use existing
+secrets:
+	python3 ./scripts/generate_secrets.py --skip-existing
+
+# Restore latest db dump
+restore:
+	./backup.sh restore
+
+# Copy blast database files into worker
 blast:
 	for file in blast-databases/*; do docker cp $$file mol-mod_blast-worker_1:/blastdbs/; done;

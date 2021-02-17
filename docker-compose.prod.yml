@@ -20,6 +20,7 @@ secrets:
     file: .secret.postgrest_config
 
 services:
+
   postgres:
     restart: always
     image: postgres:13
@@ -38,6 +39,7 @@ services:
     environment:
       - POSTGRES_PASSWORD_FILE=./run/secrets/postgres_pass
       - PGRST_DB_ANON_PASS_FILE=./run/secrets/postgrest_anon_pass
+
   postgrest:
     restart: always
     image: bioatlas/molmod-postgrest:${TAG:-latest}
@@ -54,6 +56,7 @@ services:
       - POSTGREST_CONFIG_FILE=./run/secrets/postgrest_config
     depends_on:
       - postgres
+
   blast-worker:
     image: bioatlas/molmod-blast:${TAG:-latest}
     build:
@@ -64,6 +67,7 @@ services:
       - FLASK_ENV=production
     volumes:
       - blast-db:/blastdbs
+
   asv-main:
     restart: always
     image: bioatlas/molmod:${TAG:-latest}
