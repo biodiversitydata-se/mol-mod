@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from flask import Blueprint, abort, render_template
 
 main_bp = Blueprint('main_bp', __name__,
