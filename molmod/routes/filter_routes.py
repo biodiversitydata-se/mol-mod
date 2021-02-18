@@ -5,11 +5,11 @@ result display.
 import json
 
 import requests
-from flask import Blueprint, current_app as APP
+from flask import Blueprint
+from flask import current_app as APP
 from flask import render_template, request
-
-from molmod.forms import (FilterResultForm, FilterSearchForm)
 from molmod.config import get_config
+from molmod.forms import FilterResultForm, FilterSearchForm
 
 CONFIG = get_config()
 

@@ -1,5 +1,7 @@
-from flask import current_app as app, Markup, render_template, request
-from werkzeug.exceptions import default_exceptions, HTTPException
+from flask import Markup
+from flask import current_app as app
+from flask import render_template, request
+from werkzeug.exceptions import HTTPException, default_exceptions
 
 
 def error_handler(error):

@@ -3,6 +3,7 @@
 import os
 import secrets
 
+
 def get_env_variable(name: str):
     '''
     Gets env var or warns if missing

@@ -4,12 +4,11 @@ This tool can be used to generate and remove artificial datasets for use during
 development.
 """
 
+import logging
+import random
+import subprocess
 import sys
 import uuid
-import random
-import logging
-import subprocess
-
 from datetime import datetime
 
 # load database connection variables from the environment file
