@@ -109,16 +109,17 @@
     "status": {
       "default": "valid"
     },
-    "kingdom": {},
-    "phylum": {},
-    "class": {},
+    "kingdom": {"default":""},
+    "phylum": {"default":""},
+    "class": {"default":""},
     "order": {
-      "field": "oorder"
+      "field": "oorder",
+      "default":""
     },
-    "family": {},
-    "genus": {},
-    "specificEpithet": {},
-    "infraspecificEpithet": {},
+    "family": {"default":""},
+    "genus": {"default":""},
+    "specificEpithet": {"default":""},
+    "infraspecificEpithet": {"default":""},
     "otu": {},
     "date_identified": {},
     "identification_references": {
