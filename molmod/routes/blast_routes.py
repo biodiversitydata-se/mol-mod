@@ -6,13 +6,12 @@ result display. The blast-worker containers are called from the
 import json
 
 import requests
-from flask import Blueprint, current_app as APP, request
-from flask import render_template
-from flask import jsonify
-
-# pylint: disable=import-error
-from molmod.forms import (BlastResultForm, BlastSearchForm)
+from flask import Blueprint
+from flask import current_app as APP
+from flask import jsonify, render_template, request
 from molmod.config import get_config
+# pylint: disable=import-error
+from molmod.forms import BlastResultForm, BlastSearchForm
 
 CONFIG = get_config()
 

@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 
-import os
 import json
 import logging
-
+import os
 from logging.config import dictConfig
 
 from flask import Flask
 from flask_wtf.csrf import CSRFProtect
 
-from .config import get_config
 from . import errors
+from .config import get_config
 
 
 def create_app():
@@ -43,7 +42,7 @@ def create_app():
     CSRFProtect(app)
 
     with app.app_context():
-        from molmod.routes import main_routes, filter_routes, blast_routes
+        from molmod.routes import blast_routes, filter_routes, main_routes
         app.register_blueprint(main_routes.main_bp)
         app.register_blueprint(blast_routes.blast_bp)
         app.register_blueprint(filter_routes.filter_bp)
