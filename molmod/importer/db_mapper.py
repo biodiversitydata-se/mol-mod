@@ -12,6 +12,7 @@ import sys
 from collections import OrderedDict
 from typing import List, Mapping, Tuple
 
+import numpy
 import pandas
 from pandas import Timestamp
 
@@ -136,7 +137,10 @@ class DBMapper():
         # sometimes there are columns that need to be ignored in the data,
         # so we get the column names from the mapping.
         fields = self.get_fields(table)
-        quoted_fields = ', '.join([f'"{c}"' for c in fields])
+        quoted_fields = ', '.join([f'"{c[0]}"' for c in fields])
+
+        # define what counts as missing values (for using default).
+        missing = [None, numpy.nan]
 
         # format values, so that strings are quoted
         values = []
@@ -145,12 +149,15 @@ class DBMapper():
         stop = min(len(data.values), stop)
         for i in range(start, stop):
             formatted_row = []
-            for field in fields:
+            for field, ref in fields:
+                has_default = "default" in self.mapping[table][ref]
                 try:
                     value = data[field][i]
+                    if has_default and value in missing:
+                        raise KeyError
                 except KeyError:
-                    if "default" in self.mapping[table][field]:
-                        value = self.mapping[table][field]["default"]
+                    if has_default:
+                        value = self.mapping[table][ref]["default"]
                     else:
                         logging.error("Could not insert %s values", table)
                         logging.error("Missing %s value on line '%s'",
@@ -191,7 +198,7 @@ class DBMapper():
             target = self.target_field(sheet, field)
             if not target:
                 continue
-            fields += [target]
+            fields += [(target, field)]
         return fields
 
     def target_field(self, sheet, field):
