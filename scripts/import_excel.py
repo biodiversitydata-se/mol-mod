@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """
 This is a wrapper script to send an Excel data stream
-to the data importer inside the asv-main docker-container.
+to the data importer inside a running asv-main docker-container.
 """
-
-import subprocess
 
 if __name__ == '__main__':
 
     import argparse
+    import subprocess
 
     PARSER = argparse.ArgumentParser(description=__doc__)
 
