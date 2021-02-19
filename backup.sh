@@ -62,12 +62,7 @@ then
     exit 1
   fi
   echo "Restoring database from latest dump: ${FILE}"
-  # a bunch of items in the dump are created by the maria.prager and postgres
-  # roles, so we don't restore access privileges for now.
-  cat "$FILE" | docker exec -i "${CONTAINER}" pg_restore \
-    --no-acl \
-    --no-owner \
-    $FLAGS
+  cat "$FILE" | docker exec -i "${CONTAINER}" pg_restore $FLAGS
 else
     if [[ "$1" == "data" ]]
     then
