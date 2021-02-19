@@ -7,6 +7,7 @@ to the data importer inside a running asv-main docker-container.
 if __name__ == '__main__':
 
     import argparse
+    import logging
     import subprocess
 
     #
@@ -31,10 +32,13 @@ if __name__ == '__main__':
     ARGS = PARSER.parse_args()
 
     #
-    # Compose cmd to execute in container
+    # Compose cmd to execute import.py in container
     #
 
     CMD = ["docker", "exec", "-i", ARGS.container,
            "./molmod/importer/import.py"] + ARGS.importer_args
 
-    IMPORTER = subprocess.run(CMD, stdin=open(ARGS.excel_file))
+    try:
+        IMPORTER = subprocess.run(CMD, stdin=open(ARGS.excel_file))
+    except FileNotFoundError:
+        logging.error("Could not find Excel file %s", ARGS.excel_file)
