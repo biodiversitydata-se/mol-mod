@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# This script can be used to back up or restore postgres data (and schemas),
+# by executing pg_dump / pg_restore inside a running asv-db container.
 
 # variables
 DIR="misc"
