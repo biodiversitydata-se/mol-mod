@@ -26,6 +26,7 @@ secrets:
     file: .secret.postgrest_config
 
 services:
+
   postgres:
     restart: always
     image: postgres:13
@@ -42,12 +43,15 @@ services:
     # User and password information
     env_file:
       - .env
+    # Uncomment to connect ports (HOST:CONTAINER) for debugging eg. in pgAdmin
+    #   - 5432:5432
     secrets:
       - postgres_pass
       - postgrest_anon_pass
     environment:
       - POSTGRES_PASSWORD_FILE=./run/secrets/postgres_pass
       - PGRST_DB_ANON_PASS_FILE=./run/secrets/postgrest_anon_pass
+
   postgrest:
     # https://hub.docker.com/r/postgrest/postgrest
     restart: always
@@ -64,6 +68,7 @@ services:
       - POSTGREST_CONFIG_FILE=./run/secrets/postgrest_config
     depends_on:
       - postgres
+
   blast-worker:
     build:
       context: ./
@@ -71,6 +76,7 @@ services:
     logging: *default-logging
     volumes:
       - ./blast-databases:/blastdbs
+
   develop:
     container_name: asv-main
     build:
