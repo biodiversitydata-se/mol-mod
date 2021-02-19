@@ -24,7 +24,7 @@ DEFAULT_MAPPING = os.path.join(os.path.dirname(__file__), 'data-mapping.json')
 class MolModImporter():
     """
     The mol-mod importer class is used to load data into memory, run validation
-    and insert it into the database.
+    and insert validated data into the database.
     """
 
     def __init__(self, data_file: str, mapping_file: str = DEFAULT_MAPPING):
@@ -34,8 +34,7 @@ class MolModImporter():
         documented at:
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html.
         """
-        # Before we read anything into memory, we check that we have a working
-        # database connection.
+        # Check that we have a working database connection.
         self._connect_db()
 
         # Read data mapping file to make sure that it's also available
@@ -43,10 +42,18 @@ class MolModImporter():
 
         self.data = {}
 
+        # Check input file format
         is_tar = tarfile.is_tarfile(data_file)
         if is_tar:
             tar = tarfile.open(data_file)
-        # read one sheet at the time, so that we can catch any missing sheets
+        else:
+            try:
+                pandas.read_excel(data_file)
+            except ValueError:
+                logging.error("Input neither recognized as tar nor as Excel.")
+                sys.exit(1)
+
+        # Read one sheet at the time, so that we can catch any missing sheets
         for sheet in self.data_mapping.sheets:
             try:
                 if is_tar:
@@ -77,7 +84,7 @@ class MolModImporter():
             with open(pass_file) as password:
                 password = password.read()
         except FileNotFoundError:
-            logging.error("Could not read postgres password from %s", pass_file)
+            logging.error("Could not read postgres pwd from %s", pass_file)
             sys.exit(1)
 
         try:
