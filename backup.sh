@@ -15,7 +15,7 @@ CONTAINER="asv-db"
 FORMAT="tar" # Change to 'plain' for plain SQL
 
 #
-# CREATE HELP (access with `./backup.sh -h´ in molmod folder)
+# CREATE HELP (access with './backup.sh -h' in molmod folder)
 #
 if [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]
 then
