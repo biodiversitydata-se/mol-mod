@@ -9,6 +9,12 @@ if __name__ == '__main__':
     import argparse
     import subprocess
 
+    #
+    # Use argparse to execute this script using the command-line interpreter,
+    # parse arguments into python object (ARGS), and compose help
+    # (access with './scripts/import_excel.py -h' in molmod dir)
+    #
+    # Use docstring as help intro
     PARSER = argparse.ArgumentParser(description=__doc__)
 
     PARSER.add_argument("excel_file",
@@ -23,6 +29,10 @@ if __name__ == '__main__':
                               "importer script."))
 
     ARGS = PARSER.parse_args()
+
+    #
+    # Compose cmd to execute in container
+    #
 
     CMD = ["docker", "exec", "-i", ARGS.container,
            "./molmod/importer/import.py"] + ARGS.importer_args
