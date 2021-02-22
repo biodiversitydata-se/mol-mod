@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-The mol-mod data importer takes an excel file stream, then rearranges and
+The mol-mod data importer takes an Excel file stream, then rearranges and
 inserts the data into the database.
 """
 
@@ -9,10 +9,9 @@ import logging
 import os
 import select
 import sys
-import tempfile
 import tarfile
+import tempfile
 from io import BytesIO
-from typing import Any
 
 import pandas
 import psycopg2
