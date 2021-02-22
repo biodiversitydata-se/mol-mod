@@ -20,7 +20,9 @@
         }
       }
     },
-    "event_id": {},
+    "event_id": {"function": {"operation": "concat",
+                              "separator": ":",
+                              "targets": ["dataset", "event_id_alias"]}},
     "event_id_alias": {},
     "materialSampleId": {},
     "eventDate": {"validation": "[0-9]{2,4}\\-(0[1-9]|1[0-2])(\\-[0-3]?[0-9])?"},
@@ -159,7 +161,28 @@
       }
     },
     "organism_quantity": {},
-    "previous_identifications": {},
+    "previous_identifications": {
+      "references": {
+        "table": "taxon_annotation",
+        "function": {
+          "operation": "concat",
+          "separator": "|",
+          "targets": ["kingdom",
+                      "phylum",
+                      "class",
+                      "oorder",
+                      "family",
+                      "genus",
+                      "specific_epithet",
+                      "infraspecific_epithet",
+                      "otu"]
+        },
+        "join": {
+          "from": "asv_id_alias",
+          "to": "asv_id"
+        }
+      }
+    },
     "asv_id_alias": {},
     "associated_sequences": {}
   }

@@ -117,9 +117,37 @@ class DBMapper():
             return f"'{value}'"
         if value is None:
             return 'NULL'
-        if math.isnan(value):
+        if numpy.isnan(value):
             return "'NaN'"
         return value
+
+    def _function_value(self, data: pandas.DataFrame, ref: dict):
+        """
+        Returns a value accoring to the function defined in ref['function'],
+        using the values in `data`.
+        """
+        function = ref.get('function', None)
+        if not function:
+            logging.warning("No function available for function value")
+            return None
+
+        if function['operation'] == 'concat':
+            sep = function['separator']
+            values = []
+            for field in function['targets']:
+                value = data[field].values[0]
+                if not isinstance(value, str):
+                    # we specifically want to replace NaN values with empty
+                    # strings here.
+                    if numpy.isnan(value):
+                        value = ""
+                    else:
+                        value = str(value)
+                values += [value]
+            return sep.join(values)
+        else:
+            logging.error('Unknown function: %s', function['operation'])
+        return None
 
     @property
     def sheets(self):
@@ -152,7 +180,11 @@ class DBMapper():
             for field, ref in fields:
                 has_default = "default" in self.mapping[table][ref]
                 try:
-                    value = data[field][i]
+                    if "function" in self.mapping[table][ref]:
+                        value = self._function_value(data[i:i+1],
+                                                     self.mapping[table][ref])
+                    else:
+                        value = data[field][i]
                     if has_default and value in missing:
                         raise KeyError
                 except KeyError:
@@ -230,7 +262,13 @@ class DBMapper():
                 target = data[ref['table']].set_index(ref['join']['to'])
                 joined = data[table].join(target, lsuffix="_joined",
                                           on=ref['join']['from'])
-                data[table][field] = joined[ref['field']]
+                if 'field' in ref:
+                    data[table][field] = joined[ref['field']]
+                elif 'function' in ref:
+                    values = []
+                    for i in range(len(data[table].values)):
+                        values += [self._function_value(joined[i:i+1], ref)]
+                    data[table][field] = values
 
     def validate(self, table: str, data: pandas.DataFrame) -> bool:
         """
