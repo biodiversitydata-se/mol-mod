@@ -44,6 +44,7 @@ def create_app():
 
     cas = CAS(app)
 
+    # Make name of logged in user available in templates
     @app.context_processor
     def inject_user():
         return dict(user=cas.username)
