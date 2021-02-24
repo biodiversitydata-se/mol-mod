@@ -21,6 +21,9 @@ class Config:
     BLAST_DB = get_env_variable('BLAST_DB')
     DEBUG = False
     TESTING = False
+    CAS_SERVER = get_env_variable('CAS_SERVER')
+    CAS_AFTER_LOGIN = get_env_variable('CAS_AFTER_LOGIN')
+    CAS_AFTER_LOGOUT = get_env_variable('CAS_AFTER_LOGOUT')
 
 
 class ProductionConfig(Config):

@@ -6,6 +6,7 @@ import os
 from logging.config import dictConfig
 
 from flask import Flask
+from flask_cas import CAS
 from flask_wtf.csrf import CSRFProtect
 
 from . import errors
@@ -40,6 +41,12 @@ def create_app():
 
     # Enable cross-site resource forgery protections
     CSRFProtect(app)
+
+    cas = CAS(app)
+
+    @app.context_processor
+    def inject_user():
+        return dict(user=cas.username)
 
     with app.app_context():
         from molmod.routes import blast_routes, filter_routes, main_routes
