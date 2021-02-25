@@ -134,16 +134,21 @@ class MolModImporter():
                 logging.debug("inserting %s to %s", inserted, stop)
                 query = self.data_mapping.as_query(table, data,
                                                    inserted, batch_size)
-                self.cursor.execute(query)
-                inserted += batch_size
+                try:
+                    self.cursor.execute(query)
+                except Exception as err:
+                    logging.error(err)
+                    sys.exit(1)
+                else:
+                    inserted += batch_size
 
-                # update the return values
-                if self.data_mapping.is_returning(table):
-                    retvals = self.cursor.fetchall()
-                    for col in retvals[0].keys():
-                        if col not in update_vals:
-                            update_vals[col] = []
-                        update_vals[col] += [c[col] for c in retvals]
+                    # update the return values
+                    if self.data_mapping.is_returning(table):
+                        retvals = self.cursor.fetchall()
+                        for col in retvals[0].keys():
+                            if col not in update_vals:
+                                update_vals[col] = []
+                            update_vals[col] += [c[col] for c in retvals]
 
             for col in update_vals:
                 data[col] = update_vals[col]
