@@ -71,7 +71,8 @@ class MolModImporter():
                     self.data[sheet] = pandas.read_excel(data_file,
                                                          sheet_name=sheet)
             except KeyError:
-                logging.warning("Input sheet '%s' not found. Skipping.", sheet)
+                logging.error("Input sheet '%s' not found. Aborting.", sheet)
+                sys.exit(1)
         logging.info("%s file read", "Tar" if is_tar else "Excel")
 
     def _connect_db(self, pass_file='/run/secrets/postgres_pass'):
