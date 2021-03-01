@@ -239,11 +239,13 @@ class DBMapper():
         Returns `True` if all values validated, or no validation was defined,
         `False` otherwise.
         """
+        # If input includes sheet/table that does not match mapping
         if table not in self.mapping:
             logging.warning('unknown table %s in validation', table)
             return True
 
         valid = True
+        # Iterate over mapping fields
         for field, settings in self.mapping[table].items():
             previous_mistake = False
             if 'validation' in settings:
@@ -277,46 +279,44 @@ class DBMapper():
                 logging.warning("Unknown sheet '%s' ignored", sheet)
                 continue
 
-            # rename the sheet to the target table names
+            # Rename data sheet to target table name
             table = self.mapping[sheet]['targetTable']
             data[table] = data.pop(sheet)
 
-            # figure out a mapping from the current fields to the new fields
+            # Extract data-db field map and (fkey) reference dicts from mapping
             field_mapping = {}
-            # parse field data into field names and validators
             for field, info in self.mapping[sheet].items():
                 target_field = self.target_field(sheet, field)
+                # Ignore 'non-field' keys (i.e. 'targetTable', 'returning')
                 if not target_field:
                     continue
                 field_mapping[field] = target_field
-                # keep track of references for table ordering
+                # Keep track of references for table ordering
                 ref = info.get('references', None)
                 if ref:
                     references += [(table, ref['table'])]
 
-            # then rename all the fields
+            # Rename data fields
             data[table].rename(columns=field_mapping, inplace=True)
 
-            # sometimes pandas reads a lot of empty lines,
-            # so we filter all rows that are NaN only
+            # Drop empty rows and columns, if any
             data[table] = data[table].dropna(how='all')
-            # ... and some empty columns too ...
             data[table] = data[table].drop(data[table].filter(regex="Unnamed"),
                                            axis='columns')
 
-        # parse all references to figure out insertion order,
-        # and make sure that there are no reference loops
+        # Reorder tables so that no table precedes a table it references
         ordered_tables = OrderedDict()
         for table in order_tables(list(data.keys()), references):
             ordered_tables[table] = data[table]
 
-        # also update the mapping, now that we use target tables instead of
-        # source sheets
+        # Also update mapping itself, now that input uses target table names,
+        # as it will be used later
         sheet_mapping = []
         for sheet, mapping in self.mapping.items():
             sheet_mapping += [(sheet, self.mapping[sheet]['targetTable'])]
 
         for sheet, table in sheet_mapping:
+            # Renamed sheets, e.g. asv-table
             if sheet != table:
                 mapping = self.mapping[sheet]
                 del self.mapping[sheet]
