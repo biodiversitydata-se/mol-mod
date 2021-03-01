@@ -53,11 +53,11 @@ class MolModImporter():
                 logging.error("Input neither recognized as tar nor as Excel.")
                 sys.exit(1)
 
-        # Read one sheet at the time, so that we can catch any missing sheets
+        # Read one sheet at the time, to catch any missing sheets
         for sheet in self.data_mapping.sheets:
             try:
                 if is_tar:
-                    # find the correct file in the tar archive
+                    # Find correct file in tar archive
                     content = None
                     for member in tar:
                         if member.name.split('.')[0] == sheet:
@@ -115,7 +115,8 @@ class MolModImporter():
         """
         logging.info("Inserting data into database")
 
-        # create a session to make sure that the transaction is atomic.
+        # Create session to make sure that transaction is atomic
+        # i.e. completes in an all-or-nothing manner
         for table, data in self.data.items():
             logging.info(" - %s", table)
 
@@ -131,6 +132,7 @@ class MolModImporter():
             # execute query
             inserted = 0
             while total > inserted:
+
                 stop = min(total, inserted + batch_size)
                 logging.debug("inserting %s to %s", inserted, stop)
                 query = self.data_mapping.as_query(table, data,
@@ -175,6 +177,7 @@ class MolModImporter():
         valid = True
         for table, data in self.data.items():
             logging.info(" -- %s", table)
+            # Set valid to 'false' if any field validation fails
             valid &= self.data_mapping.validate(table, data)
         return valid
 
@@ -218,13 +221,13 @@ if __name__ == '__main__':
 
     logging.basicConfig(level=(10*(ARGS.quiet - ARGS.verbose)))
 
-    # check if there is streaming data available from stdin.
+    # Check if there is streaming data available from stdin.
     if not select.select([sys.stdin], [], [], 0.0)[0]:
         logging.error("An excel input stream is required")
         PARSER.print_help()
         sys.exit(1)
 
-    # write stdin to a temporary file
+    # Write stdin to a temporary file
     with tempfile.NamedTemporaryFile('rb+') as temp:
         temp.write(sys.stdin.buffer.raw.read())
 
