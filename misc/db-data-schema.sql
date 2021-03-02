@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS public.emof (
 CREATE TABLE IF NOT EXISTS public.asv (
     pid SERIAL PRIMARY KEY,
     asv_id character(36) UNIQUE,
-    asv_sequence character varying NOT NULL
+    asv_sequence character varying UNIQUE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS public.occurrence (
