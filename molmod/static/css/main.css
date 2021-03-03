@@ -64,3 +64,11 @@ tr.shown td.details-control {
     text-align: left;
     color: #c44d34;
 }
+#file {
+    visibility: hidden;
+}
+#file-shown {
+  padding: 10px;
+  display: inline-block;
+  width: 300px;
+}

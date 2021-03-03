@@ -1,0 +1,50 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class='container'>
+    <div>
+        <br>
+        <h3>Upload data to SBDI</h3>
+        <br>
+        <p>Select an Excel or compressed archive file to submit to SBDI.
+       </p>
+    <hr>
+    </div>
+    <form method='post' id='form' enctype='multipart/form-data'>
+        {{ form.csrf_token }}
+        <div class='row'>
+            <div class='col-md-12'>
+                {% if form.file.errors %}
+                    <div class='form-group has-error'>
+                {% else %}
+                    <div class='form-group'>
+                {% endif %}
+                        <!-- actual upload, which is hidden -->
+                        {{ form.file(id='file') }}
+                        <!-- custom upload button -->
+                        <label for="file" class='btn btn-default'>Select</label>
+                        <!-- name of selected file -->
+                        <span id="file-shown">No file selected</span>
+                        {{ form.submit(class='btn btn-primary', value='Upload') }}
+                        <br>
+                        <br>
+                        <span class='help-block'>
+                            {% for error in form.file.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </span>
+                    </div>
+            </div>
+        </div>
+        <br>
+        <div class='row'>
+            <div class='col-md-12 visHlpDiv' id='upload_err_container'>
+                {{ msg }}
+            </div>
+        </div>
+    </form>
+</div>
+<br>
+<br>
+
+
+{% endblock body %}

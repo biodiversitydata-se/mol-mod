@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
+import os
 import re
 
-from flask import current_app as app
+from flask import current_app as APP
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField
 from wtforms import (BooleanField, IntegerField, SelectMultipleField,
                      SubmitField, TextAreaField, ValidationError)
 
@@ -91,6 +93,24 @@ def cover_check(form, field):
             raise ValidationError('Value between 0 and 100, please.')
 
 
+def file_check(form, field):
+    file = field.data
+    if file is not None:
+        filename = file.filename
+        try:
+            ext = os.path.splitext(filename)[1]
+            APP.logger.debug(f'ext is {ext}')
+        except Exception:
+            return None
+        regex = "([^\\s]+(\\.(?i)(xlsx|tar\\.gz|tar\\.bz2|tar\\.lz))$)"
+        if re.match(regex, filename):
+            APP.logger.debug('Correct format')
+            return None
+    raise ValidationError(
+        'Select an Excel (xlsx) or compressed archive '
+        '(tar.gz, tar.bz2 or tar.lz) file, please!')
+
+
 class BlastSearchForm(FlaskForm):
     sequence = TextAreaField(u'sequence', [fasta_check],
                              default=DEFAULT_BLAST_GENE)
@@ -101,8 +121,8 @@ class BlastSearchForm(FlaskForm):
 
 class BlastResultForm(FlaskForm):
     asv_id = BooleanField(u'asv_id')
-    batch_url = app.config['BATCH_SEARCH_URL']
-    redirect_url = app.config['REDIRECT_URL']
+    batch_url = APP.config['BATCH_SEARCH_URL']
+    redirect_url = APP.config['REDIRECT_URL']
 
 
 class FilterSearchForm(FlaskForm):
@@ -122,5 +142,10 @@ class FilterSearchForm(FlaskForm):
 
 class FilterResultForm(FlaskForm):
     asv_id = BooleanField(u'asv_id')
-    batch_url = app.config['BATCH_SEARCH_URL']
-    redirect_url = app.config['REDIRECT_URL']
+    batch_url = APP.config['BATCH_SEARCH_URL']
+    redirect_url = APP.config['REDIRECT_URL']
+
+
+class UploadForm(FlaskForm):
+    file = FileField('file', [file_check])
+    submit = SubmitField('Submit')
