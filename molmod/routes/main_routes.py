@@ -1,6 +1,6 @@
 import os
 
-from flask import Blueprint
+from flask import Blueprint, abort
 from flask import current_app as APP
 from flask import render_template, request
 from flask_cas import login_required
@@ -33,7 +33,7 @@ def upload():
 
     roles = cas.attributes['cas:authority'].split(',')
     if os.getenv('UPLOAD_ROLE') not in roles:
-        return render_template('upload_refused.html')
+        abort(403)
 
     form = UploadForm()
     msg = ''
