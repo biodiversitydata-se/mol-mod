@@ -18,12 +18,14 @@
         <li><a href="{{ url_for('main_bp.index') }}">Swedish ASV database</a> </li>
         <li><a href="{{ url_for('blast_bp.blast') }}">BLAST search</a></li>
         <li><a href="{{ url_for('filter_bp.filter') }}">Filter search</a></li>
-        <li><a href="{{ url_for('main_bp.upload') }}">Data upload</a></li>
+        {% if upload  %}
+            <li><a href="/upload">Data upload</a></li>
+        {% endif %}
         <li><a href="{{ url_for('main_bp.about') }}">About</a></li>
-        {% if user  %}
-           <li><a href="/logout">Log out {{user}}</a></li>
+        {% if user %}
+            <li><a href="/logout">Log out {{user}}</a></li>
         {% else %}
-           <li><a href="/login">Login</a></li>
+            <li><a href="/login">Login</a></li>
         {% endif %}
       </ul>
     </div>

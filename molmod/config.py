@@ -25,6 +25,7 @@ class Config:
     CAS_AFTER_LOGIN = get_env_variable('CAS_AFTER_LOGIN')
     CAS_AFTER_LOGOUT = get_env_variable('CAS_AFTER_LOGOUT')
     UPLOAD_PATH = get_env_variable('UPLOAD_PATH')
+    UPLOAD_ROLE = get_env_variable('UPLOAD_ROLE')
 
 
 class ProductionConfig(Config):

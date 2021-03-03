@@ -41,6 +41,7 @@ def create_app():
 
     # Enable cross-site resource forgery protections
     CSRFProtect(app)
+
     # Make e.g. role attribute globally available for authorization
     global cas
     # Enable authentication against Bioatlas CAS server
@@ -49,10 +50,15 @@ def create_app():
     # Make name of logged in user available in templates
     @app.context_processor
     def inject_user():
+        upload = False
         if cas.attributes:
-            return dict(user=cas.attributes['cas:firstname'])
+            user = cas.attributes['cas:firstname']
+            roles = cas.attributes['cas:authority'].split(',')
+            if os.getenv('UPLOAD_ROLE') in roles:
+                upload = True
+            return dict(user=user, upload=upload)
         else:
-            return dict(user=None)
+            return dict(user=None, upload=False)
 
     with app.app_context():
         from molmod.routes import blast_routes, filter_routes, main_routes

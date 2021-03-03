@@ -3,6 +3,8 @@ import os
 from flask import Blueprint
 from flask import current_app as APP
 from flask import render_template, request
+from flask_cas import login_required
+from molmod import cas
 from molmod.config import get_config
 from molmod.forms import UploadForm
 from werkzeug.utils import secure_filename
@@ -26,11 +28,17 @@ def about():
 
 
 @main_bp.route('/upload', methods=['GET', 'POST'])
+@login_required
 def upload():
+
+    roles = cas.attributes['cas:authority'].split(',')
+    if os.getenv('UPLOAD_ROLE') not in roles:
+        return render_template('upload_refused.html')
+
     form = UploadForm()
     msg = ''
     if request.method == 'POST':
-        if form.validate_on_submit():
+        if form.validate_on_submit() and True:
             f = form.file.data
             filename = secure_filename(f.filename)
             try:

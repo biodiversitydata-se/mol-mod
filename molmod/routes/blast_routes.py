@@ -10,7 +10,6 @@ from flask import Blueprint
 from flask import current_app as APP
 from flask import jsonify, render_template, request
 from flask_cas import login_required
-from molmod import cas
 from molmod.config import get_config
 # pylint: disable=import-error
 from molmod.forms import BlastResultForm, BlastSearchForm
@@ -28,8 +27,6 @@ def blast():
        populated on submit via (DataTables) AJAX call to '/blast_run'
        which in turn calls a blast-worker container.
     '''
-
-    APP.logger.debug(f"roles = {cas.attributes['cas:authority']}")
 
     sform = BlastSearchForm()
     rform = BlastResultForm()
