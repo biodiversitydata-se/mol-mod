@@ -1,34 +1,20 @@
 {
   "dataset": {
     "targetTable": "dataset",
-    "returning": "pid",
-    "datasetId": {},
-    "providerEmail": {
+    "datasetID": {},
+    "provider_email": {
       "validation": "[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+"
     }
   },
   "event": {
     "targetTable": "sampling_event",
-    "returning": "pid",
-    "dataset_pid": {
-      "references": {
-        "table": "dataset",
-        "field": "pid",
-        "join": {
-          "from": "dataset",
-          "to": "dataset_id"
-        }
-      }
-    },
-    "event_id": {"function": {"operation": "concat",
-                              "separator": ":",
-                              "targets": ["dataset", "event_id_alias"]}},
+    "dataset_pid": {},
     "event_id_alias": {},
-    "materialSampleId": {},
+    "materialSampleID": {},
     "eventDate": {"validation": "[0-9]{2,4}\\-(0[1-9]|1[0-2])(\\-[0-3]?[0-9])?"},
     "samplingProtocol": {},
     "sampleSizeValue": {},
-    "locationId": {},
+    "locationID": {},
     "decimalLatitude": {"validation": "[0-9]+.[0-9]+"},
     "decimalLongitude": {"validation": "[0-9]+.[0-9]+"},
     "geodeticDatum": {},
@@ -44,16 +30,7 @@
   },
   "mixs": {
     "targetTable": "mixs",
-    "pid": {
-      "references": {
-        "table": "sampling_event",
-        "field": "pid",
-        "join": {
-          "from": "event_id",
-          "to": "event_id"
-        }
-      }
-    },
+    "pid": {},
     "sop": {},
     "target_gene": {},
     "target_subfragment": {},
@@ -67,23 +44,13 @@
   },
   "emof": {
     "targetTable": "emof",
-    "event_pid": {
-      "references": {
-        "table": "sampling_event",
-        "field": "pid",
-        "join": {
-          "from": "event_id_alias",
-          "to": "event_id_alias"
-        }
-      }
-    },
-    "measurementId": {},
+    "event_pid": {},
     "measurementType": {},
-    "measurementTypeId": {},
+    "measurementTypeID": {},
     "measurementValue": {},
-    "measurementValueId": {},
+    "measurementValueID": {},
     "measurementUnit": {},
-    "measurementUnitId": {},
+    "measurementUnitID": {},
     "measurementAccuracy": {},
     "measurementDeterminedDate": {},
     "measurementDeterminedBy": {},
@@ -92,25 +59,13 @@
   },
   "asv-table": {
     "targetTable": "asv",
-    "returning": "pid",
     "asv_id_alias": {"field": "asv_id"},
     "DNA_sequence": {"field": "asv_sequence"}
   },
   "annotation": {
+    "asv_pid": {},
     "targetTable": "taxon_annotation",
-    "asv_pid": {
-      "references": {
-        "table": "asv",
-        "field": "pid",
-        "join": {
-          "from": "asv_id",
-          "to": "asv_id"
-        }
-      }
-    },
-    "status": {
-      "default": "valid"
-    },
+    "status": {"default": "valid"},
     "kingdom": {"default":""},
     "phylum": {"default":""},
     "class": {"default":""},
@@ -124,66 +79,21 @@
     "infraspecificEpithet": {"default":""},
     "otu": {},
     "date_identified": {},
-    "identification_references": {
-      "default": null
-    },
+    "identification_references": {"default": null},
     "reference_db": {},
     "annotation_algorithm": {},
-    "annotation_confidence": {
-      "default": null
-    },
-    "taxon_remarks": {
-      "default": null
-    },
+    "annotation_confidence": {"default": null},
+    "taxon_remarks": {"default": null},
     "scientificName": {},
     "taxonRank": {}
   },
   "occurrence": {
     "targetTable": "occurrence",
-    "event_pid": {
-      "references": {
-        "table": "sampling_event",
-        "field": "pid",
-        "join": {
-          "from": "event_id",
-          "to": "event_id"
-        }
-      }
-    },
-    "asv_pid": {
-      "references": {
-        "table": "asv",
-        "field": "pid",
-        "join": {
-          "from": "asv_id_alias",
-          "to": "asv_id"
-        }
-      }
-    },
+    "event_pid": {},
+    "asv_pid": {},
     "organism_quantity": {},
-    "previous_identifications": {
-      "references": {
-        "table": "taxon_annotation",
-        "function": {
-          "operation": "concat",
-          "separator": "|",
-          "targets": ["kingdom",
-                      "phylum",
-                      "class",
-                      "oorder",
-                      "family",
-                      "genus",
-                      "specific_epithet",
-                      "infraspecific_epithet",
-                      "otu"]
-        },
-        "join": {
-          "from": "asv_id_alias",
-          "to": "asv_id"
-        }
-      }
-    },
+    "previous_identifications": {},
     "asv_id_alias": {},
-    "associated_sequences": {}
+    "associatedSequences": {}
   }
 }
