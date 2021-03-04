@@ -69,7 +69,6 @@ CREATE TABLE IF NOT EXISTS public.emof (
     measurement_method character varying
 );
 
-
 CREATE TABLE IF NOT EXISTS public.asv (
     pid BIGSERIAL PRIMARY KEY,
     asv_id character(36) UNIQUE,
