@@ -47,18 +47,22 @@ def create_app():
     # Enable authentication against Bioatlas CAS server
     cas = CAS(app)
 
-    # Make name of logged in user available in templates
+    # Make some variables available in all templates
     @app.context_processor
-    def inject_user():
+    def inject_into_templates():
+        support_email = os.getenv('SUPPORT_EMAIL')
         upload = False
         if cas.attributes:
-            user = cas.attributes['cas:firstname']
+            user = cas.username
+            firstname = cas.attributes['cas:firstname']
             roles = cas.attributes['cas:authority'].split(',')
             if os.getenv('UPLOAD_ROLE') in roles:
                 upload = True
-            return dict(user=user, upload=upload)
+            return dict(user=user, firstname=firstname, upload=upload,
+                        support_email=support_email)
         else:
-            return dict(user=None, upload=False)
+            return dict(user=None, firstname=None, upload=False,
+                        support_email=support_email)
 
     with app.app_context():
         from molmod.routes import blast_routes, filter_routes, main_routes

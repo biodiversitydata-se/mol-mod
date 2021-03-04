@@ -21,7 +21,11 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ala-styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.png') }}">
-
+    <script>
+        // Make available in all templates
+        var support_email = '{{ support_email }}';
+        var page = '{{ url_for(request.endpoint).strip("/") }}'
+    </script>
 </head>
 <body>
     {% include "banner.html" %}

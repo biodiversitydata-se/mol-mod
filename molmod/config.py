@@ -21,11 +21,11 @@ class Config:
     BLAST_DB = get_env_variable('BLAST_DB')
     DEBUG = False
     TESTING = False
+    # CAS variables needed here to be accessible in __init__.py
     CAS_SERVER = get_env_variable('CAS_SERVER')
     CAS_AFTER_LOGIN = get_env_variable('CAS_AFTER_LOGIN')
     CAS_AFTER_LOGOUT = get_env_variable('CAS_AFTER_LOGOUT')
     UPLOAD_PATH = get_env_variable('UPLOAD_PATH')
-    UPLOAD_ROLE = get_env_variable('UPLOAD_ROLE')
 
 
 class ProductionConfig(Config):

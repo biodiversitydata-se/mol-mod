@@ -5,10 +5,10 @@
         <br>
         <h3>Permission error</h3>
         <br>
-        <p>You are not authorized to visit this page. Please
-            <a href="mailto:sbdi-mol-data-support@scilifelab.se">contact support</a>
-            if you believe you should have access this page.
-       </p>
+       <p>You are currently not authorized to visit this page. Please
+           <a href="mailto:{{ support_email }}?subject=Access%20to%20{{ url_for(request.endpoint).strip('/') }}%20for%20{{user}}">contact support</a>
+           if you believe you should have access to this page.
+      </p>
     <hr>
     </div>
 </div>

@@ -194,8 +194,12 @@ function makeSel2drop(drop){
             },
             error: function (jqXHR, status, error) {
                 // console.log(error);
-                $('#filt_err_container').html('Sorry, something unexpected happened during page load. '
-                  + 'Please, contact support if this error persists.');
+                // Uses @app.context_processor-injected variables passed via layout.html
+                $('#filt_err_container').html('Sorry, something unexpected happened during page load. ' +
+                  'Please <u><a href="mailto:'  + support_email +
+                  '?subject=' + page + '%20page%20loaded%20with%20error">contact support</a></u> ' +
+                  'if this error persists.');
+                // Disable Bioatlas POST option and data export
                 $('.btn').prop('disabled',true);
                 return { results: [] };
             }
@@ -213,9 +217,12 @@ function makeDataTbl(url, columns) {
         // to be empty string instead of JSON
         .on('error.dt', function (e, settings, techNote, message) {
             // console.log( 'An error has been reported by DataTables: ', message );
-            $('#search_err_container').html('Sorry, something unexpected happened during the search. '
-              + 'Please, contact support if this error persists.');
-            // Disable Bioatlas POST option and data export
+            // Uses @app.context_processor-injected variables passed via layout.html
+            $('#search_err_container').html('Sorry, something unexpected happened during the search. ' +
+              'Please <u><a href="mailto:'  + support_email +
+              '?subject=' + page + '%20page%20loaded%20with%20error">contact support</a></u> ' +
+              'if this error persists.');
+                // Disable Bioatlas POST option and data export
             $("#show_occurrences").prop("disabled",true);
             dTbl.buttons().disable();
         })
