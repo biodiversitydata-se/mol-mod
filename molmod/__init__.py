@@ -42,8 +42,6 @@ def create_app():
     # Enable cross-site resource forgery protections
     CSRFProtect(app)
 
-    # Make e.g. role attribute globally available for authorization
-    global cas
     # Enable authentication against Bioatlas CAS server
     cas = CAS(app)
 
