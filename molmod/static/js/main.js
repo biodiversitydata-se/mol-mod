@@ -1,9 +1,14 @@
 /* Changes may require cache bypass, in Chrome/Mac: shift + cmd + r */
 $(document).ready(function() {
 
+    // Use page variable from layout.html
+    currPage = page.replace('/', '')
+    // Use in mailto-link when filters or results fail to load
+    mail_subject = '?subject=Error%20loading%20' + currPage + '%20page'
+
     var hlpDiv = $('#selection_error'); // For displaying no-selection warning
 
-    var currPage = $(location).attr('href').split("/").pop();
+    // var currPage = $(location).attr('href').split("/").pop();
     switch(currPage) {
 
         // BLAST PAGE
@@ -195,9 +200,9 @@ function makeSel2drop(drop){
             error: function (jqXHR, status, error) {
                 // console.log(error);
                 // Uses @app.context_processor-injected variables passed via layout.html
-                $('#filt_err_container').html('Sorry, something unexpected happened during page load. ' +
-                  'Please <u><a href="mailto:'  + support_email + '">contact support</a></u> ' +
-                  'if this error persists.');
+                $('#filt_err_container').html('Sorry, something unexpected happened during the search. ' +
+                  'Please <u><a href="mailto:'  + support_email + mail_subject +
+                  '">contact support</a></u> if this error persists.');
                 // Disable Bioatlas POST option and data export
                 $('.btn').prop('disabled',true);
                 return { results: [] };
@@ -216,10 +221,10 @@ function makeDataTbl(url, columns) {
         // to be empty string instead of JSON
         .on('error.dt', function (e, settings, techNote, message) {
             // console.log( 'An error has been reported by DataTables: ', message );
-            // Uses @app.context_processor-injected variables passed via layout.html
+            // Uses variables passed via layout.html
             $('#search_err_container').html('Sorry, something unexpected happened during the search. ' +
-              'Please <u><a href="mailto:'  + support_email + '">contact support</a></u> ' +
-              'if this error persists.');
+              'Please <u><a href="mailto:'  + support_email + mail_subject +
+              '">contact support</a></u> if this error persists.');
                 // Disable Bioatlas POST option and data export
             $("#show_occurrences").prop("disabled",true);
             dTbl.buttons().disable();
