@@ -196,8 +196,7 @@ function makeSel2drop(drop){
                 // console.log(error);
                 // Uses @app.context_processor-injected variables passed via layout.html
                 $('#filt_err_container').html('Sorry, something unexpected happened during page load. ' +
-                  'Please <u><a href="mailto:'  + support_email +
-                  '?subject=' + page + '%20page%20loaded%20with%20error">contact support</a></u> ' +
+                  'Please <u><a href="mailto:'  + support_email + '">contact support</a></u> ' +
                   'if this error persists.');
                 // Disable Bioatlas POST option and data export
                 $('.btn').prop('disabled',true);
@@ -219,8 +218,7 @@ function makeDataTbl(url, columns) {
             // console.log( 'An error has been reported by DataTables: ', message );
             // Uses @app.context_processor-injected variables passed via layout.html
             $('#search_err_container').html('Sorry, something unexpected happened during the search. ' +
-              'Please <u><a href="mailto:'  + support_email +
-              '?subject=' + page + '%20page%20loaded%20with%20error">contact support</a></u> ' +
+              'Please <u><a href="mailto:'  + support_email + '">contact support</a></u> ' +
               'if this error persists.');
                 // Disable Bioatlas POST option and data export
             $("#show_occurrences").prop("disabled",true);
