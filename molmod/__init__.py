@@ -50,19 +50,19 @@ def create_app():
     @app.context_processor
     def inject_into_templates():
         support_email = os.getenv('SUPPORT_EMAIL')
-        # Make sure 'Data upload' menu item is uppdated after logout
-        upload_permitted = False
-        # Get attributes of current Biatlas CAS user
+        # Get attributes of logged-in Bioatlas CAS user
         if cas.attributes:
             user = cas.username
             firstname = cas.attributes['cas:firstname']
-            # Check upload permission
+            upload_permitted = False
+            # Set upload permission based on CAS user roles
             roles = cas.attributes['cas:authority'].split(',')
             if os.getenv('UPLOAD_ROLE') in roles:
                 upload_permitted = True
             return dict(user=user, firstname=firstname,
                         upload_permitted=upload_permitted,
                         support_email=support_email)
+        # Or inject empty/restrictive user variables
         else:
             return dict(user=None, firstname=None, upload_permitted=False,
                         support_email=support_email)
