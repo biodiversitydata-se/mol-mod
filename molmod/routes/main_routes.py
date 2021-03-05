@@ -27,28 +27,50 @@ def about():
 
 
 @main_bp.route('/upload', methods=['GET', 'POST'])
+# Redirect user to Bioatlas CAS login
 @login_required
 def upload():
+    '''Checks whether logged-in user has required role for file upload.
+       Authorized users are sent to upload page; unauthorized users to custom
+       403 Forbidden page ('Data upload' menu item is actually hidden for those
+       - see __init.py__ + banner.html - but 403 is used if unauthorized user
+       types in '/upload' url).
 
+       Standard Bioatlas users have role 'ROLE_USER', and we require
+       'ROLE_COLLECTION_ADMIN' for upload, for now, but will have a specific
+       molmod-upload role added later.
+    '''
+
+    # Get CAS user roles from session
     cas_attributes = session.get('CAS_ATTRIBUTES', None)
     roles = cas_attributes['cas:authority'].split(',')
+    APP.logger.debug(
+        f'User has CAS roles: {roles} ')
+
+    # Stop unauthorized users
     if os.getenv('UPLOAD_ROLE') not in roles:
         abort(403)
 
+    # Enable authorized users
     form = UploadForm()
-    msg = ''
+    upload_error = False
+    # If user has tried to submit file (POST)
     if request.method == 'POST':
-        if form.validate_on_submit() and True:
+        # If file passes (simple) validation in forms.py
+        if form.validate_on_submit():
+            # Get filename
             f = form.file.data
             filename = secure_filename(f.filename)
+            # Save file, or report error
             try:
                 f.save(os.path.join(CONFIG.UPLOAD_PATH, filename))
             except Exception as err:
-                msg = 'Sorry, something unexpected happened during file '\
-                      'upload. Please, contact support if this error persists!'
+                # Display error msg in upload form
+                upload_error = True
                 APP.logger.error(
                     f'File {filename} could not be saved due to {err}')
             else:
                 APP.logger.info(f'Uploaded file {filename}')
                 return render_template('uploaded.html', filename=filename)
-    return render_template('upload.html', form=form, msg=msg)
+    # Show upload form (GET or POST), with error when applicable (POST only)
+    return render_template('upload.html', form=form, upload_error=upload_error)

@@ -29,16 +29,15 @@
                         <br>
                         <span class='help-block'>
                             {% for error in form.file.errors %}
-                            {{ error }}
+                               {{ error }}
                             {% endfor %}
+                            {% if upload_error %}
+                                Sorry, something unexpected happened during file upload.
+                                Please <u><a href="mailto: {{ support_email }} ?subject=Error%20uploading%20data">
+                                contact support</a></u> if this error persists.
+                            {% endif %}
                         </span>
                     </div>
-            </div>
-        </div>
-        <br>
-        <div class='row'>
-            <div class='col-md-12 visHlpDiv' id='upload_err_container'>
-                {{ msg }}
             </div>
         </div>
     </form>
