@@ -22,7 +22,7 @@
              <li><a href="/upload">Data upload</a></li>
          {% endif %}
          <li><a href="{{ url_for('main_bp.about') }}">About</a></li>
-         {% if user %}
+         {% if firstname %}
              <li><a href="/logout">Log out {{firstname}}</a></li>
          {% else %}
              <li><a href="/login">Login</a></li>

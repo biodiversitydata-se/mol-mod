@@ -46,15 +46,17 @@ def create_app():
     cas = CAS(app)
 
     # Make some variables available in all templates,
-    # for dynamic display of menu items, and email links
+    # for dynamic display of menu items and email links
     @app.context_processor
     def inject_into_templates():
         support_email = os.getenv('SUPPORT_EMAIL')
         # Make sure 'Data upload' menu item is uppdated after logout
         upload_permitted = False
+        # Get attributes of current Biatlas CAS user
         if cas.attributes:
             user = cas.username
             firstname = cas.attributes['cas:firstname']
+            # Check upload permission
             roles = cas.attributes['cas:authority'].split(',')
             if os.getenv('UPLOAD_ROLE') in roles:
                 upload_permitted = True
