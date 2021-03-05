@@ -18,7 +18,7 @@
         <li><a href="{{ url_for('main_bp.index') }}">Swedish ASV database</a> </li>
         <li><a href="{{ url_for('blast_bp.blast') }}">BLAST search</a></li>
         <li><a href="{{ url_for('filter_bp.filter') }}">Filter search</a></li>
-        {% if upload  %}
+        {% if upload_permitted  %}
              <li><a href="/upload">Data upload</a></li>
          {% endif %}
          <li><a href="{{ url_for('main_bp.about') }}">About</a></li>
