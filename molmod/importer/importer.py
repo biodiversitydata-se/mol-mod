@@ -486,9 +486,13 @@ if __name__ == '__main__':
 
     ARGS = PARSER.parse_args()
 
+    # Set log level based on ./scripts/import_excel argument
+    # E.g: --v means log level = 10(3-2) = 10
     logging.basicConfig(level=(10*(ARGS.quiet - ARGS.verbose)))
+    logging.error(ARGS.no_validation)
 
-    # Check if there is streaming data available from stdin.
+    # Check if there is streaming data available from stdin
+    # (used in case importer is not executed via import_excel.py)
     if not select.select([sys.stdin], [], [], 0.0)[0]:
         logging.error("An excel input stream is required")
         PARSER.print_help()
@@ -499,4 +503,5 @@ if __name__ == '__main__':
         temp.write(sys.stdin.buffer.raw.read())
 
         run_import(temp.name, ARGS.mapping_file, ARGS.batch_size,
+                   # --no_validation -> not True = False
                    not ARGS.no_validation, ARGS.dry_run)
