@@ -317,6 +317,7 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     if validate:
         logging.info("Validating input data")
         if not run_validation(data, mapping):
+            logging.info("Validation failed, and no data were imported!")
             sys.exit(1)
 
     logging.info("Updating defaults")
