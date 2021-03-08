@@ -36,7 +36,7 @@ if __name__ == '__main__':
     #
 
     CMD = ["docker", "exec", "-i", ARGS.container,
-           "./molmod/importer/import.py"] + ARGS.importer_args
+           "./molmod/importer/importer.py"] + ARGS.importer_args
 
     try:
         IMPORTER = subprocess.run(CMD, stdin=open(ARGS.excel_file))
