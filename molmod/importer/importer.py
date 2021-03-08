@@ -4,6 +4,7 @@ The mol-mod data importer takes an Excel or Tar file stream, then rearranges
 and inserts the data into the database.
 """
 
+import hashlib
 import json
 import logging
 import os
@@ -347,9 +348,16 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     logging.info(" * emof")
     insert_common(data['emof'], mapping['emof'], cursor, batch_size)
 
+    # generate asv id's as ASV:<md5-checksum of asv seq>
+    data['asv-table']['asv_id'] = [f'ASV:{hashlib.md5(s.encode()).hexdigest()}'\
+                                   for s in data['asv-table']['DNA_sequence']]
+
     logging.info(" * asvs")
     data['asv-table'] = insert_asvs(data['asv-table'], mapping, cursor,
                                     batch_size)
+
+    # drop asv_id column again, as it confuses pandas
+    del data['asv-table']['asv_id']
 
     # join asv's and annotations to add asv pid's
     asvs = data['asv-table'].set_index('asv_id_alias')

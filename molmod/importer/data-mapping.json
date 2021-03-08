@@ -59,7 +59,7 @@
   },
   "asv-table": {
     "targetTable": "asv",
-    "asv_id_alias": {"field": "asv_id"},
+    "asv_id": {},
     "DNA_sequence": {"field": "asv_sequence"}
   },
   "annotation": {
