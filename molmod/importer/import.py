@@ -109,6 +109,7 @@ def format_value(value):
         return "'NaN'"
     return value
 
+
 def format_values(data: pandas.DataFrame, mapping: dict,
                   start: int = 0, end: Optional[int] = 0) -> str:
     """
@@ -333,14 +334,14 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     # join 'event' with 'mixs' to get pid's for mixs
     events = data['event'].set_index('event_id_alias')
     data['mixs'] = data['mixs'] \
-                   .join(events, lsuffix="_joined", on='event_id_alias')
+        .join(events, lsuffix="_joined", on='event_id_alias')
 
     logging.info(" * mixs")
     insert_common(data['mixs'], mapping['mixs'], cursor, batch_size)
 
     # join 'event' with 'emof' to get references for emof
     data['emof'] = data['emof'] \
-                   .join(events, lsuffix="_joined", on='event_id_alias')
+        .join(events, lsuffix="_joined", on='event_id_alias')
     data['emof'].rename(columns={'pid': 'event_pid'}, inplace=True)
 
     logging.info(" * emof")
@@ -353,7 +354,7 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     # join asv's and annotations to add asv pid's
     asvs = data['asv-table'].set_index('asv_id_alias')
     data['annotation'] = data['annotation'] \
-                         .join(asvs, lsuffix="_joined", on='asv_id_alias')
+        .join(asvs, lsuffix="_joined", on='asv_id_alias')
     data['annotation'].rename(columns={'pid': 'asv_pid'}, inplace=True)
 
     logging.info(" * annotations")
@@ -365,14 +366,14 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
                   'kingdom', 'phylum', 'class', 'order', 'family', 'genus',
                   'specificEpithet', 'infraspecificEpithet', 'otu']
     occurrences = data['asv-table'] \
-                  .melt(id_columns,
-                        var_name='event_id_alias',
-                        value_name='organism_quantity')
+        .melt(id_columns,
+              var_name='event_id_alias',
+              value_name='organism_quantity')
 
     # join with events, and rename asv pid to set foreign keys
     occurrences.rename(columns={'pid': 'asv_pid'}, inplace=True)
     occurrences = occurrences \
-                  .join(events, lsuffix="_joined", on='event_id_alias')
+        .join(events, lsuffix="_joined", on='event_id_alias')
     occurrences.rename(columns={'pid': 'event_pid'}, inplace=True)
 
     # first set all missing fields to empty strings instead of NaN
