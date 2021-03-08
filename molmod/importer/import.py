@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-The mol-mod data importer takes an Excel or Tar file stream, then rearranges and
-inserts the data into the database.
+The mol-mod data importer takes an Excel or Tar file stream, then rearranges
+and inserts the data into the database.
 """
 
 import json
@@ -14,8 +14,7 @@ import tarfile
 import tempfile
 from collections import OrderedDict
 from io import BytesIO
-
-from typing import List, Optional, Mapping
+from typing import List, Mapping, Optional
 
 import numpy
 import pandas
@@ -27,6 +26,7 @@ DEFAULT_MAPPING = os.path.join(os.path.dirname(__file__), 'data-mapping.json')
 
 # Define pandas dict of sheets type. This is what's returned from read_excel()
 PandasDict = Mapping[str, pandas.DataFrame]
+
 
 def as_snake_case(text: str) -> str:
     """
@@ -42,6 +42,7 @@ def as_snake_case(text: str) -> str:
                 output += "_"
         output += char.lower()
     return output
+
 
 def connect_db(pass_file='/run/secrets/postgres_pass'):
     """
@@ -75,6 +76,7 @@ def connect_db(pass_file='/run/secrets/postgres_pass'):
         sys.exit(1)
     return connection, cursor
 
+
 def get_base_query(table_mapping: dict):
     """
     Creates an SQL insert query base using the given `table_mapping`.
@@ -93,6 +95,7 @@ def get_base_query(table_mapping: dict):
     fields = ", ".join(list(field_map.values()))
 
     return f"INSERT INTO {table_mapping['targetTable']} ({fields})", field_map
+
 
 def format_value(value):
     """
@@ -123,8 +126,9 @@ def format_values(data: pandas.DataFrame, mapping: dict,
 
     return values
 
+
 def insert_common(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
-                batch_size: int = 1000):
+                  batch_size: int = 1000):
     """
     Inserts `data` into the database based on the given `mapping`.
     """
@@ -149,6 +153,7 @@ def insert_common(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
         start = end
         end = min(total, end + batch_size)
 
+
 def insert_dataset(data: pandas.DataFrame, mapping: dict,
                    db_cursor: DictCursor) -> int:
     """
@@ -171,11 +176,12 @@ def insert_dataset(data: pandas.DataFrame, mapping: dict,
 
     return db_cursor.fetchall()[0]['pid']
 
+
 def insert_events(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
                   batch_size: int = 1000) -> pandas.DataFrame:
     """
-    Inserts sampling events, reeturning the given dataframe with updated `pid`'s
-    from the database.
+    Inserts sampling events, reeturning the given dataframe with updated
+    `pid`'s from the database.
     """
     base_query, field_mapping = get_base_query(mapping['event'])
 
@@ -202,6 +208,7 @@ def insert_events(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
 
     # assign pids to data for future joins
     return data.assign(pid=pids)
+
 
 def insert_asvs(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
                 batch_size: int = 1000) -> pandas.DataFrame:
@@ -237,6 +244,7 @@ def insert_asvs(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
 
     # assign pids to data for future joins
     return data.assign(pid=pids)
+
 
 def read_data_file(data_file: str, sheets: List[str]):
     """
@@ -284,10 +292,10 @@ def read_data_file(data_file: str, sheets: List[str]):
         # Drop empty rows and columns, if any
         data[sheet] = data[sheet].dropna(how='all')
         data[sheet] = data[sheet].drop(data[sheet].filter(regex="Unnamed"),
-                                        axis='columns')
-
+                                       axis='columns')
 
     return data
+
 
 def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
                validate: bool = True, dry_run: bool = False):
@@ -349,7 +357,8 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     data['annotation'].rename(columns={'pid': 'asv_pid'}, inplace=True)
 
     logging.info(" * annotations")
-    insert_common(data['annotation'], mapping['annotation'], cursor, batch_size)
+    insert_common(data['annotation'],
+                  mapping['annotation'], cursor, batch_size)
 
     # create occurrence table from asv-table
     id_columns = ['pid', 'asv_id_alias', 'DNA_sequence', 'associatedSequences',
@@ -385,6 +394,7 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
         logging.info("Committing changes")
         connection.commit()
 
+
 def run_validation(data: PandasDict, mapping: dict):
     """
     Uses `mapping` to run regexp validation of the fields in data.
@@ -394,7 +404,7 @@ def run_validation(data: PandasDict, mapping: dict):
         logging.info(" * %s", sheet)
         for field, settings in fields.items():
             previous_mistake = False
-            if not 'validation' in settings:
+            if 'validation' not in settings:
                 continue
             validator = re.compile(settings['validation'])
             for value in data[sheet][field]:
@@ -413,6 +423,7 @@ def run_validation(data: PandasDict, mapping: dict):
 
     return valid
 
+
 def update_defaults(data: PandasDict, mapping: dict):
     """
     Uses the `mapping` dict to set default values in `data`.
@@ -426,6 +437,7 @@ def update_defaults(data: PandasDict, mapping: dict):
                     data[sheet][field] = [default]*len(data[sheet].values)
                 else:
                     data[sheet][field].fillna(default)
+
 
 if __name__ == '__main__':
 
