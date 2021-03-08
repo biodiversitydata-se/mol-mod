@@ -349,7 +349,7 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     insert_common(data['emof'], mapping['emof'], cursor, batch_size)
 
     # generate asv id's as ASV:<md5-checksum of asv seq>
-    data['asv-table']['asv_id'] = [f'ASV:{hashlib.md5(s.encode()).hexdigest()}'\
+    data['asv-table']['asv_id'] = [f'ASV:{hashlib.md5(s.encode()).hexdigest()}'
                                    for s in data['asv-table']['DNA_sequence']]
 
     logging.info(" * asvs")
