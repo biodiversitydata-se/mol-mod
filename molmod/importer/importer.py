@@ -390,8 +390,14 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
 
     # remove 0 occurrence rows, and reset the index so that the removed rows
     # will not be referenced.
-    occurrences = occurrences[occurrences.organism_quantity > 0]
-    occurrences.reset_index(inplace=True)
+    try:
+        occurrences = occurrences[occurrences.organism_quantity > 0]
+    except TypeError:
+        logging.error('Counts in asv-table include non-numeric values. '
+                      'No data were imported.')
+        sys.exit(1)
+    else:
+        occurrences.reset_index(inplace=True)
 
     # then concat all the fields
     tax_fields = ["kingdom", "phylum", "class", "order", "family", "genus",
