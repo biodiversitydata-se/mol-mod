@@ -379,6 +379,11 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     # first set all missing fields to empty strings instead of NaN
     occurrences = occurrences.fillna("")
 
+    # remove 0 occurrence rows, and reset the index so that the removed rows
+    # will not be referenced.
+    occurrences = occurrences[occurrences.organism_quantity > 0]
+    occurrences.reset_index(inplace=True)
+
     # then concat all the fields
     tax_fields = ["kingdom", "phylum", "class", "order", "family", "genus",
                   "specificEpithet", "infraspecificEpithet", "otu"]
