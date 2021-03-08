@@ -213,7 +213,7 @@ def insert_events(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
 
 
 def insert_asvs(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
-                batch_size: int = 1000) -> pandas.DataFrame:
+                batch_size: int = 1000) -> (pandas.DataFrame, int):
     """
     Inserts asv's into the database, returning the database `pid`'s. Unlike the
     other categories asv conflicts returns the id of the previously registered
@@ -224,6 +224,11 @@ def insert_asvs(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
     total = len(data.values)
     start = 0
     end = min(total, batch_size)
+
+    # get max asv_id before insert (this helps us figure out which asv's were
+    # already in the database).
+    db_cursor.execute("SELECT MAX(pid) FROM asv;")
+    old_max_pid = db_cursor.fetchone()[0]
 
     pids = []
     while start < total:
@@ -245,7 +250,7 @@ def insert_asvs(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
         end = min(total, end + batch_size)
 
     # assign pids to data for future joins
-    return data.assign(pid=pids)
+    return data.assign(pid=pids), old_max_pid or 0
 
 
 def read_data_file(data_file: str, sheets: List[str]):
@@ -354,8 +359,8 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
                                    for s in data['asv-table']['DNA_sequence']]
 
     logging.info(" * asvs")
-    data['asv-table'] = insert_asvs(data['asv-table'], mapping, cursor,
-                                    batch_size)
+    data['asv-table'], old_max_asv = insert_asvs(data['asv-table'], mapping,
+                                                 cursor, batch_size)
 
     # drop asv_id column again, as it confuses pandas
     del data['asv-table']['asv_id']
@@ -366,9 +371,12 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
         .join(asvs, lsuffix="_joined", on='asv_id_alias')
     data['annotation'].rename(columns={'pid': 'asv_pid'}, inplace=True)
 
+    # filter annotations so that only newly inserted asv's are annotated
+    annotation = data['annotation'][data['annotation'].asv_pid > old_max_asv]
+    annotation.reset_index(inplace=True)
+
     logging.info(" * annotations")
-    insert_common(data['annotation'],
-                  mapping['annotation'], cursor, batch_size)
+    insert_common(annotation, mapping['annotation'], cursor, batch_size)
 
     # create occurrence table from asv-table
     id_columns = ['pid', 'asv_id_alias', 'DNA_sequence', 'associatedSequences',
