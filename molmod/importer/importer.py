@@ -219,7 +219,7 @@ def insert_asvs(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
     other categories asv conflicts returns the id of the previously registered
     entry.
     """
-    base_query, field_mapping = get_base_query(mapping['asv-table'])
+    base_query, field_mapping = get_base_query(mapping['asv'])
 
     total = len(data.values)
     start = 0
@@ -273,8 +273,8 @@ def read_data_file(data_file: str, sheets: List[str]):
     data = {}
     # Read one sheet at the time, to catch any missing sheets
     for sheet in sheets:
-        # occurrences are taken from the asv-table sheet, so we skip reading it
-        if sheet == 'occurrence':
+        # Skip occurrences and asvs, as they are taken from asv-table sheet
+        if sheet in ['asv', 'occurrence']:
             continue
         try:
             if is_tar:
@@ -319,6 +319,29 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     logging.info("Loading data file")
     data = read_data_file(data_file, list(mapping.keys()))
 
+    # create occurrence from asv-table
+    id_columns = ['asv_id_alias', 'DNA_sequence', 'associatedSequences',
+                  'kingdom', 'phylum', 'class', 'order', 'family', 'genus',
+                  'specificEpithet', 'infraspecificEpithet', 'otu']
+    occurrences = data['asv-table'] \
+        .melt(id_columns,
+              var_name='event_id_alias',
+              value_name='organism_quantity')
+    # remove 0 occurrence rows, and reset the index so that the removed rows
+    # will not be referenced.
+    try:
+        occurrences = occurrences[occurrences.organism_quantity > 0]
+    except TypeError:
+        logging.error('Counts in asv-table include non-numeric values. '
+                      'No data were imported.')
+        sys.exit(1)
+    else:
+        occurrences.reset_index(inplace=True)
+
+    data['occurrence'] = occurrences
+    data['asv'] = occurrences[['asv_id_alias', 'DNA_sequence']]
+    data['asv'] = data['asv'].drop_duplicates()
+
     if validate:
         logging.info("Validating input data")
         if not run_validation(data, mapping):
@@ -355,18 +378,18 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     insert_common(data['emof'], mapping['emof'], cursor, batch_size)
 
     # generate asv id's as ASV:<md5-checksum of asv seq>
-    data['asv-table']['asv_id'] = [f'ASV:{hashlib.md5(s.encode()).hexdigest()}'
-                                   for s in data['asv-table']['DNA_sequence']]
+    data['asv']['asv_id'] = [f'ASV:{hashlib.md5(s.encode()).hexdigest()}'
+                             for s in data['asv']['DNA_sequence']]
 
     logging.info(" * asvs")
-    data['asv-table'], old_max_asv = insert_asvs(data['asv-table'], mapping,
-                                                 cursor, batch_size)
+    data['asv'], old_max_asv = insert_asvs(data['asv'], mapping,
+                                           cursor, batch_size)
 
     # drop asv_id column again, as it confuses pandas
-    del data['asv-table']['asv_id']
+    del data['asv']['asv_id']
 
     # join asv's and annotations to add asv pid's
-    asvs = data['asv-table'].set_index('asv_id_alias')
+    asvs = data['asv'].set_index('asv_id_alias')
     data['annotation'] = data['annotation'] \
         .join(asvs, lsuffix="_joined", on='asv_id_alias')
     data['annotation'].rename(columns={'pid': 'asv_pid'}, inplace=True)
@@ -378,34 +401,18 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     logging.info(" * annotations")
     insert_common(annotation, mapping['annotation'], cursor, batch_size)
 
-    # create occurrence table from asv-table
-    id_columns = ['pid', 'asv_id_alias', 'DNA_sequence', 'associatedSequences',
-                  'kingdom', 'phylum', 'class', 'order', 'family', 'genus',
-                  'specificEpithet', 'infraspecificEpithet', 'otu']
-    occurrences = data['asv-table'] \
-        .melt(id_columns,
-              var_name='event_id_alias',
-              value_name='organism_quantity')
+    # join occurrences with asvs
+    occurrences = data['occurrence'] \
+        .join(asvs, lsuffix="_joined", on='asv_id_alias')
+    occurrences.rename(columns={'pid': 'asv_pid'}, inplace=True)
+
+    # first set all missing fields to empty strings instead of NaN
+    occurrences = occurrences.fillna('')
 
     # join with events, and rename asv pid to set foreign keys
-    occurrences.rename(columns={'pid': 'asv_pid'}, inplace=True)
     occurrences = occurrences \
         .join(events, lsuffix="_joined", on='event_id_alias')
     occurrences.rename(columns={'pid': 'event_pid'}, inplace=True)
-
-    # first set all missing fields to empty strings instead of NaN
-    occurrences = occurrences.fillna("")
-
-    # remove 0 occurrence rows, and reset the index so that the removed rows
-    # will not be referenced.
-    try:
-        occurrences = occurrences[occurrences.organism_quantity > 0]
-    except TypeError:
-        logging.error('Counts in asv-table include non-numeric values. '
-                      'No data were imported.')
-        sys.exit(1)
-    else:
-        occurrences.reset_index(inplace=True)
 
     # then concat all the fields
     tax_fields = ["kingdom", "phylum", "class", "order", "family", "genus",
