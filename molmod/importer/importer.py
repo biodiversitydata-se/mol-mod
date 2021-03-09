@@ -352,8 +352,13 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     if validate:
         logging.info("Validating input data")
         if not run_validation(data, mapping):
-            logging.info("Validation failed, and no data were imported!")
+            logging.info("Validation failed. No data were imported!")
             sys.exit(1)
+
+    logging.info("Checking for diffs")
+    if not run_diff_check(data):
+        logging.error('Diff check failed. No data were imported.')
+        sys.exit(1)
 
     logging.info("Updating defaults")
     update_defaults(data, mapping)
@@ -506,6 +511,41 @@ def update_defaults(data: PandasDict, mapping: dict):
                     data[sheet][field] = [default]*len(data[sheet].values)
                 else:
                     data[sheet][field].fillna(default)
+
+
+def compare_sets(data: PandasDict, sheet1: str, sheet2: str, field: str):
+    """
+    Compares full sets of values for corresponding fields in different sheets,
+    and returns False if these differ.
+    """
+    set1 = set(data[sheet1][field])
+    set2 = set(data[sheet2][field])
+    diff = set1.difference(set2)
+    if diff:
+        logging.error('%s value(s) %s in %s sheet not present in %s sheet.',
+                      field, diff, sheet1, sheet2)
+        return False
+    return True
+
+
+def run_diff_check(data: PandasDict):
+    """
+    Combines booleans returned from compare_sets, and returns False if
+    any of these are False (i.e. there is some diff)
+    """
+    nodiff = True
+    # Check if any events in dependent sheets are missing from event sheet
+    for sheet in ['mixs', 'emof', 'occurrence']:
+        nodiff &= compare_sets(data, sheet, 'event', 'event_id_alias')
+
+    # Check if any events lack occurrences
+    nodiff &= compare_sets(data, 'event', 'occurrence', 'event_id_alias')
+
+    # Check if any asvs lack annotation or vv.
+    nodiff &= compare_sets(data, 'asv', 'annotation', 'asv_id_alias')
+    nodiff &= compare_sets(data, 'annotation', 'asv', 'asv_id_alias')
+
+    return nodiff
 
 
 if __name__ == '__main__':
