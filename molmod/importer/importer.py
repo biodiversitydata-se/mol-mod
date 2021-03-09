@@ -227,6 +227,8 @@ def insert_asvs(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
 
     # get max asv_id before insert (this helps us figure out which asv's were
     # already in the database).
+    db_cursor.execute("SELECT MAX(pid) FROM asv;")
+    old_max_pid = db_cursor.fetchone()[0]
 
     pids = []
     while start < total:
@@ -248,7 +250,7 @@ def insert_asvs(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
         end = min(total, end + batch_size)
 
     # assign pids to data for future joins
-    return data.assign(pid=pids)
+    return data.assign(pid=pids), old_max_pid or 0
 
 
 def read_data_file(data_file: str, sheets: List[str]):
@@ -412,7 +414,10 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
                              for s in data['asv']['DNA_sequence']]
 
     logging.info(" * asvs")
-    data['asv'] = insert_asvs(data['asv'], mapping, cursor, batch_size)
+    data['asv'], old_max_asv = insert_asvs(data['asv'], mapping,
+                                           cursor, batch_size)
+    # Drop asv_id column again, as it confuses pandas
+    del data['asv']['asv_id']
 
     #
     # Insert TAXON_ANNOTATION
@@ -425,8 +430,7 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
         .join(asvs['pid'], on='asv_id_alias', how='inner')
     data['annotation'].rename(columns={'pid': 'asv_pid'}, inplace=True)
 
-    annotation = data['annotation']
-    # Reset index after inner join
+    annotation = data['annotation'][data['annotation'].asv_pid > old_max_asv]
     annotation.reset_index(inplace=True)
 
     logging.info(" * annotations")
@@ -513,17 +517,20 @@ def update_defaults(data: PandasDict, mapping: dict):
                     data[sheet][field].fillna(default)
 
 
-def compare_sets(data: PandasDict, sheet1: str, sheet2: str, field: str):
+def compare_sets(data: PandasDict, sheet1: str, sheet2: str, field1: str,
+                 field2: str = None):
     """
     Compares full sets of values for corresponding fields in different sheets,
     and returns False if these differ.
     """
-    set1 = set(data[sheet1][field])
-    set2 = set(data[sheet2][field])
+    if not field2:
+        field2 = field1
+    set1 = set(data[sheet1][field1])
+    set2 = set(data[sheet2][field2])
     diff = set1.difference(set2)
     if diff:
         logging.error('%s value(s) %s in %s sheet not present in %s sheet.',
-                      field, diff, sheet1, sheet2)
+                      field1, diff, sheet1, sheet2)
         return False
     return True
 
@@ -541,9 +548,8 @@ def run_diff_check(data: PandasDict):
     # Check if any events lack occurrences
     nodiff &= compare_sets(data, 'event', 'occurrence', 'event_id_alias')
 
-    # Check if any asvs lack annotation or vv.
+    # Check if any asvs lack annotation
     nodiff &= compare_sets(data, 'asv', 'annotation', 'asv_id_alias')
-    nodiff &= compare_sets(data, 'annotation', 'asv', 'asv_id_alias')
 
     return nodiff
 
