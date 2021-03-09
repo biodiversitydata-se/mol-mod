@@ -58,7 +58,19 @@
     "measurementRemarks": {}
   },
   "asv-table": {
-      "targetTable": "None"
+      "targetTable": "None",
+      "kingdom": {"default":""},
+      "phylum": {"default":""},
+      "class": {"default":""},
+      "order": {
+        "field": "oorder",
+        "default":""
+      },
+      "family": {"default":""},
+      "genus": {"default":""},
+      "specificEpithet": {"default":""},
+      "infraspecificEpithet": {"default":""},
+      "otu": {"default":""}
   },
   "asv": {
     "targetTable": "asv",
