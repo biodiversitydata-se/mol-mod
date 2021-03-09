@@ -497,7 +497,6 @@ if __name__ == '__main__':
     # Set log level based on ./scripts/import_excel argument
     # E.g: --v means log level = 10(3-2) = 10
     logging.basicConfig(level=(10*(ARGS.quiet - ARGS.verbose)))
-    logging.error(ARGS.no_validation)
 
     # Check if there is streaming data available from stdin
     # (used in case importer is not executed via import_excel.py)
