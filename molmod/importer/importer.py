@@ -227,8 +227,6 @@ def insert_asvs(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
 
     # get max asv_id before insert (this helps us figure out which asv's were
     # already in the database).
-    db_cursor.execute("SELECT MAX(pid) FROM asv;")
-    old_max_pid = db_cursor.fetchone()[0]
 
     pids = []
     while start < total:
@@ -250,7 +248,7 @@ def insert_asvs(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
         end = min(total, end + batch_size)
 
     # assign pids to data for future joins
-    return data.assign(pid=pids), old_max_pid or 0
+    return data.assign(pid=pids)
 
 
 def read_data_file(data_file: str, sheets: List[str]):
@@ -319,16 +317,22 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     logging.info("Loading data file")
     data = read_data_file(data_file, list(mapping.keys()))
 
-    # create occurrence from asv-table
+    #
+    # Derive occurrence and asv 'sheets' from asv-table sheet
+    #
+
+    # 'Unpivot' event columns into rows, keeping 'id_columns' as columns
     id_columns = ['asv_id_alias', 'DNA_sequence', 'associatedSequences',
                   'kingdom', 'phylum', 'class', 'order', 'family', 'genus',
                   'specificEpithet', 'infraspecificEpithet', 'otu']
     occurrences = data['asv-table'] \
         .melt(id_columns,
+              # Store event column header and values as:
               var_name='event_id_alias',
               value_name='organism_quantity')
-    # remove 0 occurrence rows, and reset the index so that the removed rows
-    # will not be referenced.
+    # Remove rows with organism_quantity 0,
+    # and reset index so that removed rows are no longer referenced
+    # As we do this before validation, we need to catch potential TypeError
     try:
         occurrences = occurrences[occurrences.organism_quantity > 0]
     except TypeError:
@@ -338,8 +342,11 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     else:
         occurrences.reset_index(inplace=True)
 
+    # Store as sheet in data object, to include in validation
     data['occurrence'] = occurrences
+    # Also create asv 'sheet'
     data['asv'] = occurrences[['asv_id_alias', 'DNA_sequence']]
+    # Make sure we have unique asv rows
     data['asv'] = data['asv'].drop_duplicates()
 
     if validate:
@@ -351,77 +358,103 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     logging.info("Updating defaults")
     update_defaults(data, mapping)
 
+    #
+    # Insert DATASET
+    #
+
     logging.info("Inserting data")
     logging.info(" * dataset")
     dataset = insert_dataset(data['dataset'], mapping, cursor)
 
-    # update 'event' with dataset_ids
-    data['event'] = data['event'].assign(dataset_pid=lambda _: dataset)
+    #
+    # Insert EVENTS
+    #
 
+    # Get 'event_pid' from dataset and add as new column
+    data['event'] = data['event'].assign(dataset_pid=lambda _: dataset)
     logging.info(" * event")
     data['event'] = insert_events(data['event'], mapping, cursor, batch_size)
 
-    # join 'event' with 'mixs' to get pid's for mixs
+    #
+    # Insert MIXS
+    #
+
+    # Join with 'event' to get 'event_pid' as 'pid'
     events = data['event'].set_index('event_id_alias')
-    data['mixs'] = data['mixs'] \
-        .join(events, lsuffix="_joined", on='event_id_alias')
+    data['mixs'] = data['mixs'].join(events['pid'], on='event_id_alias')
 
     logging.info(" * mixs")
     insert_common(data['mixs'], mapping['mixs'], cursor, batch_size)
 
-    # join 'event' with 'emof' to get references for emof
+    #
+    # Insert EMOF
+    #
+
+    # Join with 'event' to get 'event_pid'
     data['emof'] = data['emof'] \
-        .join(events, lsuffix="_joined", on='event_id_alias')
+        .join(events['pid'], on='event_id_alias')
     data['emof'].rename(columns={'pid': 'event_pid'}, inplace=True)
 
     logging.info(" * emof")
     insert_common(data['emof'], mapping['emof'], cursor, batch_size)
 
-    # generate asv id's as ASV:<md5-checksum of asv seq>
+    #
+    # Insert ASV
+    #
+
+    # Generate 'asv_id' as ASV:<md5-checksum of 'DNA_sequence'>
     data['asv']['asv_id'] = [f'ASV:{hashlib.md5(s.encode()).hexdigest()}'
                              for s in data['asv']['DNA_sequence']]
 
     logging.info(" * asvs")
-    data['asv'], old_max_asv = insert_asvs(data['asv'], mapping,
-                                           cursor, batch_size)
+    data['asv'] = insert_asvs(data['asv'], mapping, cursor, batch_size)
 
-    # drop asv_id column again, as it confuses pandas
-    del data['asv']['asv_id']
+    #
+    # Insert TAXON_ANNOTATION
+    #
 
-    # join asv's and annotations to add asv pid's
+    # Join with asv to add 'asv_pid'
     asvs = data['asv'].set_index('asv_id_alias')
+    # Use inner join so that annotation is only added for new asvs
     data['annotation'] = data['annotation'] \
-        .join(asvs, lsuffix="_joined", on='asv_id_alias')
+        .join(asvs['pid'], on='asv_id_alias', how='inner')
     data['annotation'].rename(columns={'pid': 'asv_pid'}, inplace=True)
 
-    # filter annotations so that only newly inserted asv's are annotated
-    annotation = data['annotation'][data['annotation'].asv_pid > old_max_asv]
+    annotation = data['annotation']
+    # Reset index after inner join
     annotation.reset_index(inplace=True)
 
     logging.info(" * annotations")
     insert_common(annotation, mapping['annotation'], cursor, batch_size)
 
-    # join occurrences with asvs
-    occurrences = data['occurrence'] \
-        .join(asvs, lsuffix="_joined", on='asv_id_alias')
+    #
+    # Insert OCCURRENCE
+    #
+
+    # Join with asvs to add 'asv_pid'
+    occurrences = data['occurrence'].join(asvs['pid'], on='asv_id_alias')
     occurrences.rename(columns={'pid': 'asv_pid'}, inplace=True)
 
-    # first set all missing fields to empty strings instead of NaN
-    occurrences = occurrences.fillna('')
-
-    # join with events, and rename asv pid to set foreign keys
-    occurrences = occurrences \
-        .join(events, lsuffix="_joined", on='event_id_alias')
-    occurrences.rename(columns={'pid': 'event_pid'}, inplace=True)
-
-    # then concat all the fields
+    # Set contributor´s taxon ranks to empty strings instead of NaN
+    # Should be sorted with default values later
     tax_fields = ["kingdom", "phylum", "class", "order", "family", "genus",
                   "specificEpithet", "infraspecificEpithet", "otu"]
+    occurrences[tax_fields] = occurrences[tax_fields].fillna('')
+
+    # Join with events to add 'event_pid'
+    occurrences = occurrences.join(events, on='event_id_alias')
+    occurrences.rename(columns={'pid': 'event_pid'}, inplace=True)
+
+    # Concatenate contributor´s taxon rank fields
     occurrences['previous_identifications'] = \
         ["|".join(z) for z in zip(*[occurrences[f] for f in tax_fields])]
 
     logging.info(" * occurrences")
     insert_common(occurrences, mapping['occurrence'], cursor, batch_size)
+
+    #
+    # Commit or Roll rollback
+    #
 
     if dry_run:
         logging.info("Dry run, rolling back changes")
