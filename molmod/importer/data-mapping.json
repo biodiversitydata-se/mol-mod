@@ -4,8 +4,7 @@
     "datasetID": {},
     "provider_email": {
       "validation": "[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+"
-  },
-    "insertion_time": {}
+    }
   },
   "event": {
     "targetTable": "sampling_event",
