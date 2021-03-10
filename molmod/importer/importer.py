@@ -4,7 +4,6 @@ The mol-mod data importer takes an Excel or Tar file stream, then rearranges
 and inserts the data into the database.
 """
 
-import datetime as dt
 import hashlib
 import json
 import logging
@@ -372,7 +371,6 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
 
     logging.info("Inserting data")
     logging.info(" * dataset")
-    data['dataset']['insertion_time'] = dt.datetime.now()
     dataset = insert_dataset(data['dataset'], mapping, cursor)
 
     #
