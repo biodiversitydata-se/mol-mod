@@ -122,6 +122,7 @@ def format_values(data: pandas.DataFrame, mapping: dict,
     for i in range(start, end):
         value = []
         for field in mapping:
+            # print(f'i: {i}, field: {field} {data[field][i]}')
             value += [format_value(data[field][i])]
 
         values += [f'({", ".join(map(str, value))})']
@@ -511,10 +512,13 @@ def update_defaults(data: PandasDict, mapping: dict):
         for field, settings in fields.items():
             if 'default' in settings:
                 default = settings['default']
+                # If field (listed in mapping) is missing from input form
                 if field not in data[sheet]:
+                    # Add default to all rows
                     data[sheet][field] = [default]*len(data[sheet].values)
                 else:
-                    data[sheet][field].fillna(default)
+                    # Fill only NaN cells
+                    data[sheet][field].fillna(value=default, inplace=True)
 
 
 def compare_sets(data: PandasDict, sheet1: str, sheet2: str, field1: str,
