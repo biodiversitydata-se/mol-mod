@@ -59,18 +59,17 @@
   },
   "asv-table": {
       "targetTable": "None",
-      "kingdom": {"default":""},
-      "phylum": {"default":""},
-      "class": {"default":""},
+      "kingdom": {},
+      "phylum": {},
+      "class": {},
       "order": {
-        "field": "oorder",
-        "default":""
+        "field": "oorder"
       },
-      "family": {"default":""},
-      "genus": {"default":""},
-      "specificEpithet": {"default":""},
-      "infraspecificEpithet": {"default":""},
-      "otu": {"default":""}
+      "family": {},
+      "genus": {},
+      "specificEpithet": {},
+      "infraspecificEpithet": {},
+      "otu": {"default":"otu"}
   },
   "asv": {
     "targetTable": "asv",
@@ -92,13 +91,13 @@
     "genus": {"default":""},
     "specificEpithet": {"default":""},
     "infraspecificEpithet": {"default":""},
-    "otu": {},
+    "otu": {"default":""},
     "date_identified": {},
-    "identification_references": {"default": null},
-    "reference_db": {},
+    "reference_db": {"default":"Dummy-DB"},
     "annotation_algorithm": {},
-    "annotation_confidence": {"default": null},
-    "taxon_remarks": {"default": null},
+    "annotation_confidence": {},
+    "identification_references": {},
+    "taxon_remarks": {},
     "scientificName": {},
     "taxonRank": {}
   },
