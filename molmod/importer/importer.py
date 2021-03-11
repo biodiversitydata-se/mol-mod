@@ -14,13 +14,12 @@ import sys
 import tarfile
 import tempfile
 from collections import OrderedDict
+from datetime import date
 from io import BytesIO
 from typing import List, Mapping, Optional
 
-import numpy
 import pandas
 import psycopg2
-from pandas import Timestamp
 from psycopg2.extras import DictCursor
 
 DEFAULT_MAPPING = os.path.join(os.path.dirname(__file__), 'data-mapping.json')
@@ -102,7 +101,7 @@ def format_value(value):
     """
     Formats `value` in a manner suitable for postgres insert queries.
     """
-    if isinstance(value, (str, Timestamp)):
+    if isinstance(value, (str, date)):
         return f"'{value}'"
     if value is None:
         return 'NULL'
@@ -302,6 +301,19 @@ def read_data_file(data_file: str, sheets: List[str]):
     return data
 
 
+def handle_dates(dates: pandas.Series):
+    '''
+    Removes time digits (e.g. 00:00:00) from (Excel) date / timestamp field,
+    as they mess up validation. Does nothing if field is text / string.
+    '''
+    try:
+        dates = dates.dt.date
+    # E.g. if field is text
+    except AttributeError:
+        pass
+    return dates
+
+
 def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
                validate: bool = True, dry_run: bool = False):
     """
@@ -312,7 +324,12 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     connection, cursor = connect_db()
 
     logging.info("Loading mapping file")
-    mapping = json.load(open(mapping_file))
+    try:
+        mapping = json.load(open(mapping_file))
+    except json.decoder.JSONDecodeError as err:
+        filename = os.path.basename(mapping_file)
+        logging.error(f'There is an error in {filename}: {err}')
+        sys.exit(1)
 
     logging.info("Loading data file")
     data = read_data_file(data_file, list(mapping.keys()))
@@ -356,6 +373,10 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     # to avoid ON CONFLICT - DO UPDATE errors in insert_asvs
     data['asv'] = data['asv'].drop_duplicates()
     data['asv'].reset_index(inplace=True)
+
+    data['event']['eventDate'] = handle_dates(data['event']['eventDate'])
+    data['annotation']['date_identified'] = \
+        handle_dates(data['annotation']['date_identified'])
 
     if validate:
         logging.info("Validating input data")
