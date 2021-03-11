@@ -566,15 +566,41 @@ def run_diff_check(data: PandasDict, mapping: dict):
     # Check if any asvs lack annotation
     nodiff &= compare_sheets(data, 'asv', 'annotation', 'asv_id_alias')
 
-    # Compare data input fields with mapping
-    sheet = 'annotation'
-    set1 = set([k for k in mapping[sheet].keys()
-                if k not in ['status', 'targetTable', 'asv_pid']])
-    set2 = set(data[sheet].keys())
-    diff = set1.difference(set2)
-    if diff:
-        logging.error(f'Fields {diff} are missing from sheet annotation.')
-        nodiff &= False
+    # Check if any mapping fields are missing from data input
+    for sheet in mapping.keys():
+        set1 = set([k for k in mapping[sheet].keys()
+                    if k not in [
+                        # Fields not expected in input
+                        'status', 'targetTable', 'asv_pid',
+                        'dataset_pid', 'pid', 'event_pid', 'asv_id',
+                        'previous_identifications', 'event_pid'
+                    ]])
+        set2 = set(data[sheet].keys())
+        diff = set1.difference(set2)
+        if diff:
+            logging.error(f'Fields {diff} are missing from sheet {sheet}.')
+            nodiff &= False
+
+    #
+    # Check if any input fields are missing from mapping
+    #
+
+    # Ignore fields that are always expected to be missing, e.g.
+    # Unpivoted event fields from asv-table - which are dataset-specific
+    events = data['occurrence']['event_id_alias'].tolist()
+    # Fields used for deriving db fields, or that are moved to derived sheets
+    expected = ['event_id_alias', 'associatedSequences', 'DNA_sequence',
+                'asv_sequence', 'asv_id_alias', 'order', 'phylum', 'kingdom',
+                'class', 'family', 'genus', 'infraspecificEpithet',
+                'index', 'otu', 'specificEpithet']
+    for sheet in data.keys():
+        set1 = set([k for k in data[sheet].keys()
+                   if k not in events + expected])
+        set2 = set(mapping[sheet].keys())
+        diff = set1.difference(set2)
+        if diff:
+            logging.error(f'Fields {diff} not in mapping.')
+            nodiff &= False
 
     return nodiff
 
