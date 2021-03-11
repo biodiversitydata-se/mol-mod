@@ -122,7 +122,6 @@ def format_values(data: pandas.DataFrame, mapping: dict,
     for i in range(start, end):
         value = []
         for field in mapping:
-            # print(f'i: {i}, field: {field} {data[field][i]}')
             value += [format_value(data[field][i])]
 
         values += [f'({", ".join(map(str, value))})']
@@ -355,8 +354,10 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     data['occurrence'] = occurrences
     # Also create asv 'sheet'
     data['asv'] = occurrences[['asv_id_alias', 'DNA_sequence']]
-    # Make sure we have unique asv rows
+    # Make sure we have unique asv rows,
+    # to avoid ON CONFLICT - DO UPDATE errors in insert_asvs
     data['asv'] = data['asv'].drop_duplicates()
+    data['asv'].reset_index(inplace=True)
 
     if validate:
         logging.info("Validating input data")
@@ -521,14 +522,11 @@ def update_defaults(data: PandasDict, mapping: dict):
                 default = settings['default']
                 # If field (listed in mapping) is missing from input form
                 if field not in data[sheet]:
-                    # print(f'Field {field} not in sheet {sheet} default: {default}')
                     # Add default to all rows
                     data[sheet][field] = [default]*len(data[sheet].values)
                 else:
-                    # print(f'Field {field} in sheet {sheet} default: {default}')
                     # Fill only NaN cells
                     data[sheet][field].fillna(value=default, inplace=True)
-                    # print(data[sheet][field])
 
 
 def compare_sets(data: PandasDict, sheet1: str, sheet2: str, field1: str,
