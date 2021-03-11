@@ -78,7 +78,7 @@
     "targetTable": "occurrence",
     "event_pid": {},
     "asv_pid": {},
-    "organism_quantity": {"validation": "[0-9]+.[0-9]+"},
+    "organism_quantity": {"validation": "[0-9]+\\.0"},
     "previous_identifications": {},
     "asv_id_alias": {},
     "associatedSequences": {}
