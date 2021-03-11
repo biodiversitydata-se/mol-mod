@@ -364,7 +364,7 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
             sys.exit(1)
 
     logging.info("Checking for diffs")
-    if not run_diff_check(data):
+    if not run_diff_check(data, mapping):
         logging.error('Diff check failed. No data were imported.')
         sys.exit(1)
 
@@ -532,8 +532,8 @@ def update_defaults(data: PandasDict, mapping: dict):
                     data[sheet][field].fillna(value=default, inplace=True)
 
 
-def compare_sets(data: PandasDict, sheet1: str, sheet2: str, field1: str,
-                 field2: str = None):
+def compare_sheets(data: PandasDict, sheet1: str, sheet2: str, field1: str,
+                   field2: str = None):
     """
     Compares full sets of values for corresponding fields in different sheets,
     and returns False if these differ.
@@ -550,7 +550,7 @@ def compare_sets(data: PandasDict, sheet1: str, sheet2: str, field1: str,
     return True
 
 
-def run_diff_check(data: PandasDict):
+def run_diff_check(data: PandasDict, mapping: dict):
     """
     Combines booleans returned from compare_sets, and returns False if
     any of these are False (i.e. there is some diff)
@@ -558,13 +558,23 @@ def run_diff_check(data: PandasDict):
     nodiff = True
     # Check if any events in dependent sheets are missing from event sheet
     for sheet in ['mixs', 'emof', 'occurrence']:
-        nodiff &= compare_sets(data, sheet, 'event', 'event_id_alias')
+        nodiff &= compare_sheets(data, sheet, 'event', 'event_id_alias')
 
     # Check if any events lack occurrences
-    nodiff &= compare_sets(data, 'event', 'occurrence', 'event_id_alias')
+    nodiff &= compare_sheets(data, 'event', 'occurrence', 'event_id_alias')
 
     # Check if any asvs lack annotation
-    nodiff &= compare_sets(data, 'asv', 'annotation', 'asv_id_alias')
+    nodiff &= compare_sheets(data, 'asv', 'annotation', 'asv_id_alias')
+
+    # Compare data input fields with mapping
+    sheet = 'annotation'
+    set1 = set([k for k in mapping[sheet].keys()
+                if k not in ['status', 'targetTable', 'asv_pid']])
+    set2 = set(data[sheet].keys())
+    diff = set1.difference(set2)
+    if diff:
+        logging.error(f'Fields {diff} are missing from sheet annotation.')
+        nodiff &= False
 
     return nodiff
 
