@@ -106,8 +106,6 @@ def format_value(value):
         return f"'{value}'"
     if value is None:
         return 'NULL'
-    if numpy.isnan(value):
-        return "'NaN'"
     return value
 
 
@@ -373,6 +371,11 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     logging.info("Updating defaults")
     update_defaults(data, mapping)
 
+    # Replace remaining missing values with None.
+    # These will be transformed by format_value, and inserted into db as [null]
+    for sheet in data.keys():
+        data[sheet] = data[sheet].where(pandas.notnull(data[sheet]), None)
+
     #
     # Insert DATASET
     #
@@ -453,8 +456,8 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     occurrences = data['occurrence'].join(asvs['pid'], on='asv_id_alias')
     occurrences.rename(columns={'pid': 'asv_pid'}, inplace=True)
 
-    # Set contributor´s taxon ranks to empty strings instead of NaN
-    # Should be sorted with default values later
+    # Set contributor´s taxon ranks to empty strings
+    # to allow for concatenation
     tax_fields = ["kingdom", "phylum", "class", "order", "family", "genus",
                   "specificEpithet", "infraspecificEpithet", "otu"]
     occurrences[tax_fields] = occurrences[tax_fields].fillna('')
