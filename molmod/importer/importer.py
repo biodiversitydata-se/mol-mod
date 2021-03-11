@@ -147,6 +147,7 @@ def insert_common(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
             db_cursor.execute(query)
         except psycopg2.Error as err:
             logging.error(err)
+            logging.error("No data were imported.")
             sys.exit(1)
 
         start = end
@@ -171,6 +172,7 @@ def insert_dataset(data: pandas.DataFrame, mapping: dict,
         db_cursor.execute(query)
     except psycopg2.Error as err:
         logging.error(err)
+        logging.error("No data were imported.")
         sys.exit(1)
 
     return db_cursor.fetchall()[0]['pid']
@@ -200,6 +202,7 @@ def insert_events(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
             pids += [r['pid'] for r in db_cursor.fetchall()]
         except psycopg2.Error as err:
             logging.error(err)
+            logging.error("No data were imported.")
             sys.exit(1)
 
         start = end
@@ -241,6 +244,7 @@ def insert_asvs(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
             pids += [r['pid'] for r in db_cursor.fetchall()]
         except psycopg2.Error as err:
             logging.error(err)
+            logging.error("No data were imported.")
             sys.exit(1)
 
         start = end
@@ -374,6 +378,7 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     data['asv'] = data['asv'].drop_duplicates()
     data['asv'].reset_index(inplace=True)
 
+    # Deal with Excel timestamps
     data['event']['eventDate'] = handle_dates(data['event']['eventDate'])
     data['annotation']['date_identified'] = \
         handle_dates(data['annotation']['date_identified'])
@@ -381,7 +386,7 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     if validate:
         logging.info("Validating input data")
         if not run_validation(data, mapping):
-            logging.info("Validation failed. No data were imported!")
+            logging.error("No data were imported.")
             sys.exit(1)
 
     logging.info("Checking for diffs")
@@ -495,7 +500,7 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     insert_common(occurrences, mapping['occurrence'], cursor, batch_size)
 
     #
-    # Commit or Roll rollback
+    # Commit or Roll back
     #
 
     if dry_run:
