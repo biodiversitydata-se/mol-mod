@@ -321,7 +321,12 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     data = read_data_file(data_file, list(mapping.keys()))
 
     #
-    # Derive occurrence and asv 'sheets' from asv-table sheet
+    # Derive occurrence and asv 'sheets' from asv-table sheet.
+    #
+    # We do this already here, to include asv and occurrence fields subsequent
+    # validation (which expects 'unpivoted' rows). This means, however,
+    # that asv-table defaults (added in data-mapping.json) will have no effects
+    # on occurrences or asvs.
     #
 
     # 'Unpivot' event columns into rows, keeping 'id_columns' as columns
@@ -333,6 +338,7 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
               # Store event column header and values as:
               var_name='event_id_alias',
               value_name='organism_quantity')
+
     # Remove rows with organism_quantity 0,
     # and reset index so that removed rows are no longer referenced
     # As we do this before validation, we need to catch potential TypeError
@@ -345,7 +351,7 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     else:
         occurrences.reset_index(inplace=True)
 
-    # Store as sheet in data object, to include in validation
+    # Store as 'sheet' in data object
     data['occurrence'] = occurrences
     # Also create asv 'sheet'
     data['asv'] = occurrences[['asv_id_alias', 'DNA_sequence']]
@@ -426,6 +432,7 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
 
     # Join with asv to add 'asv_pid'
     asvs = data['asv'].set_index('asv_id_alias')
+
     # Use inner join so that annotation is only added for new asvs
     data['annotation'] = data['annotation'] \
         .join(asvs['pid'], on='asv_id_alias', how='inner')
@@ -514,11 +521,14 @@ def update_defaults(data: PandasDict, mapping: dict):
                 default = settings['default']
                 # If field (listed in mapping) is missing from input form
                 if field not in data[sheet]:
+                    # print(f'Field {field} not in sheet {sheet} default: {default}')
                     # Add default to all rows
                     data[sheet][field] = [default]*len(data[sheet].values)
                 else:
+                    # print(f'Field {field} in sheet {sheet} default: {default}')
                     # Fill only NaN cells
                     data[sheet][field].fillna(value=default, inplace=True)
+                    # print(data[sheet][field])
 
 
 def compare_sets(data: PandasDict, sheet1: str, sheet2: str, field1: str,

@@ -62,19 +62,26 @@
       "kingdom": {},
       "phylum": {},
       "class": {},
-      "order": {
-        "field": "oorder"
-      },
+      "order": {},
       "family": {},
       "genus": {},
       "specificEpithet": {},
       "infraspecificEpithet": {},
-      "otu": {"default":"otu"}
+      "otu": {}
   },
   "asv": {
     "targetTable": "asv",
     "asv_id": {},
     "DNA_sequence": {"field": "asv_sequence"}
+  },
+  "occurrence": {
+    "targetTable": "occurrence",
+    "event_pid": {},
+    "asv_pid": {},
+    "organism_quantity": {"validation": "[0-9]+.[0-9]+"},
+    "previous_identifications": {},
+    "asv_id_alias": {},
+    "associatedSequences": {}
   },
   "annotation": {
     "asv_pid": {},
@@ -93,21 +100,12 @@
     "infraspecificEpithet": {"default":""},
     "otu": {"default":""},
     "date_identified": {},
-    "reference_db": {"default":"Dummy-DB"},
+    "reference_db": {},
     "annotation_algorithm": {},
     "annotation_confidence": {},
     "identification_references": {},
     "taxon_remarks": {},
     "scientificName": {},
     "taxonRank": {}
-  },
-  "occurrence": {
-    "targetTable": "occurrence",
-    "event_pid": {},
-    "asv_pid": {},
-    "organism_quantity": {"validation": "[0-9]+.[0-9]+"},
-    "previous_identifications": {},
-    "asv_id_alias": {},
-    "associatedSequences": {}
   }
 }
