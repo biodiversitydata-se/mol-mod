@@ -6,14 +6,16 @@ SET client_encoding = 'UTF8';
 CREATE SCHEMA IF NOT EXISTS public;
 
 CREATE TABLE IF NOT EXISTS public.dataset (
-    pid SERIAL PRIMARY KEY,
+    pid BIGSERIAL PRIMARY KEY,
     dataset_id character varying UNIQUE,
     insertion_time timestamp without time zone,
+    published boolean default false,
+    in_bioatlas boolean default false,
     provider_email character varying
 );
 
 CREATE TABLE IF NOT EXISTS public.sampling_event (
-    pid SERIAL PRIMARY KEY,
+    pid BIGSERIAL PRIMARY KEY,
     event_id character varying UNIQUE,
     material_sample_id character varying,
     dataset_pid integer REFERENCES public.dataset(pid) NOT NULL,
@@ -51,7 +53,7 @@ CREATE TABLE IF NOT EXISTS public.mixs (
 );
 
 CREATE TABLE IF NOT EXISTS public.emof (
-    pid SERIAL PRIMARY KEY,
+    pid BIGSERIAL PRIMARY KEY,
     measurement_id character varying UNIQUE,
     measurement_type character varying,
     measurement_type_id character varying,
@@ -67,15 +69,14 @@ CREATE TABLE IF NOT EXISTS public.emof (
     measurement_method character varying
 );
 
-
 CREATE TABLE IF NOT EXISTS public.asv (
-    pid SERIAL PRIMARY KEY,
+    pid BIGSERIAL PRIMARY KEY,
     asv_id character(36) UNIQUE,
-    asv_sequence character varying NOT NULL
+    asv_sequence character varying UNIQUE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS public.occurrence (
-    pid SERIAL PRIMARY KEY,
+    pid BIGSERIAL PRIMARY KEY,
     occurrence_id character varying UNIQUE,
     event_pid integer REFERENCES public.sampling_event(pid) NOT NULL,
     asv_pid integer REFERENCES public.asv(pid) NOT NULL,
@@ -86,7 +87,7 @@ CREATE TABLE IF NOT EXISTS public.occurrence (
 );
 
 CREATE TABLE IF NOT EXISTS public.taxon_annotation (
-    pid SERIAL PRIMARY KEY,
+    pid BIGSERIAL PRIMARY KEY,
     asv_pid  integer REFERENCES public.asv(pid) NOT NULL,
     status character varying NOT NULL,
     kingdom character varying,

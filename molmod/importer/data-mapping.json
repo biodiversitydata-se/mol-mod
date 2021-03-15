@@ -1,0 +1,111 @@
+{
+  "dataset": {
+    "targetTable": "dataset",
+    "datasetID": {"validation": "^(?!.*nan).*$"},
+    "provider_email": {
+      "validation": "[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+"
+    }
+  },
+  "event": {
+    "targetTable": "sampling_event",
+    "dataset_pid": {},
+    "event_id_alias": {"validation": "^(?!.*nan).*$"},
+    "materialSampleID": {"validation": "^(?!.*nan).*$"},
+    "eventDate": {"validation": "[0-9]{2,4}\\-(0[1-9]|1[0-2])(\\-[0-3]?[0-9])?"},
+    "samplingProtocol": {"validation": "^(?!.*nan).*$"},
+    "sampleSizeValue": {"validation": "[0-9]+(\\.0)?"},
+    "locationID": {},
+    "decimalLatitude": {"validation": "[0-9]+(\\.[0-9]+)?"},
+    "decimalLongitude": {"validation": "[0-9]+(\\.[0-9]+)?"},
+    "geodeticDatum": {"validation": "^(?!.*nan).*$"},
+    "coordinateUncertaintyInMeters": {"validation": "[0-9]+(\\.[0-9]+)?|nan"},
+    "recordedBy": {},
+    "verbatimLocality": {},
+    "municipality": {},
+    "country": {},
+    "minimumElevationInMeters": {"validation": "[0-9]+(\\.[0-9]+)?"},
+    "maximumElevationInMeters": {"validation": "[0-9]+(\\.[0-9]+)?"},
+    "minimumDepthInMeters": {"validation": "[0-9]+(\\.[0-9]+)?"},
+    "maximumDepthInMeters": {"validation": "[0-9]+(\\.[0-9]+)?"}
+  },
+  "mixs": {
+    "targetTable": "mixs",
+    "pid": {},
+    "sop": {},
+    "target_gene": {"validation": "^(?!.*nan).*$"},
+    "target_subfragment": {"validation": "^(?!.*nan).*$"},
+    "pcr_primer_name_forward": {"validation": "^(?!.*nan).*$"},
+    "pcr_primer_name_reverse": {"validation": "^(?!.*nan).*$"},
+    "pcr_primer_forward": {"validation": "[ACTGactg]+"},
+    "pcr_primer_reverse": {"validation": "[ACTGactg]+"},
+    "env_broad_scale": {"validation": ".+\\[.+\\]"},
+    "env_local_scale": {"validation": ".+\\[.+\\]"},
+    "env_medium": {"validation": ".+\\[.+\\]"}
+  },
+  "emof": {
+    "targetTable": "emof",
+    "event_pid": {},
+    "measurementType": {"validation": "^(?!.*nan).*$"},
+    "measurementTypeID": {},
+    "measurementValue": {"validation":"^(?!.*nan).*$"},
+    "measurementValueID": {},
+    "measurementUnit": {},
+    "measurementUnitID": {},
+    "measurementAccuracy": {},
+    "measurementDeterminedDate": {},
+    "measurementDeterminedBy": {},
+    "measurementMethod": {},
+    "measurementRemarks": {}
+  },
+  "asv-table": {
+      "targetTable": "None",
+      "kingdom": {},
+      "phylum": {},
+      "class": {},
+      "order": {},
+      "family": {},
+      "genus": {},
+      "specificEpithet": {},
+      "infraspecificEpithet": {},
+      "otu": {}
+  },
+  "asv": {
+    "targetTable": "asv",
+    "asv_id": {},
+    "DNA_sequence": {"field": "asv_sequence"}
+  },
+  "occurrence": {
+    "targetTable": "occurrence",
+    "event_pid": {},
+    "asv_pid": {},
+    "organism_quantity": {"validation": "[0-9]+(\\.0)?"},
+    "previous_identifications": {},
+    "asv_id_alias": {},
+    "associatedSequences": {}
+  },
+  "annotation": {
+    "asv_pid": {},
+    "targetTable": "taxon_annotation",
+    "status": {"default": "valid"},
+    "kingdom": {"default":""},
+    "phylum": {"default":""},
+    "class": {"default":""},
+    "order": {
+      "field": "oorder",
+      "default":""
+    },
+    "family": {"default":""},
+    "genus": {"default":""},
+    "specificEpithet": {"default":""},
+    "infraspecificEpithet": {"default":""},
+    "otu": {"default":""},
+    "date_identified": {"validation": "[0-9]{2,4}\\-(0[1-9]|1[0-2])(\\-[0-3]?[0-9])?"},
+    "reference_db": {"validation": "^(?!.*nan).*$"},
+    "annotation_algorithm": {"validation": "^(?!.*nan).*$"},
+    "annotation_confidence": {"validation": "^(?!.*nan).*$"},
+    "identification_references": {"validation": "^(?!.*nan).*$"},
+    "taxon_remarks": {},
+    "scientificName": {"validation": "^(?!.*nan).*$"},
+    "taxonRank": {"validation": "^(?!.*nan).*$"}
+  }
+}
