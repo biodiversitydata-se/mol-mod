@@ -267,7 +267,7 @@ def read_data_file(data_file: str, sheets: List[str]):
     else:
         try:
             pandas.read_excel(data_file)
-        except ValueError:
+        except (ValueError, KeyError):
             logging.error("Input neither recognized as tar nor as Excel.")
             sys.exit(1)
 
