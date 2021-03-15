@@ -288,7 +288,12 @@ def read_data_file(data_file: str, sheets: List[str]):
                         csv_file.close()
                 if not content:
                     raise KeyError
-                data[sheet] = pandas.read_csv(content)
+                try:
+                    data[sheet] = pandas.read_csv(content)
+                except Exception:
+                    logging.error("Input file '%s' could not be read. "
+                                  "Please inpect file.", member.name)
+                    sys.exit(1)
             else:
                 data[sheet] = pandas.read_excel(data_file, sheet_name=sheet)
         except KeyError:
