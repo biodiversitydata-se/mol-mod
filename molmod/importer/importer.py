@@ -378,7 +378,14 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     data['asv'] = data['asv'].drop_duplicates()
     data['asv'].reset_index(inplace=True)
 
+    # Check for field differences between data input and mapping
+    logging.info("Checking fields")
+    if not compare_fields(data, mapping):
+        logging.error('No data were imported.')
+        sys.exit(1)
+
     # Deal with Excel timestamps
+    # Requires date fields to exist, so do not move ahead of field check!
     data['event']['eventDate'] = handle_dates(data['event']['eventDate'])
     data['annotation']['date_identified'] = \
         handle_dates(data['annotation']['date_identified'])
@@ -389,9 +396,8 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
             logging.error("No data were imported.")
             sys.exit(1)
 
-    logging.info("Checking for diffs")
-    if not run_diff_check(data, mapping):
-        logging.error('Diff check failed. No data were imported.')
+    if not compare_aliases(data):
+        logging.error("No data were imported.")
         sys.exit(1)
 
     logging.info("Updating defaults")
@@ -576,10 +582,10 @@ def compare_sheets(data: PandasDict, sheet1: str, sheet2: str, field1: str,
     return True
 
 
-def run_diff_check(data: PandasDict, mapping: dict):
+def compare_aliases(data: PandasDict):
     """
-    Combines booleans returned from compare_sets, and returns False if
-    any of these are False (i.e. there is some diff)
+    Compares sets of key fields between sheets, and returns false if
+    if there is any difference.
     """
     nodiff = True
     # Check if any events in dependent sheets are missing from event sheet
@@ -591,6 +597,16 @@ def run_diff_check(data: PandasDict, mapping: dict):
 
     # Check if any asvs lack annotation
     nodiff &= compare_sheets(data, 'asv', 'annotation', 'asv_id_alias')
+
+    return nodiff
+
+
+def compare_fields(data: PandasDict, mapping: dict):
+    """
+    Combines booleans returned from compare_sets, and returns False if
+    any of these are False (i.e. there is some diff)
+    """
+    nodiff = True
 
     # Check if any mapping fields are missing from data input
     for sheet in mapping.keys():
@@ -607,10 +623,7 @@ def run_diff_check(data: PandasDict, mapping: dict):
             logging.error(f'Fields {diff} are missing from sheet {sheet}.')
             nodiff &= False
 
-    #
     # Check if any input fields are missing from mapping
-    #
-
     # Ignore fields that are always expected to be missing, e.g.
     # Unpivoted event fields from asv-table - which are dataset-specific
     events = data['occurrence']['event_id_alias'].tolist()
