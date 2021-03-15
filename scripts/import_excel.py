@@ -23,7 +23,8 @@ if __name__ == '__main__':
                         )
 
     PARSER.add_argument("--container", default="asv-main",
-                        help="Docker container to execute import script in."
+                        help="Docker container to execute import script in. "
+                             "Probably mol-mod_asv-main_1 for production env."
                         )
     PARSER.add_argument("importer_args", nargs=argparse.REMAINDER,
                         help=("Additional arguments to pass to "
