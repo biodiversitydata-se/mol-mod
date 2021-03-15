@@ -42,3 +42,6 @@ if __name__ == '__main__':
         IMPORTER = subprocess.run(CMD, stdin=open(ARGS.excel_file))
     except FileNotFoundError:
         logging.error("Could not find input file %s", ARGS.excel_file)
+    except IsADirectoryError:
+        logging.error("This is not an Excel or compressed tar file %s",
+                      ARGS.excel_file)
