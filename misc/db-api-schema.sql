@@ -120,7 +120,7 @@ CREATE VIEW api.app_filter_mixs_tax AS
    JOIN :data_schema.taxon_annotation ta ON a.pid = ta.asv_pid;
 
 CREATE VIEW api.app_search_mixs_tax AS
- SELECT a.asv_id,
+ SELECT DISTINCT a.asv_id,
     concat_ws('|'::text, concat_ws(''::text, a.asv_id, '-', ta.kingdom), ta.phylum, ta.class, ta.oorder, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS asv_tax,
     a.asv_sequence,
     m.target_gene AS gene,
