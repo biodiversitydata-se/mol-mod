@@ -1,0 +1,23 @@
+<br>
+<div class='row'>
+    <div class='col-md-12 visHlpDiv' id='search_err_container'></div>
+</div>
+<!-- Hidden part, for redirection to SBDI -->
+<div class='row'>
+    <textarea name='queries' id='raw_names' style='display: none'></textarea>
+    <!-- Make visible for testing: -->
+    <!-- <textarea name='queries' id='raw_names' rows=4, cols=40></textarea> -->
+    <input type='hidden' name='redirectBase' value={{ rform.redirect_url }} >
+    <input type='hidden' name='field' value='taxon_id'/>
+    <input type='hidden' name='action' value='Search'/>
+</div>
+<br>
+<div class='row'>
+    <div class='col-md-3 hiddenElem' id='selection_error'>Please select at least one match.</div>
+</div>
+<br>
+<div class='row'>
+    <div class='col-md-2'>
+        <input id='show_occurrences' name='show_occurrences' type='submit' value='Show Bioatlas records' class='btn btn-primary'/>
+    </div>
+</div>
