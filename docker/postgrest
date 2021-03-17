@@ -1,3 +1,0 @@
-FROM postgrest/postgrest:v7.0.1
-
-CMD ["postgrest", "/run/secrets/postgrest_config"]

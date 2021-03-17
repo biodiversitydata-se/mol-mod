@@ -1,0 +1,107 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class='container'>
+    <form action='' method='post' id='sform' name='sform' class='search_function' >
+        {{ sform.csrf_token }}
+        <div class='row'>
+            <div class='col-md-3'>
+                <h6><b>Target gene</b></h6>
+                {{ sform.gene(id='gene', class='form-control select2') }}
+            </div>
+            <div class='col-md-3'>
+                <h6><b>Target subregion</b></h6>
+                {{ sform.sub(id='sub', class='form-control select2') }}
+            </div>
+
+        </div>
+        <br>
+        <div class='row'>
+            <div class='col-md-6'>
+                <h6><b>Forward primer</b></h6>
+                {{ sform.fw_prim(id='fw_prim', class='form-control select2') }}
+            </div>
+            <div class='col-md-6'>
+                <h6><b>Reverse primer</b></h6>
+                {{ sform.rv_prim(id='rv_prim', class='form-control select2') }}
+            </div>
+        </div>
+        <br>
+        <hr>
+        <div class='row'>
+            <div class='col-md-3'>
+                <h6><b>Kingdom</b></h6>
+                {{ sform.kingdom(id='kingdom', class='form-control select2') }}
+            </div>
+            <div class='col-md-3'>
+                <h6><b>Phylum</b></h6>
+                {{ sform.phylum(id='phylum', class='form-control select2') }}
+            </div>
+            <div class='col-md-3'>
+                <h6><b>Class</b></h6>
+                {{ sform.classs(id='classs', class='form-control select2') }}
+            </div>
+            <div class='col-md-3'>
+                <h6><b>Order</b></h6>
+                {{ sform.oorder(id='oorder', class='form-control select2') }}
+            </div>
+        </div>
+        <br>
+        <div class='row'>
+            <div class='col-md-3'>
+                <h6><b>Family</b></h6>
+                {{ sform.family(id='family', class='form-control select2') }}
+            </div>
+            <div class='col-md-3'>
+                <h6><b>Genus</b></h6>
+                {{ sform.genus(id='genus', class='form-control select2') }}
+            </div>
+            <div class='col-md-3'>
+                <h6><b>Specific epithet</b></h6>
+                {{ sform.species(id='species', class='form-control select2') }}
+            </div>
+        </div>
+        <br>
+        <hr>
+        <div class='row'>
+            <div class='col-md-1'>
+                {{ sform.search_for_asv(class='btn btn-primary', id='search_for_asv') }}
+            </div>
+            <div class='col-md-1'>
+                <button type='button' class='btn btn-default' id='clear_all'>Clear all</button>
+            </div>
+        </div>
+
+    </form>
+</div>
+<br>
+<br>
+{% if rform %}
+<div class='container' id='result'>
+    <form action={{ rform.batch_url }} method='post' id='rform' name='rform'>
+        {{ rform.csrf_token }}
+        <div class='row'>
+            <div class='col-md-12'>
+                <table id='api_result_table' class='dataframe table table-striped'>
+                    <thead>
+                        <tr>
+                            <th style="text-align: center"><input type="checkbox" id="select_all" /></th>
+                            <th>ID</th>
+                            <th>ASV</th>
+                            <th>Gene</th>
+                            <th>Fragment</th>
+                            <th>Fw primer</th>
+                            <th>Rv primer</th>
+                            <th>ASV sequence</th>
+                            <th>Forward primer sequence</th>
+                            <th>Reverse primer sequence</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+        {% include "sbdi_post.html" %}
+    </form>
+</div>
+{% endif %}
+
+{% endblock body %}
