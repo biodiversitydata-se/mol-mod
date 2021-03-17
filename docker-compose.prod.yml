@@ -33,6 +33,9 @@ services:
       - postgres-db:/var/lib/postgresql/data
     env_file:
       - .env
+    # Connect ports (HOST:CONTAINER) for IPT and pgAdmin (SSH)
+    ports:
+      - 5432:5432
     secrets:
       - postgres_pass
       - postgrest_anon_pass

@@ -43,9 +43,9 @@ services:
     # User and password information
     env_file:
       - .env
-    # Uncomment to connect ports (HOST:CONTAINER) for debugging eg. in pgAdmin
-    # ports:
-    #   - 5432:5432
+    # Connect ports (HOST:CONTAINER) for IPT and pgAdmin (SSH)
+    ports:
+      - 5432:5432
     secrets:
       - postgres_pass
       - postgrest_anon_pass
