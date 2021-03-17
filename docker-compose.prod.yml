@@ -1,0 +1,88 @@
+version: "3.8"
+x-logging:
+  &default-logging
+  driver: "local"
+  options:
+    max-size: '20m'
+    max-file: '5'
+    compress: 'true'
+
+volumes:
+  postgres-db:
+  blast-db:
+
+secrets:
+  postgres_pass:
+    file: .secret.postgres_pass
+  postgrest_anon_pass:
+    file: .secret.anon_pass
+  postgrest_config:
+    file: .secret.postgrest_config
+
+services:
+
+  postgres:
+    restart: always
+    image: postgres:13
+    container_name: asv-db
+    logging: *default-logging
+    volumes:
+      - ./misc/db-data-schema.sql:/docker-entrypoint-initdb.d/01-data-schema.sql
+      - ./misc/db-api-schema.sql:/docker-entrypoint-initdb.d/02-api-schema.sql
+      - ./misc/db-roles.sql:/docker-entrypoint-initdb.d/03-roles.sql
+      - postgres-db:/var/lib/postgresql/data
+    env_file:
+      - .env
+    secrets:
+      - postgres_pass
+      - postgrest_anon_pass
+    environment:
+      - POSTGRES_PASSWORD_FILE=./run/secrets/postgres_pass
+      - PGRST_DB_ANON_PASS_FILE=./run/secrets/postgrest_anon_pass
+
+  postgrest:
+    restart: always
+    image: bioatlas/molmod-postgrest:${TAG:-latest}
+    build:
+      context: ./
+      dockerfile: docker/postgrest
+    container_name: asv-rest
+    logging: *default-logging
+    env_file:
+      - .env
+    secrets:
+      - postgrest_config
+    environment:
+      - POSTGREST_CONFIG_FILE=./run/secrets/postgrest_config
+    depends_on:
+      - postgres
+
+  blast-worker:
+    image: bioatlas/molmod-blast:${TAG:-latest}
+    init: true
+    build:
+      context: ./
+      dockerfile: docker/blast
+    logging: *default-logging
+    environment:
+      - FLASK_ENV=production
+    volumes:
+      - blast-db:/blastdbs
+
+  asv-main:
+    restart: always
+    image: bioatlas/molmod:${TAG:-latest}
+    build:
+      context: ./
+      dockerfile: docker/production
+    logging: *default-logging
+    env_file:
+      - .env
+    secrets:
+      - postgres_pass
+    environment:
+      - POSTGRES_PASSWORD_FILE=./run/secrets/postgres_pass
+    ports:
+      - 5000:5000
+    depends_on:
+      - postgrest

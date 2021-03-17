@@ -19,6 +19,11 @@ body {
     visibility: hidden;
 }
 
+#filter_link, #filter_asvs {
+    padding-left: 18px;
+    padding-right: 18px;
+}
+
 /* RESULT TABLES */
 /* Query (user sequence ID) col */
 .qacc {
