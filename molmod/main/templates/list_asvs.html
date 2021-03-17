@@ -1,0 +1,11 @@
+<!-- Currently not in use -->
+{% extends "layout.html" %}
+
+{% block body %}
+
+  {% for asv in asvs %}
+    >{{ asv.asv_id }}:{{ asv.higher_taxonomy }}<br>
+    {{ asv.asv_sequence }}<br>
+  {% endfor %}
+
+{% endblock %}
