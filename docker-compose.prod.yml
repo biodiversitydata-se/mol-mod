@@ -59,6 +59,7 @@ services:
 
   blast-worker:
     image: bioatlas/molmod-blast:${TAG:-latest}
+    init: true
     build:
       context: ./
       dockerfile: docker/blast
