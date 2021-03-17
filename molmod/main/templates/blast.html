@@ -1,0 +1,93 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class='container'>
+    <form action='' method='post' id='sform' name='sform' class='search_function'>
+        {{ sform.csrf_token }}
+        <div class='row'>
+            <div class='col-md-12'>
+                {% if sform.sequence.errors %}
+                    <div class='form-group has-error'>
+                {% else %}
+                    <div class='form-group'>
+                {% endif %}
+                        <h6><b>Query sequence(s) </b>
+                            <span id='sequence_count'>2108</span>/500000 characters</h6>
+                        {{ sform.sequence(id='sequence_textarea', rows=8, cols=80, maxlength='500000', class='form-control') }}
+                        <span id='helpBlock2' class='help-block'>
+                            {% for error in sform.sequence.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </span>
+                    </div>
+            </div>
+        </div>
+        <div class='row'>
+            <div class='col-md-3'>
+                <h6><b>Minimum identity (%)</b></h6>
+                {% if sform.min_identity.errors %}
+                    <div class='form-group has-error'>
+                {% else %}
+                    <div class='form-group'>
+                {% endif %}
+                        {{ sform.min_identity(id='min_identity_input', class='form-control', type='number') }}
+                        <span class='help-block'>
+                            {% for error in sform.min_identity.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </span>
+                    </div>
+            </div>
+            <div class='col-md-3'>
+                <h6><b>Minimum query coverage (%)</b></h6>
+                {% if sform.min_qry_cover.errors %}
+                    <div class='form-group has-error'>
+                {% else %}
+                    <div class='form-group'>
+                {% endif %}
+                        {{ sform.min_qry_cover(id='min_qry_cover', class='form-control', type='number') }}
+                        <span class='help-block'>
+                            {% for error in sform.min_qry_cover.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </span>
+                    </div>
+            </div>
+        </div>
+        <div class='row'>
+            <div class='col-md-4'>
+                {{ sform.blast_for_seq(class='btn btn-primary', id='blast_for_seq') }}
+            </div>
+        </div>
+    </form>
+</div>
+<br>
+<br>
+
+{% if rform %}
+<div class='container' id='result'>
+    <form action={{ rform.batch_url }} method='post' id='rform' name='rform'>
+        {{ rform.csrf_token }}
+        <div class='row'>
+            <div class='col-md-12'>
+                <table id='blast_result_table' class='dataframe table table-striped'>
+                    <thead>
+                        <tr>
+                            <th style="text-align: center"><input type="checkbox" id="select_all" /></th>
+                            <th>ID</th>
+                            <th>Query</th>
+                            <th>Subject</th>
+                            <th>Id (%)</th>
+                            <th>Cov (%)</th>
+                            <th>E-value</th>
+                            <th>Subject sequence</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+        {% include "sbdi_post.html" %}
+    </form>
+</div>
+{% endif %}
+
+{% endblock body %}
