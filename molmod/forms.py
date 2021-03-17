@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 
-import re
-
 from flask import current_app as app
 from flask_wtf import FlaskForm
 from wtforms import (BooleanField, IntegerField, SelectMultipleField,
-                     SubmitField, TextAreaField, ValidationError)
+                     StringField, SubmitField, TextAreaField, ValidationError)
 
 DEFAULT_BLAST_GENE = """>test-seq-1
 TGGGGAATTTTGCGCAATGGGGGAAACCCTGACGCAGCAACGCCGCGTGGAGGATGAAGTCCCTTGGGACGTAAACTCCTTTCGACCGGGACGATTATGACGGTACCGGTGGAAGAAGCCCCGGCTAACTTCGTGCCAGCAGCCGCGGTAATACGAGGGGGGCAAGCGTTGTTCGGAATTATTGGGCGTAAAGGGCGCGTAGGCGGTGCGGTAAGTCACCTGTGAAACCTCTGGGCTCAACCCAGAGCCTGCAGGCGAAACTGCCGTGCTGGAGTATGGGAGAGGTGCGTGGAATTCCCGGTGTAGCGGTGAAATGCGTAGATATCGGGAGGAACACCTGTGGCGAAAGCGGCGCACTGGACCATAACTGACGCTGAGGCGCGAAAGCTAGGGGAGCAAACA
@@ -17,56 +15,21 @@ TGGGGAATTTTGCGCAATGGGGGAAACCCTGACGCAGCAACGCCGCGTGGAGGATGAAGTCCCTTGGGACGTAAACTCCT
 TGGGGAATTTTGCGCAATGGGGGAAACCCTGACGCAGCAACGCCGCGTGGAGGATGAAGTCCCTTGGGACGTAAACTCCTTTCGACTGGGAAGATAATGACGGTACCAGTGGAAGAAGCCCCGGCTAACTTCGTGCCAGCAGCCGCGGTAATACGAGGGGGGCGAGCGTTGTTCGGAATTATTGGGCGTAAAGGGCGCGTAGGCGGTGCGGTAAGTCACCTGTGAAACCTCTGGGCTCAACTCAGAGCCTGCAGGCGAAACTGCCGTGCTGGAGGGTGGGAGAGGTGCGTGGAATTCCCGGTGTAGCGGTGAAATGCGTAGATATCGGGAGGAACACCTGTGGCGAAAGCGGCGCACTGGACCACTTCTGACGCTGAGGCGCGAAAGCTAGGGGAGCAAACA
 >test-seq-5
 TGGGGAATTTTGCGCAATGGGGGAAACCCTGACGCAGCAACGCCGCGTGGAGGATGAAGCCCCTTGGGGTGTAAACTCCTTTCGACCGGGAAAATTATGATGGTACCGGTGGAAGAAGCACCGGCTAACTCTGTGCCAGCAGCCGCGGTAATACAGAGGGTGCGAGCGTTGTTCGGAATTATTGGGCGTAAAGGGCGCGTAGGCGGTGCGGTAAGTCACCTGTGAAATCCCCAGGCTTAACTTGGGGCCTGCAGGCGAAACTGCCGTGCTGGAGGGTGGGAGAGGTGCGTGGAATTCCCGGTGTAGCGGTGAAATGCGTAGATATCGGGAGGAACACCTGTGGCGAAAGCGGCGCACTGGACCACTACTGACGCTGAGGCGCGAAAGCTAGGGGAGCAAACA
-"""
+>068f2c0a7c0fcf9cef0becb9f166d479"""
 
 
-def fasta_check(form, field):
+def fasta_length_check(form, field):
     if len(field.data) < 1:
         raise ValidationError('Please submit an input sequence')
     if len(field.data) > 500000:
-        raise ValidationError('''Input sequence must be less
-                              than 500000 characters''')
-
-    # Check that this is actually a valid fasta file, that we can process
-    fasta_chars = r'AaCcGgTtUuIiRrYyKkMmSsWwBbDdHhVvNn\-'
-    title_pattern = r'^>[\w.,\-]+$'
-    seq_pattern = f'^[{fasta_chars}]+$'
-
-    # I tried to use re.fullmatch here, but it became _very_ slow, so I wrote
-    # this very simple parser instead. This has the added bonus that it gives
-    # user friendly validation messages.
-    hasSeq = True
-    isHeader = True
-    currentHeader = ''
-    # Add an empty last row to catch empty headers easily
-    for row in re.split('[\r\n]+', field.data):
-        row = row.strip()
-        # Allow empty lines
-        if len(row) == 0:
-            continue
-        # If we have a second header without first getting a sequence for the
-        # last header
-        if row.startswith('>'):
-            if not hasSeq:
-                raise ValidationError('All Fasta headers require a sequence')
-            isHeader = True
-            hasSeq = False
-            currentHeader = row
-
-        if isHeader:
-            if not re.match(title_pattern, row):
-                raise ValidationError('Malformed header: %s' % row)
-            isHeader = False
-        else:
-            if re.match(seq_pattern, row):
-                hasSeq = True
-            else:
-                raise ValidationError('Unknown characters in %s: %s' % (
-                                      currentHeader,
-                                      re.sub(f'[{fasta_chars}]+', '', row)
-                                      ))
-    if not hasSeq:
-        raise ValidationError('All Fasta headers require a sequence')
+        raise ValidationError('Input sequence must be less than 500000 characters')
+    if field.data[0] != '>':
+        raise ValidationError('Input sequence must be in fasta format')
+    # Count number of fasta headers:
+    all_headers = [line for line in field.data.split(
+        '\n') if (not len(line) == 0) and (line[0] == '>')]
+    # if len(all_headers) != 1:
+    #     raise ValidationError('Only one input sequence at a time is allowed')
 
 
 def identity_check(form, field):
@@ -74,7 +37,7 @@ def identity_check(form, field):
     if field.data is not None:
         try:
             data_i = int(field.data)
-        except Exception:
+        except:
             return None
         if data_i < 0 or data_i > 100:
             raise ValidationError('Value between 0 and 100, please.')
@@ -85,15 +48,14 @@ def cover_check(form, field):
     if field.data is not None:
         try:
             data_i = int(field.data)
-        except Exception:
+        except:
             return None
         if data_i < 0 or data_i > 100:
             raise ValidationError('Value between 0 and 100, please.')
 
 
 class BlastSearchForm(FlaskForm):
-    sequence = TextAreaField(u'sequence', [fasta_check],
-                             default=DEFAULT_BLAST_GENE)
+    sequence = TextAreaField(u'sequence', [fasta_length_check], default=DEFAULT_BLAST_GENE)
     min_identity = IntegerField(u'min_identity', [identity_check], default=97)
     min_qry_cover = IntegerField(u'min_qry_cover', [cover_check], default=100)
     blast_for_seq = SubmitField(u'BLAST')
@@ -105,7 +67,7 @@ class BlastResultForm(FlaskForm):
     redirect_url = app.config['REDIRECT_URL']
 
 
-class FilterSearchForm(FlaskForm):
+class ApiSearchForm(FlaskForm):
     gene = SelectMultipleField('gene', choices=[])
     sub = SelectMultipleField('sub', choices=[])
     fw_prim = SelectMultipleField('fw_prim', choices=[])
@@ -117,10 +79,27 @@ class FilterSearchForm(FlaskForm):
     family = SelectMultipleField('family', choices=[])
     genus = SelectMultipleField('genus', choices=[])
     species = SelectMultipleField('species', choices=[])
-    filter_asvs = SubmitField(u'Filter')
+
+    search_for_asv = SubmitField(u'Search')
+
+    # def validate(self):
+    #     '''Requires at least one selected gene or primer'''
+    #     if not FlaskForm.validate(self):
+    #         return False
+    #     result = True
+    #     g = self.gene_sel
+    #     fw = self.fw_prim_sel
+    #     rv = self.rv_prim_sel
+    #     tot = len(g.data) + len(fw.data) + len(rv.data)
+    #     if tot == 0:
+    #         g.errors.append('Please, select at least one gene or primer.')
+    #         fw.errors.append('')
+    #         rv.errors.append('')
+    #         result = False
+    #     return result
 
 
-class FilterResultForm(FlaskForm):
+class ApiResultForm(FlaskForm):
     asv_id = BooleanField(u'asv_id')
     batch_url = app.config['BATCH_SEARCH_URL']
     redirect_url = app.config['REDIRECT_URL']
