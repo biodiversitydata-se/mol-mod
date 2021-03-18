@@ -40,6 +40,7 @@ CREATE OR REPLACE VIEW api.dwc_oc_mixs AS
     mixs.pcr_primer_reverse,
     mixs.target_gene,
     mixs.target_subfragment,
+    mixs.lib_layout,
     asv.asv_sequence AS "DNA_sequence",
     mixs.env_broad_scale,
     mixs.env_local_scale,

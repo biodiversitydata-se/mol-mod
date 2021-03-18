@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS public.mixs (
     sop character varying,
     target_gene character varying NOT NULL,
     target_subfragment character varying NOT NULL,
+    lib_layout character varying NOT NULL,
     pcr_primer_name_forward character varying NOT NULL,
     pcr_primer_name_reverse character varying NOT NULL,
     pcr_primer_forward character varying NOT NULL,
