@@ -8,15 +8,13 @@ CREATE SCHEMA IF NOT EXISTS public;
 CREATE TABLE IF NOT EXISTS public.dataset (
     pid BIGSERIAL PRIMARY KEY,
     dataset_id character varying UNIQUE,
-    insertion_time timestamp without time zone,
-    published boolean default false,
+    insertion_time timestamp without time zone NOT NULL DEFAULT now(),
     in_bioatlas boolean default false,
     provider_email character varying
 );
 
 CREATE TABLE IF NOT EXISTS public.sampling_event (
     pid BIGSERIAL PRIMARY KEY,
-    event_id character varying UNIQUE,
     material_sample_id character varying,
     dataset_pid integer REFERENCES public.dataset(pid) NOT NULL,
     event_date character varying NOT NULL,
@@ -43,6 +41,7 @@ CREATE TABLE IF NOT EXISTS public.mixs (
     sop character varying,
     target_gene character varying NOT NULL,
     target_subfragment character varying NOT NULL,
+    lib_layout character varying NOT NULL,
     pcr_primer_name_forward character varying NOT NULL,
     pcr_primer_name_reverse character varying NOT NULL,
     pcr_primer_forward character varying NOT NULL,
@@ -54,7 +53,6 @@ CREATE TABLE IF NOT EXISTS public.mixs (
 
 CREATE TABLE IF NOT EXISTS public.emof (
     pid BIGSERIAL PRIMARY KEY,
-    measurement_id character varying UNIQUE,
     measurement_type character varying,
     measurement_type_id character varying,
     measurement_value character varying,
@@ -77,7 +75,6 @@ CREATE TABLE IF NOT EXISTS public.asv (
 
 CREATE TABLE IF NOT EXISTS public.occurrence (
     pid BIGSERIAL PRIMARY KEY,
-    occurrence_id character varying UNIQUE,
     event_pid integer REFERENCES public.sampling_event(pid) NOT NULL,
     asv_pid integer REFERENCES public.asv(pid) NOT NULL,
     organism_quantity integer NOT NULL,
