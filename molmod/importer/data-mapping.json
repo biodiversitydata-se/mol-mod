@@ -34,6 +34,7 @@
     "sop": {},
     "target_gene": {"validation": "^(?!.*nan).*$"},
     "target_subfragment": {"validation": "^(?!.*nan).*$"},
+    "lib_layout": {"validation": "^(?!.*nan).*$"},
     "pcr_primer_name_forward": {"validation": "^(?!.*nan).*$"},
     "pcr_primer_name_reverse": {"validation": "^(?!.*nan).*$"},
     "pcr_primer_forward": {"validation": "[ACTGactg]+"},

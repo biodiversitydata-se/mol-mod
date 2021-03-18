@@ -9,9 +9,9 @@ CREATE SCHEMA api;
 
 CREATE OR REPLACE VIEW api.dwc_oc_emof AS
  SELECT ds.dataset_id AS "datasetID",
-    se.event_id AS "eventID",
-    oc.occurrence_id AS "occurrenceID",
-    emof.measurement_id AS "measurementID",
+    ds.dataset_id || ':' || se.event_id_alias AS "eventID",
+    ds.dataset_id || ':' || se.event_id_alias || ':' || oc.asv_id_alias AS "occurrenceID",
+    ds.dataset_id || ':' || se.event_id_alias || ':' || emof.measurement_type AS "measurementID",
     emof.measurement_type AS "measurementType",
     emof.measurement_type_id AS "measurementTypeID",
     emof.measurement_unit AS "measurementUnit",
@@ -30,8 +30,8 @@ CREATE OR REPLACE VIEW api.dwc_oc_emof AS
 
 CREATE OR REPLACE VIEW api.dwc_oc_mixs AS
  SELECT ds.dataset_id AS "datasetID",
-    se.event_id AS "eventID",
-    oc.occurrence_id AS "occurrenceID",
+    ds.dataset_id || ':' || se.event_id_alias AS "eventID",
+    ds.dataset_id || ':' || se.event_id_alias || ':' || oc.asv_id_alias AS "occurrenceID",
     asv.asv_id AS "taxonID",
     mixs.sop,
     mixs.pcr_primer_name_forward,
@@ -40,6 +40,7 @@ CREATE OR REPLACE VIEW api.dwc_oc_mixs AS
     mixs.pcr_primer_reverse,
     mixs.target_gene,
     mixs.target_subfragment,
+    mixs.lib_layout,
     asv.asv_sequence AS "DNA_sequence",
     mixs.env_broad_scale,
     mixs.env_local_scale,
@@ -51,11 +52,9 @@ CREATE OR REPLACE VIEW api.dwc_oc_mixs AS
    JOIN :data_schema.asv asv ON asv.pid = oc.asv_pid;
 
 CREATE OR REPLACE VIEW api.dwc_oc_occurrence AS
- SELECT ds.dataset_id AS "datasetID",
-    se.event_id AS "eventID",
-    se.event_id_alias,
-    oc.occurrence_id AS "occurrenceID",
-    oc.asv_id_alias,
+SELECT ds.dataset_id AS "datasetID",
+    ds.dataset_id || ':' || se.event_id_alias AS "eventID",
+    ds.dataset_id || ':' || se.event_id_alias || ':' || oc.asv_id_alias AS "occurrenceID",
     'MaterialSample'::text AS "basisOfRecord",
     se.event_date AS "eventDate",
     se.location_id AS "locationID",
