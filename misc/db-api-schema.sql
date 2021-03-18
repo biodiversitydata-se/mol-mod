@@ -51,11 +51,9 @@ CREATE OR REPLACE VIEW api.dwc_oc_mixs AS
    JOIN :data_schema.asv asv ON asv.pid = oc.asv_pid;
 
 CREATE OR REPLACE VIEW api.dwc_oc_occurrence AS
- SELECT ds.dataset_id AS "datasetID",
-    se.event_id AS "eventID",
-    se.event_id_alias,
-    oc.occurrence_id AS "occurrenceID",
-    oc.asv_id_alias,
+SELECT ds.dataset_id AS "datasetID",
+    ds.dataset_id || ':' || se.event_id_alias AS "eventID",
+    ds.dataset_id || ':' || se.event_id_alias || ':' || oc.asv_id_alias AS "occurrenceID",
     'MaterialSample'::text AS "basisOfRecord",
     se.event_date AS "eventDate",
     se.location_id AS "locationID",
