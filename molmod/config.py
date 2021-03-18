@@ -26,9 +26,9 @@ class Config:
 class ProductionConfig(Config):
     DEBUG = True
     # For POST requests from search result forms to BioAtlas/SBDI
-    BATCH_SEARCH_URL = 'http://molecular.infrabas.se/' \
+    BATCH_SEARCH_URL = 'https://molecular.infrabas.se/' \
                        'biocache-service/occurrences/batchSearch'
-    REDIRECT_URL = 'http://molecular.infrabas.se/ala-hub/occurrences/search'
+    REDIRECT_URL = 'https://molecular.infrabas.se/ala-hub/occurrences/search'
     # PostgREST
     API_URL = 'http://localhost:3000'
 
@@ -36,9 +36,9 @@ class ProductionConfig(Config):
 class DevelopmentConfig(Config):
     DEBUG = True
     # For POST requests from search result forms to BioAtlas/SBDI
-    BATCH_SEARCH_URL = 'http://molecular.infrabas.se/' \
+    BATCH_SEARCH_URL = 'https://molecular.infrabas.se/' \
                        'biocache-service/occurrences/batchSearch'
-    REDIRECT_URL = 'http://molecular.infrabas.se/ala-hub/occurrences/search'
+    REDIRECT_URL = 'https://molecular.infrabas.se/ala-hub/occurrences/search'
     # PostgREST
     API_URL = 'http://localhost:3000'
 
