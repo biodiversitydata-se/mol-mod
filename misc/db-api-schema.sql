@@ -9,9 +9,9 @@ CREATE SCHEMA api;
 
 CREATE OR REPLACE VIEW api.dwc_oc_emof AS
  SELECT ds.dataset_id AS "datasetID",
-    se.event_id AS "eventID",
-    oc.occurrence_id AS "occurrenceID",
-    emof.measurement_id AS "measurementID",
+    ds.dataset_id || ':' || se.event_id_alias AS "eventID",
+    ds.dataset_id || ':' || se.event_id_alias || ':' || oc.asv_id_alias AS "occurrenceID",
+    ds.dataset_id || ':' || se.event_id_alias || ':' || emof.measurement_type AS "measurementID",
     emof.measurement_type AS "measurementType",
     emof.measurement_type_id AS "measurementTypeID",
     emof.measurement_unit AS "measurementUnit",
