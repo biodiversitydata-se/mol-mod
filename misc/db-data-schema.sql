@@ -16,7 +16,6 @@ CREATE TABLE IF NOT EXISTS public.dataset (
 
 CREATE TABLE IF NOT EXISTS public.sampling_event (
     pid BIGSERIAL PRIMARY KEY,
-    event_id character varying UNIQUE,
     material_sample_id character varying,
     dataset_pid integer REFERENCES public.dataset(pid) NOT NULL,
     event_date character varying NOT NULL,
@@ -55,7 +54,6 @@ CREATE TABLE IF NOT EXISTS public.mixs (
 
 CREATE TABLE IF NOT EXISTS public.emof (
     pid BIGSERIAL PRIMARY KEY,
-    measurement_id character varying UNIQUE,
     measurement_type character varying,
     measurement_type_id character varying,
     measurement_value character varying,
@@ -78,7 +76,6 @@ CREATE TABLE IF NOT EXISTS public.asv (
 
 CREATE TABLE IF NOT EXISTS public.occurrence (
     pid BIGSERIAL PRIMARY KEY,
-    occurrence_id character varying UNIQUE,
     event_pid integer REFERENCES public.sampling_event(pid) NOT NULL,
     asv_pid integer REFERENCES public.asv(pid) NOT NULL,
     organism_quantity integer NOT NULL,
