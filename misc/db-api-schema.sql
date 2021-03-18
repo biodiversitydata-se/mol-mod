@@ -30,8 +30,8 @@ CREATE OR REPLACE VIEW api.dwc_oc_emof AS
 
 CREATE OR REPLACE VIEW api.dwc_oc_mixs AS
  SELECT ds.dataset_id AS "datasetID",
-    se.event_id AS "eventID",
-    oc.occurrence_id AS "occurrenceID",
+    ds.dataset_id || ':' || se.event_id_alias AS "eventID",
+    ds.dataset_id || ':' || se.event_id_alias || ':' || oc.asv_id_alias AS "occurrenceID",
     asv.asv_id AS "taxonID",
     mixs.sop,
     mixs.pcr_primer_name_forward,
