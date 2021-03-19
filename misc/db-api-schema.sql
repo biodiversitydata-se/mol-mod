@@ -181,11 +181,19 @@ $_$;
 
 CREATE VIEW api.app_asvs_for_blastdb AS
  SELECT a.asv_id,
-    concat_ws(';'::text, ta.kingdom, ta.phylum, ta.class, ta.oorder, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS higher_taxonomy,
-    a.asv_sequence
-   FROM (:data_schema.asv a
-     JOIN :data_schema.taxon_annotation ta ON ((a.pid = ta.asv_pid)))
-  WHERE ((ta.status)::text = 'valid'::text);
+        concat_ws(';'::text, ta.kingdom, ta.phylum, ta.class, ta.oorder, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS higher_taxonomy,
+        a.asv_sequence
+   FROM :data_schema.asv a
+   JOIN :data_schema.taxon_annotation ta ON a.pid = ta.asv_pid
+  WHERE ta.status::text = 'valid'::text
+    AND a.pid IN (
+        SELECT DISTINCT a.pid
+          FROM :data_schema.asv a
+          JOIN :data_schema.occurrence o ON o.asv_pid = a.pid
+          JOIN :data_schema.sampling_event e ON o.event_pid = e.pid
+          JOIN :data_schema.dataset d ON e.dataset_pid = d.pid
+         WHERE d.in_bioatlas
+        );
 
 CREATE FUNCTION api.app_seq_from_id(ids character varying[]) RETURNS TABLE(asv_id CHARACTER(36), ASV_SEQUENCE CHARACTER VARYING)
     LANGUAGE sql IMMUTABLE
