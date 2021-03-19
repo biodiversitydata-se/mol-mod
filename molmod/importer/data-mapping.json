@@ -37,8 +37,8 @@
     "lib_layout": {"validation": "(paired|single|vector|other)"},
     "pcr_primer_name_forward": {"validation": "^(?!.*nan).*$"},
     "pcr_primer_name_reverse": {"validation": "^(?!.*nan).*$"},
-    "pcr_primer_forward": {"validation": "[ACTGactg]+"},
-    "pcr_primer_reverse": {"validation": "[ACTGactg]+"},
+    "pcr_primer_forward": {"validation": "[ACGTUWSMKRYBDHVNZacgtuwsmkrybdhvnz]+"},
+    "pcr_primer_reverse": {"validation": "[ACGTUWSMKRYBDHVNZacgtuwsmkrybdhvnz]+"},
     "env_broad_scale": {"validation": ".+\\[.+\\]"},
     "env_local_scale": {"validation": ".+\\[.+\\]"},
     "env_medium": {"validation": ".+\\[.+\\]"}
