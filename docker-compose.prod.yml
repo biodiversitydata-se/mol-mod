@@ -67,6 +67,10 @@ services:
       context: ./
       dockerfile: docker/blast
     logging: *default-logging
+    env_file:
+      - .env
+    secrets:
+      - postgres_pass
     environment:
       - FLASK_ENV=production
     volumes:

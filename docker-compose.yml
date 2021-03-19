@@ -76,6 +76,10 @@ services:
       dockerfile: docker/blast
     init: true
     logging: *default-logging
+    env_file:
+      - .env
+    secrets:
+      - postgres_pass
     volumes:
       - ./blast-databases:/blastdbs
 
