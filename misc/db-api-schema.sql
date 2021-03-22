@@ -116,7 +116,10 @@ CREATE VIEW api.app_filter_mixs_tax AS
    FROM :data_schema.mixs m
    JOIN :data_schema.occurrence o ON o.event_pid = m.pid
    JOIN :data_schema.asv a ON a.pid = o.asv_pid
-   JOIN :data_schema.taxon_annotation ta ON a.pid = ta.asv_pid;
+   JOIN :data_schema.taxon_annotation ta ON a.pid = ta.asv_pid
+   JOIN :data_schema.sampling_event e ON o.event_pid = e.pid
+   JOIN :data_schema.dataset d ON e.dataset_pid = d.pid
+   WHERE d.in_bioatlas;
 
 CREATE VIEW api.app_search_mixs_tax AS
  SELECT DISTINCT a.asv_id,
@@ -141,6 +144,9 @@ CREATE VIEW api.app_search_mixs_tax AS
    JOIN :data_schema.occurrence o ON o.event_pid = m.pid
    JOIN :data_schema.asv a ON a.pid = o.asv_pid
    JOIN :data_schema.taxon_annotation ta ON a.pid = ta.asv_pid
+   JOIN :data_schema.sampling_event e ON o.event_pid = e.pid
+   JOIN :data_schema.dataset d ON e.dataset_pid = d.pid
+   WHERE d.in_bioatlas
   ORDER BY a.asv_id, a.asv_sequence, m.target_gene, m.target_subfragment, (((m.pcr_primer_name_forward)::text || ': '::text) || (m.pcr_primer_forward)::text), (((m.pcr_primer_name_reverse)::text || ': '::text) || (m.pcr_primer_reverse)::text);
 
 CREATE FUNCTION api.app_drop_options(field text, noffset bigint, nlimit integer, term text DEFAULT ''::text, kingdom text[] DEFAULT '{}'::text[], phylum text[] DEFAULT '{}'::text[], classs text[] DEFAULT '{}'::text[], oorder text[] DEFAULT '{}'::text[], family text[] DEFAULT '{}'::text[], genus text[] DEFAULT '{}'::text[], species text[] DEFAULT '{}'::text[], gene text[] DEFAULT '{}'::text[], sub text[] DEFAULT '{}'::text[], fw_prim text[] DEFAULT '{}'::text[], rv_prim text[] DEFAULT '{}'::text[]) RETURNS TABLE(data json)
@@ -187,8 +193,8 @@ CREATE VIEW api.app_asvs_for_blastdb AS
    JOIN :data_schema.taxon_annotation ta ON a.pid = ta.asv_pid
   WHERE ta.status::text = 'valid'::text
     AND a.pid IN (
-        SELECT DISTINCT a.pid
-          FROM :data_schema.asv a
+        SELECT DISTINCT ib.pid
+          FROM :data_schema.asv ib
           JOIN :data_schema.occurrence o ON o.asv_pid = a.pid
           JOIN :data_schema.sampling_event e ON o.event_pid = e.pid
           JOIN :data_schema.dataset d ON e.dataset_pid = d.pid
