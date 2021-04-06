@@ -63,6 +63,11 @@ If you want to stop and restart clean, use the following shortcut (see details i
 
 Note that the blast-worker uses the same Dockerfile for both development and production, but that we set FLASK_ENV=production in docker-compose.prod.yml.
 
+### Database access
+It's possible to limit what hosts the postgres database accepts connection from by providing the environment variable `DBACCESS`, e.g.
+```
+DBACCESS=127.0.0.1/8 192.168.0.0/16
+
 ### Data import
 Import data (in Excel or text file format) using a separate python script. See:
 ```
