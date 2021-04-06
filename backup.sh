@@ -55,13 +55,18 @@ FLAGS=( -h localhost -U "$POSTGRES_USER" -d "$POSTGRES_DB" )
 if [ "$1" = "restore" ]; then
   # If no file is specified, use latest dump
   if [ -z "$2" ]; then
-    # Get files matching pattern
-    FILES=$(find "$DIR" -name "$BASE*")
-    # Save in time-sorted array
-    SORTED=($(echo $FILES | xargs ls -t))
-    # Get latest modified file
-    FILE=${SORTED[0]}
+    # Get list of all files matching pattern in "$DIR"
+    set -- "$DIR/$BASE"*
 
+    # Assume the first file is the newest
+    FILE=$1; shift
+
+    # Test if there are newer files in the list,
+    # if so, update the value of $FILE.
+    for pathname do
+        [ "$pathname" -nt "$FILE" ] && FILE=$pathname
+    done
+    
   # Otherwise use specified dump
   elif [ -f "$2" ]; then 
     FILE=$2
@@ -77,7 +82,7 @@ if [ "$1" = "restore" ]; then
 
   # Restore
   printf 'Restoring database from dumps file "%s"\n' "$FILE"
-  docker exec -i "${CONTAINER}" pg_restore "${FLAGS[@]}" <"$FILE"
+  docker exec -i "$CONTAINER" pg_restore "${FLAGS[@]}" <"$FILE"
 
 #
 # BACKUP DB
@@ -94,5 +99,5 @@ else
   printf 'Creating database dump file "%s"\n' "$FILE"
   docker exec -i "$CONTAINER" \
     pg_dump "${FLAGS[@]}" --format="$FORMAT" \
-    -n "$PGRST_DB_SCHEMA" >"$FILE.$FORMAT"
+      -n "$PGRST_DB_SCHEMA" >"$FILE.$FORMAT"
 fi
