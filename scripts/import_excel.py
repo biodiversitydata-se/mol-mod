@@ -34,6 +34,7 @@ if __name__ == '__main__':
 
     #
     # Compose cmd to execute import.py in container
+    # Path refers to script location inside container
     #
 
     CMD = ["docker", "exec", "-i", ARGS.container,
