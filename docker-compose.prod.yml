@@ -27,9 +27,9 @@ services:
     container_name: asv-db
     logging: *default-logging
     volumes:
-      - ./misc/db-data-schema.sql:/docker-entrypoint-initdb.d/01-data-schema.sql
-      - ./misc/db-api-schema.sql:/docker-entrypoint-initdb.d/02-api-schema.sql
-      - ./misc/db-roles.sql:/docker-entrypoint-initdb.d/03-roles.sql
+      - ./sql/db-data-schema.sql:/docker-entrypoint-initdb.d/01-data-schema.sql
+      - ./sql/db-api-schema.sql:/docker-entrypoint-initdb.d/02-api-schema.sql
+      - ./sql/db-roles.sql:/docker-entrypoint-initdb.d/03-roles.sql
       - postgres-db:/var/lib/postgresql/data
     env_file:
       - .env
