@@ -25,7 +25,8 @@ if __name__ == '__main__':
     ARGS, BUILDER_ARGS = PARSER.parse_known_args()
 
     #
-    # Compose cmd to execute import.py in container
+    # Compose cmd to execute blast_builder.py in container
+    # Path refers to script location inside container
     #
 
     CMD = ["docker", "exec", "-i", ARGS.container,
