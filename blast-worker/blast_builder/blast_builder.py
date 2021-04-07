@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-This file contains functions for building a blast database from sequences in the
-postgres database.
+This file contains functions for building a blast database from sequences in
+the postgres database.
 """
 
 import logging
@@ -11,6 +11,7 @@ import sys
 
 import psycopg2
 from psycopg2.extras import DictCursor
+
 
 def connect_db(pass_file: str = '/run/secrets/postgres_pass'):
     """
@@ -44,15 +45,17 @@ def connect_db(pass_file: str = '/run/secrets/postgres_pass'):
         sys.exit(1)
     return connection, cursor
 
+
 def list_datasets_in_bioatlas(cursor: DictCursor) -> list:
     """
-    Returns a list of all datasets available in the database where `in_bioatlas`
-    is `true`.
+    Returns a list of all datasets available in the database where
+    `in_bioatlas`is `true`.
     """
     query = "SELECT pid, dataset_id FROM public.dataset WHERE in_bioatlas;"
 
     cursor.execute(query)
     return [dict(row) for row in cursor.fetchall()]
+
 
 def create_input_fasta(cursor: DictCursor, filename: str = 'blast_input'):
     """
@@ -66,6 +69,7 @@ def create_input_fasta(cursor: DictCursor, filename: str = 'blast_input'):
         for asv_id, taxonomy, sequence in cursor.fetchall():
             fasta.write('>%s-%s\n%s\n' % (asv_id, taxonomy, sequence))
 
+
 def create_blast_db_from_fasta(fasta: str, db_name: str):
     """
     Creates a blast database `db_name` from the sequences in  `fasta`.
@@ -76,6 +80,7 @@ def create_blast_db_from_fasta(fasta: str, db_name: str):
            'nucl']
     subprocess.call(CMD)
 
+
 def create_blast_db(filename: str, db_dir: str = '.'):
     """
     Creates a blast database at `db_dir`/`filename`, made from all the datasets
@@ -84,32 +89,32 @@ def create_blast_db(filename: str, db_dir: str = '.'):
 
     _, cursor = connect_db()
 
-    # fetch all datasets that are to be added to the blast database. These are
+    # Fetch all datasets that are to be added to the blast database. These are
     # only used to inform the user, the api.app_asvs_for_blastdb function
     # automatically returns sequences filtered by datasets in bioatlas.
     datasets = list_datasets_in_bioatlas(cursor)
 
-    logging.info("Using datasets: %s", ', '.join([d['dataset_id'] for d in datasets]))
+    logging.info("Using datasets: %s",
+                 ', '.join([d['dataset_id'] for d in datasets]))
 
-    # check input params:
-
+    # Check input params:
     assert isinstance(filename, str), "Filename must be a string"
     assert len(filename) > 0, "Filename must be at least one character long"
     assert isinstance(db_dir, str), "Directory name must be a string"
 
-    # create filenames
-
+    # Create filenames
     db_name = f'{os.path.join(db_dir, filename)}'
     fasta = f'{db_name}.fasta'
 
-    # create the fasta file
+    # Create the fasta file
     create_input_fasta(cursor, db_name)
 
-    # create the blast database from the fasta
+    # Create the blast database from the fasta
     create_blast_db_from_fasta(fasta, db_name)
 
     # and finally, remove the fasta file, as it's no longer needed
     os.remove(fasta)
+
 
 if __name__ == '__main__':
 
