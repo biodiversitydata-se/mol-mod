@@ -8,7 +8,7 @@ Flask + jQuery app for BLAST and metadata search of sequence-based occurrences i
 The application can be run as a docker-compose environment, assuming you have [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
 
 ### Development environment
-In development, postgres data and config files are written to bind-mounted dir *postgres-data*, which needs to be deleted if you later want to regenerate the db from schema files and dumps in *sql* dir. This is also required when you generate new passwords and API config file (secrets).
+In development, postgres data and config files are written to bind-mounted dir *postgres-data*, which needs to be deleted if you later want to regenerate the db from schema files and dumps in *db* dir. This is also required when you generate new passwords and API config file (secrets).
 ```
   $ rm -R postgres-data/
 ```

@@ -1,5 +1,5 @@
 docker/
-sql/
+db/
 postgres-data/
 venv/
 personal/
