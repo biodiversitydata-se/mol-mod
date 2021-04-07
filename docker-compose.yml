@@ -35,9 +35,9 @@ services:
     volumes:
       # Files read (in alphanumeric order) during database startup,
       # and used to define database schema and roles
-      - ./misc/db-data-schema.sql:/docker-entrypoint-initdb.d/01-data-schema.sql
-      - ./misc/db-api-schema.sql:/docker-entrypoint-initdb.d/02-api-schema.sql
-      - ./misc/db-roles.sql:/docker-entrypoint-initdb.d/03-roles.sql
+      - ./sql/db-data-schema.sql:/docker-entrypoint-initdb.d/01-data-schema.sql
+      - ./sql/db-api-schema.sql:/docker-entrypoint-initdb.d/02-api-schema.sql
+      - ./sql/db-roles.sql:/docker-entrypoint-initdb.d/03-roles.sql
       # Database files stored in an easily cleared local directory
       - ./postgres-data:/var/lib/postgresql/data
     # User and password information
@@ -76,6 +76,10 @@ services:
       dockerfile: docker/blast
     init: true
     logging: *default-logging
+    env_file:
+      - .env
+    secrets:
+      - postgres_pass
     volumes:
       - ./blast-databases:/blastdbs
 
