@@ -64,9 +64,18 @@ If you want to stop and restart clean, use the following shortcut (see details i
 Note that the blast-worker uses the same Dockerfile for both development and production, but that we set FLASK_ENV=production in docker-compose.prod.yml.
 
 ### Database access
-It's possible to limit what hosts the postgres database accepts connection from by providing the environment variable `DBACCESS`, e.g.
+It's possible to limit what hosts the postgres database accepts connection from by providing the environment variable `DBACCESS` in .env file, e.g:
 ```
 DBACCESS=127.0.0.1/8 192.168.0.0/16
+```
+Note that you need to stop services and remove the database for changes to take effect.
+
+Alternatively, to implement changes in DBACCESS without removing the database, you can use a script to modify db settings:
+```
+docker restart asv-db
+docker exec asv-db docker-entrypoint-initdb.d/04-restrict-db.sh
+docker restart asv-db
+```
 
 ### Data import
 Import data (in Excel or text file format) using a separate python script. See:
