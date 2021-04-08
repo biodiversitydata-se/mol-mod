@@ -43,6 +43,11 @@ def upload():
 
     # Get CAS user roles from session
     cas_attributes = session.get('CAS_ATTRIBUTES', None)
+
+    # login_required should mean we're authenticated, but check this
+    if not cas_attributes:
+        abort(403)
+
     roles = cas_attributes['cas:authority'].split(',')
     APP.logger.debug(
         f'User has CAS roles: {roles} ')
@@ -51,26 +56,27 @@ def upload():
     if os.getenv('UPLOAD_ROLE') not in roles:
         abort(403)
 
-    # Enable authorized users
     form = UploadForm()
-    upload_error = False
-    # If user has tried to submit file (POST)
-    if request.method == 'POST':
-        # If file passes (simple) validation in forms.py
-        if form.validate_on_submit():
-            # Get filename
-            f = form.file.data
-            filename = secure_filename(f.filename)
-            # Save file, or report error
-            try:
-                f.save(os.path.join(CONFIG.UPLOAD_PATH, filename))
-            except Exception as err:
-                # Display error msg in upload form
-                upload_error = True
-                APP.logger.error(
-                    f'File {filename} could not be saved due to {err}')
-            else:
-                APP.logger.info(f'Uploaded file {filename}')
-                return render_template('uploaded.html', filename=filename)
-    # Show upload form (GET or POST), with error when applicable (POST only)
-    return render_template('upload.html', form=form, upload_error=upload_error)
+
+    if request.method != 'POST':
+        return render_template('upload.html', form=form, upload_error=False)
+
+    # User has tried to submit file (POST)
+    # Check if it passes (simple) validation in forms.py
+    if not form.validate_on_submit():
+        return render_template('upload.html', form=form, upload_error=True)
+
+    # Get filename
+    f = form.file.data
+    filename = secure_filename(f.filename)
+    # Save file, or report error
+    try:
+        f.save(os.path.join(CONFIG.UPLOAD_PATH, filename))
+    except Exception as err:
+        # Display error msg in upload form
+        APP.logger.error(
+            f'File {filename} could not be saved due to {err}')
+        return render_template('upload.html', form=form, upload_error=True)
+
+    APP.logger.info(f'Uploaded file {filename}')
+    return render_template('uploaded.html', filename=filename)

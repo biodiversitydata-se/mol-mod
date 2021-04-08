@@ -95,17 +95,23 @@ def cover_check(form, field):
 
 def file_check(form, field):
     file = field.data
-    if file is not None:
-        filename = file.filename
-        try:
-            ext = os.path.splitext(filename)[1]
-            APP.logger.debug(f'ext is {ext}')
-        except Exception:
-            return None
-        regex = "([^\\s]+(\\.(?i)(xlsx|tar\\.gz|tar\\.bz2|tar\\.lz))$)"
-        if re.match(regex, filename):
-            APP.logger.debug('Correct format')
-            return None
+
+    if not file or not file.filename:
+        raise ValidationError('No file supplied')
+
+    parts = file.filename.lower().split('.')
+    APP.logger.debug(f'{file.filename} is split into {parts}')
+
+    if len(parts) < 2:
+        raise ValidationError(
+        'Select an Excel (xlsx) or compressed archive '
+        '(tar.gz, tar.bz2 or tar.lz) file, please!')
+
+    if parts[-1] in ('xlsx') or (
+        parts[-2] in ('tar') and parts[-1] in ('gz', 'bz2', 'lz')):
+        APP.logger.debug(f'Approving file name {file.filename}')
+        return None
+
     raise ValidationError(
         'Select an Excel (xlsx) or compressed archive '
         '(tar.gz, tar.bz2 or tar.lz) file, please!')
