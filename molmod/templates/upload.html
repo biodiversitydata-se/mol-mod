@@ -13,7 +13,7 @@
         {{ form.csrf_token }}
         <div class='row'>
             <div class='col-md-12'>
-                {% if form.file.errors %}
+                {% if form and form.file.errors %}
                     <div class='form-group has-error'>
                 {% else %}
                     <div class='form-group'>
@@ -32,9 +32,11 @@
                                {{ error }}
                             {% endfor %}
                             {% if upload_error %}
+                                <p>
                                 Sorry, something unexpected happened during file upload.
-                                Please <u><a href="mailto: {{ support_email }} ?subject=Error%20uploading%20data">
+                                Please <u><a href="mailto:{{ support_email }}?subject=Error%20uploading%20data">
                                 contact support</a></u> if this error persists.
+                                </p>
                             {% endif %}
                         </span>
                     </div>
