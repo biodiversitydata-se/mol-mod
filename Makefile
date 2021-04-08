@@ -57,3 +57,6 @@ restore:
 # Copy blastdb into worker container
 blast:
 	for file in blast-databases/*; do docker cp $$file mol-mod_blast-worker_1:/blastdbs/; done;
+
+blast-build:
+	./scripts/build_blast_db.py
