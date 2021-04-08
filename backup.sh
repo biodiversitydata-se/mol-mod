@@ -46,7 +46,7 @@ then
 fi
 
 # Load database variables
-source .env
+source ./.env
 
 FILE="$DIR/${BASE}_$TIMESTAMP.sql"
 FLAGS=( -h localhost -U "$POSTGRES_USER" -d "$POSTGRES_DB" )
