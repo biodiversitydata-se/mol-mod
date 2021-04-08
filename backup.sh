@@ -9,7 +9,7 @@
 # requiring data to be restored with this script, together with a dump
 # produced with 'data' option.
 
-DIR='misc'
+DIR='db'
 BASE='db-dump'
 TIMESTAMP="$(date +'%Y-%m-%d_%H%M')"
 CONTAINER='asv-db'
