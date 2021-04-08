@@ -9,35 +9,37 @@
 # requiring data to be restored with this script, together with a dump
 # produced with 'data' option.
 
-DIR=misc
-BASE=db-dump
-TIMESTAMP=$(date +"%Y-%m-%d_%H%M")
-CONTAINER=asv-db
-FORMAT=tar	# Change to 'plain' for plain SQL
+DIR='misc'
+BASE='db-dump'
+TIMESTAMP="$(date +'%Y-%m-%d_%H%M')"
+CONTAINER='asv-db'
+FORMAT='tar'	# Change to 'plain' for plain SQL
 
 #
 # CREATE HELP (access with './backup.sh -h' in molmod folder)
 #
-if [ "$1" = -h ] || [ "$1" = --help ]; then
+if [ "$1" = '-h' ] || [ "$1" = '--help' ]; then
   cat <<'HELP'
 USAGE: ./backup.sh [restore [filename] | data]
 
-Given no arguments, this script will use the variables in .env to create a
-database backup.
+Given no arguments, this script will use the variables in the file
+".env" in the current directory to create a database backup.
 
-Viable options are:
+Supported options are:
 
-      restore <file>    restore the named database dump, or the latest database
-                        dump if no filename is given. The latest dump is
-                        selected by modification date, not from the filename.
+      restore <file>    Restore the named database dump, or the latest
+                        database dump if no filename is given.  The
+                        latest dump is selected by modification date,
+                        not from the filename.
 
-      data              make a backup containing only the public table data.
+      data              Make a backup containing only the public table
+                        data.
 
 HELP
   exit
 fi
 
-if [ "$( docker container inspect -f '{{.State.Status}}' "$CONTAINER" )" != running ]
+if [ "$( docker container inspect -f '{{.State.Status}}' "$CONTAINER" )" != 'running' ]
 then
   echo 'Database container need to be running to perform backup operations' >&2
   exit 1
@@ -46,32 +48,32 @@ fi
 # Load database variables
 source .env
 
-FILE=$DIR/${BASE}_$TIMESTAMP.sql
+FILE="$DIR/${BASE}_$TIMESTAMP.sql"
 FLAGS=( -h localhost -U "$POSTGRES_USER" -d "$POSTGRES_DB" )
 
 #
 # RESTORE DB
 #
-if [ "$1" = "restore" ]; then
+if [ "$1" = 'restore' ]; then
   # If no file is specified, use latest dump
   if [ -z "$2" ]; then
     # Get list of all files matching pattern in "$DIR"
     set -- "$DIR/$BASE"*
 
     # Assume the first file is the newest
-    FILE=$1; shift
+    FILE="$1"; shift
 
     # Test if there are newer files in the list,
     # if so, update the value of $FILE.
     for pathname do
-        [ "$pathname" -nt "$FILE" ] && FILE=$pathname
+        [ "$pathname" -nt "$FILE" ] && FILE="$pathname"
     done
     
   # Otherwise use specified dump
   elif [ -f "$2" ]; then 
-    FILE=$2
+    FILE="$2"
   else
-    FILE=$DIR/$2
+    FILE="$DIR/$2"
   fi
 
   # If no dumps are found, quit
@@ -91,8 +93,8 @@ else
   # If 'data' arg is given, dump data (from schema public) only,
   # to produce file that can be used with `restore` option later
   # Otherwise schema api (views and functions, no data) are dumped
-  if [ "$1" = data ]; then
-    FILE=$DIR/$BASE-data_$TIMESTAMP.sql
+  if [ "$1" = 'data' ]; then
+    FILE="$DIR/$BASE-data_$TIMESTAMP.sql"
     FLAGS+=( -n public --data-only )
   fi
 
