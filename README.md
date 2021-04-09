@@ -64,16 +64,15 @@ If you want to stop and restart clean, use the following shortcut (see details i
 Note that the blast-worker uses the same Dockerfile for both development and production, but that we set FLASK_ENV=production in docker-compose.prod.yml.
 
 ### Database access
-It's possible to limit what hosts the postgres database accepts connection from by providing the environment variable `DBACCESS` in .env file, e.g:
+Database access can be limited to IP ranges listed in environment variable `DBACCESS` in .env file. As a default, this is set to include loopback/same device, private and Docker networking defaults:
 ```
-DBACCESS=127.0.0.1/8 192.168.0.0/16
+DBACCESS=127.0.0.1/8 192.168.0.0/16 10.0.0.0/8 172.16.0.0/12
 ```
-Note that you need to stop services and remove the database for changes to take effect.
+Note that you need to stop services and remove the database for any changes to take effect.
 
-Alternatively, to implement changes in DBACCESS without removing the database, you can use a script to modify db settings:
+Alternatively, to add a new allowed address (but not delete anything) without removing the database, you can run a script inside the container, and then restart it for changes in pg_hba.conf to take effect:
 ```
-docker restart asv-db
-docker exec asv-db docker-entrypoint-initdb.d/04-restrict-db.sh
+docker exec -e DBACCESS='111.222.333.444/32' asv-db docker-entrypoint-initdb.d/04-restrict-db.sh
 docker restart asv-db
 ```
 
