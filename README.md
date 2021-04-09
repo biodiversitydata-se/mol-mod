@@ -70,10 +70,14 @@ DBACCESS=127.0.0.1/8 192.168.0.0/16 10.0.0.0/8 172.16.0.0/12
 ```
 Note that you need to stop services and remove the database for any changes to take effect.
 
-Alternatively, to add a new allowed address (but not delete anything) without removing the database, you can run a script inside the container, and then restart it for changes in pg_hba.conf to take effect:
+Alternatively, to add new address range(s) without removing the database, you can run a script inside the container, and then restart it for changes in pg_hba.conf to take effect:
 ```
-docker exec -e DBACCESS='111.222.333.444/32' asv-db docker-entrypoint-initdb.d/04-restrict-db.sh
+docker exec -e DBACCESS='xxx.xxx.xxx.xxx/32' asv-db docker-entrypoint-initdb.d/04-restrict-db.sh
 docker restart asv-db
+```
+Note that you may have to edit firewall settings to allow incoming connections to port 5432, from those same ranges, e.g. in ufw:
+```
+sudo ufw allow from xxx.xxx.xxx.xxx/32 to any port 5432
 ```
 
 ### Data import
