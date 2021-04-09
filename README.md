@@ -63,6 +63,23 @@ If you want to stop and restart clean, use the following shortcut (see details i
 
 Note that the blast-worker uses the same Dockerfile for both development and production, but that we set FLASK_ENV=production in docker-compose.prod.yml.
 
+### Database access
+Database access can be limited to IP ranges listed in environment variable `DBACCESS` in .env file. As a default, this is set to include loopback/same device, private and Docker networking defaults:
+```
+DBACCESS=127.0.0.1/8 192.168.0.0/16 10.0.0.0/8 172.16.0.0/12
+```
+Note that you need to stop services and remove the database for any changes to take effect.
+
+Alternatively, to add new address range(s) without removing the database, you can run a script inside the container, and then restart it for changes in pg_hba.conf to take effect:
+```
+docker exec -e DBACCESS='xxx.xxx.xxx.xxx/32' asv-db docker-entrypoint-initdb.d/04-restrict-db.sh
+docker restart asv-db
+```
+Note that you may have to edit firewall settings to allow incoming connections to port 5432, from those same ranges, e.g. in ufw:
+```
+sudo ufw allow from xxx.xxx.xxx.xxx/32 to any port 5432
+```
+
 ### Data import
 Import data (in Excel or text file format) using a separate python script. See:
 ```
