@@ -38,6 +38,7 @@ services:
       - ./db/db-data-schema.sql:/docker-entrypoint-initdb.d/01-data-schema.sql
       - ./db/db-api-schema.sql:/docker-entrypoint-initdb.d/02-api-schema.sql
       - ./db/db-roles.sql:/docker-entrypoint-initdb.d/03-roles.sql
+      - ./db/restrict_db_access.sh:/docker-entrypoint-initdb.d/04-restrict-db.sh
       # Database files stored in an easily cleared local directory
       - ./postgres-data:/var/lib/postgresql/data
     # User and password information
