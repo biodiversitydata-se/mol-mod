@@ -46,7 +46,7 @@ then
 fi
 
 # Load database variables
-source ./.env
+eval "$(grep -E '^(POSTGRES|PG)' .env)"
 
 FILE="$DIR/${BASE}_$TIMESTAMP.sql"
 FLAGS=( -h localhost -U "$POSTGRES_USER" -d "$POSTGRES_DB" )
