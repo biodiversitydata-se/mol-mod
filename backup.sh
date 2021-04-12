@@ -22,8 +22,8 @@ if [ "$1" = '-h' ] || [ "$1" = '--help' ]; then
   cat <<'HELP'
 USAGE: ./backup.sh [restore [filename] | data]
 
-Given no arguments, this script will use the variables in the file
-".env" in the current directory to create a database backup.
+Given no arguments, this script will use a subset of the variables in
+the file ".env" in the current directory to create a database backup.
 
 Supported options are:
 
@@ -46,7 +46,7 @@ then
 fi
 
 # Load database variables
-eval "$(grep -E '^(POSTGRES|PG)' .env)"
+eval "$(grep -E '^(POSTGRES|PG)' .env)" || exit 1
 
 FILE="$DIR/${BASE}_$TIMESTAMP.sql"
 FLAGS=( -h localhost -U "$POSTGRES_USER" -d "$POSTGRES_DB" )
