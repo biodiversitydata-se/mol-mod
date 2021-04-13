@@ -126,7 +126,7 @@ $(document).ready(function() {
         // Prepare ASV id:s for POST to Bioatlas
         $('#rform').submit(function() {
             // Get selected ASV IDs from table
-            var ids = $.map(dTbl.rows('.selected').data(), function (item) {
+            var ids = $.map(dTbl.rows({selected: true}).data(), function (item) {
                 return item['asv_id']
             });
             // Remove duplicates
