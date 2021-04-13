@@ -104,6 +104,7 @@ if __name__ == '__main__':
 
     PG_PASS = generate_secret('.secret.postgres_pass', ARGS.skip_existing)
     PG_ANON = generate_secret('.secret.anon_pass', ARGS.skip_existing)
+    PG_IPT = generate_secret('.secret.ipt_pass', ARGS.skip_existing)
 
     # read template file
     for row in open(ARGS.env):
