@@ -8,8 +8,12 @@ $(document).ready(function() {
 
         // BLAST PAGE
         case 'blast':
+            // Update info on query sequence length
+            // after BLAST (page is reloaded)
+            updateSeqLength();
+            // and when textarea input changes
             $('#sequence_textarea').on('input', function(){
-                $('#sequence_count').text($(this).val().length+'/500000 characters');
+                updateSeqLength();
             });
             // Define columns for BLAST search result table
             var columns = [
@@ -229,6 +233,10 @@ function makeDataTbl(url, columns) {
                     $("#show_occurrences").prop("disabled",true);
                     dTbl.buttons().disable();
                 }
+                if (json.data.length > 999) {
+                    $('#search_err_container').html('Only the first 1000 rows are shown. '
+                      + 'Please, refine your search to make sure results are not truncated.');
+                }
                 return json.data;
             } ,
             // Include CSRF-token in POST
@@ -245,4 +253,11 @@ function makeDataTbl(url, columns) {
         buttons: [ 'excel', 'csv' ]
     });
     return dTbl;
+}
+
+function updateSeqLength() {
+    // Counts no. of characters (incl. invisibles) in query sequence(s)
+    // and shows this number above textarea
+    var seqLength = $('#sequence_textarea').val().length;
+    $('#sequence_count').text(seqLength + '/50000 characters');
 }

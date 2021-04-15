@@ -61,6 +61,9 @@ def blast_run():
     results = response.json()
     results = results['data'] if 'data' in results else results
 
+    # Limit results sent to browser to max 1000 rows
+    results = results[0:1000]
+
     # Format result fields
     for result in results:
         # Set single decimal for Sci not & float

@@ -23,9 +23,9 @@
                         <p>
                             <b>Query sequence(s)</b>
                             <br>Nucleotide sequence(s), in fasta format, to compare against ASVs (subject sequences) in reference database
-                            <span style='float: right' id='sequence_count'>2108/500000 characters</span>
+                            <span style='float: right' id='sequence_count'>2108/50000 characters</span>
                         </p>
-                            {{ sform.sequence(id='sequence_textarea', rows=8, cols=80, maxlength='500000', class='form-control') }}
+                            {{ sform.sequence(id='sequence_textarea', rows=8, cols=80, maxlength='50000', class='form-control') }}
                             <span id='helpBlock2' class='help-block'>
                                 {% for error in sform.sequence.errors %}
                                 {{ error }}
