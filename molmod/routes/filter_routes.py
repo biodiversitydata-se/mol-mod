@@ -102,7 +102,7 @@ def filter_run() -> dict:
         url += '?'
         for filter, value in selections.items():
             url += f'&{filter}=in.({value})'
-    APP.logger.debug(f'URL for API request: {url}')
+    # APP.logger.debug(f'URL for API request: {url}')
 
     #
     # Send API request
@@ -114,4 +114,6 @@ def filter_run() -> dict:
     except (requests.ConnectionError, requests.exceptions.HTTPError) as e:
         APP.logger.error(f'API request for filtered occurences returned: {e}')
     else:
-        return {"data": json.loads(response.text)}
+        results = json.loads(response.text)[0:1000]
+        # APP.logger.debug(results)
+        return {"data": results}
