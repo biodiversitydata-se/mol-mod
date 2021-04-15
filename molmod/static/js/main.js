@@ -8,8 +8,12 @@ $(document).ready(function() {
 
         // BLAST PAGE
         case 'blast':
+            // Update info on query sequence length
+            // after BLAST (page is reloaded)
+            updateSeqLength();
+            // and when textarea input changes
             $('#sequence_textarea').on('input', function(){
-                $('#sequence_count').text($(this).val().length+'/50000 characters');
+                updateSeqLength();
             });
             // Define columns for BLAST search result table
             var columns = [
@@ -249,4 +253,11 @@ function makeDataTbl(url, columns) {
         buttons: [ 'excel', 'csv' ]
     });
     return dTbl;
+}
+
+function updateSeqLength() {
+    // Counts no. of characters (incl. invisibles) in query sequence(s)
+    // and shows this number above textarea
+    var seqLength = $('#sequence_textarea').val().length;
+    $('#sequence_count').text(seqLength + '/50000 characters');
 }
