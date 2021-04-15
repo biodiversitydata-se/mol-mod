@@ -114,4 +114,6 @@ def filter_run() -> dict:
     except (requests.ConnectionError, requests.exceptions.HTTPError) as e:
         APP.logger.error(f'API request for filtered occurences returned: {e}')
     else:
-        return {"data": json.loads(response.text)}
+        results = json.loads(response.text)[0:1000]
+        APP.logger.debug(results)
+        return {"data": results}
