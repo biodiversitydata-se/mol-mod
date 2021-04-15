@@ -23,9 +23,9 @@ TGGGGAATTTTGCGCAATGGGGGAAACCCTGACGCAGCAACGCCGCGTGGAGGATGAAGCCCCTTGGGGTGTAAACTCCT
 def fasta_check(form, field):
     if len(field.data) < 1:
         raise ValidationError('Please submit an input sequence')
-    if len(field.data) > 500000:
+    if len(field.data) > 50000:
         raise ValidationError('''Input sequence must be less
-                              than 500000 characters''')
+                              than 50000 characters''')
 
     # Check that this is actually a valid fasta file, that we can process
     fasta_chars = r'AaCcGgTtUuIiRrYyKkMmSsWwBbDdHhVvNn\-'

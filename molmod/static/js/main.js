@@ -9,7 +9,7 @@ $(document).ready(function() {
         // BLAST PAGE
         case 'blast':
             $('#sequence_textarea').on('input', function(){
-                $('#sequence_count').text($(this).val().length+'/500000 characters');
+                $('#sequence_count').text($(this).val().length+'/50000 characters');
             });
             // Define columns for BLAST search result table
             var columns = [
