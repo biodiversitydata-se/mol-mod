@@ -229,6 +229,10 @@ function makeDataTbl(url, columns) {
                     $("#show_occurrences").prop("disabled",true);
                     dTbl.buttons().disable();
                 }
+                if (json.data.length > 999) {
+                    $('#search_err_container').html('Only the first 1000 rows are shown. '
+                      + 'Please, refine your search to make sure results are not truncated.');
+                }
                 return json.data;
             } ,
             // Include CSRF-token in POST
