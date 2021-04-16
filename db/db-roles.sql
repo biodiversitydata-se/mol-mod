@@ -1,12 +1,13 @@
 --
 -- Environment variables
 --
-
+-- This is loaded directly from docker secrets (see compose file)
+-- See https://hub.docker.com/_/postgres under Docker secrets
 \set passwd `echo ${POSTGRES_PASSWORD}`
-\set iptpass `echo ${POSTGRES_IPT_PASS}`
+-- These need to be read from container files
+\set iptpass `cat ${POSTGRES_IPT_PASS_FILE}`
 \set anon `echo ${PGRST_DB_ANON_ROLE:-web_anon}`
-\set anonpass `echo ${PGRST_DB_ANON_PASS}`
-
+\set anonpass `cat ${PGRST_DB_ANON_PASS_FILE}`
 
 --
 -- Roles
