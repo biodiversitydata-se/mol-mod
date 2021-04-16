@@ -1,12 +1,13 @@
 --
 -- Environment variables
 --
--- This is loaded directly from docker secrets (see compose file)
+
+\set anon `echo ${PGRST_DB_ANON_ROLE:-web_anon}`
+-- This is loaded directly from docker secrets
 -- See https://hub.docker.com/_/postgres under Docker secrets
 \set passwd `echo ${POSTGRES_PASSWORD}`
 -- These need to be read from container files
 \set iptpass `cat ${POSTGRES_IPT_PASS_FILE}`
-\set anon `echo ${PGRST_DB_ANON_ROLE:-web_anon}`
 \set anonpass `cat ${PGRST_DB_ANON_PASS_FILE}`
 
 --
@@ -20,6 +21,7 @@ CREATE ROLE :anon;
 ALTER ROLE :anon WITH NOSUPERUSER INHERIT NOCREATEROLE NOCREATEDB NOLOGIN NOREPLICATION NOBYPASSRLS PASSWORD :'anonpass';
 CREATE ROLE ipt;
 ALTER ROLE ipt WITH NOSUPERUSER NOINHERIT NOCREATEROLE NOCREATEDB LOGIN NOREPLICATION NOBYPASSRLS PASSWORD :'iptpass';
+
 --
 -- Role memberships
 --
