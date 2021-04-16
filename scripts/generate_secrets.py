@@ -38,8 +38,8 @@ def generate_secret(filename, skip_existing: bool = False):
         sys.exit(1)
     else:
         logging.info("writing secret token to %s", filename)
-        logging.info("setting permissions to 400 for %s", filename)
-        os.chmod(filename, 0o400)
+        logging.info("setting permissions to 0444 for %s", filename)
+        os.chmod(filename, 0o444)
 
         return secret
 
@@ -75,8 +75,8 @@ def write_config(config_file, template_file, skip_existing=False, **variables):
         logging.info("writing template file")
         config.write(template)
 
-    logging.info("setting permissions to 400 for %s", config_file)
-    os.chmod(config_file, 0o400)
+    logging.info("setting permissions to 0444 for %s", config_file)
+    os.chmod(config_file, 0o444)
 
 
 if __name__ == '__main__':
@@ -104,6 +104,7 @@ if __name__ == '__main__':
 
     PG_PASS = generate_secret('.secret.postgres_pass', ARGS.skip_existing)
     PG_ANON = generate_secret('.secret.anon_pass', ARGS.skip_existing)
+    PG_IPT = generate_secret('.secret.ipt_pass', ARGS.skip_existing)
 
     # read template file
     for row in open(ARGS.env):

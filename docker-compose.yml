@@ -24,6 +24,8 @@ secrets:
     file: .secret.anon_pass
   postgrest_config:
     file: .secret.postgrest_config
+  ipt_pass:
+    file: .secret.ipt_pass
 
 services:
 
@@ -50,9 +52,11 @@ services:
     secrets:
       - postgres_pass
       - postgrest_anon_pass
+      - ipt_pass
     environment:
       - POSTGRES_PASSWORD_FILE=./run/secrets/postgres_pass
       - PGRST_DB_ANON_PASS_FILE=./run/secrets/postgrest_anon_pass
+      - POSTGRES_IPT_PASS_FILE=./run/secrets/ipt_pass
 
   postgrest:
     # https://hub.docker.com/r/postgrest/postgrest
