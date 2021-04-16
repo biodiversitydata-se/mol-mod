@@ -37,7 +37,6 @@ services:
     volumes:
       # Files read (in alphanumeric order) during database startup,
       # and used to define database schema and roles
-      - ./db/setup-env-extra.sh:/docker-entrypoint-initdb.d/00-setup-env-extra.sh
       - ./db/db-data-schema.sql:/docker-entrypoint-initdb.d/01-data-schema.sql
       - ./db/db-api-schema.sql:/docker-entrypoint-initdb.d/02-api-schema.sql
       - ./db/db-roles.sql:/docker-entrypoint-initdb.d/03-roles.sql
