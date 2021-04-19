@@ -51,9 +51,17 @@ Then, to pull images and start up services:
 ```
   $ make run
 ```
-Once the system is running, you can insert the default data in the database, and copy blastdb files into worker container:
+
+Once the system is running, you can insert the default data into the database:
 ```
   $ make restore
+```
+You also need to copy the BLAST database into the worker container:
+```
+  $ make blast-copy
+```
+Alternatively, you may want to *generate and *copy the blast-db:
+```
   $ make blast
 ```
 If you want to stop and restart clean, use the following shortcut (see details in Makefile):
@@ -62,6 +70,7 @@ If you want to stop and restart clean, use the following shortcut (see details i
 ```
 
 Note that the blast-worker uses the same Dockerfile for both development and production, but that we set FLASK_ENV=production in docker-compose.prod.yml.
+
 
 ### Database access
 Database access can be limited to IP ranges listed in environment variable `DBACCESS` in .env file. As a default, this is set to include loopback/same device, private and Docker networking defaults:
@@ -72,12 +81,12 @@ Note that you need to stop services and remove the database for any changes to t
 
 Alternatively, to add new address range(s) without removing the database, you can run a script inside the container, and then restart it for changes in pg_hba.conf to take effect:
 ```
-docker exec -e DBACCESS='193.11.30.171/32' asv-db docker-entrypoint-initdb.d/04-restrict-db.sh
-docker restart asv-db
+  $ docker exec -e DBACCESS='193.11.30.171/32' asv-db docker-entrypoint-initdb.d/04-restrict-db.sh
+  $ docker restart asv-db
 ```
 Note that you may have to edit firewall settings to allow incoming connections to port 5432, from those same ranges, e.g. in ufw:
 ```
-sudo ufw allow from 193.11.30.171/32 to any port 5432
+  $ sudo ufw allow from 193.11.30.171/32 to any port 5432
 ```
 
 ### Data import
@@ -89,6 +98,8 @@ This script executes *importer.py* inside the main container. Check the *PARSER.
 ```
   $ ./scripts/import_excel.py /path/to/file.xlsx --dry-run -vv
 ```
+For new datasets to be available in BLAST database build or filter search, you also need to set dataset property *in_bioatlas* to *true* (e.g. via pgAdmin until implemented as script running in container). See also *BLAST-database generation* below.
+
 
 ### BLAST-database generation
 Generate a new BLAST database (including ASVs from datasets that have been imported into the Bioatlas only), using another script. See:
@@ -99,6 +110,24 @@ This script executes *blast_builder.py* inside a blast-worker container. Again, 
 ```
   $ ./scripts/build_blast_db.py -vv
 ```
+
+### Updates on server
+If you have built new images locally and pushed to dockerhub](https://hub.docker.com/r/bioatlas/), you can just pull and run these directly on the server:
+```
+  $ make pull
+  $ make up
+  # or
+  $ make run
+```
+But if you have made changes to *compose* or *.env files*, you also need to update the git repos:
+```
+  $ git pull
+```
+If the app still doesn't update properly, double-check that you have pulled the correct version of the image: with info on dockerhub:
+```
+  $ docker image ls --digests
+```
+You may also have to empty the browser cache (Chrome/Mac: shift + cmd + R), to implement changes in jQuery.
 
 ### Testing
 To run the available python unittests, you need to create a local python
