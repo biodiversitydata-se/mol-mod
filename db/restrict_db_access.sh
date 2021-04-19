@@ -1,4 +1,8 @@
 #!/bin/sh
+# This script runs during database initialization,
+# i.e. when asv-db is started with postgres-data dir removed,
+# or if executed inside running asv-db container (See README.md) with DBACCESS argument
+# Adds db access (via 5432) to all IP:s listed in DBACCESS variable, in .env file
 
 if [ -n "$DBACCESS" ]; then
   for hostaccess in $DBACCESS; do
