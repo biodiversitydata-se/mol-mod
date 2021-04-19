@@ -54,9 +54,13 @@ wait:
 restore:
 	./backup.sh restore
 
+# Build blastdb from datasets with in_bioatlas = true
+blast-build:
+	python3 ./scripts/build_blast_db.py
+
 # Copy blastdb into worker container
-blast:
+blast-copy:
 	for file in blast-databases/*; do docker cp $$file mol-mod_blast-worker_1:/blastdbs/; done;
 
-blast-build:
-	./scripts/build_blast_db.py
+# Build and copy blastdb into container
+blast: blast-build blast-copy
