@@ -60,7 +60,7 @@ You also need to copy the BLAST database into the worker container:
 ```
   $ make blast-copy
 ```
-Alternatively, you may want to *generate and *copy the blast-db:
+Alternatively, you may want to *generate and* copy the blast-db:
 ```
   $ make blast
 ```
