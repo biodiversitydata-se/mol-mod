@@ -64,7 +64,7 @@
                 {% else %}
                     <div class='form-group'>
                 {% endif %}
-                        {{ sform.min_qry_cover(id='min_qry_cover', class='form-control', type='number') }}
+                        {{ sform.min_qry_cover(id='min_qry_cover_input', class='form-control', type='number') }}
                         <span class='help-block'>
                             {% for error in sform.min_qry_cover.errors %}
                             {{ error }}
@@ -78,7 +78,10 @@
             <div class='col-md-1'>
                 {{ sform.blast_for_seq(class='btn btn-primary', id='blast_for_seq') }}
             </div>
-            <div class='col-md-11'>
+            <div class='col-md-1'>
+                <button type='button' class='btn btn-default' id='clear_all'>Clear all</button>
+            </div>
+            <div class='col-md-10'>
                 You may have to scroll down to see results.
                 When they have finished loading, tick left column to (de)select a row,
                 and click bottom button to show occurrence records of selected ASV:s in Bioatlas.
