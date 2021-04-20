@@ -10,11 +10,13 @@ from flask import Blueprint
 from flask import current_app as APP
 from flask import jsonify, render_template, request
 from flask_cas import login_required
+from molmod import limiter
 from molmod.config import get_config
 # pylint: disable=import-error
 from molmod.forms import BlastResultForm, BlastSearchForm
 
 CONFIG = get_config()
+
 
 blast_bp = Blueprint('blast_bp', __name__,
                      template_folder='templates')
@@ -22,6 +24,8 @@ blast_bp = Blueprint('blast_bp', __name__,
 
 @blast_bp.route('/blast', methods=['GET', 'POST'])
 @login_required
+@limiter.limit('1 per day', error_message='Too many requests per user'
+               'and time unit! Chill!')
 def blast():
     '''Displays both blast search and result forms. Result table is
        populated on submit via (DataTables) AJAX call to '/blast_run'

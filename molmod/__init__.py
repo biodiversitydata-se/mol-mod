@@ -7,10 +7,16 @@ from logging.config import dictConfig
 
 from flask import Flask
 from flask_cas import CAS
+from flask_limiter import Limiter
 from flask_wtf.csrf import CSRFProtect
 
 from . import errors
 from .config import get_config
+
+# Extensions
+csrf = CSRFProtect()
+cas = CAS()
+limiter = Limiter(key_func=lambda: cas.username)
 
 
 def create_app():
@@ -40,10 +46,15 @@ def create_app():
     # app.logger.setLevel(logging.root.level)
 
     # Enable cross-site resource forgery protections
-    CSRFProtect(app)
+    csrf.init_app(app)
 
     # Enable authentication against Bioatlas CAS server
-    cas = CAS(app)
+    cas.init_app(app)
+
+    # Enable custom error handling
+    errors.init_app(app)
+
+    limiter.init_app(app)
 
     # Make some variables available in all templates,
     # for dynamic display of menu items and email links
@@ -72,6 +83,5 @@ def create_app():
         app.register_blueprint(main_routes.main_bp)
         app.register_blueprint(blast_routes.blast_bp)
         app.register_blueprint(filter_routes.filter_bp)
-        errors.init_app(app)
 
     return app
