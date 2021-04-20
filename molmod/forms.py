@@ -88,7 +88,7 @@ def cover_check(form, field):
 class BlastSearchForm(FlaskForm):
     sequence = TextAreaField(u'sequence', [fasta_check],
                              default=DEFAULT_BLAST_GENE)
-    min_identity = IntegerField(u'min_identity', [identity_check], default=97)
+    min_identity = IntegerField(u'min_identity', [identity_check], default=100)
     min_qry_cover = IntegerField(u'min_qry_cover', [cover_check], default=100)
     blast_for_seq = SubmitField(u'BLAST')
 
