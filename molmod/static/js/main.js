@@ -15,6 +15,11 @@ $(document).ready(function() {
             $('#sequence_textarea').on('input', function(){
                 updateSeqLength();
             });
+            $('#clear_all').on('click', function () {
+                $('#sequence_textarea').val('');
+                $('#min_identity_input').val('');
+                $('#min_qry_cover_input').val('');
+            });
             // Define columns for BLAST search result table
             var columns = [
                 { data: null, orderable: false, defaultContent: '', className: 'select-checkbox'},
