@@ -15,5 +15,45 @@
             here</a>.
         </p>
     </div>
+    <hr>
+    <div>
+        <h3>Statistics</h3>
+        <p><br>Overview of marker genes and taxa represented in the ASV database,
+            excluding any datasets not yet published in the Bioatlas.</p>
+    </div>
+    <div class='row'>
+        <div class='col-md-12'>
+            <table id='stats_table' class='dataframe table table-striped'>
+                <thead>
+                    <tr>
+                        <th>Marker</th>
+                        <th>Kingdoms</th>
+                        <th>Phyla #</th>
+                        <th>Classes #</th>
+                        <th>Orders #</th>
+                        <th>Families #</th>
+                        <th>Genera #</th>
+                        <th>Species #</th>
+                        <th>ASV:s #</th>
+                    </tr>
+                    {% if rows %}
+                    {% for row in rows %}
+                    <tr>
+                        <td>{{ row.gene }}</a></td>
+                        <td>{{ row.kingdoms }}</a></td>
+                        <td align="center">{{ row.phyla }}</a></td>
+                        <td align="center">{{ row.classes }}</a></td>
+                        <td align="center">{{ row.orders }}</a></td>
+                        <td align="center">{{ row.families }}</a></td>
+                        <td align="center">{{ row.genera }}</a></td>
+                        <td align="center">{{ row.species }}</a></td>
+                        <td align="center">{{ row.asvs }}</a></td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </thead>
+            </table>
+        </div>
+    </div>
 </div>
 {% endblock body %}

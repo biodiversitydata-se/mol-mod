@@ -149,6 +149,35 @@ CREATE VIEW api.app_search_mixs_tax AS
    WHERE d.in_bioatlas
   ORDER BY a.asv_id, a.asv_sequence, m.target_gene, m.target_subfragment, (((m.pcr_primer_name_forward)::text || ': '::text) || (m.pcr_primer_forward)::text), (((m.pcr_primer_name_reverse)::text || ': '::text) || (m.pcr_primer_reverse)::text);
 
+  CREATE MATERIALIZED VIEW api.app_about_stats AS
+   SELECT sub.gene,
+      string_agg(DISTINCT sub.kingdom::text, ', '::text) AS kingdoms,
+      count(DISTINCT sub.phylum) AS phyla,
+      count(DISTINCT sub.classs) AS classes,
+      count(DISTINCT sub.oorder) AS orders,
+      count(DISTINCT sub.family) AS families,
+      count(DISTINCT sub.genus) AS genera,
+      count(DISTINCT sub.species) AS species,
+      count(DISTINCT sub.asv_id) AS asvs
+     FROM ( SELECT a.asv_id,
+              m.target_gene AS gene,
+              ta.kingdom,
+              ta.phylum,
+              ta.class AS classs,
+              ta.oorder,
+              ta.family,
+              ta.genus,
+              ta.genus::text || ta.specific_epithet::text AS species
+             FROM mixs m
+               JOIN occurrence o ON o.event_pid = m.pid
+               JOIN asv a ON a.pid = o.asv_pid
+               JOIN taxon_annotation ta ON a.pid = ta.asv_pid
+               JOIN sampling_event e ON o.event_pid = e.pid
+               JOIN dataset d ON e.dataset_pid = d.pid WHERE d.in_bioatlas) sub
+    GROUP BY sub.gene
+    ORDER BY sub.gene
+  WITH DATA;
+
 CREATE FUNCTION api.app_drop_options(field text, noffset bigint, nlimit integer, term text DEFAULT ''::text, kingdom text[] DEFAULT '{}'::text[], phylum text[] DEFAULT '{}'::text[], classs text[] DEFAULT '{}'::text[], oorder text[] DEFAULT '{}'::text[], family text[] DEFAULT '{}'::text[], genus text[] DEFAULT '{}'::text[], species text[] DEFAULT '{}'::text[], gene text[] DEFAULT '{}'::text[], sub text[] DEFAULT '{}'::text[], fw_prim text[] DEFAULT '{}'::text[], rv_prim text[] DEFAULT '{}'::text[]) RETURNS TABLE(data json)
     LANGUAGE plpgsql IMMUTABLE
     AS $_$
