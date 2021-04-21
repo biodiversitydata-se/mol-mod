@@ -5,9 +5,10 @@
         <br>
         <h3>Search for ASVs and Bioatlas records using BLAST</h3>
         <br>
-        <p>Use the Basic Local Alignment Search Tool (BLAST) to find Amplicon
+        <p>Use the <a href="https://www.ncbi.nlm.nih.gov/books/NBK153387/">
+           Basic Local Alignment Search Tool (BLAST)</a>, to find Amplicon
            Sequence Variants (ASVs), and associated Bioatlas occurrence records,
-           <br>matching your sequences and alignment criteria
+           <br>matching your sequences and alignment criteria.
        </p>
     <hr>
     </div>
@@ -74,6 +75,23 @@
             </div>
         </div>
         <br>
+        <div class='row'>
+            <div class='col-md-12'>
+                This corresponds to running a (command line) nucleotide BLAST (BLASTn) search filtered
+                on -perc_identity and -qcov_hsp_perc.
+                Note that query cover is calculated per High Scorting Pair (HSP),
+                i.e. per ungapped local pairwise alignment between query and subject,
+                and that we only report the best HSP for each query-subject hit.
+                Result fields correspond to 'qacc', 'sacc', 'pident', 'qcovhsp', 'evalue'
+                in <a href="http://www.metagenomics.wiki/tools/blast/blastn-output-format-6/">BLASTn output format 6</a>,
+                and rows are sorted on Query and E-value by default.
+                The E-value is a measure of 'significance',
+                more specifically the number of hits of similar score that we expect to see by chance given our database size.
+            </div>
+        </div>
+
+        <br>
+        <hr>
         <div class='row'>
             <div class='col-md-1'>
                 {{ sform.blast_for_seq(class='btn btn-primary', id='blast_for_seq') }}
