@@ -5,8 +5,8 @@ keep track of the current number of jobs in case we would want to limit this in
 the future.
 """
 
-import os
 import json
+import os
 import subprocess
 from logging.config import dictConfig
 
@@ -65,11 +65,12 @@ def main():
         # Collect BLAST cmd items into list
         cmd = ['blastn']
         cmd += ['-perc_identity', unlist(form['min_identity'])]
+        # Query cover per High-Scoring Pair
         cmd += ['-qcov_hsp_perc', unlist(form['min_qry_cover'])]
         cmd += ['-db', os.path.join('/blastdbs', form['db'])]
         cmd += ['-outfmt', f'6 {" ".join(field_names)}']
-        # Only report x best High Scorting Pair(s) per sequence hit
-        # cmd += ['-max_hsps', '1']
+        # Only report best High Scorting Pair per query/subject pair
+        cmd += ['-max_hsps', '1']
         cmd += ['-num_threads', '4']
 
     except KeyError as err:
