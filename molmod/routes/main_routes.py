@@ -1,9 +1,10 @@
 import json
+import os
 
 import requests
 from flask import Blueprint, abort
 from flask import current_app as APP
-from flask import render_template
+from flask import render_template, send_from_directory
 from molmod.config import get_config
 
 CONFIG = get_config()
@@ -40,3 +41,21 @@ def get_stats() -> dict:
         results = json.loads(response.text)
         # APP.logger.debug(results)
         return results
+
+
+@main_bp.route('/submit')
+def submit():
+    # abort(301)
+    return render_template('submit.html')
+
+
+@main_bp.route("/files/<filename>")
+def files(filename):
+    """Downloads a file"""
+    dir = os.path.join('.', 'static', 'downloads')
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    try:
+        return send_from_directory(dir, filename, as_attachment=True)
+    except FileNotFoundError:
+        abort(404)
