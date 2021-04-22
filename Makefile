@@ -64,3 +64,8 @@ blast-copy:
 
 # Build and copy blastdb into container
 blast: blast-build blast-copy
+
+# Update in_bioatlas status (to 0/1) for dataset pid and / or (when pid=0)
+# stats view for datasets in_bioatlas = 1
+status-update:
+	python3 ./scripts/update_bas_status.py --container mol-mod_asv-main_1 $(pid) $(status) -v
