@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
 """
-This is a wrapper script to send an Excel data stream
-to the data importer inside a running asv-main docker-container.
+This is a wrapper script to send an Excel data stream (and additional
+arguments) to the data importer inside a running docker-container.
+To see additional arguments, use:
+`docker exec -i asv-main ./molmod/importer/importer.py -h` (in development), or
+`docker exec -i mol-mod_asv-main_1 ./molmod/importer/importer.py -h`
+(in production). Then add them to the wrapper command, e.g:
+`./scripts/import_excel.py file.xlsx -v` ) or e.g.
+`./scripts/import_excel.py --container mol-mod_asv-main_1 file.xlsx -v`
+(in production).
 """
 
 if __name__ == '__main__':
