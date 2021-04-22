@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block title %}Page Not Found{% endblock %}
+{% block body %}
+<div class='container'>
+    <div>
+        <br>
+        <h2>How to submit data to the ASV database and Bioatlas</h2>
+        <p><br>Some intro about relationship between ENA-ASV DB-Bioatlas,
+            perhaps referring to About page.
+        <p><br>Overview of planned flow, to be described.
+            <ol>
+                <li>Data contributor (DC) deposits raw data in ENA or other publicly available repository</li>
+                <li>DC downloads Excel template from module (this page)</li>
+                <li>DC creates Bioatlas account (Login-page)</li>
+                <li>DC logs in (Login-page)</li>
+                <li>DC requests upload permission (File upload-page)</li>
+                <li>DC uploads Excel or TSV-files (File upload-page)</li>
+                <li>We import data into ASV database, and apply standard taxonomic re-annotation.</li>
+                <li>We create a new data resource in <a href='https://www.gbif.se/ipt/'>the Integrated Publishing Toolkit (IPT)</a>, and add new IPT-user, if needed.</li>
+                <li>We email DC with IPT-login-info and 'Databasägareavtal' contract</li>
+                <li>DC returns signed contract, supplies metadata and publishes data in IPT</li>
+                <li>Bioatlas admin lets us know when data have been imported into Bioatlas</li>
+                <li>We flag dataset as published, making it searchable in webapp</li>
+                <li>We regularly update taxonomic annotation, and publish new dataset versions in IPT.</li>
+            </ol>
+        </p>
+    </div>
+    <div>
+        <p>Download <a href="{{ url_for('main_bp.files', filename='SBDI-metabarcoding-template.xlsx') }}">Data input template</a>
+        </p>
+    </div>
+</div>
+{% endblock body %}
