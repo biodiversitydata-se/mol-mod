@@ -12,7 +12,7 @@ import psycopg2
 from importer import connect_db
 
 
-def run_update(dataset_pid: int = 0, status: int = 1, dry_run: bool = False):
+def run_update(pid: int = 0, status: int = 1, dry_run: bool = False):
     '''Updates `in_bioatlas` status for a dataset, and/or updates the
        materialized db view that summarizes data for datasets that have been
        imported into the Bioatlas (i.e. have status `in_bioatlas = True)'''
@@ -22,7 +22,7 @@ def run_update(dataset_pid: int = 0, status: int = 1, dry_run: bool = False):
 
     # If first argument in update_bas_status cmd is zero,
     # skip status update and only run the view update
-    if dataset_pid > 0:
+    if pid > 0:
         # Translate status from int (simpler to write) to bool (used in db)
         if status == 0:
             status = False
@@ -31,7 +31,7 @@ def run_update(dataset_pid: int = 0, status: int = 1, dry_run: bool = False):
         try:
             logging.info("Updating Bioatlas status")
             cursor.execute(f"UPDATE dataset SET in_bioatlas = {status} \
-                             WHERE pid = {dataset_pid};")
+                             WHERE pid = {pid};")
         except psycopg2.OperationalError as err:
             logging.error("Could not update Bioatlas status")
             logging.error(err)
@@ -64,7 +64,7 @@ if __name__ == '__main__':
 
     PARSER = argparse.ArgumentParser(description=__doc__)
 
-    PARSER.add_argument('dataset_pid', type=int,
+    PARSER.add_argument('pid', type=int,
                         help=("pid of dataset to be status-updated,"
                               " or 0 for no dataset (i.e. view-update only)"))
     PARSER.add_argument('status', type=int,
@@ -84,4 +84,4 @@ if __name__ == '__main__':
     # Set log level based on ./scripts/import_excel argument
     # E.g: --v means log level = 10(3-2) = 10
     logging.basicConfig(level=(10*(ARGS.quiet - ARGS.verbose)))
-    run_update(ARGS.dataset_pid, ARGS.status, ARGS.dry_run)
+    run_update(ARGS.pid, ARGS.status, ARGS.dry_run)
