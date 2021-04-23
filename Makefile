@@ -50,6 +50,10 @@ wait:
 	$(info Waiting for services to start)
 	sleep 10
 
+# Backup postgres data
+backup:
+	./scripts/backup.sh data
+
 # Restore latest db dump in db container
 restore:
 	./scripts/backup.sh restore
