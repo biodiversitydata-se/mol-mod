@@ -1,15 +1,18 @@
 #
-# This makefile is intended to be used for creating, publishing, and running
-# the molmod produciton environment (locally).
+# This makefile is intended to be used for creating, publishing,
+# and running the molmod produciton environment
 #
 compose = docker-compose.prod.yml
 SHELL = bash
 
-all: build
-
 run: pull up
 
-rebuild: clean secrets build up wait restore blast
+# Implement (updated) image, restore db, blastdb and stats page
+test: clean pull up wait restore blast-copy stats
+
+#
+# GENERAL DOCKER
+#
 
 # Build service, or rebuild to implement changes in Dockerfile
 build:
@@ -42,13 +45,17 @@ ps:
 clean:
 	docker-compose -f $(compose) down -v
 
-# Generate passwords, or use existing
-secrets:
-	python3 ./scripts/generate_secrets.py --skip-existing
-
 wait:
 	$(info Waiting for services to start)
 	sleep 10
+
+#
+# DB
+#
+
+# Generate passwords, or use existing
+secrets:
+	python3 ./scripts/generate_secrets.py --skip-existing
 
 # Backup postgres data
 backup:
@@ -57,6 +64,10 @@ backup:
 # Restore latest db dump in db container
 restore:
 	./scripts/backup.sh restore
+
+#
+# BLAST
+#
 
 # Build blastdb from datasets with in_bioatlas = true
 blast-build:
@@ -69,7 +80,15 @@ blast-copy:
 # Build and copy blastdb into container
 blast: blast-build blast-copy
 
+#
+# Dataset status & visibility
+#
+
 # Update in_bioatlas status (to 0/1) for dataset pid and / or (when pid=0)
 # stats view for datasets in_bioatlas = 1
-status-update:
+status:
 	python3 ./scripts/update_bas_status.py --container mol-mod_asv-main_1 $(pid) $(status) -v
+
+# Update stats view
+stats:
+	python3 ./scripts/update_bas_status.py --container mol-mod_asv-main_1 0 0 -v
