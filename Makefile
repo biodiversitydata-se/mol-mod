@@ -52,7 +52,7 @@ wait:
 
 # Restore latest db dump in db container
 restore:
-	./backup.sh restore
+	./scripts/backup.sh restore
 
 # Build blastdb from datasets with in_bioatlas = true
 blast-build:
