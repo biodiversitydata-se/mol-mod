@@ -41,6 +41,21 @@ def create_app():
     # Enable cross-site resource forgery protections
     CSRFProtect(app)
 
+    # Make some variables available in all templates
+    @app.context_processor
+    def inject_into_templates():
+        CONFIG = get_config()
+        logging.debug(CONFIG.SBDI_CONTACT_PAGE)
+
+        return dict(
+            sbdi_contact_page=CONFIG.SBDI_CONTACT_PAGE,
+            sbdi_start_page=CONFIG.SBDI_START_PAGE,
+            sbdi_seq_search_page=CONFIG.SBDI_SEQ_SEARCH_PAGE,
+            sbdi_molecular_page=CONFIG.SBDI_MOLECULAR_PAGE,
+            bioatlas_page=CONFIG.BIOATLAS_PAGE,
+            taxonomy_page=CONFIG.TAXONOMY_PAGE
+        )
+
     with app.app_context():
         from molmod.routes import blast_routes, filter_routes, main_routes
         app.register_blueprint(main_routes.main_bp)
