@@ -43,6 +43,12 @@ def get_stats() -> dict:
         return results
 
 
+@main_bp.route('/upload')
+def upload():
+    # abort(301)
+    return render_template('upload.html')
+
+
 @main_bp.route('/submit')
 def submit():
     # abort(301)

@@ -5,28 +5,22 @@
     <div>
         <br>
         <h1>Submit data</h1>
-        <p><br>Some intro about relationship between ENA-ASV DB-Bioatlas,
-            perhaps referring to About page.
-        <p><br>Overview of planned flow, to be described.
+        <p><br>We can help make your Amplicon Sequence Variant (ASV) dataset available to the research community
+            via the ASV database and the Bioatlas. Read more about our platform, and the data we currently support,
+            in the <a href="{{ url_for('main_bp.about') }}">About</a> page.
+        <p>These are the main steps of the submission process:
             <ol>
-                <li>Data contributor (DC) deposits raw data in ENA or other publicly available repository</li>
-                <li>DC downloads Excel template from module (this page)</li>
-                <li>DC creates Bioatlas account (Login-page)</li>
-                <li>DC logs in (Login-page)</li>
-                <li>DC requests upload permission (File upload-page)</li>
-                <li>DC uploads Excel or TSV-files (File upload-page)</li>
-                <li>We import data into ASV database, and apply standard taxonomic re-annotation.</li>
-                <li>We create a new data resource in <a href='https://www.gbif.se/ipt/'>the Integrated Publishing Toolkit (IPT)</a>, and add new IPT-user, if needed.</li>
-                <li>We email DC with IPT-login-info and 'Databasägareavtal' contract</li>
-                <li>DC returns signed contract, supplies metadata and publishes data in IPT</li>
-                <li>Bioatlas admin lets us know when data have been imported into Bioatlas</li>
-                <li>We flag dataset as published, making it searchable in webapp</li>
-                <li>We regularly update taxonomic annotation, and publish new dataset versions in IPT.</li>
+                <li>Submit your raw data to ENA (see our
+                    <a href="https://biodiversitydata-se.github.io/mol-data/ena-metabar.html">guide</a>).
+                </li>
+                <li>Denoise your data to ASVs (you can use the <a href="https://nf-co.re/ampliseq">ampliseq pipeline</a>).</li>
+                <li>
+                    <a href="{{ url_for('main_bp.files', filename='SBDI-metabarcoding-template.xlsx') }}">
+                        Download</a>, fill in and
+                    <a href="{{ url_for('main_bp.upload') }}">upload</a> the data input template.</li>
+                <li>We will contact you to write a data-sharing contract.</li>
+                <li>Your data will be published in the ASV database and bioatlas.</li>
             </ol>
-        </p>
-    </div>
-    <div>
-        <p>Download <a href="{{ url_for('main_bp.files', filename='SBDI-metabarcoding-template.xlsx') }}">Data input template</a>
         </p>
     </div>
 </div>
