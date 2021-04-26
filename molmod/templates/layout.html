@@ -21,7 +21,11 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ala-styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.png') }}">
-
+    <script>
+        // Make available in all templates
+        var page = '{{ request.path }}';
+        var sbdiContactPage = '{{ sbdi_contact_page }}';
+    </script>
 </head>
 <body>
     {% include "banner.html" %}
