@@ -153,6 +153,11 @@ $(document).ready(function() {
             }
         });
     }
+    
+    $("#file").change(function(){
+        var filename = $(this).val().split('\\').pop();
+        $('#file-shown').text(filename);
+    });
 
 });
 

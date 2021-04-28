@@ -8,6 +8,7 @@ import requests
 from flask import Blueprint
 from flask import current_app as APP
 from flask import render_template, request
+from flask_cas import login_required
 from molmod.config import get_config
 from molmod.forms import FilterResultForm, FilterSearchForm
 
@@ -18,6 +19,7 @@ filter_bp = Blueprint('filter_bp', __name__,
 
 
 @filter_bp.route('/filter', methods=['GET', 'POST'])
+@login_required
 def filter():
     '''Displays both filter search and result forms. Search form dropdowns
        are populates via (Select2) AJAX call to '/request_drop_options/';

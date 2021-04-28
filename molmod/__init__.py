@@ -6,6 +6,7 @@ import os
 from logging.config import dictConfig
 
 from flask import Flask
+from flask_cas import CAS
 from flask_wtf.csrf import CSRFProtect
 
 from . import errors
@@ -41,10 +42,21 @@ def create_app():
     # Enable cross-site resource forgery protections
     CSRFProtect(app)
 
-    # Make some variables available in all templates
+    # Enable authentication against Bioatlas CAS server
+    cas = CAS(app)
+
+    # Make some variables available in all templates,
+    # for dynamic display of menu items and email links
     @app.context_processor
     def inject_into_templates():
         CONFIG = get_config()
+        if cas.attributes:
+            user = cas.username
+            # To show in menu when user is logged in
+            firstname = cas.attributes['cas:firstname']
+        else:
+            user = None
+            firstname = None
 
         return dict(
             sbdi_contact_page=CONFIG.SBDI_CONTACT_PAGE,
@@ -52,7 +64,9 @@ def create_app():
             sbdi_seq_search_page=CONFIG.SBDI_SEQ_SEARCH_PAGE,
             sbdi_molecular_page=CONFIG.SBDI_MOLECULAR_PAGE,
             bioatlas_page=CONFIG.BIOATLAS_PAGE,
-            taxonomy_page=CONFIG.TAXONOMY_PAGE
+            taxonomy_page=CONFIG.TAXONOMY_PAGE,
+            user=user,
+            firstname=firstname
         )
 
     with app.app_context():
