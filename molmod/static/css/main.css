@@ -14,6 +14,20 @@ body {
     color: #aa4442;
 }
 
+h1 {
+  font-size: 25px;
+}
+
+h2 {
+  font-size: 20px;
+}
+
+P.blocktext {
+    margin-left: auto;
+    margin-right: auto;
+    width: 85%
+}
+
 /* FORMS */
 #rform, #sform {
     visibility: hidden;
