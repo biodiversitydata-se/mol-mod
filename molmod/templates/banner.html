@@ -19,6 +19,11 @@
         <li><a href="{{ url_for('blast_bp.blast') }}">BLAST search</a></li>
         <li><a href="{{ url_for('filter_bp.filter') }}">Filter search</a></li>
         <li><a href="{{ url_for('main_bp.submit') }}">Submit data</a></li>
+        {% if firstname %}
+            <li><a href="/logout">Log out {{firstname}}</a></li>
+        {% else %}
+            <li><a href="/login">Login</a></li>
+        {% endif %}
         <li><a href="{{ url_for('main_bp.about') }}">About</a></li>
       </ul>
     </div>

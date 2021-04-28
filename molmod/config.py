@@ -21,12 +21,17 @@ class Config:
     BLAST_DB = get_env_variable('BLAST_DB')
     DEBUG = False
     TESTING = False
+    # SBDI links
     SBDI_START_PAGE = get_env_variable('SBDI_START_PAGE')
     SBDI_CONTACT_PAGE = get_env_variable('SBDI_CONTACT_PAGE')
     SBDI_SEQ_SEARCH_PAGE = get_env_variable('SBDI_SEQ_SEARCH_PAGE')
     SBDI_MOLECULAR_PAGE = get_env_variable('SBDI_MOLECULAR_PAGE')
     BIOATLAS_PAGE = get_env_variable('BIOATLAS_PAGE')
     TAXONOMY_PAGE = get_env_variable('TAXONOMY_PAGE')
+    # CAS authentication
+    CAS_SERVER = get_env_variable('CAS_SERVER')
+    CAS_AFTER_LOGIN = get_env_variable('CAS_AFTER_LOGIN')
+    CAS_AFTER_LOGOUT = get_env_variable('CAS_AFTER_LOGOUT')
 
 
 class ProductionConfig(Config):
