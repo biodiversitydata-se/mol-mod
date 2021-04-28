@@ -2,8 +2,9 @@
 
 import re
 
-from flask import current_app as app
+from flask import current_app as APP
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField
 from wtforms import (BooleanField, IntegerField, SelectMultipleField,
                      SubmitField, TextAreaField, ValidationError)
 
@@ -85,6 +86,30 @@ def cover_check(form, field):
             raise ValidationError('Value between 0 and 100, please.')
 
 
+def file_check(form, field):
+    file = field.data
+
+    if not file or not file.filename:
+        raise ValidationError('No file supplied')
+
+    parts = file.filename.lower().split('.')
+    APP.logger.debug(f'{file.filename} is split into {parts}')
+
+    if len(parts) < 2:
+        raise ValidationError(
+            'Select an Excel (xlsx) or compressed archive '
+            '(tar.gz, tar.bz2 or tar.lz) file, please!')
+
+    if parts[-1] in ('xlsx') or (parts[-2] in ('tar') and
+       parts[-1] in ('gz', 'bz2', 'lz')):
+        APP.logger.debug(f'Approving file name {file.filename}')
+        return None
+
+    raise ValidationError(
+        'Select an Excel (xlsx) or compressed archive '
+        '(tar.gz, tar.bz2 or tar.lz) file, please!')
+
+
 class BlastSearchForm(FlaskForm):
     sequence = TextAreaField(u'sequence', [fasta_check],
                              default=DEFAULT_BLAST_GENE)
@@ -95,8 +120,8 @@ class BlastSearchForm(FlaskForm):
 
 class BlastResultForm(FlaskForm):
     asv_id = BooleanField(u'asv_id')
-    batch_url = app.config['BATCH_SEARCH_URL']
-    redirect_url = app.config['REDIRECT_URL']
+    batch_url = APP.config['BATCH_SEARCH_URL']
+    redirect_url = APP.config['REDIRECT_URL']
 
 
 class FilterSearchForm(FlaskForm):
@@ -116,5 +141,10 @@ class FilterSearchForm(FlaskForm):
 
 class FilterResultForm(FlaskForm):
     asv_id = BooleanField(u'asv_id')
-    batch_url = app.config['BATCH_SEARCH_URL']
-    redirect_url = app.config['REDIRECT_URL']
+    batch_url = APP.config['BATCH_SEARCH_URL']
+    redirect_url = APP.config['REDIRECT_URL']
+
+
+class UploadForm(FlaskForm):
+    file = FileField('file', [file_check])
+    submit = SubmitField('Submit')

@@ -9,6 +9,7 @@ import requests
 from flask import Blueprint
 from flask import current_app as APP
 from flask import jsonify, render_template, request
+from flask_cas import login_required
 from molmod.config import get_config
 # pylint: disable=import-error
 from molmod.forms import BlastResultForm, BlastSearchForm
@@ -20,6 +21,7 @@ blast_bp = Blueprint('blast_bp', __name__,
 
 
 @blast_bp.route('/blast', methods=['GET', 'POST'])
+@login_required
 def blast():
     '''Displays both blast search and result forms. Result table is
        populated on submit via (DataTables) AJAX call to '/blast_run'
