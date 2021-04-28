@@ -45,7 +45,6 @@ def create_app():
     @app.context_processor
     def inject_into_templates():
         CONFIG = get_config()
-        logging.debug(CONFIG.SBDI_CONTACT_PAGE)
 
         return dict(
             sbdi_contact_page=CONFIG.SBDI_CONTACT_PAGE,
