@@ -241,8 +241,8 @@ function makeDataTbl(url, columns) {
                     dTbl.buttons().disable();
                 }
                 if (json.data.length > 999) {
-                    $('#search_err_container').html('Only the first 1000 rows are shown. '
-                      + 'Please, refine your search to make sure results are not truncated.');
+                    $('#search_err_container').html('Please note that only the first 1000 hits are returned. '
+                      + 'Refine your search to make sure results are not truncated.');
                 }
                 return json.data;
             } ,
