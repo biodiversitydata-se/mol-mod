@@ -10,6 +10,7 @@ x-logging:
 volumes:
   postgres-db:
   blast-db:
+  blastconfig:
 
 secrets:
   postgres_pass:
@@ -80,6 +81,7 @@ services:
       - FLASK_ENV=production
     volumes:
       - blast-db:/blastdbs
+      - blastconfig:/root/.config
 
   asv-main:
     restart: always
