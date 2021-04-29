@@ -8,6 +8,6 @@ WORKDIR /worker
 
 RUN pip3 install -r requirements.txt
 
-ENV FLASK_ENV="development"
+ENV FLASK_ENV="production"
 ENV FLASK_APP="worker.py"
 CMD ["flask", "run", "--host=0.0.0.0"]
