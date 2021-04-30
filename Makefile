@@ -87,8 +87,8 @@ blast: blast-build blast-copy
 # Update in_bioatlas status (to 0/1) for dataset pid and / or (when pid=0)
 # stats view for datasets in_bioatlas = 1
 status:
-	python3 ./scripts/update_bas_status.py --container mol-mod_asv-main_1 $(pid) $(status) -v
+	python3 ./scripts/update_bas_status.py --container asv-main $(pid) $(status) -v
 
 # Update stats view
 stats:
-	python3 ./scripts/update_bas_status.py --container mol-mod_asv-main_1 0 0 -v
+	python3 ./scripts/update_bas_status.py --container asv-main 0 0 -v
