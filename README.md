@@ -73,7 +73,16 @@ Alternatively, you can just update the view:
 ```
   $ make status pid=0 status=1
 ```
-Note that the blast-worker uses the same Dockerfile for both development and production, but that we set FLASK_ENV=production in docker-compose.prod.yml.
+Note that the blast-worker uses the same Dockerfile for both development and production, but that we set
+FLASK_ENV=production in docker-compose.prod.yml.
+
+
+### CAS authentication
+For local testing of production environment, you need to run or add this to your bash startup file (e.g. ~/.bash_profile):
+```
+  $ export HOST_URL=http://localhost:5000
+```
+Otherwise the Bioatlas CAS server will redirect users to 'https://molecular.biodiversitydata.se' after logout.
 
 
 ### Database access
