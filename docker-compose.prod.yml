@@ -68,6 +68,8 @@ services:
       - postgres
 
   blast-worker:
+    # Can not have container-name set, as this makes spawning additional
+    # workers on demand fail for some reason
     image: bioatlas/molmod-blast:${TAG:-latest}
     init: true
     build:
@@ -90,6 +92,7 @@ services:
     build:
       context: ./
       dockerfile: docker/production
+    container_name: asv-main
     logging: *default-logging
     volumes:
       - uploads:/uploads
