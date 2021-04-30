@@ -31,7 +31,6 @@ class Config:
     # CAS authentication
     CAS_SERVER = get_env_variable('CAS_SERVER')
     CAS_AFTER_LOGIN = get_env_variable('CAS_AFTER_LOGIN')
-    CAS_AFTER_LOGOUT = get_env_variable('CAS_AFTER_LOGOUT')
     UPLOAD_PATH = get_env_variable('UPLOAD_PATH')
     # Cache settings (Flask internal)
     SEND_FILE_MAX_AGE_DEFAULT = 300  # 300 seconds = 5 minutes
@@ -43,6 +42,12 @@ class ProductionConfig(Config):
     BATCH_SEARCH_URL = 'https://records.bioatlas.se/ws/occurrences/batchSearch'
     REDIRECT_URL = 'https://records.bioatlas.se/occurrences/search'
 
+    # For testing in local production env,
+    # run or add this to your bash startup file (e.g. ~/.bash_profile):
+    # export HOST_URL=http://localhost:5000
+    CAS_AFTER_LOGOUT = get_env_variable('CAS_AFTER_LOGOUT') or \
+        'https://molecular.biodiversitydata.se'
+
 
 class DevelopmentConfig(Config):
     DEBUG = True
@@ -50,6 +55,7 @@ class DevelopmentConfig(Config):
     BATCH_SEARCH_URL = 'https://molecular.infrabas.se/' \
                        'biocache-service/occurrences/batchSearch'
     REDIRECT_URL = 'https://molecular.infrabas.se/ala-hub/occurrences/search'
+    CAS_AFTER_LOGOUT = 'http://localhost:5000'
 
 
 class TestConfig(Config):
