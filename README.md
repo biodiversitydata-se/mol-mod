@@ -64,11 +64,15 @@ Alternatively, you may want to *generate and* copy the blast-db:
 ```
   $ make blast
 ```
-If you want to stop and restart clean, use the following shortcut (see details in Makefile):
+As BLAST, filter search and About stats will only return data from datasets already in the Bioatlas, you may also need to update the 'in_bioatlas' flag for a dataset:
 ```
-  $ make rebuild
+  $ make status pid=17 status=1
 ```
-
+...which also updates the materialized view behind the About stats.
+Alternatively, you can just update the view:
+```
+  $ make status pid=0 status=1
+```
 Note that the blast-worker uses the same Dockerfile for both development and production, but that we set FLASK_ENV=production in docker-compose.prod.yml.
 
 
@@ -87,6 +91,16 @@ Alternatively, to add new address range(s) without removing the database, you ca
 Note that you may have to edit firewall settings to allow incoming connections to port 5432, from those same ranges, e.g. in ufw:
 ```
   $ sudo ufw allow from xxx.xxx.xxx.xxx/32 to any port 5432
+```
+
+### File uploads
+You can list uploaded files in running asv-main container:
+```
+  $ docker exec asv-main ls /uploads
+```
+It is also possible to copy these to current host dir with:
+```
+  $ docker cp  asv-main:/uploads .
 ```
 
 ### Data import
