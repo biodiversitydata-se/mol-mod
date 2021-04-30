@@ -10,6 +10,9 @@ COPY wsgi.py /app/
 COPY config/uwsgi-config.ini /app/
 RUN chown -R www-data:www-data /app/
 
+RUN mkdir -p /uploads
+RUN chown www-data:www-data /uploads
+
 WORKDIR /app
 
 RUN pip3 install -r molmod/requirements.txt

@@ -99,6 +99,7 @@ services:
       - type: bind
         source: ./
         target: /code
+      - uploads:/uploads
     env_file:
       - .env
     secrets:
@@ -112,3 +113,4 @@ services:
 
 volumes:
   blastconfig:
+  uploads:
