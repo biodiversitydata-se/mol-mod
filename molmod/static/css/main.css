@@ -81,7 +81,10 @@ tr.shown td.details-control {
     text-align: left;
     color: #c44d34;
 }
-
+.scroll-note {
+    color: #c44d34;
+}
+/* FILE UPLOAD */
 #file {
     visibility: hidden;
 }
