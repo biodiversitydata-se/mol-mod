@@ -40,9 +40,9 @@ class Config:
 class ProductionConfig(Config):
     DEBUG = True
     # For POST requests from search result forms to BioAtlas/SBDI
-    BATCH_SEARCH_URL = 'https://records.bioatlas.se/ws/occurrences/batchSearch'
-    REDIRECT_URL = 'https://records.bioatlas.se/occurrences/search'
-
+    BATCH_SEARCH_URL = 'https://records.biodiversitydata.se/' \
+                       'ws/occurrences/batchSearch'
+    REDIRECT_URL = 'https://records.biodiversitydata.se/occurrences/search'
     # For testing in local production env,
     # run or add this to your bash startup file (e.g. ~/.bash_profile):
     # export HOST_URL=http://localhost:5000
