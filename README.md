@@ -103,7 +103,7 @@ Note that you may have to edit firewall settings to allow incoming connections t
 ```
 
 ### File uploads
-We set the size limit of uploaded files both in nginx proxy (client_max_body_size), but also in the flask .env file (MAX_CONTENT_LENGTH) to be able to show a flask (rather than nginx) error page. Note that neither the flask development server nor uwsgi handles this well, resulting in a connection reset error instead of a 413 response (See Connection Reset Issue in [Flask documentation](https://flask.palletsprojects.com/en/1.1.x/patterns/fileuploads/) when testing locally.
+The size limit you set in nginx (molecular.conf: client_max_body_size) needs to correspond to the setting in flask (.env: MAX_CONTENT_LENGTH) for restriction to work properly. Note that neither the flask development server nor uwsgi handles this well, resulting in a connection reset error instead of a 413 response (See Connection Reset Issue in [Flask documentation](https://flask.palletsprojects.com/en/1.1.x/patterns/fileuploads/) when testing locally.
 
 You can list uploaded files in running asv-main container:
 ```
