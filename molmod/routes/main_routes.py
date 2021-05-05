@@ -84,7 +84,7 @@ def upload():
     # User has tried to submit file (POST)
     # Check if it passes (simple) validation in forms.py
     if not form.validate_on_submit():
-        return render_template('upload.html', form=form, upload_error=True)
+        return render_template('upload.html', form=form)
 
     # Get filename
     f = form.file.data
