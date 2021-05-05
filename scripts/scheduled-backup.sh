@@ -57,6 +57,11 @@ fi >&2
 
 target_dir=$backup_dir/backup-$(date +%Y%m%d-%H%M%S)
 
+set --
+if [ -d "$backup_dir/latest" ]; then
+	set -- --link-dest="$backup_dir/latest/"
+fi
+
 for source_dir in db log upload; do
 	source_dir=$toplevel/$source_dir
 
@@ -66,7 +71,7 @@ for source_dir in db log upload; do
 	fi >&2
 
 	rsync --archive --itemize-changes \
-		--link-dest="$backup_dir/latest/" \
+		"$@" \
 		"$source_dir" "$target_dir"
 done
 
