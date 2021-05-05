@@ -90,7 +90,7 @@ def file_check(form, field):
     file = field.data
 
     if not file or not file.filename:
-        raise ValidationError('No file supplied')
+        raise ValidationError('Please select a file.')
 
     parts = file.filename.lower().split('.')
     APP.logger.debug(f'{file.filename} is split into {parts}')
