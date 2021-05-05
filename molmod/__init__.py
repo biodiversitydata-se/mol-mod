@@ -66,7 +66,8 @@ def create_app():
             bioatlas_page=CONFIG.BIOATLAS_PAGE,
             taxonomy_page=CONFIG.TAXONOMY_PAGE,
             user=user,
-            firstname=firstname
+            firstname=firstname,
+            max_file_size=CONFIG.MAX_CONTENT_LENGTH
         )
 
     with app.app_context():
