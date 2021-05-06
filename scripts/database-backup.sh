@@ -99,7 +99,7 @@ else
   fi
 
   printf 'Creating database dump file "%s"\n' "$FILE"
-  docker exec -i "$CONTAINER" \
+  docker exec "$CONTAINER" \
     pg_dump "${FLAGS[@]}" --format="$FORMAT" \
       -n "$PGRST_DB_SCHEMA" >"$FILE.$FORMAT"
 fi
