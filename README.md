@@ -22,7 +22,7 @@ Then, start up services:
 ```
 Once the system is running, you can insert the default data into the database:
 ```
-  $ ./backup.sh restore
+  $ ./scripts/database-backup.sh restore
 ```
 
 The development site should now be available at http://localhost:5000.
