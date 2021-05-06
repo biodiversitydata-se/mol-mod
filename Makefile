@@ -59,11 +59,11 @@ secrets:
 
 # Backup postgres data
 backup:
-	./scripts/backup.sh data
+	./scripts/database-backup.sh data
 
 # Restore latest db dump in db container
 restore:
-	./scripts/backup.sh restore
+	./scripts/database-backup.sh restore
 
 #
 # BLAST

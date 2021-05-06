@@ -16,11 +16,11 @@ CONTAINER='asv-db'
 FORMAT='tar'	# Change to 'plain' for plain SQL
 
 #
-# CREATE HELP (access with './backup.sh -h' in molmod folder)
+# CREATE HELP (access with './scripts/database-backup.sh -h' in molmod folder)
 #
 if [ "$1" = '-h' ] || [ "$1" = '--help' ]; then
   cat <<'HELP'
-USAGE: ./backup.sh [restore [filename] | data]
+USAGE: ./scripts/database-backup.sh [restore [filename] | data]
 
 Given no arguments, this script will use a subset of the variables in
 the file ".env" in the current directory to create a database backup.
