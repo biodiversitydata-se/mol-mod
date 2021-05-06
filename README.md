@@ -103,6 +103,8 @@ Note that you may have to edit firewall settings to allow incoming connections t
 ```
 
 ### File uploads
+The size limit you set in nginx (molecular.conf: client_max_body_size) needs to correspond to the setting in flask (.env: MAX_CONTENT_LENGTH) for restriction to work properly. Note that neither the flask development server nor uwsgi handles this well, resulting in a connection reset error instead of a 413 response (See Connection Reset Issue in [Flask documentation](https://flask.palletsprojects.com/en/1.1.x/patterns/fileuploads/) when testing locally.
+
 You can list uploaded files in running asv-main container:
 ```
   $ docker exec asv-main ls /uploads
