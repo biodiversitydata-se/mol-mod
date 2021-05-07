@@ -41,9 +41,7 @@ then
 	exit 1
 fi
 
-if [ -z "$toplevel" ]; then
-	toplevel=$( readlink -f "$( dirname "$0" )/.." )
-fi
+toplevel=$( readlink -f "${toplevel:-"$( dirname "$0" )/.."}" )
 
 backup_dir=$toplevel/backup
 
