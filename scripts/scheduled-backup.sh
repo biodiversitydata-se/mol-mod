@@ -17,13 +17,13 @@
 #	Github reposiory has been checked out, and this will be found
 #	via this script's location if the variable is left unset below.
 #
-#	Backups are written to "$toplevel/backup/backup-timestamp" where
-#	"timestamp" is a timestamp on the YYYYMMDD-HHMMSS format.  There
-#	will also be a symbolic link, "$toplevel/backup/latest", which
-#	will point to the most recent backup.
+#	Backups are written to "$toplevel/backups/backup-timestamp"
+#	where "timestamp" is a timestamp on the YYYYMMDD-HHMMSS format.
+#	There will also be a symbolic link, "$toplevel/backups/latest",
+#	which will point to the most recent backup.
 #
 #	Backups are incremental.  Unchanged files are hard-linked in
-#	older backups.
+#	older backups and will not consume extra space.
 #
 #	This script is suitable to be run from crontab.	 Suggested
 #	crontab entry for twice-daily backups as 9 AM and 9 PM:
@@ -43,7 +43,7 @@ fi
 
 toplevel=$( readlink -f "${toplevel:-"$( dirname "$0" )/.."}" )
 
-backup_dir=$toplevel/backup
+backup_dir=$toplevel/backups
 
 case $backup_dir in
 	/*)	# absolute path, okay
