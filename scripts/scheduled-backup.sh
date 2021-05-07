@@ -45,6 +45,14 @@ toplevel=$( readlink -f "${toplevel:-"$( dirname "$0" )/.."}" )
 
 backup_dir=$toplevel/backup
 
+case $backup_dir in
+	/*)	# absolute path, okay
+		;;
+	*)	# not an absolute path
+		printf '"%s" is not an absolute pathname\n' "$backup_dir" >&2
+		exit 1
+esac
+
 if [ ! -d "$backup_dir" ]; then
 	printf 'Creating "%s"...\n' "$backup_dir"
 	if ! mkdir "$backup_dir"; then
