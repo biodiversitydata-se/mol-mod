@@ -83,7 +83,7 @@ $(document).ready(function() {
                     var selFile = $('#file')[0].files[0];
                     // Check size
                     if( selFile.size > maxFileSize ) {
-                        $('#upload_err_container').html('JQ: The file you tried to upload was larger than the ' + maxFileSize / (1024 * 1024) + ' MB we can deal with here. '
+                        $('#upload_err_container').html('The file you tried to upload was larger than the ' + maxFileSize / (1024 * 1024) + ' MB we can deal with here. '
                         + 'Please <u><a href="' + sbdiContactPage + '">contact SBDI support</a></u>, and we will find another option for you.');
                         return false;
                     }
