@@ -33,7 +33,7 @@ stop:
 
 # Stop and remove containers
 down:
-	docker-compose -f $(compose) down
+	docker-compose -f $(compose) down --remove-orphans
 
 logs:
 	docker-compose -f $(compose) logs -f
