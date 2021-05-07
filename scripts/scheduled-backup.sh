@@ -3,27 +3,27 @@
 #-----------------------------------------------------------------------
 # This script will:
 #
-#	1.  Perform a database dump using the "scripts/backup.sh"
-#	    script.
+#	1.  Perform a database dump using the
+#	    "scripts/database-backup.sh" script, unless given the "-n"
+#	    command line option.
 #
 #	2.  Perform an incremental backup of the following directories
 #	    using rsync:
 #
-#		* "$toplevel"/db
-#		* "$toplevel"/log
-#		* "$toplevel"/upload
+#		* "$toplevel"/db	(the database backups)
+#		* asv-main:/upload	(the in-container upload directory)
 #
-#	The "$toplevel" directory is the director into which the mol-mod
-#	Github reposiory has been checked out, and this will be found
+#	The "$toplevel" directory is the directory into which the
+#	mol-mod Github reposiory has been cloned, and this will be found
 #	via this script's location if the variable is left unset below.
 #
-#	Backups are written to "$toplevel/backup/backup-timestamp" where
-#	"timestamp" is a timestamp on the YYYYMMDD-HHMMSS format.  There
-#	will also be a symbolic link, "$toplevel/backup/latest", which
-#	will point to the most recent backup.
+#	Backups are written to "$toplevel/backups/backup-timestamp"
+#	where "timestamp" is a timestamp on the YYYYMMDD-HHMMSS format.
+#	There will also be a symbolic link, "$toplevel/backups/latest",
+#	which will point to the most recent backup.
 #
 #	Backups are incremental.  Unchanged files are hard-linked in
-#	older backups.
+#	older backups and will not consume extra space.
 #
 #	This script is suitable to be run from crontab.	 Suggested
 #	crontab entry for twice-daily backups as 9 AM and 9 PM:
@@ -31,9 +31,10 @@
 #		0 9,21 * * * /opt/mol-mod/scripts/scheduled-backup.sh
 #-----------------------------------------------------------------------
 
+# TODO: command line parsing
 # TODO: Database dump
 
-toplevel=
+unset toplevel
 
 if ! command -v rsync >/dev/null 2>&1
 then
@@ -43,7 +44,7 @@ fi
 
 toplevel=$( readlink -f "${toplevel:-"$( dirname "$0" )/.."}" )
 
-backup_dir=$toplevel/backup
+backup_dir=$toplevel/backups
 
 case $backup_dir in
 	/*)	# absolute path, okay
@@ -63,23 +64,19 @@ fi >&2
 
 target_dir=$backup_dir/backup-$(date +%Y%m%d-%H%M%S)
 
-set --
+# Default rsync options.
+set -- --archive --itemize-changes -e 'docker exec -i'
+
+# Add --link-dest option if "$backup_dir/latest" exists.
 if [ -d "$backup_dir/latest" ]; then
-	set -- --link-dest="$backup_dir/latest/"
+	set -- "$@" --link-dest="$backup_dir/latest/"
 fi
 
-for source_dir in db log upload; do
-	source_dir=$toplevel/$source_dir
-
-	if [ ! -d "$source_dir" ]; then
-		printf 'Skipping "%s", directory not avaiable\n' "$source_dir"
-		continue
-	fi >&2
-
-	rsync --archive --itemize-changes \
-		"$@" \
-		"$source_dir" "$target_dir"
+# Note: No slash at the end of pathnames here.
+for source_dir in "$toplevel/db" asv-main:/uploads; do
+	rsync "$@" "$source_dir" "$target_dir"
 done
 
+# (Re-)create "$backup_dir/latest" symbolic link.
 rm -f "$backup_dir/latest"
 ln -s "$(basename "$target_dir")" "$backup_dir/latest"
