@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block title %}Page Not Found{% endblock %}
+{% block body %}
+<div class='container'>
+    <div>
+        <br>
+        <h3>File Too Large</h3>
+        <br>
+        <p>The file you tried to upload was larger than the {{ "{:.0f}".format(max_file_size/(1024*1024)) }}
+           MB we can deal with here.
+       </p>
+       <p>
+           Please contact <a href="{{ sbdi_contact_page }}">SBDI support</a>,
+           and we will find another option for you.
+        </p>
+
+    </div>
+</div>
+{% endblock body %}

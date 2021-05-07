@@ -50,15 +50,12 @@ def get_stats() -> dict:
 # Redirect user to Bioatlas CAS login
 @login_required
 def upload():
-    '''Checks whether logged-in user has required role for file upload.
-       Authorized users are sent to upload page; unauthorized users to custom
-       403 Forbidden page ('Data upload' menu item is actually hidden for those
-       - see __init.py__ + banner.html - but 403 is used if unauthorized user
-       types in '/upload' url).
-
-       Standard Bioatlas users have role 'ROLE_USER', and we require
-       'ROLE_COLLECTION_ADMIN' for upload, for now, but will have a specific
-       molmod-upload role added later.
+    '''Checks whether logged-in user has required role (UPLOAD_ROLE) for file
+       upload. Authorized users are sent to upload page; unauthorized users to
+       custom 403 Forbidden page. Selected files currently need to pass
+       validation in both forms.py and js, the latter of which was added to be
+       able to reject larger files faster, and to avoid getting 413 response
+       directly from nginx.
     '''
 
     # Get CAS user roles from session
@@ -73,7 +70,7 @@ def upload():
         f'User has CAS roles: {roles} ')
 
     # Stop unauthorized users
-    if os.getenv('UPLOAD_ROLE') not in roles:
+    if CONFIG.UPLOAD_ROLE not in roles:
         abort(403)
 
     form = UploadForm()
@@ -84,7 +81,7 @@ def upload():
     # User has tried to submit file (POST)
     # Check if it passes (simple) validation in forms.py
     if not form.validate_on_submit():
-        return render_template('upload.html', form=form, upload_error=True)
+        return render_template('upload.html', form=form)
 
     # Get filename
     f = form.file.data
@@ -93,7 +90,6 @@ def upload():
     try:
         f.save(os.path.join(CONFIG.UPLOAD_PATH, filename))
     except Exception as err:
-        # Display error msg in upload form
         APP.logger.error(
             f'File {filename} could not be saved due to {err}')
         return render_template('upload.html', form=form, upload_error=True)
