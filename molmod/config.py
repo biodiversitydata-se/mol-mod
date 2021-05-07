@@ -31,8 +31,12 @@ class Config:
     # CAS authentication
     CAS_SERVER = get_env_variable('CAS_SERVER')
     CAS_AFTER_LOGIN = get_env_variable('CAS_AFTER_LOGIN')
+    # Data submission
     UPLOAD_PATH = get_env_variable('UPLOAD_PATH')
+    UPLOAD_ROLE = get_env_variable('UPLOAD_ROLE')
     MAX_CONTENT_LENGTH = int(get_env_variable('MAX_CONTENT_LENGTH'))
+    VALID_EXTENSIONS = get_env_variable('VALID_EXTENSIONS').split(' ')
+
     # Cache settings (Flask internal), but see also molecular.config in proxy
     # (https://github.com/biodiversitydata-se/proxy-ws-mol-mod-docker)
     SEND_FILE_MAX_AGE_DEFAULT = 300  # 300 seconds = 5 minutes
