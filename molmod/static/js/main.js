@@ -3,11 +3,10 @@ $(document).ready(function() {
 
     var hlpDiv = $('#selection_error'); // For displaying no-selection warning
 
-    var currPage = $(location).attr('href').split("/").pop();
-    switch(currPage) {
+    switch(page) {
 
         // BLAST PAGE
-        case 'blast':
+        case '/blast':
             // Update info on query sequence length
             // after BLAST (page is reloaded)
             updateSeqLength();
@@ -36,7 +35,7 @@ $(document).ready(function() {
             break;
 
         // FILTER PAGE
-        case 'filter':
+        case '/filter':
 
             // Set format for select2-dropdown boxes
             $.fn.select2.defaults.set('theme', 'bootstrap');
@@ -75,6 +74,41 @@ $(document).ready(function() {
             // Make FILTER search result table
             var dTbl = makeDataTbl('/filter_run', columns);
             break;
+
+        case '/upload':
+            $('#uform').submit(function() {
+            // Checks size and name of selected file against env variables
+                // If file has been selected (otherwise Flask rejects)
+                if ($("#file").val()) {
+                    var selFile = $('#file')[0].files[0];
+                    // Check size
+                    if( selFile.size > maxFileSize ) {
+                        $('#upload_err_container').html('JQ: The file you tried to upload was larger than the ' + maxFileSize / (1024 * 1024) + ' MB we can deal with here. '
+                        + 'Please <u><a href="' + sbdiContactPage + '">contact SBDI support</a></u>, and we will find another option for you.');
+                        return false;
+                    }
+                    // Check extension
+                    var valExtArr = validExtensions.split(', ');
+                    var nmParts = selFile.name.split('.');
+                    // If no extension
+                    if (nmParts.length < 2){
+                        $("#upload_err_container").html('Select a valid file (' + validExtensions + '), please!');
+                        return false;
+                    }
+                    // Catches single extension part, e.g. xlsx
+                    var sngExt = nmParts[nmParts.length - 1];
+                    // Catches double extension parts, e.g. tar.gz
+                    var dblExt = nmParts[nmParts.length - 2] + '.' + sngExt;
+                    // If neither matches allow extensions
+                    if ((valExtArr.indexOf(sngExt.toLowerCase()) == -1) &&
+                       (valExtArr.indexOf(dblExt.toLowerCase()) == -1)) {
+                        $("#upload_err_container").html('Select a valid file (' + validExtensions + '), please!');
+                        return false;
+                    }
+                }
+                return true;
+        });
+
     }
 
     // Show forms after Bootstrap/dataTables/Select2 styling is done
@@ -153,7 +187,7 @@ $(document).ready(function() {
             }
         });
     }
-    
+
     $("#file").change(function(){
         var filename = $(this).val().split('\\').pop();
         $('#file-shown').text(filename);

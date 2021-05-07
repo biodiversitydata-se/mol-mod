@@ -5,41 +5,38 @@
         <br>
         <h3>Upload data to the ASV database</h3>
         <br>
-        <p>Select an Excel (xlsx) or compressed archive file (tar.gz, tar.bz2 och tar.lz) to submit.
-           Archives should contain a folder of comma-separated (csv) text files, each named after the original template sheet.
+        <p>Select an Excel (xlsx) or compressed archive file (xlsx.zip, tar.gz, tar.bz2 och tar.lz), with a maximum size of {{ "{:.0f}".format(max_file_size/(1024*1024)) }} MB.
        </p>
     </div>
-    <form method='post' id='form' enctype='multipart/form-data'>
+    <form method='post' id='uform' enctype='multipart/form-data'>
         {{ form.csrf_token }}
         <div class='row'>
             <div class='col-md-12'>
+                <!-- Actual upload, which is hidden -->
+                {{ form.file(id='file') }}
+                <!-- Custom upload button -->
+                <label for="file" class='btn btn-default'>Select</label>
+                <!-- Name of selected file -->
+                <span id="file-shown">No file selected</span>
+                {{ form.submit(class='btn btn-primary', value='Upload') }}
+                <br>
+                <br>
+            </div>
+        </div>
+        <div class='row'>
+            <div class='col-md-12 visHlpDiv' id='upload_err_container'>
+                <!-- Validation errors -->
                 {% if form and form.file.errors %}
-                    <div class='form-group has-error'>
-                {% else %}
-                    <div class='form-group'>
+                    {% for error in form.file.errors %}
+                       {{ error }}
+                    {% endfor %}
                 {% endif %}
-                        <!-- actual upload, which is hidden -->
-                        {{ form.file(id='file') }}
-                        <!-- custom upload button -->
-                        <label for="file" class='btn btn-default'>Select</label>
-                        <!-- name of selected file -->
-                        <span id="file-shown">No file selected</span>
-                        {{ form.submit(class='btn btn-primary', value='Upload') }}
-                        <br>
-                        <br>
-                        <span class='help-block'>
-                            {% for error in form.file.errors %}
-                               {{ error }}
-                            {% endfor %}
-                            {% if upload_error %}
-                                <p>
-                                Sorry, something unexpected happened during file upload.
-                                Please contact <a href="{{ sbdi_contact_page }}">SBDI support</a>
-                                if this error persists.
-                                </p>
-                            {% endif %}
-                        </span>
-                    </div>
+                <!-- Upload errors -->
+                {% if upload_error %}
+                    Sorry, something unexpected happened during file upload.
+                    Please <u><a contact href="{{ sbdi_contact_page }}">contact SBDI support</a></u>
+                    if this error persists.
+                {% endif %}
             </div>
         </div>
     </form>
