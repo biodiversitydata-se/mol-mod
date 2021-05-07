@@ -14,7 +14,7 @@ body {
 }
 
 .help-block {
-    color: #aa4442;
+    color: #c44d34;
 }
 
 h1 {
@@ -91,5 +91,5 @@ tr.shown td.details-control {
 #file-shown {
   padding: 10px;
   display: inline-block;
-  width: 300px;
+  width: 400px;
 }

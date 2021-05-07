@@ -88,26 +88,25 @@ def cover_check(form, field):
 
 def file_check(form, field):
     file = field.data
+    valid_ext = APP.config['VALID_EXTENSIONS']
+    ext_str = ", ".join(valid_ext)
 
     if not file or not file.filename:
-        raise ValidationError('No file supplied')
+        raise ValidationError('Please select a file.')
 
+    # Same validation (with differently worded msg) is run by jQuery
+    # to respond (i.e. reject) faster for large files, but I keep this for now
     parts = file.filename.lower().split('.')
     APP.logger.debug(f'{file.filename} is split into {parts}')
 
     if len(parts) < 2:
-        raise ValidationError(
-            'Select an Excel (xlsx) or compressed archive '
-            '(tar.gz, tar.bz2 or tar.lz) file, please!')
+        raise ValidationError(f'Please select a valid file ({ext_str}).')
 
-    if parts[-1] in ('xlsx') or (parts[-2] in ('tar') and
-       parts[-1] in ('gz', 'bz2', 'lz')):
+    if (parts[-1] in valid_ext) or (parts[-2] + '.' + parts[-1] in valid_ext):
         APP.logger.debug(f'Approving file name {file.filename}')
         return None
 
-    raise ValidationError(
-        'Select an Excel (xlsx) or compressed archive '
-        '(tar.gz, tar.bz2 or tar.lz) file, please!')
+    raise ValidationError(f'Please select a valid file ({ext_str}).')
 
 
 class BlastSearchForm(FlaskForm):
