@@ -32,8 +32,46 @@
 #		0 9,21 * * * /opt/mol-mod/scripts/scheduled-backup.sh
 #-----------------------------------------------------------------------
 
-# TODO: command line parsing
-# TODO: Database dump
+usage () {
+	cat <<-END_USAGE
+	Usage:
+
+	    $0 -h
+
+	    $0 [-n] [-v]
+
+	Options:
+
+	    -h	displays this help text
+	    -n	do not dump database
+	    -v	be more verbose
+
+	END_USAGE
+}
+
+be_verbose=false
+do_db_dump=true
+
+while getopts 'hnv' opt; do
+	case $opt in
+		h)
+			usage
+			exit
+			;;
+		n)
+			do_db_dump=false
+			;;
+		v)
+			be_verbose=true
+			;;
+		*)
+			echo 'Error in command line parsing' >&2
+			usage >&2
+			exit 1
+	esac
+done
+
+shift "$(( OPTIND - 1 ))"
 
 unset topdir
 container=asv-main
@@ -72,15 +110,24 @@ fi >&2
 
 target_dir=$backup_dir/backup-$(date +%Y%m%d-%H%M%S)
 
+if "$do_db_dump"; then
+	"$topdir"/scripts/database-backup.sh data
+fi
+
 # Default rsync options.
 set -- --archive --rsh='docker exec -i'
 
 # Be quiet if we're running non-interatively
-if [ ! -t 1 ]; then
+if [ ! -t 1 ] && ! "$be_verbose"; then
 	set -- "$@" --quiet
 else
 	set -- "$@" --itemize-changes
 fi
+
+if "$be_verbose"; then
+	set -- "$@" --verbose
+fi
+
 
 # Add --link-dest option if "$backup_dir/latest" exists.
 if [ -d "$backup_dir/latest" ]; then
