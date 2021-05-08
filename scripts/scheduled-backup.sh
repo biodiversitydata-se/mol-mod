@@ -111,23 +111,27 @@ fi >&2
 target_dir=$backup_dir/backup-$(date +%Y%m%d-%H%M%S)
 
 if "$do_db_dump"; then
-	"$topdir"/scripts/database-backup.sh data
+	FORMAT=custom "$topdir"/scripts/database-backup.sh data |
+	if [ -t 1 ] || "$be_verbose"; then
+		cat
+	else
+		cat >/dev/null
+	fi
 fi
 
 # Default rsync options.
 set -- --archive --rsh='docker exec -i'
 
 # Be quiet if we're running non-interatively
-if [ ! -t 1 ] && ! "$be_verbose"; then
-	set -- "$@" --quiet
-else
+if [ -t 1 ] || "$be_verbose"; then
 	set -- "$@" --itemize-changes
+else
+	set -- "$@" --quiet
 fi
 
 if "$be_verbose"; then
 	set -- "$@" --verbose
 fi
-
 
 # Add --link-dest option if "$backup_dir/latest" exists.
 if [ -d "$backup_dir/latest" ]; then
