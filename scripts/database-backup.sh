@@ -13,7 +13,11 @@ DIR='db'
 BASE='db-dump'
 TIMESTAMP="$(date +'%Y-%m-%d_%H%M')"
 CONTAINER='asv-db'
-FORMAT='tar'	# Change to 'plain' for plain SQL
+
+# Use the "$FORMAT" environment variable if it's available, but
+# otherwise default to "tar" format.  The formats supported by pg_dump
+# are plain, custom, directory, and tar.  See the pg_dump manual.
+FORMAT=${FORMAT:-tar}
 
 #
 # CREATE HELP (access with './scripts/database-backup.sh -h' in molmod folder)
