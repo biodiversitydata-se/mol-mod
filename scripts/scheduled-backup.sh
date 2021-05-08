@@ -4,23 +4,24 @@
 # This script will:
 #
 #	1.  Perform a database dump using the
-#	    "scripts/database-backup.sh" script, unless given the "-n"
-#	    command line option.
+#	    "$topdir/scripts/database-backup.sh" script, unless given
+#	    the "-n" command line option.
 #
 #	2.  Perform an incremental backup of the following directories
 #	    using rsync:
 #
-#		* "$toplevel"/db	(the database backups)
-#		* asv-main:/upload	(the in-container upload directory)
+#		* "$topdir"/db		(the database backups)
+#		* "$container:/uploads"	(the in-container upload directory)
 #
-#	The "$toplevel" directory is the directory into which the
-#	mol-mod Github reposiory has been cloned, and this will be found
-#	via this script's location if the variable is left unset below.
+#	The "$topdir" directory is the directory into which the mol-mod
+#	Github reposiory has been cloned.  This will be found via this
+#	script's location if the variable is left unset below.
 #
-#	Backups are written to "$toplevel/backups/backup-timestamp"
-#	where "timestamp" is a timestamp on the YYYYMMDD-HHMMSS format.
-#	There will also be a symbolic link, "$toplevel/backups/latest",
-#	which will point to the most recent backup.
+#	Backups are written to "backups/backup-{timestamp}" under
+#	"$topdir", where "{timestamp}" is a timestamp on the
+#	"YYYYMMDD-HHMMSS" format.  There will also be a symbolic link
+#	at "backups/latest", which will point to the most recent backup
+#	directory.
 #
 #	Backups are incremental.  Unchanged files are hard-linked in
 #	older backups and will not consume extra space.
@@ -34,28 +35,35 @@
 # TODO: command line parsing
 # TODO: Database dump
 
-unset toplevel
+unset topdir
+container=asv-main
+
+# Only run if the "$container" container is running.
+if [ "$( docker container inspect -f '{{ .State.Running }}' "$container" )" != 'true' ]
+then
+	printf 'Container "%s" not available\n'	"$container"
+	exit 1
+fi >&2
 
 if ! command -v rsync >/dev/null 2>&1
 then
 	echo 'rsync is not available, or not in PATH' >&2
 	exit 1
-fi
+fi >&2
 
-toplevel=$( readlink -f "${toplevel:-"$( dirname "$0" )/.."}" )
+topdir=$( readlink -f "${topdir:-"$( dirname "$0" )/.."}" )
 
-backup_dir=$toplevel/backups
+backup_dir=$topdir/backups
 
 case $backup_dir in
-	/*)	# absolute path, okay
-		;;
-	*)	# not an absolute path
-		printf '"%s" is not an absolute pathname\n' "$backup_dir" >&2
+	([!/]*)
+		# not an absolute path
+		printf '"%s" is not an absolute pathname\n' "$backup_dir"
 		exit 1
-esac
+esac >&2
 
 if [ ! -d "$backup_dir" ]; then
-	printf 'Creating "%s"...\n' "$backup_dir"
+	printf 'Creating missing backup directory "%s"...\n' "$backup_dir"
 	if ! mkdir "$backup_dir"; then
 		echo 'Failed'
 		exit 1
@@ -65,7 +73,14 @@ fi >&2
 target_dir=$backup_dir/backup-$(date +%Y%m%d-%H%M%S)
 
 # Default rsync options.
-set -- --archive --itemize-changes -e 'docker exec -i'
+set -- --archive --rsh='docker exec -i'
+
+# Be quiet if we're running non-interatively
+if [ ! -t 1 ]; then
+	set -- "$@" --quiet
+else
+	set -- "$@" --itemize-changes
+fi
 
 # Add --link-dest option if "$backup_dir/latest" exists.
 if [ -d "$backup_dir/latest" ]; then
@@ -73,7 +88,7 @@ if [ -d "$backup_dir/latest" ]; then
 fi
 
 # Note: No slash at the end of pathnames here.
-for source_dir in "$toplevel/db" asv-main:/uploads; do
+for source_dir in "$topdir/db" "$container:/uploads"; do
 	rsync "$@" "$source_dir" "$target_dir"
 done
 
