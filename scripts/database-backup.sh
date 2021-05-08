@@ -102,7 +102,7 @@ else
     FLAGS+=( -n public --data-only )
   fi
 
-  printf 'Creating database dump file "%s"\n' "$FILE"
+  printf 'Creating database dump file "%s.%s"\n' "$FILE" "$FORMAT"
   docker exec "$CONTAINER" \
     pg_dump "${FLAGS[@]}" --format="$FORMAT" \
       -n "$PGRST_DB_SCHEMA" >"$FILE.$FORMAT"
