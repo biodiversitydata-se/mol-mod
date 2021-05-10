@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime as dt
 
 import requests
 from flask import Blueprint, abort
@@ -66,6 +67,7 @@ def upload():
         abort(403)
 
     roles = cas_attributes['cas:authority'].split(',')
+
     APP.logger.debug(
         f'User has CAS roles: {roles} ')
 
@@ -86,15 +88,19 @@ def upload():
     # Get filename
     f = form.file.data
     filename = secure_filename(f.filename)
+    # Add user email & time
+    email = cas_attributes['cas:email']
+    upload_time = dt.now().strftime("%y%m%d-%H%M%S")
+    ext_filename = filename + '_' + email + '_' + upload_time
     # Save file, or report error
     try:
-        f.save(os.path.join(CONFIG.UPLOAD_PATH, filename))
+        f.save(os.path.join(CONFIG.UPLOAD_PATH, ext_filename))
     except Exception as err:
         APP.logger.error(
-            f'File {filename} could not be saved due to {err}')
+            f'File {ext_filename} could not be saved due to {err}')
         return render_template('upload.html', form=form, upload_error=True)
 
-    APP.logger.info(f'Uploaded file {filename}')
+    APP.logger.info(f'Uploaded file {ext_filename}')
     return render_template('uploaded.html', filename=filename)
 
 
@@ -102,6 +108,11 @@ def upload():
 def submit():
     # abort(301)
     return render_template('submit.html')
+
+
+@main_bp.route('/test')
+def test():
+    abort(413)
 
 
 @main_bp.route("/files/<filename>")
