@@ -5,24 +5,33 @@
 #
 #	1.  Perform a database dump using the
 #	    "$topdir/scripts/database-backup.sh" script, unless given
-#	    the "-n" command line option.
+#	    the "-n" command line option.  This writes a compressed dump
+#	    file to the "$topdir/db-backup" directory.
 #
-#	2.  Perform an incremental backup of the following directories
+#	2.  Pull logs from the three Docker containers asv-main,
+#	    asv-db, and asv-rest.  These logs are stored in
+#	    "$topdir/log-backup".  Only the logging data produced since
+#	    the last time this script ran will be stored (empty log
+#	    backups are removed).  The timestamp on the symbolic link
+#	    "$topdir/backups/latest" (which is re-created at the end of
+#	    this script) is used to determine from when logs are to be
+#	    stored.
+#
+#	3.  Perform an incremental backup of the following directories
 #	    using rsync:
 #
-#		* "$topdir"/db		(the database backups)
+#		* "$topdir"/db-backup"	(the database backups)
+#		* "$topdir/log-backup"	(the log backups)
 #		* "asv-main:/uploads"	(the in-container upload directory)
-#		* logs produced by asv-{db,main,rest} since last backup.
 #
 #	The "$topdir" directory is the directory into which the mol-mod
 #	Github reposiory has been cloned.  This will be found via this
 #	script's location if the variable is left unset below.
 #
-#	Backups are written to "backups/backup-{timestamp}" under
-#	"$topdir", where "{timestamp}" is a timestamp on the
-#	"YYYYMMDD-HHMMSS" format.  There will also be a symbolic link
-#	at "backups/latest", which will point to the most recent backup
-#	directory.
+#	Backups are written to "$topdir/backups/backup-{timestamp}",
+#	where "{timestamp}" is a timestamp on the "YYYYMMDD-HHMMSS"
+#	format.	 There will also be a symbolic link at "backups/latest",
+#	which will point to the most recent backup directory.
 #
 #	Backups are incremental.  Unchanged files are hard-linked in
 #	older backups and will not consume extra space.
@@ -50,6 +59,10 @@ usage () {
 	END_USAGE
 }
 
+#-----------------------------------------------------------------------
+# Do command line parsing.
+#-----------------------------------------------------------------------
+
 be_verbose=false
 do_db_dump=true
 
@@ -74,7 +87,9 @@ done
 
 shift "$(( OPTIND - 1 ))"
 
-unset topdir
+#-----------------------------------------------------------------------
+# Sanity checking our environment before starting.
+#-----------------------------------------------------------------------
 
 # Only run if the "asv-main" container is running.
 if [ "$( docker container inspect -f '{{ .State.Running }}' asv-main )" != 'true' ]
@@ -89,6 +104,7 @@ then
 	exit 1
 fi >&2
 
+unset topdir
 topdir=$( readlink -f "${topdir:-"$( dirname "$0" )/.."}" )
 
 backup_dir=$topdir/backups
@@ -108,6 +124,10 @@ if [ ! -d "$backup_dir" ]; then
 	fi
 fi >&2
 
+#-----------------------------------------------------------------------
+# 1.  Do database dump.
+#-----------------------------------------------------------------------
+
 now=$(date +%Y%m%d-%H%M%S)
 target_dir=$backup_dir/backup-$now
 
@@ -119,6 +139,10 @@ if "$do_db_dump"; then
 		cat >/dev/null
 	fi
 fi
+
+#-----------------------------------------------------------------------
+# 2.  Do Docker log dump.
+#-----------------------------------------------------------------------
 
 # Default options for "docker logs".
 set -- --timestamps --details
@@ -138,6 +162,11 @@ for container in asv-main asv-db asv-rest; do
 		rm -f "$backup_file"
 	fi
 done
+
+#-----------------------------------------------------------------------
+# 3.  Do incremental backup of database dumps, log dumps, and the
+#     "uploads" directory in the asv-main container.
+#-----------------------------------------------------------------------
 
 # Default rsync options.
 set -- --archive --omit-dir-times --rsh='docker exec -i'
