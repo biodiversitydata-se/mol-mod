@@ -12,6 +12,7 @@
 #
 #		* "$topdir"/db		(the database backups)
 #		* "$container:/uploads"	(the in-container upload directory)
+#		* logs produced by "$container" container since last backup.
 #
 #	The "$topdir" directory is the directory into which the mol-mod
 #	Github reposiory has been cloned.  This will be found via this
@@ -108,7 +109,8 @@ if [ ! -d "$backup_dir" ]; then
 	fi
 fi >&2
 
-target_dir=$backup_dir/backup-$(date +%Y%m%d-%H%M%S)
+now=$(date +%Y%m%d-%H%M%S)
+target_dir=$backup_dir/backup-$now
 
 if "$do_db_dump"; then
 	FORMAT=custom "$topdir"/scripts/database-backup.sh data |
@@ -117,6 +119,21 @@ if "$do_db_dump"; then
 	else
 		cat >/dev/null
 	fi
+fi
+
+# Default options for "docker logs".
+set -- --timestamps --details
+
+if [ -d "$backup_dir/latest" ]; then
+	set -- "$@" --since "$(stat --format %Z "$backup_dir/latest")"
+fi
+
+mkdir -p "$topdir/log-backup"
+docker logs "$@" "$container" >"$topdir/log-backup/$container.log.$now"
+
+# Remove log if nothing was logged since last backup.
+if [ ! -s "$topdir/log-backup/$container.log.$now" ]; then
+	rm -f "$topdir/log-backup/$container.log.$now"
 fi
 
 # Default rsync options.
@@ -139,7 +156,8 @@ if [ -d "$backup_dir/latest" ]; then
 fi
 
 # Note: No slash at the end of pathnames here.
-for source_dir in "$topdir/db" "$container:/uploads"; do
+for source_dir in "$topdir/db-backup" "$container:/uploads" "$topdir/log-backup"
+do
 	rsync "$@" "$source_dir" "$target_dir"
 done
 
