@@ -11,8 +11,8 @@
 #	    using rsync:
 #
 #		* "$topdir"/db		(the database backups)
-#		* "$container:/uploads"	(the in-container upload directory)
-#		* logs produced by "$container" container since last backup.
+#		* "asv-main:/uploads"	(the in-container upload directory)
+#		* logs produced by asv-{db,main,rest} since last backup.
 #
 #	The "$topdir" directory is the directory into which the mol-mod
 #	Github reposiory has been cloned.  This will be found via this
@@ -75,12 +75,11 @@ done
 shift "$(( OPTIND - 1 ))"
 
 unset topdir
-container=asv-main
 
-# Only run if the "$container" container is running.
-if [ "$( docker container inspect -f '{{ .State.Running }}' "$container" )" != 'true' ]
+# Only run if the "asv-main" container is running.
+if [ "$( docker container inspect -f '{{ .State.Running }}' asv-main )" != 'true' ]
 then
-	printf 'Container "%s" not available\n'	"$container"
+	echo 'Container "asv-main" not available'
 	exit 1
 fi >&2
 
@@ -129,12 +128,16 @@ if [ -d "$backup_dir/latest" ]; then
 fi
 
 mkdir -p "$topdir/log-backup"
-docker logs "$@" "$container" >"$topdir/log-backup/$container.log.$now" 2>&1
+for container in asv-main asv-db asv-rest; do
+	backup_file=$topdir/log-backup/$container.log.$now
 
-# Remove log if nothing was logged since last backup.
-if [ ! -s "$topdir/log-backup/$container.log.$now" ]; then
-	rm -f "$topdir/log-backup/$container.log.$now"
-fi
+	docker logs "$@" "$container" >"$backup_file" 2>&1
+
+	# Remove log if nothing was logged since last backup.
+	if [ ! -s "$backup_file" ]; then
+		rm -f "$backup_file"
+	fi
+done
 
 # Default rsync options.
 set -- --archive --rsh='docker exec -i'
@@ -156,7 +159,7 @@ if [ -d "$backup_dir/latest" ]; then
 fi
 
 # Note: No slash at the end of pathnames here.
-for source_dir in "$topdir/db-backup" "$container:/uploads" "$topdir/log-backup"
+for source_dir in "$topdir/db-backup" asv-main:/uploads "$topdir/log-backup"
 do
 	rsync "$@" "$source_dir" "$target_dir"
 done
