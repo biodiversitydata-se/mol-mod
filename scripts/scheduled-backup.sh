@@ -140,7 +140,7 @@ for container in asv-main asv-db asv-rest; do
 done
 
 # Default rsync options.
-set -- --archive --rsh='docker exec -i'
+set -- --archive --omit-dir-times --rsh='docker exec -i'
 
 # Be quiet if we're running non-interatively
 if [ -t 1 ] || "$be_verbose"; then
