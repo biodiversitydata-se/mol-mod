@@ -129,7 +129,7 @@ if [ -d "$backup_dir/latest" ]; then
 fi
 
 mkdir -p "$topdir/log-backup"
-docker logs "$@" "$container" >"$topdir/log-backup/$container.log.$now"
+docker logs "$@" "$container" >"$topdir/log-backup/$container.log.$now" 2>&1
 
 # Remove log if nothing was logged since last backup.
 if [ ! -s "$topdir/log-backup/$container.log.$now" ]; then
