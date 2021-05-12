@@ -26,7 +26,7 @@
 #
 #	The "$topdir" directory is the directory into which the mol-mod
 #	Github reposiory has been cloned.  This will be found via this
-#	script's location if the variable is left unset below.
+#	script's location.
 #
 #	Backups are written to "$topdir/backups/backup-{timestamp}",
 #	where "{timestamp}" is a timestamp on the "YYYYMMDD-HHMMSS"
@@ -104,9 +104,7 @@ then
 	exit 1
 fi >&2
 
-unset topdir
-topdir=$( readlink -f "${topdir:-"$( dirname "$0" )/.."}" )
-
+topdir=$( readlink -f "$( dirname "$0" )/.." )
 backup_dir=$topdir/backups
 
 case $backup_dir in
