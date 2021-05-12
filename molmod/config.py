@@ -43,7 +43,7 @@ class Config:
 
 
 class ProductionConfig(Config):
-    DEBUG = True
+    DEBUG = False
     # For POST requests from search result forms to BioAtlas/SBDI
     BATCH_SEARCH_URL = 'https://records.biodiversitydata.se/' \
                        'ws/occurrences/batchSearch'
