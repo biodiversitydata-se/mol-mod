@@ -3,7 +3,7 @@ $table-bg-accent: #f9f9f9 !default;
 /* ALA custom style rules
 ================================= */
 
-@import url(https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900);
+@import url(/static/css/roboto.css);
 
 /* Global
 ================================= */
