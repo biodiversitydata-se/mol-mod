@@ -76,6 +76,14 @@ Alternatively, you can just update the view:
 Note that the blast-worker uses the same Dockerfile for both development and production, but that we set
 FLASK_ENV=production in docker-compose.prod.yml.
 
+You can use a script to create incremental backups of the database, container logs and uploaded files to (host) folder [repos-path]/backups:
+```
+  $./scripts/scheduled-backup.sh
+```
+This script can also be used to run from crontab (time-based job scheduler). Suggested crontab entry for twice-daily backups as 9 AM and 9 PM:
+```
+  0 9,21 * * * /opt/mol-mod/scripts/scheduled-backup.sh
+```
 
 ### CAS authentication
 For local testing of production environment, you need to run or add this to your bash startup file (e.g. ~/.bash_profile):
