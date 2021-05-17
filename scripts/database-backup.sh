@@ -9,18 +9,22 @@
 # requiring data to be restored with this script, together with a dump
 # produced with 'data' option.
 
-DIR='db'
+DIR='db-backup'
 BASE='db-dump'
 TIMESTAMP="$(date +'%Y-%m-%d_%H%M')"
 CONTAINER='asv-db'
-FORMAT='tar'	# Change to 'plain' for plain SQL
+
+# Use the "$FORMAT" environment variable if it's available, but
+# otherwise default to "tar" format.  The formats supported by pg_dump
+# are plain, custom, directory, and tar.  See the pg_dump manual.
+FORMAT=${FORMAT:-tar}
 
 #
-# CREATE HELP (access with './backup.sh -h' in molmod folder)
+# CREATE HELP (access with './scripts/database-backup.sh -h' in molmod folder)
 #
 if [ "$1" = '-h' ] || [ "$1" = '--help' ]; then
   cat <<'HELP'
-USAGE: ./backup.sh [restore [filename] | data]
+USAGE: ./scripts/database-backup.sh [restore [filename] | data]
 
 Given no arguments, this script will use a subset of the variables in
 the file ".env" in the current directory to create a database backup.
@@ -98,8 +102,8 @@ else
     FLAGS+=( -n public --data-only )
   fi
 
-  printf 'Creating database dump file "%s"\n' "$FILE"
-  docker exec -i "$CONTAINER" \
+  printf 'Creating database dump file "%s.%s"\n' "$FILE" "$FORMAT"
+  docker exec "$CONTAINER" \
     pg_dump "${FLAGS[@]}" --format="$FORMAT" \
       -n "$PGRST_DB_SCHEMA" >"$FILE.$FORMAT"
 fi
