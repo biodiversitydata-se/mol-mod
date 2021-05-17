@@ -11,5 +11,8 @@ WORKDIR /code
 
 RUN pip3 install -r requirements.txt
 
+RUN apt-get update
+RUN apt-get -y install rsync
+
 ENV FLASK_ENV="development"
 CMD ["python3", "wsgi.py"]
