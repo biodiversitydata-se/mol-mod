@@ -33,7 +33,7 @@ stop:
 
 # Stop and remove containers
 down:
-	docker-compose -f $(compose) down
+	docker-compose -f $(compose) down --remove-orphans
 
 logs:
 	docker-compose -f $(compose) logs -f
@@ -59,11 +59,11 @@ secrets:
 
 # Backup postgres data
 backup:
-	./scripts/backup.sh data
+	./scripts/database-backup.sh data
 
 # Restore latest db dump in db container
 restore:
-	./scripts/backup.sh restore
+	./scripts/database-backup.sh restore
 
 #
 # BLAST
