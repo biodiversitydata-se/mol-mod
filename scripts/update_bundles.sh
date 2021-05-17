@@ -71,9 +71,9 @@ curl -s 'https://google-webfonts-helper.herokuapp.com/api/fonts/roboto?subsets=l
 	font-style: $style;
 	font-weight: $weight;
 	font-display: swap;
-	src: url(/static/webfonts/roboto-$weight-$style.ttf) format('truetype'),
-	     url(/static/webfonts/roboto-$weight-$style.woff) format('woff'),
-	     url(/static/webfonts/roboto-$weight-$style.woff2) format('woff2');
+	src: url(/static/webfonts/roboto-$weight-$style.woff2) format('woff2'),
+         url(/static/webfonts/roboto-$weight-$style.woff) format('woff'),
+		 url(/static/webfonts/roboto-$weight-$style.ttf) format('truetype');
 }
 EOF
 
