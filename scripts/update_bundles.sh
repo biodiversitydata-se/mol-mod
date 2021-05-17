@@ -8,7 +8,7 @@ DTJS=https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js
 BS=https://github.com/twbs/bootstrap/releases/download/v3.4.1/bootstrap-3.4.1-dist.zip
 SELECTTWO=https://github.com/select2/select2/archive/refs/tags/4.0.13.tar.gz
 FONTAWESOME=https://use.fontawesome.com/releases/v5.15.3/fontawesome-free-5.15.3-web.zip
-
+CCBY=https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by.svg
 
 
 STATICDIR=$(dirname "$(realpath "$0")")/../molmod/static
@@ -20,15 +20,18 @@ pushd "$TDIR"
 mkdir -p js
 mkdir -p css
 mkdir -p webfonts
+mkdir -p img
 
 mkdir -p "$STATICDIR/webfonts"
 mkdir -p "$STATICDIR/css"
 mkdir -p "$STATICDIR/js"
-
+mkdir -p "$STATICDIR/img"
 
 wget "$DTJS"
 wget "$DTCSS"
 wget "$JQJS"
+wget "$CCBY"
+mv by.svg img
 
 mv jquery-*.min.js js/jquery.min.js
 mv *.js js
@@ -84,6 +87,7 @@ cat css/* > css/unified.css
 cp webfonts/* "$STATICDIR/webfonts/"
 cp css/* "$STATICDIR/css/"
 cp js/* "$STATICDIR/js/"
+cp img/* "$STATICDIR/img/"
 
 popd
 rm -r "$TDIR"
