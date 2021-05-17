@@ -18,5 +18,8 @@ WORKDIR /app
 RUN pip3 install -r molmod/requirements.txt
 RUN pip3 install uwsgi
 
+RUN apt-get update
+RUN apt-get -y install rsync
+
 ENV FLASK_ENV="production"
 CMD ["uwsgi", "--ini", "uwsgi-config.ini", "--uid", "www-data"]

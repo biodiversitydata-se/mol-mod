@@ -1,7 +1,7 @@
 version: "3.8"
 x-logging:
   &default-logging
-  driver: "local"
+  driver: "json-file"
   options:
     max-size: '20m'
     max-file: '5'
