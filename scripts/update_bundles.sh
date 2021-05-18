@@ -57,7 +57,7 @@ cp bootstrap*/css/bootstrap.min.css css/
 cp bootstrap*/css/bootstrap.min.css.map css/
 cp select2*/dist/css/select2.min.css css/
 cp fontawesome*/css/all.min.css css/fontawesome.all.min.cs
-cp fontawesome*/css/brands.min.css css/brands.min.cs
+cp fontawesome*/css/brands.min.css css/
 
 cp fontawesome*/webfonts/* webfonts/
 
