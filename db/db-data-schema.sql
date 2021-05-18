@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS public.dataset (
 CREATE TABLE IF NOT EXISTS public.sampling_event (
     pid BIGSERIAL PRIMARY KEY,
     material_sample_id character varying,
-    dataset_pid integer REFERENCES public.dataset(pid) NOT NULL,
+    dataset_pid integer NOT NULL REFERENCES public.dataset(pid) ON DELETE CASCADE,
     event_date character varying NOT NULL,
     sampling_protocol character varying NOT NULL,
     sample_size_value integer NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS public.sampling_event (
 );
 
 CREATE TABLE IF NOT EXISTS public.mixs (
-    pid integer PRIMARY KEY REFERENCES public.sampling_event(pid),
+    pid integer PRIMARY KEY REFERENCES public.sampling_event(pid) ON DELETE CASCADE,
     sop character varying,
     target_gene character varying NOT NULL,
     target_subfragment character varying NOT NULL,
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS public.emof (
     measurement_unit_id character varying,
     measurement_accuracy character varying,
     measurement_remarks character varying,
-    event_pid integer NOT NULL REFERENCES public.sampling_event(pid),
+    event_pid integer NOT NULL REFERENCES public.sampling_event(pid) ON DELETE CASCADE,
     measurement_determined_date character varying,
     measurement_determined_by character varying,
     measurement_method character varying
@@ -75,8 +75,8 @@ CREATE TABLE IF NOT EXISTS public.asv (
 
 CREATE TABLE IF NOT EXISTS public.occurrence (
     pid BIGSERIAL PRIMARY KEY,
-    event_pid integer REFERENCES public.sampling_event(pid) NOT NULL,
-    asv_pid integer REFERENCES public.asv(pid) NOT NULL,
+    event_pid integer NOT NULL REFERENCES public.sampling_event(pid) ON DELETE CASCADE,
+    asv_pid integer NOT NULL REFERENCES public.asv(pid) ON DELETE CASCADE,
     organism_quantity integer NOT NULL,
     previous_identifications character varying NOT NULL,
     asv_id_alias character varying NOT NULL,
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS public.occurrence (
 
 CREATE TABLE IF NOT EXISTS public.taxon_annotation (
     pid BIGSERIAL PRIMARY KEY,
-    asv_pid  integer REFERENCES public.asv(pid) NOT NULL,
+    asv_pid integer NOT NULL REFERENCES public.asv(pid) ON DELETE CASCADE,
     status character varying NOT NULL,
     kingdom character varying,
     phylum character varying,
