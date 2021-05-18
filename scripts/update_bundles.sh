@@ -7,6 +7,7 @@ DTCSS=https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css
 DTJS=https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js
 BS=https://github.com/twbs/bootstrap/releases/download/v3.4.1/bootstrap-3.4.1-dist.zip
 SELECTTWO=https://github.com/select2/select2/archive/refs/tags/4.0.13.tar.gz
+SELCTTWOBS=https://raw.githubusercontent.com/select2/select2-bootstrap-theme/master/dist/select2-bootstrap.min.css
 FONTAWESOME=https://use.fontawesome.com/releases/v5.15.3/fontawesome-free-5.15.3-web.zip
 CCBY=https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by.svg
 
@@ -31,6 +32,8 @@ wget "$DTJS"
 wget "$DTCSS"
 wget "$JQJS"
 wget "$CCBY"
+wget "$SELECTTWOBS"
+
 mv by.svg img
 
 mv jquery-*.min.js js/jquery.min.js
