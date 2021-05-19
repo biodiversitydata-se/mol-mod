@@ -18,6 +18,7 @@ then
 	exit 1
 fi >&2
 
+# shellcheck source=.env
 . <( grep '^POSTGRES_' "$topdir/.env" ) || exit 1
 
 tput bold
@@ -36,12 +37,18 @@ do_dbquery () {
 		-c "$1"
 }
 
+printf -v PS3fmt '%s' \
+	'\n' \
+	'Please select dataset to delete (2-%d),\n' \
+	'or select 1 to quit.\n' \
+	'--> '
+
 while true; do
 	readarray -t datasets < <( do_dbquery 'SELECT dataset_id FROM dataset' | sed 1d )
 	nsets=${#datasets[@]}
 
-	printf -v PS3 '\nPlease select dataset to delete (2-%d)\nOr select 1 to quit: ' \
-		"$((nsets + 1 ))"
+	# shellcheck disable=SC2059
+	printf -v PS3 "$PS3fmt" "$(( nsets + 1 ))"
 
 	select dataset in QUIT "${datasets[@]}"; do
 		if [[ "$REPLY" != *[![:digit:]]* ]] && [ "$REPLY" -ne 0 ]; then
