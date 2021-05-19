@@ -109,15 +109,16 @@
               <li><a href="/login">Login</a></li>
           {% endif %}
         </ul>
-        <ul class="nav navbar-nav navbar-right"">
 
+        <ul class="nav navbar-nav navbar-right">
         <li class=" hide-on-desktop hide-on-tablet"><a href="https://biodiversitydata.se"><i
             class="fas fa-external-link-alt"></i>&nbsp; <span data-i18n="nav.link-to-sbdi"></span></a></li>
         <li class="hide-on-desktop hide-on-tablet"><a href="https://docs.biodiversitydata.se"><i
               class="fas fa-external-link-alt"></i>&nbsp; <span data-i18n="nav.link-to-docs"></span></a></li>
         <li class=" hide-on-desktop hide-on-tablet"><a href="https://docs.biodiversitydata.se/support"><i
           class="fas fa-external-link-alt"></i>&nbsp; <span data-i18n="nav.link-to-support"></span></a></li>
-        <li class="dropdown">
+         <!-- Always hide in ASV portal -->
+         <li class="dropdown hide-on-desktop hide-on-tablet hide-on-mobile">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
             aria-expanded="false"><span data-i18n="nav.more"></span> <span class="caret"></span></a>
           <ul id="dropdown-auth-menu" class="dropdown-menu ::loginStatus::">
@@ -140,37 +141,6 @@
           </ul>
         </li>
       </ul>
-
-      <!-- Language selector if you don't whan a multilang site, remove it -->
-      <!-- <ul class="nav navbar-nav navbar-right">
-        <li id="dropdown-lang" class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-            aria-expanded="false"><span class="caret"></span></a>
-          <ul class="locale-switcher dropdown-menu dropdown-lang-menu">
-            <li class="locale-link" data-locale="en"><a class="en-locale-link" href="#"><span
-                  class="lang_link_en">English</span></a></li>
-            <li class="locale-link" data-locale="es"><a class="es-locale-link" href="#"><span
-                  class="lang_link_es">Español</span></a></li>
-            <li class="locale-link" data-locale="zh"><a class="zh-CN-locale-link" href="#"><span
-                  class="lang_link_zh-CN">简体中文</span></a></li>
-            <li class="locale-link" data-locale="sw"><a class="sw-locale-link" href="#"><span
-                  class="lang_link_sw">Swahili</span></a></li>
-          </ul>
-        </li>
-      </ul> -->
-
-      <!-- Search classic form with ALA autocomplete -->
-      <form method="get" action="https://species.biodiversitydata.se/search" class="search-form navbar-form navbar-right">
-        <div class="form-group">
-          <input name="q" id="autocompleteHeader" type="text" class="form-control"
-            data-i18n="[placeholder]nav.searchbox">
-        </div>
-
-        <button type="submit" data-toggle="tooltip" aria-label="Left Align" data-placement="bottom"
-          data-i18n="[title]nav.searchbox" class="btn btn-default">
-          <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
-        </button>
-      </form>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
 </nav>
