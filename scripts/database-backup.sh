@@ -9,6 +9,8 @@
 # requiring data to be restored with this script, together with a dump
 # produced with 'data' option.
 
+topdir=$( readlink -f "$( dirname "$0" )/.." )
+
 DIR='db-backup'
 BASE='db-dump'
 TIMESTAMP="$(date +'%Y-%m-%d_%H%M')"
@@ -23,23 +25,23 @@ FORMAT=${FORMAT:-tar}
 # CREATE HELP (access with './scripts/database-backup.sh -h' in molmod folder)
 #
 if [ "$1" = '-h' ] || [ "$1" = '--help' ]; then
-  cat <<'HELP'
-USAGE: ./scripts/database-backup.sh [restore [filename] | data]
+  cat <<-HELP
+	USAGE: $0 [restore [filename] | data]
 
-Given no arguments, this script will use a subset of the variables in
-the file ".env" in the current directory to create a database backup.
+	Given no arguments, this script will use a subset of the variables in
+	the file ".env" in the current directory to create a database backup.
 
-Supported options are:
+	Supported options are:
 
-      restore <file>    Restore the named database dump, or the latest
-                        database dump if no filename is given.  The
-                        latest dump is selected by modification date,
-                        not from the filename.
+	      restore <file>    Restore the named database dump, or the latest
+	                        database dump if no filename is given.  The
+	                        latest dump is selected by modification date,
+	                        not from the filename.
 
-      data              Make a backup containing only the public table
-                        data.
+	      data              Make a backup containing only the public table
+	                        data.
 
-HELP
+	HELP
   exit
 fi
 
@@ -50,9 +52,9 @@ then
 fi
 
 # Load database variables
-eval "$(grep -E '^(POSTGRES|PG)' .env)" || exit 1
+. <( grep -e '^POSTGRES' -e '^PG' "$topdir/.env" ) || exit 1
 
-FILE="$DIR/${BASE}_$TIMESTAMP.sql"
+FILE="$topdir/$DIR/${BASE}_$TIMESTAMP.sql"
 FLAGS=( -h localhost -U "$POSTGRES_USER" -d "$POSTGRES_DB" )
 
 #
@@ -62,7 +64,7 @@ if [ "$1" = 'restore' ]; then
   # If no file is specified, use latest dump
   if [ -z "$2" ]; then
     # Get list of all files matching pattern in "$DIR"
-    set -- "$DIR/$BASE"*
+    set -- "$topdir/$DIR/$BASE"*
 
     # Assume the first file is the newest
     FILE="$1"; shift
@@ -77,7 +79,7 @@ if [ "$1" = 'restore' ]; then
   elif [ -f "$2" ]; then 
     FILE="$2"
   else
-    FILE="$DIR/$2"
+    FILE="$topdir/$DIR/$2"
   fi
 
   # If no dumps are found, quit
@@ -98,7 +100,7 @@ else
   # to produce file that can be used with `restore` option later
   # Otherwise schema api (views and functions, no data) are dumped
   if [ "$1" = 'data' ]; then
-    FILE="$DIR/$BASE-data_$TIMESTAMP.sql"
+    FILE="$topdir/$DIR/$BASE-data_$TIMESTAMP.sql"
     FLAGS+=( -n public --data-only )
   fi
 
