@@ -50,9 +50,21 @@ select.form-control.input-sm {
     /* Restore arrow lost with SBDI-CSS */
     -webkit-appearance: menulist !important;
 }
-/* Override ALA for selected table rows */
-.table-striped>tbody>tr.selected:nth-child(odd)>td,
-.table-striped>tbody>tr.selected:nth-child(even)>td {
+/* Restore striped table lost with SBDI-CSS */
+.table tr:nth-child(odd) td,
+.table tr th,
+/* Same for form controls */
+.form-control {
+    color: #4c4c4c !important;
+    background-color: white !important;
+}
+.table tr:nth-child(even) td {
+    color: #4c4c4c !important;
+    background-color: #f9f9f9 !important;
+}
+/* Selected rows */
+.table tr.selected:nth-child(odd) td,
+.table tr.selected:nth-child(even) td {
     color: black !important;
     background-color: #bed9e5 !important;
 }
