@@ -2,9 +2,9 @@
 {% block body %}
 <div class="jumbotron">
     <div class="container">
-        <h1>Swedish ASV database</h1>
-        <p>Welcome to the database of Swedish Amplicon Sequence Variants (ASVs)
-            <br> - an interface to sequence-based observations in <a href="{{ bioatlas_page }}">the SBDI Bioatlas</a>
+        <h1>Swedish ASV portal</h1>
+        <p>Welcome to the portal of Swedish Amplicon Sequence Variants (ASVs)
+           <br> - an interface to sequence-based observations in SBDI
         </p>
     </div>
 </div>
@@ -12,19 +12,19 @@
 <div class="container">
     <div class="row">
         <div class="col-md-4">
-            <p>Search for ASVs and Bioatlas records using<br>the Basic Local Alignment Search Tool (BLAST)
+            <p>Search for ASVs and Bioatlas records using<br>Basic Local Alignment Search Tool (BLAST)
             </p>
-            <p><a class="btn btn-primary" id=blast_link href="{{ url_for('blast_bp.blast') }}" role="button">BLAST</a></p>
+            <a class="btn btn-primary" id=blast_link href="{{ url_for('blast_bp.blast') }}" role="button">BLAST</a>
         </div>
         <div class="col-md-4">
             <p>Search for ASVs and Bioatlas records using<br>filters on sequencing details and taxonomy
             </p>
-            <p><a class="btn btn-primary"  id=filter_link href="{{ url_for('filter_bp.filter') }}" role="button">Filter</a></p>
+            <p><a class="btn btn-primary"  id=filter_link href="{{ url_for('filter_bp.filter') }}" role="button">FILTER</a></p>
         </div>
         <div class="col-md-4">
-            <p>Submit your metabarcoding data<br>to the ASV database and Bioatlas
+            <p>Submit your metabarcoding dataset<br>to the ASV database and Bioatlas
             </p>
-            <p><a class="btn btn-primary"  id=submit_link href="{{ url_for('main_bp.submit') }}" role="button">Submit</a></p>
+            <p><a class="btn btn-primary"  id=submit_link href="{{ url_for('main_bp.submit') }}" role="button">SUBMIT</a></p>
         </div>
     </div>
 </div>

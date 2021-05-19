@@ -4,7 +4,7 @@ CSS class selector: .xxx, id selector: #xxx
 */
 
 /* GENERAL */
-
+/*
 body {
     font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
@@ -23,7 +23,7 @@ h1 {
 
 h2 {
   font-size: 20px;
-}
+} */
 
 P.blocktext {
     margin-left: auto;
@@ -36,10 +36,10 @@ P.blocktext {
     visibility: hidden;
 }
 
-#filter_link, #filter_asvs {
+/* #filter_link, #filter_asvs {
     padding-left: 18px;
     padding-right: 18px;
-}
+} */
 
 /* RESULT TABLES */
 /* Query (user sequence ID) col */
@@ -64,11 +64,11 @@ tr.shown td.details-control {
     background: url('../img/details_close.png') no-repeat top 13px right 10px;
 }
 /* Override ALA for selected table rows */
-.table-striped>tbody>tr.selected:nth-child(odd)>td,
+/* .table-striped>tbody>tr.selected:nth-child(odd)>td,
 .table-striped>tbody>tr.selected:nth-child(even)>td {
     color: black !important;
     background-color: #f8dbd3 !important;
-}
+} */
 /* HELP */
 .hiddenElem {
     display: none;

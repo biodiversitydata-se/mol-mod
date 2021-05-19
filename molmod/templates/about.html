@@ -3,16 +3,13 @@
 {% block body %}
 <div class='container'>
     <div class="col-md-12">
-        <br>
-        <h1>About the Swedish ASV database</h1>
+        <h1>About the Swedish ASV portal</h1>
         <p>
-        <br>
-            The database of Swedish Amplicon Sequence Variants (ASVs)
+            The portal of Swedish Amplicon Sequence Variants (ASVs)
             is an interface to sequence-based observations in
-            <a href="{{ bioatlas_page }}">the Bioatlas</a>,
-            which is part of the <a href="{{ sbdi_start_page }}">
+            the <a href="{{ sbdi_start_page }}">
             Swedish Biodiversity Data Infrastructure (SBDI)</a>.
-            In addition to the database and web interface,
+            In addition to a database of amplicon sequence variants (ASVs) and a web interface,
             we provide a
             <a href="https://biodiversitydata-se.github.io/mol-data/ena-metabar.html"
                rel="noreferrer noopener">step-by-step guide</a>
@@ -23,13 +20,11 @@
             (developed in the nf-core collaboration)
             for denoising and taxonomic annotation of metabarcoding data.
         </p>
-        <br>
         <p class="blocktext">
             <br>
             <img src="{{url_for('static', filename='img/metabarcoding-sbdi.png')}}"
                  width=85% />
         <p>
-            <br>
             <i>Metabarcoding data in SBDI</i>: A sequencing service provider, such as NGI, delivers sequencing data
             to the user. The user submits raw sequencing data and contextual data to ENA
             (see <a href="https://biodiversitydata-se.github.io/mol-data/ena-metabar.html"
@@ -38,15 +33,13 @@
                 <a href="https://nf-co.re/ampliseq"
                    rel="noreferrer noopener">nf-core/ampliseq</a>,
             and submits the denoised data (ASVs and their counts in different samples, and contextual data)
-            to the ASV database. Metabarcoding data in the ASV database/Bioatlas
-            can be searched and downloaded using the web app or using the
+            to the ASV portal. Metabarcoding data in the ASV database/Bioatlas
+            can be searched and downloaded using the portal or using the
                 <a href="https://github.com/biodiversitydata-se/SBDI4R"
                    rel="noreferrer noopener">SBDI4R package</a> in R.
         </p>
-        <br>
         <p>
-            <h2>Why publish data in the ASV database</h2>
-            <br>
+            <h2>Why publish data in SBDI?</h2>
             By publishing your data in the Swedish ASV database and Bioatlas
             your data will be easily reusable by others and can be seamlessly analysed
             in conjunction with other datasets in the Bioatlas. The ASVs will be
@@ -58,10 +51,8 @@
             your metabarcoding-based biodiversity data will contribute to global
             knowledge about biodiversity.
         </p>
-        <br>
         <p>
             <h2>Available data</h2>
-            <br>
             Currently, we support inclusion of ASVs for the 16S rRNA gene for prokaryotes,
             and the internal transcribed spacer (ITS) for fungi. Later in 2021 we will
             support the cytochrome c oxidase I (COI) for animals and the 18S rRNA gene
