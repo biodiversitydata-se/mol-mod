@@ -37,13 +37,14 @@ CSS class selector: .xxx, id selector: #xxx
     min-width: 400px;
     padding-right: 30px;
 }
-/* Expandable seqs */
+/* +/- symbols for expandable seqs */
 td.details-control {
-    background: url('../img/details_open.png') no-repeat top 13px right 10px;
+    background: url('../img/details_open.png') no-repeat top 13px right 10px !important;
     cursor: pointer;
 }
 tr.shown td.details-control {
-    background: url('../img/details_close.png') no-repeat top 13px right 10px;
+    background: url('../img/details_close.png') no-repeat top 13px right 10px !important;
+}
 /* Show ... entries */
 select.form-control.input-sm {
     /* Restore arrow lost with SBDI-CSS */
