@@ -64,11 +64,11 @@ tr.shown td.details-control {
     background: url('../img/details_close.png') no-repeat top 13px right 10px;
 }
 /* Override ALA for selected table rows */
-/* .table-striped>tbody>tr.selected:nth-child(odd)>td,
+.table-striped>tbody>tr.selected:nth-child(odd)>td,
 .table-striped>tbody>tr.selected:nth-child(even)>td {
     color: black !important;
-    background-color: #f8dbd3 !important;
-} */
+    background-color: #bed9e5 !important;
+}
 /* HELP */
 .hiddenElem {
     display: none;
