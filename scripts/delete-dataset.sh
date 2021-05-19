@@ -27,6 +27,7 @@ cat <<'MESSAGE_END'
 *** This script deletes datasets.
 *** Use with care.
 *************************************
+
 MESSAGE_END
 tput sgr0
 
@@ -63,5 +64,7 @@ while true; do
 		echo 'Invalid choice.' >&2
 	done
 
-	printf 'Selected "%s"\n' "$dataset"
+	printf 'DELETING "%s"...\n' "$dataset"
+	do_dbquery 'DELETE FROM dataset WHERE dataset_id = '"'$dataset'"
+	echo 'Done.'
 done
