@@ -2,9 +2,7 @@
 {% block body %}
 <div class='container'>
     <div>
-        <br>
         <h1>Upload data to the ASV database</h1>
-        <br>
         <p>Select an Excel (xlsx) or compressed archive file (xlsx.zip, tar.gz, tar.bz2 och tar.lz), with a maximum size of {{ "{:.0f}".format(max_file_size/(1024*1024)) }} MB.
        </p>
     </div>
@@ -19,8 +17,6 @@
                 <!-- Name of selected file -->
                 <span id="file-shown">No file selected</span>
                 {{ form.submit(class='btn btn-primary', value='Upload') }}
-                <br>
-                <br>
             </div>
         </div>
         <div class='row'>
