@@ -70,7 +70,7 @@ select.form-control.input-sm {
 .hiddenElem {
     display: none;
 }
-.visHlpElem {
+.table tr td:first-child.visHlpElem {
     background-color: #f8dbd3 !important;
 }
 .visHlpDiv {
