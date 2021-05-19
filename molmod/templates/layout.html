@@ -35,8 +35,6 @@
     <script>require('js/init');</script>
     <!-- end of self js -->
 
-    <title>SBDI-ASV-DB</title>
-
     <!-- DataTables w. Select & button ext w. Excel + Bootstrap 3 styling -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs/jszip-2.5.0/dt-1.10.24/b-1.7.0/b-html5-1.7.0/sl-1.3.3/datatables.min.css"/>
 
@@ -55,6 +53,9 @@
         var maxFileSize = '{{ max_file_size }}';
         var validExtensions = '{{ valid_extensions }}';
     </script>
+
+    <!-- Title from 'child' template -->
+    <title>{% block title %}{% endblock %} | ASV portal</title>
 
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="description" content="Swedish Biodiversity Data Infrastructure"/>
