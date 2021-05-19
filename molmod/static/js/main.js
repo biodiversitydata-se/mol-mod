@@ -293,9 +293,9 @@ function makeDataTbl(url, columns) {
         order: [[2, 'asc']], // Required for non-orderable col 0
         select: { style: 'multi', selector: 'td:nth-child(1)' }, // Checkbox selection
         // Layout: l=Show.., f=Search, tr=table, i=Showing.., p=pagination
-        dom: "<'row'<'col-md-4'l><'col-md-8'f>>" +
+        dom: "<'row'<'col-md-5'l><'col-md-7'f>>" +
         "<'row'<'col-md-12't>>" +
-        "<'row'<'col-md-3'B><'col-md-3'i><'col-md-6'p>>",
+        "<'row'<'col-md-2'B><'col-md-5'i><'col-md-5'p>>",
         buttons: [ 'excel', 'csv' ]
     });
     return dTbl;
