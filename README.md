@@ -40,6 +40,12 @@ You may also want to get rid of dangling images and associated volumes:
   $ docker system prune --volumes
 ```
 
+#### Styling
+
+Generally, resources necessary for displaying the pages are served through the service, which may simplify providing information on processing of personal information.
+
+These resources should generally be commited to the source repository, but the script `scripts/update_bundles.sh` pulls in the required resources from the sources - this should not normally be needed but should be updated and used when changing the involved resources (e.g. migrating to a newer bootstrap version).
+
 ### Production environment
 In production, postgres and blastdb data are instead saved to named volumes (mol-mod_postgres-db & mol-mod_blast-db), and compose operations are simplified using a Makefile.
 
