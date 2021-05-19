@@ -4,42 +4,17 @@ CSS class selector: .xxx, id selector: #xxx
 */
 
 /* GENERAL */
-/*
-body {
-    font-family: Roboto, 'Helvetica Neue', sans-serif;
-}
 
-.main-content {
-    padding: 15px 15px;
-}
-
-.help-block {
-    color: #c44d34;
-}
-
-h1 {
-  font-size: 25px;
-}
-
-h2 {
-  font-size: 20px;
-} */
-
-P.blocktext {
+/* P.blocktext {
     margin-left: auto;
     margin-right: auto;
     width: 85%
-}
+} */
 
 /* FORMS */
 #rform, #sform {
     visibility: hidden;
 }
-
-/* #filter_link, #filter_asvs {
-    padding-left: 18px;
-    padding-right: 18px;
-} */
 
 /* RESULT TABLES */
 /* Query (user sequence ID) col */
