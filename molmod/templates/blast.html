@@ -2,9 +2,7 @@
 {% block body %}
 <div class='container'>
     <div>
-        <br>
         <h1>BLAST for ASVs and Bioatlas records</h1>
-        <br>
         <p>Use the Basic Local Alignment Search Tool (BLAST), to find Amplicon
            Sequence Variants (ASVs), and associated Bioatlas occurrence records,
            <br>matching your sequences and alignment criteria.
@@ -74,7 +72,6 @@
                     </div>
             </div>
         </div>
-        <br>
         <div class='row'>
             <div class='col-md-12'>
                 This corresponds to running a (command-line) nucleotide BLAST (<i>BLASTn</i>) search filtered
@@ -93,13 +90,12 @@
         <br>
         <hr>
         <div class='row'>
-            <div class='col-md-1'>
+            <div class='col-md-3'>
                 {{ sform.blast_for_seq(class='btn btn-primary', id='blast_for_seq') }}
+                &nbsp;&nbsp;
+                <input type='button' class='btn btn-primary' id='clear_all' value='Clear'/>
             </div>
-            <div class='col-md-1'>
-                <button type='button' class='btn btn-default' id='clear_all'>Clear all</button>
-            </div>
-            <div class='col-md-10'>
+            <div class='col-md-9'>
                 You may have to <span class='scroll-note'>scroll down to see results</span>.
                 When they have finished loading, tick left column to (de)select a row,
                 and click bottom button to show occurrence records of selected ASV:s in Bioatlas.

@@ -2,9 +2,7 @@
 {% block body %}
 <div class='container'>
     <div>
-        <br>
         <h1>Filter ASVs and Bioatlas records</h1>
-        <br>
         <p>Find Amplicon Sequence Variants (ASVs) and associated Bioatlas
            occurrence records using filter search. Selected filters are combined with logical AND,
            and limit available options in remaining dropdowns.
@@ -20,11 +18,11 @@
         </div>
         <div class='row'>
             <div class='col-md-3'>
-                <p><b>Target gene</b></p>
+                <b>Target gene</b>
                 {{ sform.gene(id='gene', class='form-control select2') }}
             </div>
             <div class='col-md-3'>
-                <p><b>Target subregion</b><p>
+                <b>Target subregion</b>
                 {{ sform.sub(id='sub', class='form-control select2') }}
             </div>
 
@@ -32,70 +30,68 @@
         <br>
         <div class='row'>
             <div class='col-md-6'>
-                <p><b>Forward primer</b></p>
+                <b>Forward primer</b>
                 {{ sform.fw_prim(id='fw_prim', class='form-control select2') }}
             </div>
             <div class='col-md-6'>
-                <p><b>Reverse primer</b></p>
+                <b>Reverse primer</b>
                 {{ sform.rv_prim(id='rv_prim', class='form-control select2') }}
             </div>
         </div>
         <br>
-        <hr>
         <div class='row'>
             <div class='col-md-3'>
-                <p><i>Taxonomy</i></p>
+                <i>Taxonomy</i></p>
             </div>
         </div>
         <div class='row'>
             <div class='col-md-3'>
-                <p><b>Kingdom</b></p>
+                <b>Kingdom</b>
                 {{ sform.kingdom(id='kingdom', class='form-control select2') }}
             </div>
             <div class='col-md-3'>
-                <p><b>Phylum</b></p>
+                <b>Phylum</b>
                 {{ sform.phylum(id='phylum', class='form-control select2') }}
             </div>
             <div class='col-md-3'>
-                <p><b>Class</b></p>
+                <b>Class</b>
                 {{ sform.classs(id='classs', class='form-control select2') }}
             </div>
             <div class='col-md-3'>
-                <p><b>Order</b></p>
+                <b>Order</b>
                 {{ sform.oorder(id='oorder', class='form-control select2') }}
             </div>
         </div>
         <br>
         <div class='row'>
             <div class='col-md-3'>
-                <p><b>Family</b></p>
+                <b>Family</b>
                 {{ sform.family(id='family', class='form-control select2') }}
             </div>
             <div class='col-md-3'>
-                <p><b>Genus</b></p>
+                <b>Genus</b>
                 {{ sform.genus(id='genus', class='form-control select2') }}
             </div>
             <div class='col-md-3'>
-                <p><b>Specific epithet</b></p>
+                <b>Specific epithet</b>
                 {{ sform.species(id='species', class='form-control select2') }}
             </div>
         </div>
         <div class='row'>
             <div class='col-md-12'>
                <br>Read more about ASV taxonomy in SBDI
-              <a href="https://biodiversitydata-se.github.io/mol-data/std-taxon-annotation">here</a>.
+              <a href="https://docs.biodiversitydata.se/analyse-data/molecular-tools/">here</a>.
             </div>
        </div>
         <br>
         <hr>
         <div class='row'>
-            <div class='col-md-1'>
+            <div class='col-md-3'>
                 {{ sform.filter_asvs(class='btn btn-primary', id='filter_asvs') }}
+                &nbsp;&nbsp;
+                <input type='button' class='btn btn-primary' id='clear_all' value='Clear'/>
             </div>
-            <div class='col-md-1'>
-                <button type='button' class='btn btn-default' id='clear_all'>Clear all</button>
-            </div>
-            <div class='col-md-10'>
+            <div class='col-md-9'>
                 You may have to <span class='scroll-note'>scroll down to see results</span>.
                 When they have finished loading, tick left column to (de)select a row,
                 and click bottom button to show occurrence records of selected ASV:s in Bioatlas.
