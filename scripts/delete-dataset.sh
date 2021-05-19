@@ -18,7 +18,7 @@ then
 	exit 1
 fi >&2
 
-# shellcheck source=.env
+# shellcheck disable=SC1090
 . <( grep '^POSTGRES_' "$topdir/.env" ) || exit 1
 
 tput bold

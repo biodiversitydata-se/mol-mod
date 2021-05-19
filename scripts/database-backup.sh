@@ -52,6 +52,7 @@ then
 fi
 
 # Load database variables
+# shellcheck disable=SC1090
 . <( grep -e '^POSTGRES' -e '^PG' "$topdir/.env" ) || exit 1
 
 FILE="$topdir/$DIR/${BASE}_$TIMESTAMP.sql"
