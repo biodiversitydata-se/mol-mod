@@ -44,6 +44,10 @@ td.details-control {
 }
 tr.shown td.details-control {
     background: url('../img/details_close.png') no-repeat top 13px right 10px;
+/* Show ... entries */
+select.form-control.input-sm {
+    /* Restore arrow lost with SBDI-CSS */
+    -webkit-appearance: menulist !important;
 }
 /* Override ALA for selected table rows */
 .table-striped>tbody>tr.selected:nth-child(odd)>td,
