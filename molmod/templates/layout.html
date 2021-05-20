@@ -1,7 +1,12 @@
 <!doctype html>
 <html lang="en-US">
 <head>
-    <meta charset="UTF-8"/>
+    <!-- SBDI meta -->
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="description" content="Swedish Biodiversity Data Infrastructure"/>
+    <meta name="author" content="Swedish Biodiversity Data Infrastructure">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <!-- ALA dependencies (loaded by grails modules) -->
     <!-- During development of local html pages (like the main index) we need to load them -->
     <base href="/">
@@ -9,10 +14,8 @@
     <link rel="stylesheet" type="text/css" href="https://static.biodiversitydata.se/css/bootstrap-theme.min.css">
     <link rel="stylesheet" type="text/css" href="https://static.biodiversitydata.se/css/ala-styles.min.css">
     <link rel="stylesheet" type="text/css" href="https://static.biodiversitydata.se/css/font-awesome.min.css">
-
     <script src="https://static.biodiversitydata.se/js/jquery.min.js"></script>
     <script src="https://static.biodiversitydata.se/js/jquery-migration.min.js"></script>
-
     <script src="https://static.biodiversitydata.se/js/bootstrap.js"></script>
     <script src="https://static.biodiversitydata.se/js/autocomplete.js"></script>
     <script src="https://static.biodiversitydata.se/js/application.js"></script>
@@ -45,11 +48,6 @@
 
     <!-- Title from 'child' template -->
     <title>{% block title %}{% endblock %} | ASV portal</title>
-
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <meta name="description" content="Swedish Biodiversity Data Infrastructure"/>
-    <meta name="author" content="Swedish Biodiversity Data Infrastructure">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- DataTables w. Select & button ext w. Excel + Bootstrap 3 styling -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs/jszip-2.5.0/dt-1.10.24/b-1.7.0/b-html5-1.7.0/sl-1.3.3/datatables.min.css"/>
