@@ -48,10 +48,10 @@ select.form-control.input-sm {
     /* Restore arrow lost with SBDI-CSS */
     -webkit-appearance: menulist !important;
 }
-/* Restore striped table lost with SBDI-CSS */
+/* Restore striped table look - lost with SBDI-CSS */
 .table tr:nth-child(odd) td,
 .table tr th,
-/* Same for form controls */
+/* Use same look for form controls */
 .form-control {
     color: #4c4c4c !important;
     background-color: white !important;
