@@ -66,5 +66,6 @@ while true; do
 
 	printf 'DELETING "%s"...\n' "$dataset"
 	do_dbquery 'DELETE FROM dataset WHERE dataset_id = '"'$dataset'"
+	do_dbquery 'DELETE FROM asv WHERE pid NOT IN (SELECT DISTINCT asv_pid FROM occurrence)'
 	echo 'Done.'
 done
