@@ -12,8 +12,11 @@ P.blocktext {
 .main-content {
     padding: 15px 15px;
 }
+h2 {
+    font-size: 22px !important;
+}
 .main-content p, th, td, label, .dataTables_info, .help-block, li, #file-shown {
-    font-size: 16.45px !important;
+    font-size: 16px !important;
 }
 
 .help-block {
@@ -84,7 +87,7 @@ select.form-control.input-sm {
     display: block;
     text-align: left;
     color: #c44d34;
-    font-size: 16.45px !important;
+    font-size: 16px !important;
 }
 /* FILE UPLOAD */
 #file {
