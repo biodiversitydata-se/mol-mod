@@ -12,6 +12,10 @@ P.blocktext {
 .main-content {
     padding: 15px 15px;
 }
+.main-content p, th, td, label, .dataTables_info, .help-block, li, #file-shown {
+    font-size: 16.45px !important;
+}
+
 .help-block {
     color: #c44d34;
 }
@@ -71,7 +75,7 @@ select.form-control.input-sm {
 }
 /* HELP */
 .hiddenElem {
-    display: none;
+    visibility: hidden;
 }
 .table tr td:first-child.visHlpElem {
     background-color: #f8dbd3 !important;
@@ -80,6 +84,7 @@ select.form-control.input-sm {
     display: block;
     text-align: left;
     color: #c44d34;
+    font-size: 16.45px !important;
 }
 /* FILE UPLOAD */
 #file {

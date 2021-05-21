@@ -29,7 +29,7 @@ About
             <img src="{{url_for('static', filename='img/metabarcoding-sbdi.png')}}"
                  width=85% />
         <p>
-            <i>Metabarcoding data in SBDI</i>: A sequencing service provider, such as NGI, delivers sequencing data
+            <b>Metabarcoding data in SBDI</b>: A sequencing service provider, such as NGI, delivers sequencing data
             to the user. The user submits raw sequencing data and contextual data to ENA
             (see <a href="https://biodiversitydata-se.github.io/mol-data/ena-metabar.html"
                     rel="noreferrer noopener">guide</a>),
@@ -42,9 +42,10 @@ About
                 <a href="https://github.com/biodiversitydata-se/SBDI4R"
                    rel="noreferrer noopener">SBDI4R package</a> in R.
         </p>
+        <hr>
         <p>
             <h2>Why publish data in SBDI?</h2>
-            By publishing your data in the Swedish ASV database and Bioatlas
+            <p>By publishing your data in the Swedish ASV database and Bioatlas
             your data will be easily reusable by others and can be seamlessly analysed
             in conjunction with other datasets in the Bioatlas. The ASVs will be
             regularly re-annoted as new reference database versions are released;
@@ -53,17 +54,18 @@ About
             such as ENA or NCBI that typically only store raw sequencing data.
             Data in the Bioatlas is further regularly integrated in GBIF and therefor
             your metabarcoding-based biodiversity data will contribute to global
-            knowledge about biodiversity.
+            knowledge about biodiversity.</p>
         </p>
+        <hr>
         <p>
             <h2>Available data</h2>
-            Currently, we support inclusion of ASVs for the 16S rRNA gene for prokaryotes,
+            <p>Currently, we support inclusion of ASVs for the 16S rRNA gene for prokaryotes,
             and the internal transcribed spacer (ITS) for fungi. Later in 2021 we will
             support the cytochrome c oxidase I (COI) for animals and the 18S rRNA gene
-            for eukaryotes. Other markers can be included on request.
+            for eukaryotes. Other markers can be included on request.</p>
         </p>
         <p>
-            <i>Marker genes and taxa currently represented in the ASV database</i>
+            <b>Marker genes and taxa currently represented in the ASV database:</b>
             <br>
             <table id='stats_table' class='dataframe table table-striped'>
                 <thead>
@@ -99,11 +101,9 @@ About
             </table>
         </p>
         <br>
-        <p>Read more about Molecular biodiversity data in SBDI
-           <a href="{{ sbdi_molecular_page }}">here</a>, or
-           <a href="{{ sbdi_contact_page }}">contact SBDI support</a> with any questions or suggestions.
-        </p>
-        <p>We are currently working on improving the accessibility of this website.</p>
+        <hr>
+        <p><a href="{{ sbdi_contact_page }}">Contact SBDI support</a> with any questions or suggestions.
+           <br>We are currently working on improving the accessibility of this website!</p><br>
 
 </div>
 {% endblock body %}
