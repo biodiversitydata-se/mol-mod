@@ -101,3 +101,11 @@ select.form-control.input-sm {
   display: inline-block;
   width: 400px;
 }
+
+#blast_for_seq,
+#clear_all,
+#filter_asvs,
+#show_occurrences,
+#submit {
+  border-radius: 4px;
+}
