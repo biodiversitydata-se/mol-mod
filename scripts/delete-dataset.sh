@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # This script presents the user with a menu showing the current datasets
 # available in the PostgreSQL database running in the asv-db container.
@@ -7,6 +7,13 @@
 #
 # The script have no command line opitons and takes no other arguments.
 #
+
+readlink () {
+	case $OSTYPE in
+		linux*) command readlink "$@" ;;
+		*) command greadlink "$@" ;;
+	esac
+}
 
 topdir=$( readlink -f "$( dirname "$0" )/.." )
 
