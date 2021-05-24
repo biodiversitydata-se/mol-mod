@@ -18,7 +18,10 @@ h2 {
 .main-content p, th, td, label, .dataTables_info, .help-block, li, #file-shown {
     font-size: 16px !important;
 }
-
+/* Nav-bar links */
+#bs-example-navbar-collapse-1 > ul.nav.navbar-nav.navbar-left > li > a {
+    color: white;
+}
 .help-block {
     color: #c44d34;
 }
