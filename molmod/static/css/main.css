@@ -4,41 +4,34 @@ CSS class selector: .xxx, id selector: #xxx
 */
 
 /* GENERAL */
-
-body {
-    font-family: Roboto, 'Helvetica Neue', sans-serif;
-}
-
-.main-content {
-    padding: 15px 15px;
-}
-
-.help-block {
-    color: #c44d34;
-}
-
-h1 {
-  font-size: 25px;
-}
-
-h2 {
-  font-size: 20px;
-}
-
 P.blocktext {
     margin-left: auto;
     margin-right: auto;
     width: 85%
 }
+.main-content {
+    padding: 15px 15px;
+}
+h2 {
+    font-size: 22px !important;
+}
+.main-content p, th, td, label, .dataTables_info, .help-block, li, #file-shown {
+    font-size: 16px !important;
+}
+/* Nav-bar links */
+#bs-example-navbar-collapse-1 > ul.nav.navbar-nav > li > a {
+    color: white;
+}
+.help-block {
+    color: #c44d34;
+}
+.welcome {
+    background:#f2f2f2 url('../img/dna.png') no-repeat right !important;
+}
 
 /* FORMS */
 #rform, #sform {
     visibility: hidden;
-}
-
-#filter_link, #filter_asvs {
-    padding-left: 18px;
-    padding-right: 18px;
 }
 
 /* RESULT TABLES */
@@ -55,34 +48,49 @@ P.blocktext {
     min-width: 400px;
     padding-right: 30px;
 }
-/* Expandable seqs */
+/* +/- symbols for expandable seqs */
 td.details-control {
-    background: url('../img/details_open.png') no-repeat top 13px right 10px;
+    background: url('../img/details_open.png') no-repeat top 13px right 10px !important;
     cursor: pointer;
 }
 tr.shown td.details-control {
-    background: url('../img/details_close.png') no-repeat top 13px right 10px;
+    background: url('../img/details_close.png') no-repeat top 13px right 10px !important;
 }
-/* Override ALA for selected table rows */
-.table-striped>tbody>tr.selected:nth-child(odd)>td,
-.table-striped>tbody>tr.selected:nth-child(even)>td {
+/* Show ... entries */
+select.form-control.input-sm {
+    /* Restore arrow lost with SBDI-CSS */
+    -webkit-appearance: menulist !important;
+}
+/* Restore striped table look - lost with SBDI-CSS */
+.table tr:nth-child(odd) td,
+.table tr th,
+/* Use same look for form controls */
+.form-control {
+    color: #4c4c4c !important;
+    background-color: white !important;
+}
+.table tr:nth-child(even) td {
+    color: #4c4c4c !important;
+    background-color: #f9f9f9 !important;
+}
+/* Selected rows */
+.table tr.selected:nth-child(odd) td,
+.table tr.selected:nth-child(even) td {
     color: black !important;
-    background-color: #f8dbd3 !important;
+    background-color: #bed9e5 !important;
 }
 /* HELP */
 .hiddenElem {
-    display: none;
+    visibility: hidden;
 }
-.visHlpElem {
+.table tr td:first-child.visHlpElem {
     background-color: #f8dbd3 !important;
 }
 .visHlpDiv {
     display: block;
     text-align: left;
     color: #c44d34;
-}
-.scroll-note {
-    color: #c44d34;
+    font-size: 16px !important;
 }
 /* FILE UPLOAD */
 #file {

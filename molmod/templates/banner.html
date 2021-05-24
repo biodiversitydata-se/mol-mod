@@ -1,34 +1,132 @@
-<nav class="navbar navbar-default navbar-fixed-top">
-  <div class="container container-navbar">
+<!-- site-banner -->
+
+<header id="masthead" class="site-header header-v1">
+  <div id="masthead-inner" class="site-header-inner">
+    <div class="header-main header--row layout-full-contained" id="cb-row--header-main" data-row-id="main"
+      data-show-on="desktop mobile">
+      <div class="header--row-inner header-main-inner light-mode">
+        <div class="customify-container">
+          <div class="customify-grid cb-row--desktop hide-on-mobile hide-on-tablet customify-grid-middle">
+            <div class="customify-col-6_md-6_sm-6 builder-item builder-first--logo builder-item--group"
+              data-push-left="">
+              <div class="item--inner builder-item--logo" data-section="title_tagline" data-item-id="logo">
+                <div class="site-branding logo-bottom">
+                  <a href="https://static.biodiversitydata.se" class="logo-link" rel="home" itemprop="url">
+                    <img class="site-img-logo" src="https://static.biodiversitydata.se/images/sbdi-logo-orginal-large.png"
+                      alt="Swedish Biodiversity Data Infrastructure">
+                  </a>
+                </div><!-- .site-branding -->
+              </div>
+              <div class="item--inner builder-item--html" data-section="header_html" data-item-id="html">
+                <div class="builder-header-html-item item--html">
+                  <p data-i18n="general.orgfullname"></p>
+                </div>
+              </div>
+            </div>
+            <div class="customify-col-4_md-4_sm-4 builder-item builder-first--search_box builder-item--group"
+              data-push-left="off-2">
+
+              <div class="item--inner builder-item--search_box" data-section="search_box" data-item-id="search_box">
+                <div class="header-search_box-item item--search_box">
+
+                </div>
+              </div>
+              <div id="banner-head-buttons" class="item--inner builder-item--button" data-section="header_button" data-item-id="button">
+                <a target="_new" href="https://biodiversitydata.se"
+                  class="item--button customify-btn customify-builder-btn is-icon-before">
+                  <i class="fas fa-external-link-alt"></i>&nbsp; <span data-i18n="nav.link-to-sbdi"></span></a>
+                <!-- TODO: fix international strings - data-i18n  -->
+
+                <a target="_new" href="https://docs.biodiversitydata.se/support"
+                  class="item--button customify-btn customify-builder-btn is-icon-before">
+                  <i class="fas fa-external-link-alt"></i>&nbsp; <span data-i18n="nav.link-to-support"></span></a>
+                <!-- TODO: fix international strings - data-i18n  -->
+
+              </div>
+            </div>
+
+          </div>
+          <div class="cb-row--mobile hide-on-desktop customify-grid customify-grid-middle">
+            <div class="customify-col-12_md-12_sm-12 builder-item builder-first--logo" data-push-left="">
+              <div class="item--inner builder-item--logo" data-section="title_tagline" data-item-id="logo">
+                <div class="site-branding logo-bottom">
+                  <a href="https://docs.biodiversitydata.se/" class="logo-link" rel="home" itemprop="url">
+                    <img class="site-img-logo" src="https://static.biodiversitydata.se/images/sbdi-logo-orginal-large.png"
+                      alt="Swedish Biodiversity Data Infrastructure">
+                  </a>
+                </div><!-- .site-branding -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</header>
+
+
+<!-- BootStrap 3 Classic Navbar addapted from sample:
+     https://getbootstrap.com/docs/3.3/components/#navbar -->
+
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+        data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="https://bioatlas.se"><img alt="Brand" src="https://static.bioatlas.se/bs3/img/bas-logo-2016-inline.png"></a>
+      <a class="navbar-brand hide-on-desktop" href="https://static.biodiversitydata.se" data-i18n="general.orgfullname"></a>
     </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <div class="row row-search">
-        <div class="col-xs-12 col-sm-4 col-md-6">
-        </div>
-      </div>
-      <!-- End row -->
-      <ul class="nav navbar-nav">
-        <li><a href="{{ url_for('main_bp.index') }}">Swedish ASV database</a> </li>
-        <li><a href="{{ url_for('blast_bp.blast') }}">BLAST search</a></li>
-        <li><a href="{{ url_for('filter_bp.filter') }}">Filter search</a></li>
-        <li><a href="{{ url_for('main_bp.submit') }}">Submit data</a></li>
-        <li><a href="{{ url_for('main_bp.about') }}">About</a></li>
-        {% if firstname %}
-            <li><a href="/logout">Log out {{firstname}}</a></li>
-        {% else %}
-            <li><a href="/login">Login</a></li>
-        {% endif %}
+        <ul class="nav navbar-nav navbar-left">
+          <li><a href="{{ url_for('main_bp.index') }}">Swedish ASV portal</a> </li>
+          <li><a href="{{ url_for('blast_bp.blast') }}">BLAST search</a></li>
+          <li><a href="{{ url_for('filter_bp.filter') }}">Filter search</a></li>
+          <li><a href="{{ url_for('main_bp.submit') }}">Submit data</a></li>
+          <li><a href="{{ url_for('main_bp.about') }}">About</a></li>
+          {% if firstname %}
+              <li><a href="/logout">Log out {{firstname}}</a></li>
+          {% else %}
+              <li><a href="/login">Login</a></li>
+          {% endif %}
+        </ul>
+
+        <ul class="nav navbar-nav navbar-right">
+        <li class=" hide-on-desktop hide-on-tablet"><a href="https://biodiversitydata.se"><i
+            class="fas fa-external-link-alt"></i>&nbsp; <span data-i18n="nav.link-to-sbdi"></span></a></li>
+        <li class=" hide-on-desktop hide-on-tablet"><a href="https://docs.biodiversitydata.se/support"><i
+          class="fas fa-external-link-alt"></i>&nbsp; <span data-i18n="nav.link-to-support"></span></a></li>
+         <!-- Always hide in ASV portal -->
+         <li class="dropdown hide-on-desktop hide-on-tablet hide-on-mobile">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+            aria-expanded="false"><span data-i18n="nav.more"></span> <span class="caret"></span></a>
+          <ul id="dropdown-auth-menu" class="dropdown-menu ::loginStatus::">
+            <li><a data-i18n="nav.login" class="loginBtn" href="https://auth.biodiversitydata.se/cas/login"></a></li>
+            <li><a data-i18n="nav.myprofile" class="myProfileBtn" href="https://auth.biodiversitydata.se/userdetails/myprofile/"></a></li>
+            <li><a data-i18n="nav.logout" class="logoutBtn" href="https://auth.biodiversitydata.se/cas/logout"></a></li>
+            <li><a data-i18n="nav.create-account" class="signUpBtn"
+                href="https://auth.biodiversitydata.se/userdetails/registration/createAccount"></a></li>
+            <li role="separator" class="divider"></li>
+            <li><a data-i18n="nav.collectory" href="https://collections.biodiversitydata.se"></a></li>
+            <li><a data-i18n="nav.biocache" href="https://records.biodiversitydata.se"></a></li>
+            <li><a data-i18n="nav.species" href="https://species.biodiversitydata.se"></a></li>
+            <li><a data-i18n="nav.species-lists" href="https://lists.biodiversitydata.se"></a></li>
+            <li><a data-i18n="nav.spatial" href="https://spatial.biodiversitydata.se"></a></li>
+            <li><a data-i18n="nav.regions" href="https://regions.biodiversitydata.se"></a></li>
+            <li><a data-i18n="nav.images" href="https://images.biodiversitydata.se"></a></li>
+            <li role="separator" class="divider"></li>
+            <li><a data-i18n="nav.your-area" href="https://records.biodiversitydata.se/explore/your-area/"></a></li>
+            <li><a data-i18n="nav.datasets" href="https://collections.biodiversitydata.se/datasets"></a></li>
+          </ul>
+        </li>
       </ul>
-    </div>
-    <!-- /.navbar-collapse -->
-  </div>
-  <!-- /.container-fluid -->
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
 </nav>
-<!-- End Navbar -->

@@ -1,16 +1,19 @@
 {% extends "layout.html" %}
-{% block title %}Page Not Found{% endblock %}
+
+{% block title %}
+Submit data
+{% endblock title %}
+
+
 {% block body %}
 <div class='container'>
     <div>
-        <br>
         <h1>Submit data</h1>
-        <p><br>We can help make your Amplicon Sequence Variant (ASV) dataset available to the research community
+        <p>We can help make your Amplicon Sequence Variant (ASV) dataset available to the research community
             via the ASV database and the Bioatlas. Read more about our platform, and the data we currently support,
             in the <a href="{{ url_for('main_bp.about') }}">About</a> page.
         <br>
-        <hr>
-        <p>These are the main steps of the submission process:
+        <h2>Main steps of the submission process:</h2>
             <ol>
                 <li>Submit your raw data to ENA (see our
                     <a href="https://biodiversitydata-se.github.io/mol-data/ena-metabar.html">guide</a>).
