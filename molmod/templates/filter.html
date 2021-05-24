@@ -1,10 +1,13 @@
 {% extends "layout.html" %}
+
+{% block title %}
+Filter search
+{% endblock title %}
+
 {% block body %}
 <div class='container'>
     <div>
-        <br>
         <h1>Filter ASVs and Bioatlas records</h1>
-        <br>
         <p>Find Amplicon Sequence Variants (ASVs) and associated Bioatlas
            occurrence records using filter search. Selected filters are combined with logical AND,
            and limit available options in remaining dropdowns.
@@ -14,17 +17,17 @@
     <form action='' method='post' id='sform' name='sform' class='search_function' >
         {{ sform.csrf_token }}
         <div class='row'>
-            <div class='col-md-3'>
-                <p><i>Sequencing details</i></p>
+            <div class='col-md-12'>
+                <h2>Sequencing details</h2>
             </div>
         </div>
         <div class='row'>
             <div class='col-md-3'>
-                <p><b>Target gene</b></p>
+                <label for='gene'>Target gene</label>
                 {{ sform.gene(id='gene', class='form-control select2') }}
             </div>
             <div class='col-md-3'>
-                <p><b>Target subregion</b><p>
+                <label for='sub'>Target subregion</label>
                 {{ sform.sub(id='sub', class='form-control select2') }}
             </div>
 
@@ -32,91 +35,89 @@
         <br>
         <div class='row'>
             <div class='col-md-6'>
-                <p><b>Forward primer</b></p>
+                <label for='fw_prim'>Forward primer</label>
                 {{ sform.fw_prim(id='fw_prim', class='form-control select2') }}
             </div>
             <div class='col-md-6'>
-                <p><b>Reverse primer</b></p>
+                <label for='rv_prim'>Reverse primer</label>
                 {{ sform.rv_prim(id='rv_prim', class='form-control select2') }}
             </div>
         </div>
-        <br>
-        <hr>
+        <br><br>
         <div class='row'>
-            <div class='col-md-3'>
-                <p><i>Taxonomy</i></p>
+            <div class='col-md-12'>
+                <h2>Taxonomy</h2>
             </div>
         </div>
         <div class='row'>
             <div class='col-md-3'>
-                <p><b>Kingdom</b></p>
+                <label for='kingdom'>Kingdom</label>
                 {{ sform.kingdom(id='kingdom', class='form-control select2') }}
             </div>
             <div class='col-md-3'>
-                <p><b>Phylum</b></p>
+                <label for='phylum'>Phylum</label>
                 {{ sform.phylum(id='phylum', class='form-control select2') }}
             </div>
             <div class='col-md-3'>
-                <p><b>Class</b></p>
+                <label for='classs'>Class</label>
                 {{ sform.classs(id='classs', class='form-control select2') }}
             </div>
             <div class='col-md-3'>
-                <p><b>Order</b></p>
+                <label for='oorder'>Order</label>
                 {{ sform.oorder(id='oorder', class='form-control select2') }}
             </div>
         </div>
         <br>
         <div class='row'>
             <div class='col-md-3'>
-                <p><b>Family</b></p>
+                <label for='family'>Family</label>
                 {{ sform.family(id='family', class='form-control select2') }}
             </div>
             <div class='col-md-3'>
-                <p><b>Genus</b></p>
+                <label for='genus'>Genus</label>
                 {{ sform.genus(id='genus', class='form-control select2') }}
             </div>
             <div class='col-md-3'>
-                <p><b>Specific epithet</b></p>
+                <label for='species'>Specific epithet</label>
                 {{ sform.species(id='species', class='form-control select2') }}
             </div>
         </div>
         <div class='row'>
             <div class='col-md-12'>
-               <br>Read more about ASV taxonomy in SBDI
-              <a href="https://biodiversitydata-se.github.io/mol-data/std-taxon-annotation">here</a>.
+               <br><p>Read more about ASV taxonomy in SBDI
+              <a href="https://docs.biodiversitydata.se/analyse-data/molecular-tools/">here</a>.</p>
             </div>
        </div>
-        <br>
         <hr>
         <div class='row'>
-            <div class='col-md-1'>
+            <div class='col-md-3'>
                 {{ sform.filter_asvs(class='btn btn-primary', id='filter_asvs') }}
+                &nbsp;&nbsp;
+                <input type='button' class='btn btn-primary' id='clear_all' value='Clear'/>
             </div>
-            <div class='col-md-1'>
-                <button type='button' class='btn btn-default' id='clear_all'>Clear all</button>
-            </div>
-            <div class='col-md-10'>
-                You may have to <span class='scroll-note'>scroll down to see results</span>.
-                When they have finished loading, tick left column to (de)select a row,
-                and click bottom button to show occurrence records of selected ASV:s in Bioatlas.
-                You can also download results as Excel/CSV, and link these to Bioatlas records via <i>taxonID</i> column.
+            <div class='col-md-9'>
+                <p>
+                    <b>Tip: </b>You may have to <b>scroll down and wait</b> for results to load.
+                    Then tick a checkbox to (de)select a row, toggle +/- symbols to show/hide sequences,
+                    and click bottom <i>Show Bioatlas records</i> button to show occurrences of selected ASV:s in the Bioatlas.
+                    You can also download search results as Excel/CSV, and use <i>taxonID</i> column to link these to Bioatlas records.
+                </p>
             </div>
         </div>
-        <br>
         <div class='row'>
             <div class='col-md-12 visHlpDiv' id='filt_err_container'></div>
         </div>
 
     </form>
 </div>
-<br>
-<br>
+
 {% if rform %}
 <div class='container' id='result'>
     <form action={{ rform.batch_url }} method='post' id='rform' name='rform'>
         {{ rform.csrf_token }}
         <div class='row'>
             <div class='col-md-12'>
+                <hr>
                 <table id='filter_result_table' class='dataframe table table-striped'>
                     <thead>
                         <tr>

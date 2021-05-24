@@ -1,13 +1,15 @@
 {% extends 'layout.html' %}
+
+{% block title %}
+BLAST search
+{% endblock title %}
+
 {% block body %}
 <div class='container'>
     <div>
-        <br>
         <h1>BLAST for ASVs and Bioatlas records</h1>
-        <br>
-        <p>Use the Basic Local Alignment Search Tool (BLAST), to find Amplicon
-           Sequence Variants (ASVs), and associated Bioatlas occurrence records,
-           <br>matching your sequences and alignment criteria.
+        <p>Use the Basic Local Alignment Search Tool (BLAST), to find Amplicon 
+           Sequence Variants (ASVs), and associated Bioatlas occurrence records, matching your sequences and alignment criteria.
            Read more about how to search by sequence <a href="{{ sbdi_seq_search_page }}">here</a>.
        </p>
     <hr>
@@ -22,7 +24,7 @@
                     <div class='form-group'>
                 {% endif %}
                         <p>
-                            <b>Query sequence(s)</b>
+                            <label for='sequence_textarea'>Query sequence(s)</label>
                             <br>Nucleotide sequence(s), in fasta format, to compare against ASVs (subject sequences) in reference database
                             <span style='float: right' id='sequence_count'>2108/50000 characters</span>
                         </p>
@@ -37,9 +39,9 @@
         </div>
         <br>
         <div class='row'>
-            <div class='col-md-3'>
+            <div class='col-md-4'>
                 <p>
-                    <b>Min. identity (Id %)</b>
+                    <label for='min_identity'>Minimum identity (Id %)</label>
                         <br>Share of exact matches in alignment
                 </p>
                 {% if sform.min_identity.errors %}
@@ -55,9 +57,8 @@
                         </span>
                     </div>
             </div>
-            <div class='col-md-3'>
-                <p>
-                    <b>Min. query coverage (Cov %)</b>
+            <div class='col-md-4'>
+                <p><label for='min_qry_cover'>Minimum query coverage (Cov %)</label>
                     <br>Share of aligned query bases
                 </p>
                 {% if sform.min_qry_cover.errors %}
@@ -74,42 +75,39 @@
                     </div>
             </div>
         </div>
-        <br>
         <div class='row'>
-            <div class='col-md-12'>
-                This corresponds to running a (command-line) nucleotide BLAST (<i>BLASTn</i>) search filtered
+            <div class='col-md-12'><p>
+                <b>What does this mean? </b>This corresponds to a nucleotide BLAST (<i>BLASTn</i>) search filtered
                 on <i>-perc_identity</i> and <i>-qcov_hsp_perc</i>.
-                Note that query cover is calculated per <i>High Scoring Pair (HSP)</i>,
+                Query cover is calculated per <i>High Scoring Pair (HSP)</i>,
                 i.e. per ungapped local pairwise alignment between query and subject,
-                and that we only report the best HSP for each query-subject hit.
+                and we only report the best HSP for each query-subject hit.
                 Result fields correspond to <i>qacc</i>, <i>sacc</i>, <i>pident</i>, <i>qcovhsp</i> and <i>evalue</i>
                 in tabular BLASTn output format (<i>–outfmt=6</i>),
-                and rows are sorted on Query and E-value by default.
-                The E-value specifies the number of hits of similar (or higher) score
+                and rows are sorted on <i>Query</i> and <i>E-value</i> by default.
+                E-value specifies the number of hits of similar (or higher) score
                 that we expect to see by chance, i.e. smaller values indicate 'better' hits.
-            </div>
+            </p></div>
         </div>
-
-        <br>
         <hr>
         <div class='row'>
-            <div class='col-md-1'>
+            <div class='col-md-3'>
                 {{ sform.blast_for_seq(class='btn btn-primary', id='blast_for_seq') }}
+                &nbsp;&nbsp;
+                <input type='button' class='btn btn-primary' id='clear_all' value='Clear'/>
             </div>
-            <div class='col-md-1'>
-                <button type='button' class='btn btn-default' id='clear_all'>Clear all</button>
-            </div>
-            <div class='col-md-10'>
-                You may have to <span class='scroll-note'>scroll down to see results</span>.
-                When they have finished loading, tick left column to (de)select a row,
-                and click bottom button to show occurrence records of selected ASV:s in Bioatlas.
-                You can also download results as Excel/CSV, and link these to Bioatlas records via <i>taxonID</i> column.
+            <div class='col-md-9'>
+                <p>
+                    <b>Tip: </b>You may have to <b>scroll down and wait</b> for results to load.
+                    Then tick a checkbox to (de)select a row, toggle +/- symbols to show/hide sequences,
+                    and click bottom <i>Show Bioatlas records</i> button to show occurrences of selected ASV:s in the Bioatlas.
+                    You can also download search results as Excel/CSV, and use <i>taxonID</i> column to link these to Bioatlas records.
+                </p>
             </div>
         </div>
     </form>
 </div>
-<br>
-<br>
+
 
 {% if rform %}
 <div class='container' id='result'>
@@ -117,6 +115,7 @@
         {{ rform.csrf_token }}
         <div class='row'>
             <div class='col-md-12'>
+                <hr>
                 <table id='blast_result_table' class='dataframe table table-striped'>
                     <thead>
                         <tr>
