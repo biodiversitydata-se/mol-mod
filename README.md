@@ -133,7 +133,7 @@ This script executes *importer.py* inside the main container. Check the *PARSER.
 ```
 For new datasets to be available in BLAST database build or filter search, you also need to set dataset property *in_bioatlas* to *true* (e.g. via pgAdmin until implemented as script running in container). See also *BLAST-database generation* below.
 
-### Data edits
+### Data deletions
 In the production environment, you can delete single datasets with an interactive script:
 ```
   $ scripts/delete-dataset.sh
