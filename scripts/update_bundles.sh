@@ -26,24 +26,25 @@ mkdir -p "$STATICDIR/img"
 wget "$DTJS"
 wget "$DTCSS"
 wget "$SELECTTWOBS"
-mv *.js js
-mv *.css css
+mv ./*.js js
+mv ./*.css css
 
 wget "$SELECTTWO"
 
-tar -zxvf *.tar.gz
+tar -zxvf ./*.tar.gz
 
 cp select2*/dist/js/select2.full.min.js js/
 cp select2*/dist/css/select2.min.css css/
 
-curl -s 'https://google-webfonts-helper.herokuapp.com/api/fonts/roboto?subsets=latin,latin-ext' | \
-	jq -r '.variants[] | [ .id, .fontStyle, .fontWeight, .ttf, .woff, .woff2] | @tsv'  | \
-	while read -r fontid style weight ttffile wofffile woff2file ; do
-		curl -s "$ttffile" > "webfonts/roboto-$weight-style.ttf"
-			echo $fontid
-		curl -s "$ttffile" > "webfonts/roboto-$weight-$style.ttf"
-		curl -s "$wofffile" > "webfonts/roboto-$weight-$style.woff"
-		curl -s "$woff2file" > "webfonts/roboto-$weight-$style.woff2"
+if [ skip = this_for_now ]; then
+
+	curl -s 'https://google-webfonts-helper.herokuapp.com/api/fonts/roboto?subsets=latin,latin-ext' | \
+		jq -r '.variants[] | [ .id, .fontStyle, .fontWeight, .ttf, .woff, .woff2] | @tsv'  | \
+		while read -r fontid style weight ttffile wofffile woff2file ; do
+			curl -s "$ttffile" > "webfonts/roboto-$weight-style.ttf"
+			curl -s "$ttffile" > "webfonts/roboto-$weight-$style.ttf"
+			curl -s "$wofffile" > "webfonts/roboto-$weight-$style.woff"
+			curl -s "$woff2file" > "webfonts/roboto-$weight-$style.woff2"
 
 		cat - >> css/roboto.css <<EOF
 @font-face {
@@ -56,12 +57,9 @@ curl -s 'https://google-webfonts-helper.herokuapp.com/api/fonts/roboto?subsets=l
 		 url(/static/webfonts/roboto-$weight-$style.ttf) format('truetype');
 }
 EOF
+	done
+fi
 
-done
-
-# Do not generate font file for now
-rm css/roboto.css
-# cp webfonts/* "$STATICDIR/webfonts/"
 cp css/* "$STATICDIR/css/"
 cp js/* "$STATICDIR/js/"
 
