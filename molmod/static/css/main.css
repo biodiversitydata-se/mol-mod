@@ -15,7 +15,7 @@ P.blocktext {
 h2 {
     font-size: 22px !important;
 }
-.main-content p, th, td, label, .dataTables_info, .help-block, li, #file-shown {
+.main-content p, th, td, .dataTables_info, .help-block, li, #file-shown {
     font-size: 16px !important;
 }
 /* Nav-bar links */
@@ -106,6 +106,16 @@ select.form-control.input-sm {
 #clear_all,
 #filter_asvs,
 #show_occurrences,
-#submit {
-  border-radius: 4px;
+#submit,
+#blast_link,
+#filter_link,
+#submit_link,
+#file_label {
+    border-radius: 4px;
+    padding: 0px 18.2px;
+    line-height: 2.5em;
+    font-weight: bolder;
+    font-size: 1rem;
+    color: #fff;
+    text-transform: uppercase;
 }

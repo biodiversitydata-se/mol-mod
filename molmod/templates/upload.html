@@ -18,7 +18,7 @@ Upload file
                 <!-- Actual upload, which is hidden -->
                 {{ form.file(id='file') }}
                 <!-- Custom upload button -->
-                <label for="file" class='btn btn-default'>Select</label>
+                <label for="file" class='btn btn-default' id='file_label'>Select</label>
                 <!-- Name of selected file -->
                 <span id="file-shown">No file selected</span>
                 {{ form.submit(class='btn btn-primary', value='Upload') }}
