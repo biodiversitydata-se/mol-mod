@@ -15,6 +15,12 @@ P.blocktext {
 h2 {
     font-size: 22px !important;
 }
+.container a:not(.btn), .visHlpDiv a {
+    text-decoration: underline !important;
+}
+.container a:hover, .visHlpDiv a:hover {
+    text-decoration: none !important;
+}
 .main-content p, th, td, .dataTables_info, .help-block, li, #file-shown {
     font-size: 16px !important;
 }
@@ -86,8 +92,7 @@ select.form-control.input-sm {
 .table tr td:first-child.visHlpElem {
     background-color: #f8dbd3 !important;
 }
-.visHlpDiv {
-    display: block;
+.visHlpDiv, .visHlpDiv a {
     text-align: left;
     color: #c44d34;
     font-size: 16px !important;
@@ -101,7 +106,7 @@ select.form-control.input-sm {
   display: inline-block;
   width: 400px;
 }
-
+/* BUTTONS */
 #blast_for_seq,
 #clear_all,
 #filter_asvs,
