@@ -15,7 +15,13 @@ P.blocktext {
 h2 {
     font-size: 22px !important;
 }
-.main-content p, th, td, label, .dataTables_info, .help-block, li, #file-shown {
+.container a:not(.btn), .visHlpDiv a {
+    text-decoration: underline !important;
+}
+.container a:hover, .visHlpDiv a:hover {
+    text-decoration: none !important;
+}
+.main-content p, th, td, .dataTables_info, .help-block, li, #file-shown {
     font-size: 16px !important;
 }
 /* Nav-bar links */
@@ -86,8 +92,7 @@ select.form-control.input-sm {
 .table tr td:first-child.visHlpElem {
     background-color: #f8dbd3 !important;
 }
-.visHlpDiv {
-    display: block;
+.visHlpDiv, .visHlpDiv a {
     text-align: left;
     color: #c44d34;
     font-size: 16px !important;
@@ -100,4 +105,22 @@ select.form-control.input-sm {
   padding: 10px;
   display: inline-block;
   width: 400px;
+}
+/* BUTTONS */
+#blast_for_seq,
+#clear_all,
+#filter_asvs,
+#show_occurrences,
+#submit,
+#blast_link,
+#filter_link,
+#submit_link,
+#file_label {
+    border-radius: 4px;
+    padding: 0px 18.2px;
+    line-height: 2.5em;
+    font-weight: bolder;
+    font-size: 1rem;
+    color: #fff;
+    text-transform: uppercase;
 }
