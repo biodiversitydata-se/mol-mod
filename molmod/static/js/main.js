@@ -84,7 +84,7 @@ $(document).ready(function() {
                     // Check size
                     if( selFile.size > maxFileSize ) {
                         $('#upload_err_container').html('The file you tried to upload was larger than the ' + maxFileSize / (1024 * 1024) + ' MB we can deal with here. '
-                        + 'Please <u><a href="' + sbdiContactPage + '">contact SBDI support</a></u>, and we will find another option for you.');
+                        + 'Please <a href="' + sbdiContactPage + '">contact SBDI support</a>, and we will find another option for you.');
                         return false;
                     }
                     // Check extension
@@ -239,7 +239,7 @@ function makeSel2drop(drop){
             error: function (jqXHR, status, error) {
                 // console.log(error);
                 $('#filt_err_container').html('Sorry, something unexpected happened during page load. '
-                + 'Please <u><a href="' + sbdiContactPage + '">contact SBDI support</a></u> if this error persists.');
+                + 'Please <a href="' + sbdiContactPage + '">contact SBDI support</a> if this error persists.');
 
                 $('.btn').prop('disabled',true);
                 return { results: [] };
@@ -259,7 +259,7 @@ function makeDataTbl(url, columns) {
         .on('error.dt', function (e, settings, techNote, message) {
             // console.log( 'An error has been reported by DataTables: ', message );
             $('#search_err_container').html('Sorry, something unexpected happened during the search. '
-            + 'Please <u><a href="' + sbdiContactPage + '">contact SBDI support</a></u> if this error persists.');
+            + 'Please <a href="' + sbdiContactPage + '">contact SBDI support</a> if this error persists.');
 
             // Disable Bioatlas POST option and data export
             $("#show_occurrences").prop("disabled",true);

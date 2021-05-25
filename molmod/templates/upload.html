@@ -18,12 +18,13 @@ Upload file
                 <!-- Actual upload, which is hidden -->
                 {{ form.file(id='file') }}
                 <!-- Custom upload button -->
-                <label for="file" class='btn btn-default'>Select</label>
+                <label for="file" class='btn btn-default' id='file_label'>Select</label>
                 <!-- Name of selected file -->
                 <span id="file-shown">No file selected</span>
                 {{ form.submit(class='btn btn-primary', value='Upload') }}
             </div>
         </div>
+        <br>
         <div class='row'>
             <div class='col-md-12 visHlpDiv' id='upload_err_container'>
                 <!-- Validation errors -->
@@ -35,7 +36,7 @@ Upload file
                 <!-- Upload errors -->
                 {% if upload_error %}
                     Sorry, something unexpected happened during file upload.
-                    Please <u><a contact href="{{ sbdi_contact_page }}">contact SBDI support</a></u>
+                    Please <a contact href="{{ sbdi_contact_page }}">contact SBDI support</a>
                     if this error persists.
                 {% endif %}
             </div>
