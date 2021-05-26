@@ -61,6 +61,7 @@ class Config:
     # Data submission
     UPLOAD_PATH = get_env_variable('UPLOAD_PATH')
     UPLOAD_ROLE = get_env_variable('UPLOAD_ROLE')
+    UPLOAD_EMAIL = get_env_variable('UPLOAD_EMAIL')
     MAX_CONTENT_LENGTH = int(get_env_variable('MAX_CONTENT_LENGTH'))
     VALID_EXTENSIONS = get_env_variable('VALID_EXTENSIONS').split(' ')
 
