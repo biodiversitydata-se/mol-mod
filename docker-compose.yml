@@ -24,6 +24,8 @@ secrets:
     file: .secret.anon_pass
   postgrest_config:
     file: .secret.postgrest_config
+  email_config:
+    file: .secret.email_config
   ipt_pass:
     file: .secret.ipt_pass
 
@@ -104,6 +106,7 @@ services:
       - .env
     secrets:
       - postgres_pass
+      - email_config
     environment:
       - POSTGRES_PASSWORD_FILE=./run/secrets/postgres_pass
       - CAS_AFTER_LOGOUT=${HOST_URL}
