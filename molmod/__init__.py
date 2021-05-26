@@ -6,6 +6,7 @@ import os
 from logging.config import dictConfig
 
 from flask import Flask
+from flask_mail import Mail
 from flask_cas import CAS
 from flask_wtf.csrf import CSRFProtect
 
@@ -44,6 +45,9 @@ def create_app():
 
     # Enable authentication against Bioatlas CAS server
     cas = CAS(app)
+
+    # Enable flask email
+    app.mail = Mail(app)
 
     # Make some variables available in all templates,
     # for dynamic display of menu items and email links
