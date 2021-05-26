@@ -128,4 +128,5 @@ if __name__ == '__main__':
     write_config('.secret.postgrest_config', ARGS.template, ARGS.skip_existing,
                  **VARS)
 
-    write_config('.secret.email_config', ARGS.email, ARGS.skip_existing)
+    # Never overwrite email config
+    write_config('.secret.email_config', ARGS.email, True)
