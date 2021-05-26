@@ -90,6 +90,9 @@ if __name__ == '__main__':
     PARSER.add_argument('-t', '--template',
                         default='config/postgrest.conf.template',
                         help="postgrest config template file")
+    PARSER.add_argument('-m', '--email',
+                        default='config/email.conf.template',
+                        help="email config template file")
     PARSER.add_argument('--skip-existing', action="store_true",
                         help="Skip existing secrets")
     PARSER.add_argument('-v', '--verbose', action="count", default=0,
@@ -124,3 +127,5 @@ if __name__ == '__main__':
 
     write_config('.secret.postgrest_config', ARGS.template, ARGS.skip_existing,
                  **VARS)
+
+    write_config('.secret.email_config', ARGS.email, ARGS.skip_existing)
