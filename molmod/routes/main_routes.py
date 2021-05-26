@@ -7,6 +7,7 @@ from flask import Blueprint, abort
 from flask import current_app as APP
 from flask import render_template, request, send_from_directory, session
 from flask_cas import login_required
+from flask_mail import Message
 from molmod.config import get_config
 from molmod.forms import UploadForm
 from werkzeug.utils import secure_filename
@@ -95,6 +96,21 @@ def upload():
     # Save file, or report error
     try:
         f.save(os.path.join(CONFIG.UPLOAD_PATH, ext_filename))
+        msg = Message('New molmod file upload',
+                      sender=APP.mail.username,
+                      recipients = [CONFIG.UPLOAD_EMAIL])
+        msg.body = f"""
+        Hello!
+
+        There's a new file uploaded to molmod:
+        user: {email}
+        file: {filename} (saved as {ext_filename})
+
+        Have a nice day!
+
+        / molmod
+        """
+        APP.mail.send(msg)
     except Exception as err:
         APP.logger.error(
             f'File {ext_filename} could not be saved due to {err}')
