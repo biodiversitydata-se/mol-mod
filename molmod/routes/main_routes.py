@@ -1,12 +1,15 @@
 import json
 import os
 from datetime import datetime as dt
+from smtplib import SMTPException
+from ssl import SSLError
 
 import requests
 from flask import Blueprint, abort
 from flask import current_app as APP
 from flask import render_template, request, send_from_directory, session
 from flask_cas import login_required
+from flask_mail import Message
 from molmod.config import get_config
 from molmod.forms import UploadForm
 from werkzeug.utils import secure_filename
@@ -95,6 +98,24 @@ def upload():
     # Save file, or report error
     try:
         f.save(os.path.join(CONFIG.UPLOAD_PATH, ext_filename))
+        msg = Message('New file upload',
+                      sender=APP.mail.username,
+                      recipients=CONFIG.UPLOAD_EMAIL)
+        msg.body = f"""
+        Hello!
+
+        A new file has been uploaded to the ASV portal:
+        user: {email}
+        file: {filename} (saved as {ext_filename})
+
+        Have a nice day!
+
+        / Swedish ASV portal
+        """
+        APP.mail.send(msg)
+    except (SMTPException, SSLError) as ex:
+        APP.logger.error(
+            f"Could not send e-mail notification on file upload due to {ex}")
     except Exception as err:
         APP.logger.error(
             f'File {ext_filename} could not be saved due to {err}')
@@ -108,11 +129,6 @@ def upload():
 def submit():
     # abort(301)
     return render_template('submit.html')
-
-
-@main_bp.route('/test')
-def test():
-    abort(413)
 
 
 @main_bp.route("/files/<filename>")
