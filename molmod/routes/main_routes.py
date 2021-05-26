@@ -98,7 +98,7 @@ def upload():
     # Save file, or report error
     try:
         f.save(os.path.join(CONFIG.UPLOAD_PATH, ext_filename))
-        msg = Message('New ASV portal file upload',
+        msg = Message('New file upload',
                       sender=APP.mail.username,
                       recipients=CONFIG.UPLOAD_EMAIL)
         msg.body = f"""
@@ -129,11 +129,6 @@ def upload():
 def submit():
     # abort(301)
     return render_template('submit.html')
-
-
-@main_bp.route('/test')
-def test():
-    abort(413)
 
 
 @main_bp.route("/files/<filename>")
