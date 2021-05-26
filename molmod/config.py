@@ -14,6 +14,7 @@ def get_env_variable(name: str):
         message = "Expected environment variable '{}' not set.".format(name)
         raise Exception(message)
 
+
 def load_config_values(target: object, filename: str):
     """
     Reads all variables from a config file, formatted like:
@@ -29,7 +30,7 @@ def load_config_values(target: object, filename: str):
         key, value = row.split("=")
         # format values so that boolean values and integers are parsed into
         # the correct type.
-        value = value.strip().strip("'\"") # remove whitespace and quotes
+        value = value.strip().strip("'\"")  # remove whitespace and quotes
         # parse boolean
         if value.lower() in ['true', 't']:
             value = True
@@ -40,6 +41,7 @@ def load_config_values(target: object, filename: str):
             value = int(value) if value.isnumeric() else value
 
         setattr(target, key.strip(), value)
+
 
 def to_list(raw: str) -> list:
     """If the `raw` string is formatted like a list, it is converted to a list,
@@ -55,6 +57,7 @@ def to_list(raw: str) -> list:
         retval += [raw]
 
     return retval
+
 
 class Config:
     SECRET_KEY = secrets.token_hex()
@@ -92,6 +95,7 @@ class Config:
 
         # Make sure that UPLOAD_EMAIL is a list
         self.UPLOAD_EMAIL = to_list(self.UPLOAD_EMAIL)
+
 
 class ProductionConfig(Config):
     DEBUG = False
