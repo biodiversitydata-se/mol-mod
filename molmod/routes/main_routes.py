@@ -10,6 +10,8 @@ from flask_cas import login_required
 from flask_mail import Message
 from molmod.config import get_config
 from molmod.forms import UploadForm
+from ssl import SSLError
+from smtplib import SMTPException
 from werkzeug.utils import secure_filename
 
 CONFIG = get_config()
@@ -111,6 +113,8 @@ def upload():
         / molmod
         """
         APP.mail.send(msg)
+    except (SMTPException, SSLError) as ex:
+        APP.logger.error("Could not send e-mail notification on file upload")
     except Exception as err:
         APP.logger.error(
             f'File {ext_filename} could not be saved due to {err}')
