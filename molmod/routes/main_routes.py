@@ -100,7 +100,7 @@ def upload():
         f.save(os.path.join(CONFIG.UPLOAD_PATH, ext_filename))
         msg = Message('New molmod file upload',
                       sender=APP.mail.username,
-                      recipients = [CONFIG.UPLOAD_EMAIL])
+                      recipients = CONFIG.UPLOAD_EMAIL)
         msg.body = f"""
         Hello!
 

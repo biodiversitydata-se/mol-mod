@@ -41,6 +41,20 @@ def load_config_values(target: object, filename: str):
 
         setattr(target, key.strip(), value)
 
+def to_list(raw: str) -> list:
+    """If the `raw` string is formatted like a list, it is converted to a list,
+    otherwise returns a list with `raw` as the single item.
+    """
+    raw = raw.strip()
+    retval = []
+
+    if raw[0] == '[' and raw[-1] == ']':
+        for item in raw[1:-1].split(','):
+            retval += [item.strip().strip("'\"")]
+    else:
+        retval += [raw]
+
+    return retval
 
 class Config:
     SECRET_KEY = secrets.token_hex()
@@ -75,6 +89,9 @@ class Config:
         """
         # Flask-Mail settings
         load_config_values(self, config_file)
+
+        # Make sure that UPLOAD_EMAIL is a list
+        self.UPLOAD_EMAIL = to_list(self.UPLOAD_EMAIL)
 
 class ProductionConfig(Config):
     DEBUG = False
