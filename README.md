@@ -20,7 +20,7 @@ Generate secrets, or reuse old:
 ```
   $ ./scripts/generate_secrets.py --skip-existing
 ```
-If no secrets exist before, this will copy config/email.conf.template into .secret.email_config which then needs to be manually filled with mail server and account details. Likewise, you need to add a list of recipient email addresses to environmental variable UPLOAD_EMAIL, plus the IP:s of webapp and IPT hosts to DBACCESS, in .env file.
+If no secrets exist before, this will copy *config/email.conf.template* into *.secret.email_config* which then needs to be manually filled with mail server and account details. Likewise, you need to add a list of recipient email addresses to environmental variable *UPLOAD_EMAIL*, plus the IP:s of webapp and IPT hosts to *DBACCESS*, in *.env* file.
 
 Then, start up services:
 ```
@@ -53,7 +53,7 @@ Again, you need to either generate secrets, or reuse old:
 ```
   $ make secrets
 ```
-Also, see Development environment (above) on how to set up email and database access, before continuing.
+Also, see *Development environment* (above) on how to set up email and database access, before continuing.
 
 Then, to pull images and start up services:
 ```
