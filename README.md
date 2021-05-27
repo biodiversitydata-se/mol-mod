@@ -20,6 +20,8 @@ Generate secrets, or reuse old:
 ```
   $ ./scripts/generate_secrets.py --skip-existing
 ```
+If no secrets exist before, this will copy config/email.conf.template into .secret.email_config which then needs to be manually filled with mail server and account details. Likewise, you need to add a list of recipient email addresses to environmental variable UPLOAD_EMAIL, plus the IP:s of webapp and IPT hosts to DBACCESS, in .env file.
+
 Then, start up services:
 ```
   $ docker-compose up
@@ -51,6 +53,8 @@ Again, you need to either generate secrets, or reuse old:
 ```
   $ make secrets
 ```
+Also, see Development environment (above) on how to set up email and database access, before continuing.
+
 Then, to pull images and start up services:
 ```
   $ make run
@@ -125,7 +129,7 @@ It is also possible to copy these to current host dir with:
 ```
   $ docker cp  asv-main:/uploads .
 ```
-When a file is uploaded, an email notification is sent to each of the addresses included in the environmental variable UPLOAD_EMAIL (defaults to a couple dummy addresses!).
+When a file is uploaded, an email notification is sent to each of the addresses included in the environmental variable UPLOAD_EMAIL.
 
 ### Data import
 Import data (in Excel or text file format) using a separate python script. See:
