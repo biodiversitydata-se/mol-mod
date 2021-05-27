@@ -1,5 +1,27 @@
 #!/usr/bin/env bash
 
+# Mapping of the data file's column names to database field names.
+declare -A field_name_map
+field_name_map=(
+	[kingdom]=kingdom
+	[phylum]=phylum
+	[class]=class
+	[order]=oorder
+	[family]=family
+	[genus]=genus
+	[specificEpithet]=specific_epithet
+	[infraspecificEpithet]=infraspecific_epithet
+	[otu]=otu
+	[scientificName]=scientific_name
+	[taxonRank]=taxon_rank
+	[date_identified]=date_identified
+	[reference_db]=reference_db
+	[annotation_algorithm]=annotation_algorithm
+	[identification_references]=identification_references
+	[annotation_confidence]=annotation_confidence
+	[taxon_remarks]=taxon_remarks
+)
+
 readlink () {
 	case $OSTYPE in
 		linux*)
