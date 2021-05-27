@@ -23,10 +23,16 @@ asvhash () {
 }
 
 do_dbquery () {
-	docker exec asv-db \
+        # Use --command if we got an argument.  Otherwise, read SQL
+        # commands from standard input.
+
+	if [ "$#" -ne 0 ]; then
+		set -- --command="$*"
+	fi
+
+	docker exec -i asv-db \
 		psql -h localhost -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
-		--no-align --quiet --tuples-only \
-		--command="$1"
+		--no-align --quiet --tuples-only "$@"
 }
 
 topdir=$( readlink -f "$( dirname "$0" )/.." )
