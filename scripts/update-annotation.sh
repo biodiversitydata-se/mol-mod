@@ -78,10 +78,13 @@ esac
 
 indata=$tmpdir/data.csv
 
+# ----------------------------------------------------------------------
 # Verify that each sequence is already in the database.  Do this by
 # calculating the MD5 checksums of the sequences in the CSV file, and
 # then use these to query the database.
+# ----------------------------------------------------------------------
 
+# Get sequences, calculate ASV IDs, put these into an array.
 readarray -t asv_ids < <(
 	csvcut -c asv_sequence "$indata" |
 	while IFS= read -r sequence; do
@@ -89,27 +92,33 @@ readarray -t asv_ids < <(
 	done
 )
 
-query=$(cat <<-END_SQL
-	WITH v (id) AS (
-	VALUES
-	$( printf "\t('%s'),\n" "${asv_ids[@]}" | sed '$s/,$//' )
-	)
-	SELECT v.id
-	FROM v
-	LEFT JOIN asv ON (asv.asv_id = v.id)
-	WHERE asv.asv_id IS NULL
+# Get a list of any ASV IDs in the annotation file that are not found in
+# the database.
+readarray -t bad_asv_ids < <(
+	# This bit extracts the IDs that do not exist in the database.
+	# It uses a modified query from
+	# https://dba.stackexchange.com/a/141137
+	cat <<-END_SQL | do_dbquery
+		WITH v (id) AS (
+		VALUES
+		$( printf "\t('%s'),\n" "${asv_ids[@]}" | sed '$s/,$//' )
+		)
+		SELECT v.id
+		FROM v
+		LEFT JOIN asv ON (asv.asv_id = v.id)
+		WHERE asv.asv_id IS NULL
 	END_SQL
 )
 
-while IFS= read -r bad_asv_id; do
-	printf 'WARNING: ASV ID "%s" not found in database\n' "$bad_asv_id"
+# Delete the bad IDs from the array of IDs.
+for bad_id in "${bad_asv_ids[@]}"; do
+	printf 'WARNING: ASV ID "%s" not found in database\n' "$bad_id"
 	for i in "${!asv_ids[@]}"; do
-		if [ "${asv_ids[i]}" = "$bad_asv_id" ]; then
-			unset 'asv_ids[i]'
-			break
-		fi
+		[ "${asv_ids[i]}" != "$bad_id" ] && continue
+		unset 'asv_ids[i]'
+		break
 	done
-done < <( do_dbquery "$query" )
+done
 
 printf '%s\n' "${asv_ids[@]}"
 cleanup
