@@ -106,12 +106,12 @@ Note that you need to stop services and remove the database for any changes to t
 
 Alternatively, to add new address range(s) without removing the database, you can run a script inside the container, and then restart it for changes in pg_hba.conf to take effect:
 ```
-  $ docker exec -e DBACCESS='xxx.xxx.xxx.xxx/32' asv-db docker-entrypoint-initdb.d/04-restrict-db.sh
+  $ docker exec -e DBACCESS='xxx.xx.xx.xxx/32' asv-db docker-entrypoint-initdb.d/04-restrict-db.sh
   $ docker restart asv-db
 ```
 Note that you may have to edit firewall settings to allow incoming connections to port 5432, from those same ranges, e.g. in ufw:
 ```
-  $ sudo ufw allow from xxx.xxx.xxx.xxx/32 to any port 5432
+  $ sudo ufw allow from xxx.xx.xx.xxx/32 to any port 5432
 ```
 
 ### File uploads
