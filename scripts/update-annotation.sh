@@ -25,8 +25,8 @@ asvhash () {
 do_dbquery () {
 	docker exec asv-db \
 		psql -h localhost -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
-		--quiet --csv \
-		-c "$1"
+		--no-align --quiet --tuples-only \
+		--command="$1"
 }
 
 topdir=$( readlink -f "$( dirname "$0" )/.." )
@@ -83,5 +83,27 @@ readarray -t asv_ids < <(
 	done
 )
 
-printf '"%s"\n' "${asv_ids[@]}"
+query=$(cat <<-END_SQL
+	WITH v (id) AS (
+	VALUES
+	$( printf "\t('%s'),\n" "${asv_ids[@]}" | sed '$s/,$//' )
+	)
+	SELECT v.id
+	FROM v
+	LEFT JOIN asv ON (asv.asv_id = v.id)
+	WHERE asv.asv_id IS NULL
+	END_SQL
+)
+
+while IFS= read -r bad_asv_id; do
+	printf 'WARNING: ASV ID "%s" not found in database\n' "$bad_asv_id"
+	for i in "${!asv_ids[@]}"; do
+		if [ "${asv_ids[i]}" = "$bad_asv_id" ]; then
+			unset 'asv_ids[i]'
+			break
+		fi
+	done
+done < <( do_dbquery "$query" )
+
+printf '%s\n' "${asv_ids[@]}"
 cleanup
