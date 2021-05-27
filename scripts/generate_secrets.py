@@ -38,8 +38,8 @@ def generate_secret(filename, skip_existing: bool = False):
         sys.exit(1)
     else:
         logging.info("writing secret token to %s", filename)
-        logging.info("setting permissions to 0444 for %s", filename)
-        os.chmod(filename, 0o444)
+        logging.info("setting permissions to 0400 for %s", filename)
+        os.chmod(filename, 0o400)
 
         return secret
 
