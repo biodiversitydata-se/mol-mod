@@ -103,6 +103,8 @@ case $1 in
 esac
 
 indata=$tmpdir/data.csv
+#REMOVE LATER#connstr=sqlite:///$tmpdir/database.db
+#REMOVE LATER#csvsql --db "$connstr" --insert "$indata"
 
 # ----------------------------------------------------------------------
 # Verify that each sequence is already in the database.  Do this by
@@ -110,13 +112,20 @@ indata=$tmpdir/data.csv
 # then use these to query the database.
 # ----------------------------------------------------------------------
 
-# Get sequences, calculate ASV IDs, put these into an array.
+# Get sequences, calculate ASV IDs, insert new column ("asv_id") with
+# these.
 readarray -t asv_ids < <(
-	csvcut -c asv_sequence "$indata" |
+	csvcut -c asv_sequence "$indata" | sed 1d |
 	while IFS= read -r sequence; do
 		asvhash "$sequence"
 	done
 )
+
+cp "$indata" "$indata.tmp"
+{
+	echo 'asv_id'
+	printf '%s\n' "${asv_ids[@]}"
+} | paste -d , - "$indata.tmp" >"$indata"
 
 # Get a list of any ASV IDs in the annotation file that are not found in
 # the database.
@@ -136,15 +145,22 @@ readarray -t bad_asv_ids < <(
 	END_SQL
 )
 
-# Delete the bad IDs from the array of IDs.
+# Delete the bad IDs from the array of IDs, and from the input file.
+set --
 for bad_id in "${bad_asv_ids[@]}"; do
 	printf 'WARNING: ASV ID "%s" not found in database\n' "$bad_id"
+	set -- "$@" -e "^$bad_id"
 	for i in "${!asv_ids[@]}"; do
 		[ "${asv_ids[i]}" != "$bad_id" ] && continue
 		unset 'asv_ids[i]'
 		break
 	done
 done
+if [ "$#" -ne 0 ]; then
+	cp "$indata" "$indata.tmp"
+	grep -v "$@" "$indata.tmp" >"$indata"
+fi
 
 printf '%s\n' "${asv_ids[@]}"
+
 cleanup
