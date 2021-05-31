@@ -22,28 +22,32 @@ field_name_map=(
 	[taxon_remarks]=taxon_remarks
 )
 
+# Make readlink use GNU readlink on macOS.
 readlink () {
 	case $OSTYPE in
 		linux*)
-			command readlink "$@" ;;
+			command readlink "$@"
+			;;
 		*)
-			command greadlink "$@" ;;
+			command greadlink "$@"
 	esac
 }
 
+# Computes tho AVS hash given a sequence.
+# Uses GNU md5sum.
 asvhash () {
 	printf '%s' "$1" |
 	case $OSTYPE in
 		linux*)
-			command md5sum |
-			cut -d ' ' -f 1
+			command md5sum
 			;;
 		*)
-			command md5 ;;
+			command gmd5sum
 	esac |
-	awk '{ print "ASV:" $0 }'
+	sed 's/^\([[:xdigit:]]\{1,\}\).*/ASV:\1/'
 }
 
+# Simplifies making a query to the database in the asv-db container.
 do_dbquery () {
         # Use --command if we got an argument.  Otherwise, read SQL
         # commands from standard input.
