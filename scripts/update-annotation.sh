@@ -150,7 +150,7 @@ readarray -t bad_asv_ids < <(
 	# https://dba.stackexchange.com/a/141137
 	cat <<-END_SQL | do_dbquery
 		WITH v (id) AS (
-		VALUES
+		VALUES (
 		$( printf "\t('%s'),\n" "${asv_ids[@]}" | sed '$s/,$//' )
 		)
 		SELECT v.id
@@ -177,5 +177,20 @@ if [ "$#" -ne 0 ]; then
 fi
 
 printf '%s\n' "${asv_ids[@]}"
+
+# ----------------------------------------------------------------------
+# DATA LOADING
+# ----------------------------------------------------------------------
+
+# Mark old annotations on the affected ASV IDs as "old".
+cat <<-END_SQL | do_dbquery
+	UPDATE taxon_annotation
+	SET status = 'old'
+	FROM taxon_annotation AS ta
+	JOIN asv ON (asv.pid = ta.asv_pid)
+	WHERE asv.asv_id IN (
+	$( printf "'%s',\n" "${asv_ids[@]}" | sed '$s/,$//' )
+	)
+END_SQL
 
 cleanup
