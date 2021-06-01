@@ -191,4 +191,11 @@ cat <<-END_SQL | do_dbquery
 	)
 END_SQL
 
+names=( "${!field_name_map[@]}" )
+csvcut --columns "$( IFS=,; printf '%s' "${names[*]}" )" "$indata" |
+csvformat --out-tabs --out-quoting 1 --out-quotechar "'" | sed 1d |
+while IFS=$'\t' read -r "${names[@]}" junk; do
+	echo "$genus"
+done
+
 cleanup
