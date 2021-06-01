@@ -150,7 +150,7 @@ readarray -t bad_asv_ids < <(
 	# https://dba.stackexchange.com/a/141137
 	cat <<-END_SQL | do_dbquery
 		WITH v (id) AS (
-		VALUES (
+		VALUES
 		$( printf "\t('%s'),\n" "${asv_ids[@]}" | sed '$s/,$//' )
 		)
 		SELECT v.id
