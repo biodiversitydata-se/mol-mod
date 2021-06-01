@@ -107,10 +107,25 @@ indata=$tmpdir/data.csv
 #REMOVE LATER#csvsql --db "$connstr" --insert "$indata"
 
 # ----------------------------------------------------------------------
+# DATA VERIFICATION
+# ----------------------------------------------------------------------
+
+# Verify that the annotation file contains all the needed columns.
+readarray -t datacols < <( csvcut -n "$indata" | sed 's/.* //' )
+
+for colname in "${!field_name_map[@]}"; do
+	for datacol in "${datacols[@]}"; do
+		if [ "$colname" = "$datacol" ]; then
+			continue 2
+		fi
+	done
+	printf 'Can not find column "%s" in annotation file\n' "$colname" >&2
+	exit 1
+done
+
 # Verify that each sequence is already in the database.  Do this by
 # calculating the MD5 checksums of the sequences in the CSV file, and
 # then use these to query the database.
-# ----------------------------------------------------------------------
 
 # Get sequences, calculate ASV IDs, insert new column ("asv_id") with
 # these.
