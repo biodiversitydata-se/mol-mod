@@ -111,7 +111,7 @@ indata=$tmpdir/data.csv
 # ----------------------------------------------------------------------
 
 # Verify that the annotation file contains all the needed columns.
-readarray -t datacols < <( csvcut -n "$indata" | sed 's/.* //' )
+readarray -t datacols < <( csvcut --names "$indata" | sed 's/.* //' )
 
 for colname in "${!field_name_map[@]}"; do
 	for datacol in "${datacols[@]}"; do
@@ -130,7 +130,7 @@ done
 # Get sequences, calculate ASV IDs, insert new column ("asv_id") with
 # these.
 readarray -t asv_ids < <(
-	csvcut -c asv_sequence "$indata" | sed 1d |
+	csvcut --columns asv_sequence "$indata" | sed 1d |
 	while IFS= read -r sequence; do
 		asvhash "$sequence"
 	done
@@ -175,8 +175,6 @@ if [ "$#" -ne 0 ]; then
 	cp "$indata" "$indata.tmp"
 	grep -v "$@" "$indata.tmp" >"$indata"
 fi
-
-printf '%s\n' "${asv_ids[@]}"
 
 # ----------------------------------------------------------------------
 # DATA LOADING
