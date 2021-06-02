@@ -7,29 +7,35 @@ CSS class selector: .xxx, id selector: #xxx
 .main-content {
     padding: 15px 15px;
 }
+/* Make header smaller */
 h2 {
     font-size: 22px !important;
 }
+/* Underline links but when not hovered */
 .container a:not(.btn), .visHlpDiv a {
     text-decoration: underline !important;
 }
 .container a:hover, .visHlpDiv a:hover {
     text-decoration: none !important;
 }
+/* Increase font size */
 .main-content p, th, td, .dataTables_info, .help-block, li, #file-shown {
     font-size: 16px !important;
 }
 
-.help-block {
-    color: #c44d34;
-}
+/* DNA background image */
 .welcome {
     background:#f2f2f2 url('../img/dna.png') no-repeat right !important;
 }
 
 /* FORMS */
+/* Hide forms (until styled) */
 #rform, #sform {
     visibility: hidden;
+}
+/* BLAST form validation errors */
+.help-block {
+    color: #c44d34;
 }
 
 /* RESULT TABLES */
@@ -54,19 +60,20 @@ td.details-control {
 tr.shown td.details-control {
     background: url('../img/details_close.png') no-repeat top 13px right 10px !important;
 }
-/* Show ... entries */
+/* Restore lost arrow for 'Show x entries' */
 select.form-control.input-sm {
-    /* Restore arrow lost with SBDI-CSS */
     -webkit-appearance: menulist !important;
 }
-/* Restore striped table look - lost with SBDI-CSS */
+/* Restore striped table look */
+/* Odd rows */
 .table tr:nth-child(odd) td,
 .table tr th,
-/* Use same look for form controls */
+/* Use same look for form input fields */
 .form-control {
     color: #4c4c4c !important;
     background-color: white !important;
 }
+/* Even rows */
 .table tr:nth-child(even) td {
     color: #4c4c4c !important;
     background-color: #f9f9f9 !important;
@@ -77,20 +84,27 @@ select.form-control.input-sm {
     color: black !important;
     background-color: #bed9e5 !important;
 }
+
 /* HELP */
+/* Empty SBDI post requests, table/dropdown loading errors etc.*/
+/* Hide by default */
 .hiddenElem {
     visibility: hidden;
 }
+/* Highlight table checkbox column in pink */
 .table tr td:first-child.visHlpElem {
     background-color: #f8dbd3 !important;
 }
+/* ... and show help msg in red */
 .visHlpDiv, .visHlpDiv a {
     text-align: left;
     color: #c44d34;
     visibility: visible;
     font-size: 16px !important;
 }
+
 /* FILE UPLOAD */
+/* Hide actual browse button (replace with label below)*/
 #file {
     visibility: hidden;
 }
@@ -99,7 +113,8 @@ select.form-control.input-sm {
   display: inline-block;
   width: 400px;
 }
-/* BUTTONS */
+
+/* BUTTONS (and fake buttons) */
 #blast_for_seq,
 #clear_all,
 #filter_asvs,
@@ -113,7 +128,5 @@ select.form-control.input-sm {
     padding: 0px 18.2px;
     line-height: 2.5em;
     font-weight: bolder;
-    font-size: 1rem;
-    color: #fff;
     text-transform: uppercase;
 }
