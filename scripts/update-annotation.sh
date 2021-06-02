@@ -107,18 +107,19 @@ else
 fi
 cp "$indata" "$indata.tmp"
 for colname in "${!colname_map[@]}"; do
-	if [ "$colname" != "${colname_map[$colname]}" ]; then
-		printf '1s/%s%s%s/%s/\n' "$ws" "$colname" "$we" "${colname_map[$colname]}"
-	fi
+	[ "$colname" = "${colname_map[$colname]}" ] && continue
+	printf '1s/%s%s%s/%s/\n' "$ws" "$colname" "$we" "${colname_map[$colname]}"
 done | sed -f /dev/stdin "$indata.tmp" >"$indata"
 
 # Create a temporary table called "tmpdata".
 cat <<-'END_SQL' | do_dbquery
+	BEGIN;
+
 	-- Drop old table if needed.
 	DROP TABLE IF EXISTS tmpdata;
 
-	-- Create with the same schema as "taxon_annotation", but with
-	-- an additional "asv_sequence" column.
+	-- Create the table with the same schema as "taxon_annotation",
+	-- but with an additional "asv_sequence" column.
 	CREATE TABLE tmpdata (
 		LIKE taxon_annotation,
 		asv_sequence CHARACTER VARYING
@@ -132,6 +133,8 @@ cat <<-'END_SQL' | do_dbquery
 		nextval('taxon_annotation_pid_seq'),
 	ALTER COLUMN asv_pid DROP NOT NULL,
 	ALTER COLUMN status SET DEFAULT 'valid';
+
+	COMMIT;
 END_SQL
 
 # Load annotation data into "tmpdata" table.
@@ -140,6 +143,8 @@ docker exec -i asv-main \
 		--no-create <"$indata"
 
 cat <<-'END_SQL' | do_dbquery
+	BEGIN;
+
 	-- Populate the "asv_pid" column with the correct values based
 	-- on the sequence data.
 	UPDATE tmpdata AS t
@@ -165,4 +170,9 @@ cat <<-'END_SQL' | do_dbquery
 	INSERT INTO taxon_annotation
 	SELECT * FROM tmpdata
 	WHERE asv_pid IS NOT NULL;
+
+	-- Drop the temporary table.
+	DROP TABLE tmpdata;
+
+	COMMIT;
 END_SQL
