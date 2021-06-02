@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# Mapping of the data file's column names to database field names.
-declare -A field_name_map
-field_name_map=(
+# Mapping of the data file's column names to database column names.
+declare -A colname_map
+colname_map=(
 	[kingdom]=kingdom
 	[phylum]=phylum
 	[class]=class
@@ -123,6 +123,8 @@ for colname in "${!field_name_map[@]}"; do
 	exit 1
 done
 
+unset datacols datacol
+
 # Verify that each sequence is already in the database.  Do this by
 # calculating the MD5 checksums of the sequences in the CSV file, and
 # then use these to query the database.
@@ -191,10 +193,10 @@ cat <<-END_SQL | do_dbquery
 	)
 END_SQL
 
-names=( "${!field_name_map[@]}" )
-csvcut --columns "$( IFS=,; printf '%s' "${names[*]}" )" "$indata" |
+colnames=( "${!colname_map[@]}" )
+csvcut --columns "$( IFS=,; printf '%s' "${colnames[*]}" )" "$indata" |
 csvformat --out-tabs --out-quoting 1 --out-quotechar "'" | sed 1d |
-while IFS=$'\t' read -r "${names[@]}" junk; do
+while IFS=$'\t' read -r "${colnames[@]}" junk; do
 	echo "$genus"
 done
 
