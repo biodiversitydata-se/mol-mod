@@ -60,6 +60,12 @@
     <script src="https://static.biodiversitydata.se/js/vendor.js?DIGEST"></script>
     <script src="https://static.biodiversitydata.se/js/app.js?DIGEST"></script>
     <script>require('js/init');</script>
+    <script type="text/javascript">
+      function focusScroll() {
+        // Allow to move with PgUp/Down the main contain without having to focus manually
+        $("#main_content").trigger("focus");
+      }
+    </script>
 
     <!-- DataTables w. Select & button ext -->
     <script src="{{ url_for('static', filename='js/datatables.min.js') }}"></script>
