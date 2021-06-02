@@ -33,20 +33,6 @@ readlink () {
 	esac
 }
 
-# Computes tho AVS hash given a sequence.
-# Uses GNU md5sum.
-asvhash () {
-	printf '%s' "$1" |
-	case $OSTYPE in
-		linux*)
-			command md5sum
-			;;
-		*)
-			command gmd5sum
-	esac |
-	sed 's/^\([[:xdigit:]]\{1,\}\).*/ASV:\1/'
-}
-
 # Simplifies making a query to the database in the asv-db container.
 do_dbquery () {
         # Use --command if we got an argument.  Otherwise, read SQL
@@ -77,6 +63,13 @@ fi >&2
 # shellcheck disable=SC1090
 . <( grep '^POSTGRES_' "$topdir/.env" ) || exit 1
 
+printf -v connstr 'postgresql+psycopg2://%s:%s@%s:%s/%s' \
+	"$POSTGRES_USER" \
+	"$(<$topdir/.secret.postgres_pass)" \
+	"$POSTGRES_HOST" \
+	"$POSTGRES_PORT" \
+	"$POSTGRES_DB"
+
 indata=$1
 
 if [ -z "$1" ]; then
@@ -103,101 +96,73 @@ case $1 in
 esac
 
 indata=$tmpdir/data.csv
-#REMOVE LATER#connstr=sqlite:///$tmpdir/database.db
-#REMOVE LATER#csvsql --db "$connstr" --insert "$indata"
 
-# ----------------------------------------------------------------------
-# DATA VERIFICATION
-# ----------------------------------------------------------------------
-
-# Verify that the annotation file contains all the needed columns.
-readarray -t datacols < <( csvcut --names "$indata" | sed 's/.* //' )
-
-for colname in "${!field_name_map[@]}"; do
-	for datacol in "${datacols[@]}"; do
-		if [ "$colname" = "$datacol" ]; then
-			continue 2
-		fi
-	done
-	printf 'Can not find column "%s" in annotation file\n' "$colname" >&2
-	exit 1
-done
-
-unset datacols datacol
-
-# Verify that each sequence is already in the database.  Do this by
-# calculating the MD5 checksums of the sequences in the CSV file, and
-# then use these to query the database.
-
-# Get sequences, calculate ASV IDs, insert new column ("asv_id") with
-# these.
-readarray -t asv_ids < <(
-	csvcut --columns asv_sequence "$indata" | sed 1d |
-	while IFS= read -r sequence; do
-		asvhash "$sequence"
-	done
-)
-
-cp "$indata" "$indata.tmp"
-{
-	echo 'asv_id'
-	printf '%s\n' "${asv_ids[@]}"
-} | paste -d , - "$indata.tmp" >"$indata"
-
-# Get a list of any ASV IDs in the annotation file that are not found in
-# the database.
-readarray -t bad_asv_ids < <(
-	# This bit extracts the IDs that do not exist in the database.
-	# It uses a modified query from
-	# https://dba.stackexchange.com/a/141137
-	cat <<-END_SQL | do_dbquery
-		WITH v (id) AS (
-		VALUES
-		$( printf "\t('%s'),\n" "${asv_ids[@]}" | sed '$s/,$//' )
-		)
-		SELECT v.id
-		FROM v
-		LEFT JOIN asv ON (asv.asv_id = v.id)
-		WHERE asv.asv_id IS NULL
-	END_SQL
-)
-
-# Delete the bad IDs from the array of IDs, and from the input file.
-set --
-for bad_id in "${bad_asv_ids[@]}"; do
-	printf 'WARNING: ASV ID "%s" not found in database\n' "$bad_id"
-	set -- "$@" -e "^$bad_id"
-	for i in "${!asv_ids[@]}"; do
-		[ "${asv_ids[i]}" != "$bad_id" ] && continue
-		unset 'asv_ids[i]'
-		break
-	done
-done
-if [ "$#" -ne 0 ]; then
-	cp "$indata" "$indata.tmp"
-	grep -v "$@" "$indata.tmp" >"$indata"
+# Change the data file's column names.
+if [[ $OSTYPE == linux* ]]; then
+	ws='\<'
+	we='\>'
+else
+	ws='[[:<:]]'
+	we='[[:>:]]'
 fi
+cp "$indata" "$indata.tmp"
+for colname in "${!colname_map[@]}"; do
+	if [ "$colname" != "${colname_map[$colname]}" ]; then
+		printf '1s/%s%s%s/%s/\n' "$ws" "$colname" "$we" "${colname_map[$colname]}"
+	fi
+done | sed -f /dev/stdin "$indata.tmp" >"$indata"
 
-# ----------------------------------------------------------------------
-# DATA LOADING
-# ----------------------------------------------------------------------
+# Create a temporary table called "tmpdata".
+cat <<-'END_SQL' | do_dbquery
+	-- Drop old table if needed.
+	DROP TABLE IF EXISTS tmpdata;
 
-# Mark old annotations on the affected ASV IDs as "old".
-cat <<-END_SQL | do_dbquery
-	UPDATE taxon_annotation
-	SET status = 'old'
-	FROM taxon_annotation AS ta
-	JOIN asv ON (asv.pid = ta.asv_pid)
-	WHERE asv.asv_id IN (
-	$( printf "'%s',\n" "${asv_ids[@]}" | sed '$s/,$//' )
-	)
+	-- Create with the same schema as "taxon_annotation", but with
+	-- an additional "asv_sequence" column.
+	CREATE TABLE tmpdata (
+		LIKE taxon_annotation,
+		asv_sequence CHARACTER VARYING
+	 );
+
+	-- Use the "pid" sequence from the "taxon_annotation" table,
+	-- allow "asv_pid" to be NULL, and set the default "status"
+	-- value to the string "valid".
+	ALTER TABLE tmpdata
+	ALTER COLUMN pid SET DEFAULT
+		nextval('taxon_annotation_pid_seq'),
+	ALTER COLUMN asv_pid DROP NOT NULL,
+	ALTER COLUMN status SET DEFAULT 'valid';
 END_SQL
 
-colnames=( "${!colname_map[@]}" )
-csvcut --columns "$( IFS=,; printf '%s' "${colnames[*]}" )" "$indata" |
-csvformat --out-tabs --out-quoting 1 --out-quotechar "'" | sed 1d |
-while IFS=$'\t' read -r "${colnames[@]}" junk; do
-	echo "$genus"
-done
+# Load annotation data into "tmpdata" table.
+docker exec -i asv-main \
+	csvsql --db "$connstr" --insert --tables tmpdata \
+		--no-create <"$indata"
 
-cleanup
+cat <<-'END_SQL' | do_dbquery
+	-- Populate the "asv_pid" column with the correct values based
+	-- on the sequence data.
+	UPDATE tmpdata AS t
+	SET asv_pid = asv.pid
+	FROM asv
+	WHERE asv.asv_sequence = t.asv_sequence;
+
+	-- As we're done with it, drop the "asv_sequence" column from
+	-- our temporary table.
+	ALTER TABLE tmpdata
+	DROP COLUMN asv_sequence;
+
+	-- Set the "status" of any existing annotation entries for these
+	-- sequences to the string "old".
+	UPDATE taxon_annotation AS ta
+	SET status = 'old'
+	FROM tmpdata AS t
+	WHERE ta.asv_pid = t.asv_pid;
+
+	-- Finally, copy the data from our temporary table into the
+	-- annotation table.  Avoid inserting data associated with
+	-- sequence data that couldn't be matched.
+	INSERT INTO taxon_annotation
+	SELECT * FROM tmpdata
+	WHERE asv_pid IS NOT NULL;
+END_SQL
