@@ -125,9 +125,12 @@ done | sed -f /dev/stdin "$indata.tmp" >"$indata"
 
 # Create a temporary table called "tmpdata".
 cat <<-'END_SQL' | do_dbquery
+	-- We will now create the temporary table that will hold the
+	-- data from the file.
 	BEGIN;
 
 	-- Drop old table if needed.
+	-- This will generate a NOTICE if the table does not exist.
 	DROP TABLE IF EXISTS tmpdata;
 
 	-- Create the table with the same schema as "taxon_annotation",
@@ -147,6 +150,8 @@ cat <<-'END_SQL' | do_dbquery
 	ALTER COLUMN status SET DEFAULT 'valid';
 
 	COMMIT;
+	-- Done.  The data will now be loaded using "csvsql" via the
+	-- asv-main container.
 END_SQL
 
 # Load annotation data into "tmpdata" table.
@@ -155,6 +160,10 @@ docker exec -i asv-main \
 		--no-create <"$indata"
 
 cat <<-'END_SQL' | do_dbquery
+	-- The data has now been loaded.  We now modify the data
+	-- so that it's suitable to be copied straigt into the
+	-- "taxon_annotation" table.
+
 	BEGIN;
 
 	-- Populate the "asv_pid" column with the correct values based
@@ -183,8 +192,17 @@ cat <<-'END_SQL' | do_dbquery
 	SELECT * FROM tmpdata
 	WHERE asv_pid IS NOT NULL;
 
+	-- Delete the data that was copied.
+	DELETE FROM tmpdata
+	WHERE asv_pid IS NOT NULL;
+
+	-- This is how many entries couldn't be used due to non-matching
+	-- sequences.
+	SELECT COUNT(*) FROM tmpdata;
+
 	-- Drop the temporary table.
 	DROP TABLE tmpdata;
 
 	COMMIT;
+	-- All done.
 END_SQL
