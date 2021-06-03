@@ -65,23 +65,24 @@ if [ ! -e "$topdir/.env" ]; then
 	exit 1
 fi >&2
 
-if [ "$( docker container inspect -f '{{ .State.Running }}' asv-db )" != 'true' ]
-then
-	echo 'Container "asv-db" is not available.'
-	exit 1
-fi >&2
+# Make sure that the needed containers are up and running.
+for container in asv-db asv-main; do
+	if [ "$( docker container inspect -f '{{ .State.Running }}' "$container" )" != 'true' ]
+	then
+		printf 'Container "%s" is not available.' "$container"
+		exit 1
+	fi >&2
+done
 
 # shellcheck disable=SC1090
 . <( grep '^POSTGRES_' "$topdir/.env" ) || exit 1
 
 printf -v connstr 'postgresql+psycopg2://%s:%s@%s:%s/%s' \
 	"$POSTGRES_USER" \
-	"$(<$topdir/.secret.postgres_pass)" \
+	"$(<"$topdir/.secret.postgres_pass")" \
 	"$POSTGRES_HOST" \
 	"$POSTGRES_PORT" \
 	"$POSTGRES_DB"
-
-indata=$1
 
 if [ -z "$1" ]; then
 	echo 'Missing filename argument'
