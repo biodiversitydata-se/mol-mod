@@ -43,8 +43,9 @@ do_dbquery () {
 	fi
 
 	docker exec -i asv-db \
-		psql -h localhost -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
-		--no-align --quiet --tuples-only "$@"
+		psql --host=localhost --user="$POSTGRES_USER" \
+			--dbname="$POSTGRES_DB" \
+			--no-align --echo-all --tuples-only "$@"
 }
 
 topdir=$( readlink -f "$( dirname "$0" )/.." )
