@@ -48,6 +48,16 @@ do_dbquery () {
 			--no-align --echo-all --tuples-only "$@"
 }
 
+if ! command -v in2csv >/dev/null 2>&1; then
+	cat <<-'END_MESSAGE'
+		The command "in2csv" is not available.
+		Please install the "csvkit" package,
+		either using "pip install csvkit" or
+		via a package manager.
+	END_MESSAGE
+	exit 1
+fi >&2
+
 topdir=$( readlink -f "$( dirname "$0" )/.." )
 
 if [ ! -e "$topdir/.env" ]; then
