@@ -1,5 +1,38 @@
 #!/usr/bin/env bash
 
+# ======================================================================
+# This script takes an annotation file as its only argument.  The file
+# should be a Microsoft Excel spreadsheet (*.xlsx), or a corresponding
+# CSV file (*.csv).
+#
+# The columns names in the file are expected to be the following (order
+# is *not* important):
+#
+#	annotation_algorithm
+#	annotation_confidence
+#	class
+#	date_identified
+#	family
+#	genus
+#	identification_references
+#	infraspecificEpithet
+#	kingdom
+#	order
+#	otu
+#	phylum
+#	reference_db
+#	scientificName
+#	specificEpithet
+#	taxonRank
+#	taxon_remarks
+#
+# See the associative array "colname_map" below for how these are mapped
+# to column names in the "taxon_annotation" table in the ASV database.
+#
+# The conversation with the database will be shown to the user, as a way
+# of presenting the progress.
+# ======================================================================
+
 # Mapping of the data file's column names to database column names.
 declare -A colname_map
 colname_map=(
