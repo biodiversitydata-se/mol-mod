@@ -33,6 +33,10 @@
 # of presenting the progress.
 # ======================================================================
 
+# ----------------------------------------------------------------------
+# Setup and sanity checks.
+# ----------------------------------------------------------------------
+
 # Mapping of the data file's column names to database column names.
 declare -A colname_map
 colname_map=(
@@ -128,6 +132,10 @@ case $infile in
 		exit 1
 esac
 
+# ----------------------------------------------------------------------
+# Setup of the staging table in the database.
+# ----------------------------------------------------------------------
+
 # Create a temporary table called "tmpdata".
 cat <<-'END_SQL' | do_dbquery
 	-- We will now create the temporary table that will hold the
@@ -180,6 +188,11 @@ docker exec -i asv-main sh -c '
 	"$@" | sed -e "$colrename" |
 	csvsql --db "$connstr" --insert --tables tmpdata --no-create' sh \
 	"$connstr" "$colrename" "${filter[@]}" <"$infile"
+
+# ----------------------------------------------------------------------
+# Modify the data in the staging table and finally copy the data to the
+# annotation table.
+# ----------------------------------------------------------------------
 
 cat <<-'END_SQL' | do_dbquery
 	-- The data has now been loaded.  We now modify the data
