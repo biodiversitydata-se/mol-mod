@@ -116,6 +116,16 @@ class DevelopmentConfig(Config):
     CAS_AFTER_LOGOUT = 'http://localhost:5000'
     UPLOAD_EMAIL = get_env_variable('DEV_UPLOAD_EMAIL')
 
+    def __init__(self, config_file: str = "/run/secrets/email_config"):
+        """
+        Loads the email config values.
+        """
+        # Flask-Mail settings
+        load_config_values(self, config_file)
+
+        # Make sure that UPLOAD_EMAIL is a list
+        self.UPLOAD_EMAIL = to_list(self.UPLOAD_EMAIL)
+
 
 class TestConfig(Config):
     TESTING = True
