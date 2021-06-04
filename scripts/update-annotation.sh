@@ -81,16 +81,6 @@ do_dbquery () {
 			--no-align --echo-all --tuples-only "$@"
 }
 
-if ! command -v in2csv >/dev/null 2>&1; then
-	cat <<-'END_MESSAGE'
-		The command "in2csv" is not available.
-		Please install the "csvkit" package,
-		either using "pip install csvkit" or
-		via a package manager.
-	END_MESSAGE
-	exit 1
-fi >&2
-
 topdir=$( readlink -f "$( dirname "$0" )/.." )
 
 if [ ! -e "$topdir/.env" ]; then
@@ -122,39 +112,21 @@ if [ -z "$1" ]; then
 	exit 1
 fi >&2
 
-tmpdir=$(mktemp -d)
+infile=$1
 
-cleanup () { rm -f -r "$tmpdir"; }
-trap cleanup INT TERM HUP
-
-case $1 in
+# Set up filter for data that produces CSV.
+case $infile in
 	*.csv)	# ok, we want CSV.
-		cp "$1" "$tmpdir/data.csv"
+		filter=( cat )
 		;;
 	*.xlsx)	# ok, but need to convert to CSV.
-		in2csv "$1" >"$tmpdir/data.csv"
+		filter=( in2csv -f xlsx )
 		;;
 	*)	# not ok, we got some strange filename.
-		printf 'File has unknown filename suffix: %s\n' "$1" >&2
+		printf 'File has unknown filename suffix: %s\n' "$infile" >&2
 		echo 'Expected filename matching *.csv or *.xlsx' >&2
 		exit 1
 esac
-
-indata=$tmpdir/data.csv
-
-# Change the data file's column names.
-if [[ $OSTYPE == linux* ]]; then
-	ws='\<'
-	we='\>'
-else
-	ws='[[:<:]]'
-	we='[[:>:]]'
-fi
-cp "$indata" "$indata.tmp"
-for colname in "${!colname_map[@]}"; do
-	[ "$colname" = "${colname_map[$colname]}" ] && continue
-	printf '1s/%s%s%s/%s/\n' "$ws" "$colname" "$we" "${colname_map[$colname]}"
-done | sed -f /dev/stdin "$indata.tmp" >"$indata"
 
 # Create a temporary table called "tmpdata".
 cat <<-'END_SQL' | do_dbquery
@@ -187,16 +159,32 @@ cat <<-'END_SQL' | do_dbquery
 	-- asv-main container.
 END_SQL
 
-# Load annotation data into "tmpdata" table.
-docker exec -i asv-main \
-	csvsql --db "$connstr" --insert --tables tmpdata \
-		--no-create <"$indata"
+# ----------------------------------------------------------------------
+# Load annotation data into the "tmpdata" table using "csvsql" on the
+# "asv-main" container, but first create CSV from the original data if
+# needed and rename columns.
+# ----------------------------------------------------------------------
+
+# Create sed script to rename columns using the mapping in "colname_map".
+unset colrename
+for colname in "${!colname_map[@]}"; do
+	[ "$colname" = "${colname_map[$colname]}" ] && continue
+	colrename+=${colrename:+;}$(
+		printf '1s/\<%s\>/%s/\n' "$colname" "${colname_map[$colname]}"
+	)
+done
+
+docker exec -i asv-main sh -c '
+	connstr=$1; shift
+	colrename=$1; shift
+	"$@" | sed -e "$colrename" |
+	csvsql --db "$connstr" --insert --tables tmpdata --no-create' sh \
+	"$connstr" "$colrename" "${filter[@]}" <"$infile"
 
 cat <<-'END_SQL' | do_dbquery
 	-- The data has now been loaded.  We now modify the data
 	-- so that it's suitable to be copied straigt into the
 	-- "taxon_annotation" table.
-
 	BEGIN;
 
 	-- Populate the "asv_pid" column with the correct values based
