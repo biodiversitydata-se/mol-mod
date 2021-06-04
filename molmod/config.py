@@ -75,23 +75,12 @@ class Config:
     # Data submission
     UPLOAD_PATH = get_env_variable('UPLOAD_PATH')
     UPLOAD_ROLE = get_env_variable('UPLOAD_ROLE')
-    UPLOAD_EMAIL = get_env_variable('UPLOAD_EMAIL')
     MAX_CONTENT_LENGTH = int(get_env_variable('MAX_CONTENT_LENGTH'))
     VALID_EXTENSIONS = get_env_variable('VALID_EXTENSIONS').split(' ')
 
     # Cache settings (Flask internal), but see also molecular.config in proxy
     # (https://github.com/biodiversitydata-se/proxy-ws-mol-mod-docker)
     SEND_FILE_MAX_AGE_DEFAULT = 300  # 300 seconds = 5 minutes
-
-    def __init__(self, config_file: str = "/run/secrets/email_config"):
-        """
-        Loads the email config values.
-        """
-        # Flask-Mail settings
-        load_config_values(self, config_file)
-
-        # Make sure that UPLOAD_EMAIL is a list
-        self.UPLOAD_EMAIL = to_list(self.UPLOAD_EMAIL)
 
 
 class ProductionConfig(Config):
@@ -105,6 +94,17 @@ class ProductionConfig(Config):
     # export HOST_URL=http://localhost:5000
     CAS_AFTER_LOGOUT = get_env_variable('CAS_AFTER_LOGOUT') or \
         'https://molecular.biodiversitydata.se'
+    UPLOAD_EMAIL = get_env_variable('UPLOAD_EMAIL')
+
+    def __init__(self, config_file: str = "/run/secrets/email_config"):
+        """
+        Loads the email config values.
+        """
+        # Flask-Mail settings
+        load_config_values(self, config_file)
+
+        # Make sure that UPLOAD_EMAIL is a list
+        self.UPLOAD_EMAIL = to_list(self.UPLOAD_EMAIL)
 
 
 class DevelopmentConfig(Config):
@@ -114,6 +114,7 @@ class DevelopmentConfig(Config):
                        'biocache-service/occurrences/batchSearch'
     REDIRECT_URL = 'https://molecular.infrabas.se/ala-hub/occurrences/search'
     CAS_AFTER_LOGOUT = 'http://localhost:5000'
+    UPLOAD_EMAIL = get_env_variable('DEV_UPLOAD_EMAIL')
 
 
 class TestConfig(Config):
