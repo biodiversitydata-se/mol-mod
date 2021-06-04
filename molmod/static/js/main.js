@@ -76,7 +76,7 @@ $(document).ready(function() {
             break;
 
         case '/upload':
-            $('#uform').submit(function() {
+            $('#uform').on('submit', function() {
             // Checks size and name of selected file against env variables
                 // If file has been selected (otherwise Flask rejects)
                 if ($("#file").val()) {
@@ -167,7 +167,7 @@ $(document).ready(function() {
         });
 
         // Prepare ASV id:s for POST to Bioatlas
-        $('#rform').submit(function() {
+        $('#rform').on('submit', function() {
             // Get selected ASV IDs from table
             var ids = $.map(dTbl.rows({selected: true}).data(), function (item) {
                 return item['asv_id']
@@ -188,7 +188,7 @@ $(document).ready(function() {
         });
     }
 
-    $("#file").change(function(){
+    $("#file").on('change', function(){
         var filename = $(this).val().split('\\').pop();
         $('#file-shown').text(filename);
     });
