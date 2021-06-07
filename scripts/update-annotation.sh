@@ -219,6 +219,12 @@ cat <<-'END_SQL' | do_dbquery
 	FROM tmpdata AS t
 	WHERE ta.asv_pid = t.asv_pid;
 
+	-- "taxon_rank" should be blank rather than NULL.
+	-- https://github.com/biodiversitydata-se/mol-mod/pull/51#issuecomment-855789302
+	UPDATE tmpdata
+	SET taxon_rank = ''
+	WHERE taxon_rank IS NULL;
+
 	-- Finally, copy the data from our temporary table into the
 	-- annotation table.  Avoid inserting data associated with
 	-- sequence data that couldn't be matched.
