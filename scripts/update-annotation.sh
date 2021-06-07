@@ -34,6 +34,30 @@
 # ======================================================================
 
 # ----------------------------------------------------------------------
+# CREATE HELP (access with './scripts/update-annotation.sh -h')
+# ----------------------------------------------------------------------
+
+if [ "$1" = '-h' ] || [ "$1" = '--help' ]; then
+  cat <<-HELP
+
+******************************************************************************
+
+	This script updates the taxonomic annotation of ASV:s that match sequences
+	in the supplied annotation file.
+
+	USAGE: $0 <annotation_file>
+
+	Supported argument:
+
+	    <annotation_file>    	Path of annotation file (.xslx or .csv)
+
+******************************************************************************
+
+	HELP
+  exit
+fi
+
+# ----------------------------------------------------------------------
 # Setup and sanity checks.
 # ----------------------------------------------------------------------
 
