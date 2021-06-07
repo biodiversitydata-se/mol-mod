@@ -219,11 +219,17 @@ cat <<-'END_SQL' | do_dbquery
 	FROM tmpdata AS t
 	WHERE ta.asv_pid = t.asv_pid;
 
-	-- "taxon_rank" should be blank rather than NULL.
-	-- https://github.com/biodiversitydata-se/mol-mod/pull/51#issuecomment-855789302
-	UPDATE tmpdata
-	SET taxon_rank = ''
-	WHERE taxon_rank IS NULL;
+	-- A number of columns need to be empty strings rather than NULL.
+	-- https://github.com/biodiversitydata-se/mol-mod/pull/51#issuecomment-855902991
+	UPDATE tmpdata SET kingdom = '' WHERE kingdom IS NULL;
+	UPDATE tmpdata SET phylum  = '' WHERE phylum  IS NULL;
+	UPDATE tmpdata SET class   = '' WHERE class   IS NULL;
+	UPDATE tmpdata SET oorder  = '' WHERE oorder  IS NULL;
+	UPDATE tmpdata SET family  = '' WHERE family  IS NULL;
+	UPDATE tmpdata SET genus   = '' WHERE genus   IS NULL;
+	UPDATE tmpdata SET otu     = '' WHERE otu     IS NULL;
+	UPDATE tmpdata SET specific_epithet      = '' WHERE specific_epithet      IS NULL;
+	UPDATE tmpdata SET infraspecific_epithet = '' WHERE infraspecific_epithet IS NULL;
 
 	-- Finally, copy the data from our temporary table into the
 	-- annotation table.  Avoid inserting data associated with
