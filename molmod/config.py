@@ -126,7 +126,7 @@ class TestConfig(Config):
 
 def get_config():
     '''
-    Uses FLASK_ENV (set in start.sh) to determine app environment.
+    Uses FLASK_ENV (set in compose file) to determine app environment.
     '''
     try:
         env = get_env_variable('FLASK_ENV')
