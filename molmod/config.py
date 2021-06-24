@@ -23,23 +23,25 @@ def load_config_values(target: object, filename: str):
       [...]
     and sets the loaded key/value pairs in the `target` object.
     """
-    for row in open(filename):
-        row = row.strip()
-        if not row or row[0] == '#':
-            continue
-        key, value = row.split("=")
-        # Parse values into correct types
-        value = value.strip().strip("'\"")  # remove whitespace and quotes
-        # Parse boolean
-        if value.lower() in ['true', 't']:
-            value = True
-        elif value.lower() in ['false', 'f']:
-            value = False
-        # Parse integers
-        else:
-            value = int(value) if value.isnumeric() else value
+    with open(filename) as f:
+        for row in f:
+            row = row.strip()
+            if not row or row[0] == '#':
+                continue
+            key, value = row.split("=")
+            # format values so that boolean values and integers are parsed into
+            # the correct type.
+            value = value.strip().strip("'\"")  # remove whitespace and quotes
+            # parse boolean
+            if value.lower() in ['true', 't']:
+                value = True
+            elif value.lower() in ['false', 'f']:
+                value = False
+            # parse integers
+            else:
+                value = int(value) if value.isnumeric() else value
 
-        setattr(target, key.strip(), value)
+            setattr(target, key.strip(), value)
 
 
 def to_list(raw: str) -> list:
