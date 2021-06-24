@@ -135,7 +135,7 @@ It is also possible to copy these to current host dir with:
 ```
   $ docker cp  asv-main:/uploads .
 ```
-When a file is uploaded, an email notification is sent to each of the addresses included in the environmental variable UPLOAD_EMAIL.
+When a file is uploaded, an email notification is sent to each of the addresses included in the environmental variables UPLOAD_EMAIL or DEV_UPLOAD_EMAIL.
 
 ### Data import
 Import data (in Excel or text file format) using a separate python script. See:

@@ -17,7 +17,7 @@ def get_env_variable(name: str):
 
 def load_config_values(target: object, filename: str):
     """
-    Reads all variables from a config file, formatted like:
+    Reads all variables from a secret / config file, formatted like:
       key1 = value
       key2 = value
       [...]
@@ -28,15 +28,14 @@ def load_config_values(target: object, filename: str):
         if not row or row[0] == '#':
             continue
         key, value = row.split("=")
-        # format values so that boolean values and integers are parsed into
-        # the correct type.
+        # Parse values into correct types
         value = value.strip().strip("'\"")  # remove whitespace and quotes
-        # parse boolean
+        # Parse boolean
         if value.lower() in ['true', 't']:
             value = True
         elif value.lower() in ['false', 'f']:
             value = False
-        # parse integers
+        # Parse integers
         else:
             value = int(value) if value.isnumeric() else value
 
@@ -100,9 +99,10 @@ class ProductionConfig(Config):
     BATCH_SEARCH_URL = 'https://records.biodiversitydata.se/' \
                        'ws/occurrences/batchSearch'
     REDIRECT_URL = 'https://records.biodiversitydata.se/occurrences/search'
-    # For testing in local production env,
-    # run or add this to your bash startup file (e.g. ~/.bash_profile):
-    # export HOST_URL=http://localhost:5000
+    # For testing in local production env, run or add this to ~/.bash_profile:
+    # ´export HOST_URL=http://localhost:5000´
+    # docker-compose.prod.yml then uses this to set env var CAS_AFTER_LOGOUT
+    # In production, we use site URL instead
     CAS_AFTER_LOGOUT = get_env_variable('CAS_AFTER_LOGOUT') or \
         'https://molecular.biodiversitydata.se'
     UPLOAD_EMAIL = get_env_variable('UPLOAD_EMAIL')
