@@ -82,6 +82,17 @@ class Config:
     # (https://github.com/biodiversitydata-se/proxy-ws-mol-mod-docker)
     SEND_FILE_MAX_AGE_DEFAULT = 300  # 300 seconds = 5 minutes
 
+    # To be inherited by both Prod/Dev config
+    def __init__(self, config_file: str = "/run/secrets/email_config"):
+        """
+        Loads the email config values.
+        """
+        # Flask-Mail settings
+        load_config_values(self, config_file)
+
+        # Make sure that UPLOAD_EMAIL is a list
+        self.UPLOAD_EMAIL = to_list(self.UPLOAD_EMAIL)
+
 
 class ProductionConfig(Config):
     DEBUG = False
@@ -96,16 +107,6 @@ class ProductionConfig(Config):
         'https://molecular.biodiversitydata.se'
     UPLOAD_EMAIL = get_env_variable('UPLOAD_EMAIL')
 
-    def __init__(self, config_file: str = "/run/secrets/email_config"):
-        """
-        Loads the email config values.
-        """
-        # Flask-Mail settings
-        load_config_values(self, config_file)
-
-        # Make sure that UPLOAD_EMAIL is a list
-        self.UPLOAD_EMAIL = to_list(self.UPLOAD_EMAIL)
-
 
 class DevelopmentConfig(Config):
     DEBUG = True
@@ -115,16 +116,6 @@ class DevelopmentConfig(Config):
     REDIRECT_URL = 'https://molecular.infrabas.se/ala-hub/occurrences/search'
     CAS_AFTER_LOGOUT = 'http://localhost:5000'
     UPLOAD_EMAIL = get_env_variable('DEV_UPLOAD_EMAIL')
-
-    def __init__(self, config_file: str = "/run/secrets/email_config"):
-        """
-        Loads the email config values.
-        """
-        # Flask-Mail settings
-        load_config_values(self, config_file)
-
-        # Make sure that UPLOAD_EMAIL is a list
-        self.UPLOAD_EMAIL = to_list(self.UPLOAD_EMAIL)
 
 
 class TestConfig(Config):
