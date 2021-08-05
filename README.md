@@ -92,7 +92,7 @@ FLASK_ENV=production in docker-compose.prod.yml.
 
 You can use a script to create incremental backups of the database, container logs and uploaded files to (host) folder [repos-path]/backups:
 ```
-  $./scripts/scheduled-backup.sh
+  $ ./scripts/scheduled-backup.sh
 ```
 This script can also be used to run from crontab (time-based job scheduler). Suggested crontab entry for twice-daily backups as 9 AM and 9 PM:
 ```
