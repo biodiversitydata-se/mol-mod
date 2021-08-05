@@ -1,7 +1,7 @@
 /* Changes may require cache bypass, in Chrome/Mac: shift + cmd + r */
 $(document).ready(function() {
 
-    var hlpDiv = $('#selection_error'); // For displaying no-selection warning
+    var hlpDiv = $('#sel_err_container'); // For displaying no-selection warning
 
     switch(page) {
 
@@ -76,7 +76,7 @@ $(document).ready(function() {
             break;
 
         case '/upload':
-            $('#uform').submit(function() {
+            $('#uform').on('submit', function() {
             // Checks size and name of selected file against env variables
                 // If file has been selected (otherwise Flask rejects)
                 if ($("#file").val()) {
@@ -135,8 +135,8 @@ $(document).ready(function() {
 
         // Remove no-selection warnings when any row is selected
         dTbl.on( 'select', function () {
-            if($('#selection_error').hasClass('visHlpDiv')){
-                $('#selection_error').removeClass('visHlpDiv');
+            if($('#sel_err_container').hasClass('visHlpDiv')){
+                $('#sel_err_container').removeClass('visHlpDiv');
                 $('.table tr td:first-child').removeClass('visHlpElem');
             }
         });
@@ -167,7 +167,7 @@ $(document).ready(function() {
         });
 
         // Prepare ASV id:s for POST to Bioatlas
-        $('#rform').submit(function() {
+        $('#rform').on('submit', function() {
             // Get selected ASV IDs from table
             var ids = $.map(dTbl.rows({selected: true}).data(), function (item) {
                 return item['asv_id']
@@ -181,14 +181,14 @@ $(document).ready(function() {
 
             // Warn and abort if no selection has been made in table
             if (!$('#raw_names').val()) {
-                $('#selection_error').addClass('visHlpDiv');
+                $('#sel_err_container').addClass('visHlpDiv');
                 $('.table tr td:first-child').addClass('visHlpElem');
                 return false;
             }
         });
     }
 
-    $("#file").change(function(){
+    $("#file").on('change', function(){
         var filename = $(this).val().split('\\').pop();
         $('#file-shown').text(filename);
     });

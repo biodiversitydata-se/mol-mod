@@ -11,6 +11,12 @@ The application can be run as a docker-compose environment, assuming you have [D
   $ brew install bash
 ```
 
+### Environmental variables
+Use .env.template to create .env file, and add missing values to the latter, before proceeding.
+```
+  $ cp .env.template .env
+```
+
 ### Development environment
 In development, postgres data and config files are written to bind-mounted dir *postgres-data*, which needs to be deleted if you later want to regenerate the db from schema files and dumps in *db* dir. This is also required when you generate new passwords and API config file (secrets).
 ```
@@ -129,7 +135,7 @@ It is also possible to copy these to current host dir with:
 ```
   $ docker cp  asv-main:/uploads .
 ```
-When a file is uploaded, an email notification is sent to each of the addresses included in the environmental variable UPLOAD_EMAIL.
+When a file is uploaded, an email notification is sent to each of the addresses included in the environmental variables UPLOAD_EMAIL or DEV_UPLOAD_EMAIL.
 
 ### Data import
 Import data (in Excel or text file format) using a separate python script. See:

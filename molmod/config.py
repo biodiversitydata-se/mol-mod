@@ -17,30 +17,31 @@ def get_env_variable(name: str):
 
 def load_config_values(target: object, filename: str):
     """
-    Reads all variables from a config file, formatted like:
+    Reads all variables from a secret / config file, formatted like:
       key1 = value
       key2 = value
       [...]
     and sets the loaded key/value pairs in the `target` object.
     """
-    for row in open(filename):
-        row = row.strip()
-        if not row or row[0] == '#':
-            continue
-        key, value = row.split("=")
-        # format values so that boolean values and integers are parsed into
-        # the correct type.
-        value = value.strip().strip("'\"")  # remove whitespace and quotes
-        # parse boolean
-        if value.lower() in ['true', 't']:
-            value = True
-        elif value.lower() in ['false', 'f']:
-            value = False
-        # parse integers
-        else:
-            value = int(value) if value.isnumeric() else value
+    with open(filename) as f:
+        for row in f:
+            row = row.strip()
+            if not row or row[0] == '#':
+                continue
+            key, value = row.split("=")
+            # format values so that boolean values and integers are parsed into
+            # the correct type.
+            value = value.strip().strip("'\"")  # remove whitespace and quotes
+            # parse boolean
+            if value.lower() in ['true', 't']:
+                value = True
+            elif value.lower() in ['false', 'f']:
+                value = False
+            # parse integers
+            else:
+                value = int(value) if value.isnumeric() else value
 
-        setattr(target, key.strip(), value)
+            setattr(target, key.strip(), value)
 
 
 def to_list(raw: str) -> list:
@@ -68,9 +69,6 @@ class Config:
     # SBDI links
     SBDI_START_PAGE = get_env_variable('SBDI_START_PAGE')
     SBDI_CONTACT_PAGE = get_env_variable('SBDI_CONTACT_PAGE')
-    SBDI_SEQ_SEARCH_PAGE = get_env_variable('SBDI_SEQ_SEARCH_PAGE')
-    SBDI_MOLECULAR_PAGE = get_env_variable('SBDI_MOLECULAR_PAGE')
-    BIOATLAS_PAGE = get_env_variable('BIOATLAS_PAGE')
     TAXONOMY_PAGE = get_env_variable('TAXONOMY_PAGE')
     # CAS authentication
     CAS_SERVER = get_env_variable('CAS_SERVER')
@@ -78,7 +76,6 @@ class Config:
     # Data submission
     UPLOAD_PATH = get_env_variable('UPLOAD_PATH')
     UPLOAD_ROLE = get_env_variable('UPLOAD_ROLE')
-    UPLOAD_EMAIL = get_env_variable('UPLOAD_EMAIL')
     MAX_CONTENT_LENGTH = int(get_env_variable('MAX_CONTENT_LENGTH'))
     VALID_EXTENSIONS = get_env_variable('VALID_EXTENSIONS').split(' ')
 
@@ -86,6 +83,7 @@ class Config:
     # (https://github.com/biodiversitydata-se/proxy-ws-mol-mod-docker)
     SEND_FILE_MAX_AGE_DEFAULT = 300  # 300 seconds = 5 minutes
 
+    # To be inherited by both Prod/Dev config
     def __init__(self, config_file: str = "/run/secrets/email_config"):
         """
         Loads the email config values.
@@ -103,11 +101,13 @@ class ProductionConfig(Config):
     BATCH_SEARCH_URL = 'https://records.biodiversitydata.se/' \
                        'ws/occurrences/batchSearch'
     REDIRECT_URL = 'https://records.biodiversitydata.se/occurrences/search'
-    # For testing in local production env,
-    # run or add this to your bash startup file (e.g. ~/.bash_profile):
-    # export HOST_URL=http://localhost:5000
+    # For testing in local production env, run or add this to ~/.bash_profile:
+    # ´export HOST_URL=http://localhost:5000´
+    # docker-compose.prod.yml then uses this to set env var CAS_AFTER_LOGOUT
+    # In production, we use site URL instead
     CAS_AFTER_LOGOUT = get_env_variable('CAS_AFTER_LOGOUT') or \
         'https://molecular.biodiversitydata.se'
+    UPLOAD_EMAIL = get_env_variable('UPLOAD_EMAIL')
 
 
 class DevelopmentConfig(Config):
@@ -117,6 +117,7 @@ class DevelopmentConfig(Config):
                        'biocache-service/occurrences/batchSearch'
     REDIRECT_URL = 'https://molecular.infrabas.se/ala-hub/occurrences/search'
     CAS_AFTER_LOGOUT = 'http://localhost:5000'
+    UPLOAD_EMAIL = get_env_variable('DEV_UPLOAD_EMAIL')
 
 
 class TestConfig(Config):
@@ -125,7 +126,7 @@ class TestConfig(Config):
 
 def get_config():
     '''
-    Uses FLASK_ENV (set in start.sh) to determine app environment.
+    Uses FLASK_ENV (set in compose file) to determine app environment.
     '''
     try:
         env = get_env_variable('FLASK_ENV')

@@ -6,3 +6,4 @@ venv/
 personal/
 .secret.*
 uploads/
+.env
