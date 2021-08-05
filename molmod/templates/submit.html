@@ -16,10 +16,10 @@ Submit data
         <h2>Main steps of the submission process:</h2>
             <ol>
                 <li>Submit your raw data to ENA (see our
-                    <a href="https://biodiversitydata-se.github.io/mol-data/ena-metabar.html"
+                    <a href="{{ ena_guide_page }}"
                        target="_blank">guide<span class='screen-reader-text'>(Link opens in a new tab)</span></a>).
                 </li>
-                <li>Denoise your data to ASVs (you can use the <a href="https://nf-co.re/ampliseq" target="_blank">ampliseq pipeline
+                <li>Denoise your data to ASVs (you can use the <a href="{{ ampliseq_page }}" target="_blank">ampliseq pipeline
                 <span class='screen-reader-text'>(Link opens in a new tab)</span></a>).</li>
                 <li>
                     <a href="{{ url_for('main_bp.files', filename='SBDI-metabarcoding-template.xlsx') }}">

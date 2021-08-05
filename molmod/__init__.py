@@ -66,6 +66,8 @@ def create_app():
             sbdi_contact_page=CONFIG.SBDI_CONTACT_PAGE,
             sbdi_start_page=CONFIG.SBDI_START_PAGE,
             taxonomy_page=CONFIG.TAXONOMY_PAGE,
+            ena_guide_page=CONFIG.ENA_GUIDE_PAGE,
+            ampliseq_page=CONFIG.AMPLISEQ_PAGE,
             user=user,
             firstname=firstname,
             max_file_size=CONFIG.MAX_CONTENT_LENGTH,

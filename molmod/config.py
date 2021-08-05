@@ -66,10 +66,12 @@ class Config:
     BLAST_DB = get_env_variable('BLAST_DB')
     DEBUG = False
     TESTING = False
-    # SBDI links
+    # SBDI links etc.
     SBDI_START_PAGE = get_env_variable('SBDI_START_PAGE')
     SBDI_CONTACT_PAGE = get_env_variable('SBDI_CONTACT_PAGE')
     TAXONOMY_PAGE = get_env_variable('TAXONOMY_PAGE')
+    ENA_GUIDE_PAGE = get_env_variable('ENA_GUIDE_PAGE')
+    AMPLISEQ_PAGE = get_env_variable('AMPLISEQ_PAGE')
     # CAS authentication
     CAS_SERVER = get_env_variable('CAS_SERVER')
     CAS_AFTER_LOGIN = get_env_variable('CAS_AFTER_LOGIN')

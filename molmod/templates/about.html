@@ -15,15 +15,11 @@ About
             Swedish Biodiversity Data Infrastructure (SBDI)</a>.
             In addition to a database of amplicon sequence variants (ASVs) and a web interface,
             we provide a
-            <a href="https://biodiversitydata-se.github.io/mol-data/ena-metabar.html"
+            <a href="{{ ena_guide_page }}"
                rel="noreferrer noopener" target="_blank">step-by-step guide<span class='screen-reader-text'>(Link opens in a new tab)</span></a>
             to submitting raw sequence data to ENA,
             and a
-            <a href="https://nf-co.re/ampliseq" target="_blank"
-               rel="noreferrer noopener">pipeline
-               <span class='screen-reader-text'>(Link opens in a new tab)</span>
-           </a>
-            (developed in the nf-core collaboration)
+            <a href="{{ ampliseq_page }}" target="_blank" rel="noreferrer noopener">pipeline<span class='screen-reader-text'>(Link opens in a new tab)</span></a> (developed in the nf-core collaboration)
             for denoising and taxonomic annotation of metabarcoding data.
         </p>
         <p>
@@ -32,9 +28,9 @@ About
                      class="img-fluid" title="Flow of metabarcoding data in SBDI" />
                 <figcaption><br><b>Flow of metabarcoding data in SBDI</b>: A sequencing service provider, such as NGI, delivers sequencing data
                     to the user. The user submits raw sequencing data and contextual data to ENA
-                    (see <a href="https://biodiversitydata-se.github.io/mol-data/ena-metabar.html"
+                    (see <a href="{{ ena_guide_page }}"
                     rel="noreferrer noopener">our guide<span class='screen-reader-text'>(Link opens in a new tab)</span></a>), denoises the data using e.g.
-                    <a href="https://nf-co.re/ampliseq" rel="noreferrer noopener" target="_blank">nf-core/ampliseq
+                    <a href="{{ ampliseq_page }}" rel="noreferrer noopener" target="_blank">nf-core/ampliseq
                         <span class='screen-reader-text'>(Link opens in a new tab)</span>
                     </a>, and submits the denoised data (ASVs and their counts in different samples, and contextual data)
                     to the ASV portal. Metabarcoding data in the ASV database/Bioatlas
