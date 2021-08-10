@@ -1,5 +1,5 @@
 # mol-mod
-Module ([the Swedish ASV portal](http://molecular.biodiversitydata.se/)) for handling sequence-based occurrence data in [SBDI](https://biodiversitydata.se/).
+Module ([the Swedish ASV portal](http://asv-portal.biodiversitydata.se/)) for handling sequence-based occurrence data in [SBDI](https://biodiversitydata.se/).
 
 ### Overview
 Flask + jQuery app for BLAST and metadata search of sequence-based occurrences in SBDI, via separate BLAST and Amplicon Sequence Variant (ASV) databases. Views of the ASV db are exposed via [postgREST server](https://postgrest.org/en/v7.0.0/index.html), and accessed in API calls (for metadata search part).
@@ -104,7 +104,7 @@ For local testing of production environment, you need to run or add this to your
 ```
   $ export HOST_URL=http://localhost:5000
 ```
-Otherwise the Bioatlas CAS server will redirect users to 'https://molecular.biodiversitydata.se' after logout.
+Otherwise the Bioatlas CAS server will redirect users to 'https://asv-portal.biodiversitydata.se' after logout.
 
 
 ### Database access
