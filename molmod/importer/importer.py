@@ -282,7 +282,9 @@ def read_data_file(data_file: str, sheets: List[str]):
                 # Find correct file in tar archive
                 content = None
                 for member in tar:
-                    if member.name.split('.')[0] == sheet:
+                    # Ignore parent dir, if any
+                    member_name = os.path.basename(member.name)
+                    if member_name.split('.')[0] == sheet:
                         csv_file = tar.extractfile(member)
                         content = BytesIO(csv_file.read())
                         csv_file.close()
