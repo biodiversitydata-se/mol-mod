@@ -108,7 +108,7 @@ class ProductionConfig(Config):
     # docker-compose.prod.yml then uses this to set env var CAS_AFTER_LOGOUT
     # In production, we use site URL instead
     CAS_AFTER_LOGOUT = get_env_variable('CAS_AFTER_LOGOUT') or \
-        'https://molecular.biodiversitydata.se'
+        'https://asv-portal.biodiversitydata.se'
     UPLOAD_EMAIL = get_env_variable('UPLOAD_EMAIL')
 
 
