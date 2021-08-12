@@ -93,11 +93,25 @@ SELECT ds.dataset_id AS "datasetID",
     ta.date_identified AS "dateIdentified",
     ta.identification_references AS "identificationReferences",
     (((ta.annotation_algorithm::text || ' annotation confidence (at lowest specified taxon): '::text) || ta.annotation_confidence) || ', against reference database: '::text) || ta.reference_db::text AS "identificationRemarks",
-    'Identified by data provider as: '::text || oc.previous_identifications::text AS "previousIdentifications"
+    'Identified by data provider as: '::text || oc.previous_identifications::text AS "previousIdentifications",
+    row_to_json(( SELECT d.*::record AS d
+        FROM ( SELECT se.sample_size_value AS "sampleSizeValue",
+                      oc.organism_quantity AS "organismQuantity",
+                      m.sop,
+                      m.pcr_primer_name_forward,
+                      m.pcr_primer_name_reverse,
+                      m.target_gene,
+                      m.target_subfragment,
+                      m.lib_layout,
+                      a.asv_sequence AS "DNA_sequence",
+                      m.env_broad_scale,
+                      m.env_local_scale,
+                      m.env_medium) d)) AS "dynamicProperties"
    FROM :data_schema.sampling_event se
    JOIN :data_schema.occurrence oc ON oc.event_pid = se.pid
    JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid
    JOIN :data_schema.asv a ON a.pid = oc.asv_pid
+   JOIN :data_schema.mixs m ON m.pid = se.pid
    JOIN :data_schema.taxon_annotation ta ON a.pid = ta.asv_pid
    AND ta.status::text = 'valid';
 
