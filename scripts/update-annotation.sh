@@ -87,15 +87,13 @@ colname_map=(
 )
 
 # Make readlink use GNU readlink on macOS.
-readlink () {
-	case $OSTYPE in
-		linux*)
-			command readlink "$@"
+case $OSTYPE in
+		darwin*)
+			readlink () {
+				command greadlink "$@"
+			}
 			;;
-		*)
-			command greadlink "$@"
-	esac
-}
+esac
 
 # Simplifies making a query to the database in the asv-db container.
 do_dbquery () {
