@@ -26,6 +26,9 @@
 #	taxonRank
 #	taxon_remarks
 #
+# We allow for a "domain" column as well, as ampliseq may include it,
+# (but until GBIF also does, we actually ignore it)
+#
 # See the associative array "colname_map" below for how these are mapped
 # to column names in the "taxon_annotation" table in the ASV database.
 #
@@ -171,10 +174,11 @@ cat <<-'END_SQL' | do_dbquery
 	DROP TABLE IF EXISTS tmpdata;
 
 	-- Create the table with the same schema as "taxon_annotation",
-	-- but with an additional "asv_sequence" column.
+	-- but with additional "asv_sequence" and "domain" columns.
 	CREATE TABLE tmpdata (
 		LIKE taxon_annotation,
-		asv_sequence CHARACTER VARYING
+		asv_sequence CHARACTER VARYING,
+		domain CHARACTER VARYING DEFAULT NULL
 	 );
 
 	-- Use the "pid" sequence from the "taxon_annotation" table,
@@ -183,9 +187,18 @@ cat <<-'END_SQL' | do_dbquery
 	ALTER TABLE tmpdata
 	ALTER COLUMN pid SET DEFAULT
 		nextval('taxon_annotation_pid_seq'),
-	ALTER COLUMN asv_pid DROP NOT NULL,
-	ALTER COLUMN status SET DEFAULT 'valid';
-
+    ALTER COLUMN asv_pid DROP NOT NULL,
+    ALTER COLUMN status SET DEFAULT 'valid',
+    -- avoid NotNullViolation when inserting into tmpdata
+    -- NULL values will be replaced with '' anyway, see below
+    ALTER COLUMN phylum DROP NOT NULL,
+    ALTER COLUMN oorder DROP NOT NULL,
+    ALTER COLUMN class DROP NOT NULL,
+    ALTER COLUMN family DROP NOT NULL,
+    ALTER COLUMN genus DROP NOT NULL,
+    ALTER COLUMN specific_epithet DROP NOT NULL,
+    ALTER COLUMN infraspecific_epithet DROP NOT NULL,
+    ALTER COLUMN otu DROP NOT NULL;
 	COMMIT;
 	-- Done.  The data will now be loaded using "csvsql" via the
 	-- asv-main container.
@@ -234,7 +247,8 @@ cat <<-'END_SQL' | do_dbquery
 	-- As we're done with it, drop the "asv_sequence" column from
 	-- our temporary table.
 	ALTER TABLE tmpdata
-	DROP COLUMN asv_sequence;
+	DROP COLUMN asv_sequence,
+	DROP COLUMN domain;
 
 	-- Set the "status" of any existing annotation entries for these
 	-- sequences to the string "old".

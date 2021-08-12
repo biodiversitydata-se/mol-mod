@@ -308,6 +308,9 @@ def read_data_file(data_file: str, sheets: List[str]):
         data[sheet] = data[sheet].dropna(how='all')
         data[sheet] = data[sheet].drop(data[sheet].filter(regex="Unnamed"),
                                        axis='columns')
+    # Drop 'domain' column if e.g. ampliseq has included that
+    for sheet in ['asv-table', 'annotation']:
+        data[sheet] = data[sheet].drop(columns=['domain'], errors='ignore')
 
     return data
 
