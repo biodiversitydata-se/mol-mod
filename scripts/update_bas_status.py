@@ -2,13 +2,12 @@
 """
 This is a wrapper script to run (and pass arguments to) status_updater.py
 inside a running container. To see those additional arguments, use:
-`docker exec -i asv-main ./molmod/importer/status_updater.py -h`
+'docker exec -i asv-main ./molmod/importer/status_updater.py -h'
 (in development), or
-`docker exec -i asv-main ./molmod/importer/status_updater.py -h`
+'docker exec -i asv-main ./molmod/importer/status_updater.py -h'
 (in production). Then add them to the wrapper command, e.g:
-`./scripts/update_bas_status.py 13 1 -v --dry-run` (in development) or e.g.
-`./scripts/update_bas_status.py --container asv-main 13 1 -v --dry-run`
-(in production).
+'./scripts/update_bas_status.py 13 1 dr15 -v --dry-run' (in development) or
+'make status pid=13 status=1 ruid=dr15'(in production).
 """
 
 if __name__ == '__main__':

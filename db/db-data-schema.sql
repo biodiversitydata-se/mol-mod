@@ -7,10 +7,10 @@ CREATE SCHEMA IF NOT EXISTS public;
 
 CREATE TABLE IF NOT EXISTS public.dataset (
     pid BIGSERIAL PRIMARY KEY,
-    dataset_id character varying UNIQUE,
+    filename character varying UNIQUE,
     insertion_time timestamp without time zone NOT NULL DEFAULT now(),
     in_bioatlas boolean default false,
-    provider_email character varying
+    bioatlas_resource_uid character varying
 );
 
 CREATE TABLE IF NOT EXISTS public.sampling_event (

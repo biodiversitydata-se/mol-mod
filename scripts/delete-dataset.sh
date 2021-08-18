@@ -73,7 +73,7 @@ printf -v PS3fmt '%s' \
 
 while true; do
 	# Get list of current datasets.
-	readarray -t datasets < <( do_dbquery 'SELECT dataset_id FROM dataset' | sed 1d )
+	readarray -t datasets < <( do_dbquery "SELECT 'pid:' || pid as dataset FROM dataset" | sed 1d )
 	nsets=${#datasets[@]}
 
 	# shellcheck disable=SC2059
@@ -93,9 +93,11 @@ while true; do
 		echo 'Invalid choice.' >&2
 	done
 
+
 	# Perform deletion.
 	printf 'DELETING "%s"...\n' "$dataset"
-	do_dbquery 'DELETE FROM dataset WHERE dataset_id = '"'$dataset'"
+	dataset=${dataset//pid:/}
+	do_dbquery 'DELETE FROM dataset WHERE pid = '"$dataset"
 	do_dbquery 'DELETE FROM asv WHERE pid NOT IN (SELECT DISTINCT asv_pid FROM occurrence)'
 	echo 'Done.'
 done
