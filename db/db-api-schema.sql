@@ -8,10 +8,10 @@
 CREATE SCHEMA api;
 
 CREATE OR REPLACE VIEW api.dwc_oc_emof AS
- SELECT ds.dataset_id AS "datasetID",
-    ds.dataset_id || ':' || se.event_id_alias AS "eventID",
-    ds.dataset_id || ':' || se.event_id_alias || ':' || oc.asv_id_alias AS "occurrenceID",
-    ds.dataset_id || ':' || se.event_id_alias || ':' || emof.measurement_type AS "measurementID",
+ SELECT 'SBDI-ASV:' || ds.pid AS "datasetID",
+    'SBDI-ASV:' || ds.pid || ':' || se.event_id_alias AS "eventID",
+    'SBDI-ASV:' || ds.pid || ':' || se.event_id_alias || ':' || oc.asv_id_alias AS "occurrenceID",
+    'SBDI-ASV:' || ds.pid || ':' || se.event_id_alias || ':' || emof.measurement_type AS "measurementID",
     emof.measurement_type AS "measurementType",
     emof.measurement_type_id AS "measurementTypeID",
     emof.measurement_unit AS "measurementUnit",
@@ -29,9 +29,9 @@ CREATE OR REPLACE VIEW api.dwc_oc_emof AS
    JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid;
 
 CREATE OR REPLACE VIEW api.dwc_oc_mixs AS
- SELECT ds.dataset_id AS "datasetID",
-    ds.dataset_id || ':' || se.event_id_alias AS "eventID",
-    ds.dataset_id || ':' || se.event_id_alias || ':' || oc.asv_id_alias AS "occurrenceID",
+  SELECT 'SBDI-ASV:' || ds.pid AS "datasetID",
+    'SBDI-ASV:' || ds.pid || ':' || se.event_id_alias AS "eventID",
+    'SBDI-ASV:' || ds.pid || ':' || se.event_id_alias || ':' || oc.asv_id_alias AS "occurrenceID",
     asv.asv_id AS "taxonID",
     mixs.sop,
     mixs.pcr_primer_name_forward,
@@ -52,9 +52,9 @@ CREATE OR REPLACE VIEW api.dwc_oc_mixs AS
    JOIN :data_schema.asv asv ON asv.pid = oc.asv_pid;
 
 CREATE OR REPLACE VIEW api.dwc_oc_occurrence AS
-SELECT ds.dataset_id AS "datasetID",
-    ds.dataset_id || ':' || se.event_id_alias AS "eventID",
-    ds.dataset_id || ':' || se.event_id_alias || ':' || oc.asv_id_alias AS "occurrenceID",
+SELECT 'SBDI-ASV:' || ds.pid AS "datasetID",
+   'SBDI-ASV:' || ds.pid || ':' || se.event_id_alias AS "eventID",
+   'SBDI-ASV:' || ds.pid || ':' || se.event_id_alias || ':' || oc.asv_id_alias AS "occurrenceID",
     'MaterialSample'::text AS "basisOfRecord",
     se.event_date AS "eventDate",
     se.location_id AS "locationID",

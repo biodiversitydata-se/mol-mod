@@ -78,14 +78,14 @@ Alternatively, you may want to *generate and* copy the blast-db:
 ```
   $ make blast
 ```
-As BLAST, filter search and About stats will only return data from datasets already in the Bioatlas, you may also need to update the 'in_bioatlas' flag for a dataset:
+As BLAST, filter search and About stats will only return data from datasets already in the Bioatlas, you may also need to update the Bioatlas metadata for a dataset:
 ```
-  $ make status pid=17 status=1
+  $ make status pid=17 status=1 ruid=dr15
 ```
 ...which also updates the materialized view behind the About stats.
 Alternatively, you can just update the view:
 ```
-  $ make status pid=0 status=1
+  $ make status pid=0 status=0 ruid=0
 ```
 Note that the blast-worker uses the same Dockerfile for both development and production, but that we set
 FLASK_ENV=production in docker-compose.prod.yml.

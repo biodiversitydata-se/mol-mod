@@ -1,10 +1,8 @@
 {
   "dataset": {
     "targetTable": "dataset",
-    "datasetID": {"validation": "(?!nan).*"},
-    "provider_email": {
-      "validation": "[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+"
-    }
+    "filename": {"validation": "(?!nan).*"},
+    "bioatlas_resource_uid": {"validation": "(?!nan).*"}
   },
   "event": {
     "targetTable": "sampling_event",
