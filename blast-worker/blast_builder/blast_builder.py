@@ -51,7 +51,7 @@ def list_datasets_in_bioatlas(cursor: DictCursor) -> list:
     Returns a list of all datasets available in the database where
     `in_bioatlas`is `true`.
     """
-    query = "SELECT pid, bioatlas_resource_uid FROM public.dataset \
+    query = "SELECT pid, dataset_id FROM public.dataset \
              WHERE in_bioatlas;"
 
     cursor.execute(query)
@@ -95,8 +95,8 @@ def create_blast_db(filename: str, db_dir: str = '.'):
     # automatically returns sequences filtered by datasets in bioatlas.
     datasets = list_datasets_in_bioatlas(cursor)
 
-    logging.info("Using datasets (pid/bioatlas_resource_uid): %s",
-                 ', '.join([str(d['pid']) + "/" + d['bioatlas_resource_uid']
+    logging.info("Using datasets (pid/dataset_id): %s",
+                 ', '.join([str(d['pid']) + "/" + d['dataset_id']
                             for d in datasets]))
 
     # Check input params:

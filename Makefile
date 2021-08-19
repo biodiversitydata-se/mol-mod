@@ -71,7 +71,7 @@ restore:
 
 # Build blastdb from datasets with in_bioatlas = true
 blast-build:
-	python3 ./scripts/build_blast_db.py
+	python3 ./scripts/build_blast_db.py -v
 
 # Copy blastdb into worker container
 blast-copy:
