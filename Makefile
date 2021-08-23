@@ -92,3 +92,6 @@ status:
 # Update stats view
 stats:
 	python3 ./scripts/update_bas_status.py --container asv-main 0 0 0 -v
+# Display menu for deleting datasets and related data
+delete:
+	./scripts/delete-dataset.sh
