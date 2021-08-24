@@ -8,7 +8,7 @@
 CREATE SCHEMA api;
 
 CREATE OR REPLACE VIEW api.dwc_oc_emof AS
- SELECT 'SBDI-ASV:' || ds.dataset_id AS "datasetID",
+ SELECT ds.dataset_id AS "datasetID",
     ds.dataset_id || ':' || se.event_id_alias AS "eventID",
     ds.dataset_id || ':' || se.event_id_alias || ':' || oc.asv_id_alias AS "occurrenceID",
     ds.dataset_id || ':' || se.event_id_alias || ':' || emof.measurement_type AS "measurementID",
@@ -29,7 +29,7 @@ CREATE OR REPLACE VIEW api.dwc_oc_emof AS
    JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid;
 
 CREATE OR REPLACE VIEW api.dwc_oc_mixs AS
-SELECT 'SBDI-ASV:' || ds.dataset_id AS "datasetID",
+SELECT ds.dataset_id AS "datasetID",
     ds.dataset_id || ':' || se.event_id_alias AS "eventID",
     ds.dataset_id || ':' || se.event_id_alias || ':' || oc.asv_id_alias AS "occurrenceID",
     asv.asv_id AS "taxonID",
@@ -52,7 +52,7 @@ SELECT 'SBDI-ASV:' || ds.dataset_id AS "datasetID",
    JOIN :data_schema.asv asv ON asv.pid = oc.asv_pid;
 
 CREATE OR REPLACE VIEW api.dwc_oc_occurrence AS
-SELECT 'SBDI-ASV:' || ds.dataset_id AS "datasetID",
+SELECT ds.dataset_id AS "datasetID",
     ds.dataset_id || ':' || se.event_id_alias AS "eventID",
     ds.dataset_id || ':' || se.event_id_alias || ':' || oc.asv_id_alias AS "occurrenceID",
     'MaterialSample'::text AS "basisOfRecord",
