@@ -73,7 +73,7 @@ printf -v PS3fmt '%s' \
 
 while true; do
 	# Get list of current datasets.
-	readarray -t datasets < <( do_dbquery "SELECT 'pid:' || pid as dataset FROM dataset" | sed 1d )
+	readarray -t datasets < <( do_dbquery "SELECT 'pid:' || pid FROM dataset" | sed 1d )
 	nsets=${#datasets[@]}
 
 	# shellcheck disable=SC2059

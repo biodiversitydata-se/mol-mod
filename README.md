@@ -2,7 +2,7 @@
 Module ([the Swedish ASV portal](http://asv-portal.biodiversitydata.se/)) for handling sequence-based occurrence data in [SBDI](https://biodiversitydata.se/).
 
 ### Overview
-Flask + jQuery app for BLAST and metadata search of sequence-based occurrences in SBDI, via separate BLAST and Amplicon Sequence Variant (ASV) databases. Views of the ASV db are exposed via [postgREST server](https://postgrest.org/en/v7.0.0/index.html), and accessed in API calls (for metadata search part).
+Flask + jQuery app for BLAST and metadata search of sequence-based occurrences in SBDI, via separate BLAST and Amplicon Sequence Variant (ASV) databases. Views of the ASV db are exposed via [postgREST server](https://postgrest.org/en/v7.0.0/index.html), and accessed in API calls (for metadata search part). Note that different contributors have used different tools for communicating with the database (see /scripts dir). This could perhaps be made more consistent in the future.
 
 ### Prerequisites
 The application can be run as a docker-compose environment, assuming you have [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed. Mac users may additionally need to install coreutils, to access the included greadlink tool, plus a newer version of bash, to run some db maintenance scripts. This can e.g. be done with Homebrew:
@@ -32,12 +32,9 @@ Then, start up services:
 ```
   $ docker-compose up
 ```
-Once the system is running, you can insert the default data into the database:
-```
-  $ ./scripts/database-backup.sh restore
-```
-
 The development site should now be available at http://localhost:5000.
+
+Once the system is up and running, see *Production environment* below for how to insert data into the database, and how to build a blast database from sequences in the Bioatlas etc.
 
 The server will automatically rebuild on changes to the python code for ease of
 development (except for changes in worker.py, as it is copied into container at startup, i.e. not mounted from host). Note that this setup is not intended for production, and should not
@@ -53,7 +50,7 @@ You may also want to get rid of dangling images and associated volumes:
 ```
 
 ### Production environment
-In production, postgres and blastdb data are instead saved to named volumes (mol-mod_postgres-db & mol-mod_blast-db), and compose operations are simplified using a Makefile.
+In production, postgres and blastdb data are saved to named volumes (mol-mod_postgres-db & mol-mod_blast-db), and compose operations are simplified using a Makefile (actually, make-rules that don't involve a specific docker-compose file can also be used in development environment).
 
 Again, you need to either generate secrets, or reuse old:
 ```

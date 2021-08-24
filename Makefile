@@ -71,7 +71,7 @@ restore:
 
 # Build blastdb from datasets with in_bioatlas = true
 blast-build:
-	python3 ./scripts/build_blast_db.py
+	python3 ./scripts/build_blast_db.py -v
 
 # Copy blastdb into worker container
 blast-copy:
@@ -92,3 +92,6 @@ status:
 # Update stats view
 stats:
 	python3 ./scripts/update_bas_status.py --container asv-main 0 0 0 -v
+# Display menu for deleting datasets and related data
+delete:
+	./scripts/delete-dataset.sh
