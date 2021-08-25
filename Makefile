@@ -80,6 +80,11 @@ blast-copy:
 # Build and copy blastdb into container
 blast: blast-build blast-copy
 
+# Export a fasta file of all ASVs currently annotated with reference database
+# Example: make fasta ref=UNITE:8.0
+fasta:
+	python3 ./scripts/build_blast_db.py --ref $(ref) -v
+
 #
 # Dataset status & visibility
 #
