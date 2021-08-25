@@ -52,7 +52,7 @@ You may also want to get rid of dangling images and associated volumes:
 ### Production environment
 In production, postgres and blastdb data are saved to named volumes (mol-mod_postgres-db & mol-mod_blast-db), and compose operations are simplified using a Makefile (actually, make-rules that don't involve a specific docker-compose file can also be used in development environment).
 
-Again, you need to either generate secrets, or reuse old:
+Again, you need to either generate secrets, or reuse old ones:
 ```
   $ make secrets
 ```
@@ -82,7 +82,7 @@ As BLAST, filter search and About stats will only return data from datasets alre
 ...which also updates the materialized view behind the About stats.
 Alternatively, you can just update the view:
 ```
-  $ make status pid=0 status=0 ruid=0
+  $ make status
 ```
 Note that the blast-worker uses the same Dockerfile for both development and production, but that we set
 FLASK_ENV=production in docker-compose.prod.yml.
