@@ -87,6 +87,7 @@ services:
     volumes:
       - blast-db:/blastdbs
       - blastconfig:/root/.config
+      - ./fasta-exports:/worker/fasta-exports
 
   asv-main:
     restart: always

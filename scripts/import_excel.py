@@ -1,14 +1,9 @@
 #!/usr/bin/env python3
 """
 This is a wrapper script to send an Excel data stream (and additional
-arguments) to the data importer inside a running docker-container.
-To see additional arguments, use:
-`docker exec -i asv-main ./molmod/importer/importer.py -h` (in development), or
-`docker exec -i asv-main ./molmod/importer/importer.py -h`
-(in production). Then add them to the wrapper command, e.g:
-`./scripts/import_excel.py file.xlsx -v` ) or e.g.
-`./scripts/import_excel.py --container asv-main file.xlsx -v`
-(in production).
+arguments) to importer.py inside a running docker container.
+To see arguments that can be passed on to the importer, run:
+docker exec -i asv-main ./molmod/importer/importer.py -h
 """
 
 if __name__ == '__main__':
@@ -17,11 +12,6 @@ if __name__ == '__main__':
     import logging
     import subprocess
 
-    #
-    # Use argparse to execute this script using the command-line interpreter,
-    # parse arguments into python object (ARGS), and compose help
-    # (access with './scripts/import_excel.py -h' in molmod dir)
-    #
     # Use docstring as help intro
     PARSER = argparse.ArgumentParser(description=__doc__)
 
@@ -33,11 +23,9 @@ if __name__ == '__main__':
                         help="Docker container to execute import script in. "
                              "Probably asv-main for production env."
                         )
-    PARSER.add_argument("importer_args", nargs=argparse.REMAINDER,
-                        help=("Additional arguments to pass to "
-                              "importer script."))
 
-    ARGS = PARSER.parse_args()
+    # Parse above argument directly, and pass any additional to script
+    ARGS, IMPORTER_ARGS = PARSER.parse_known_args()
 
     #
     # Compose cmd to execute import.py in container
@@ -45,10 +33,10 @@ if __name__ == '__main__':
     #
 
     CMD = ["docker", "exec", "-i", ARGS.container,
-           "./molmod/importer/importer.py"] + ARGS.importer_args
+           "./molmod/importer/importer.py"] + IMPORTER_ARGS
 
     try:
-        IMPORTER = subprocess.run(CMD, stdin=open(ARGS.excel_file))
+        subprocess.run(CMD, stdin=open(ARGS.excel_file))
     except FileNotFoundError:
         logging.error("Could not find input file %s", ARGS.excel_file)
     except IsADirectoryError:

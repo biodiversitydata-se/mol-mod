@@ -50,14 +50,16 @@ wait:
 	sleep 10
 
 #
-# DB
+# SECRETS
 #
 
-# Generate passwords, or use existing
 secrets:
 	python3 ./scripts/generate_secrets.py --skip-existing
 
-# Backup postgres data
+#
+# DB BACKUP & RESTORE
+#
+
 backup:
 	./scripts/database-backup.sh data
 
@@ -66,7 +68,7 @@ restore:
 	./scripts/database-backup.sh restore
 
 #
-# BLAST
+# BLAST & FASTA
 #
 
 # Build blastdb from datasets with in_bioatlas = true
@@ -80,18 +82,35 @@ blast-copy:
 # Build and copy blastdb into container
 blast: blast-build blast-copy
 
+# Export a fasta file of all ASVs currently annotated with reference database
+# Example: make fasta ref=UNITE:8.0
+fasta:
+	python3 ./scripts/build_blast_db.py --ref $(ref) -v
+
 #
-# Dataset status & visibility
+# DATA MANIPULATION
 #
 
-# Update in_bioatlas status (to 0/1) for dataset pid and / or (when pid=0)
-# stats view for datasets in_bioatlas = 1
+# Import Excel
+# Example: make import file=/some/path/to/file.xlsx
+import:
+	python3 ./scripts/import_excel.py $(file) -v
+dry-import:
+	python3 ./scripts/import_excel.py $(file) -v --dry-run
+
+# Update dataset status
+# Example: make status pid=1 status=0 ruid=dr188
 status:
-	python3 ./scripts/update_bas_status.py --container asv-main $(pid) $(status) $(ruid) -v
-
+	python3 ./scripts/update_bas_status.py --pid $(pid) --status $(status) --ruid $(ruid) -v
 # Update stats view
 stats:
-	python3 ./scripts/update_bas_status.py --container asv-main 0 0 0 -v
+	python3 ./scripts/update_bas_status.py -v
+
 # Display menu for deleting datasets and related data
 delete:
 	./scripts/delete-dataset.sh
+
+# Reannotate ASVs
+reannot:
+	# Example: make reannot file=/some/path/to/file.xlsx
+	./scripts/update-annotation.sh $(file)
