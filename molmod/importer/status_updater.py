@@ -34,12 +34,17 @@ def run_update(pid: int = 0, status: int = 1, ruid: str = '',
 
     # Update Bioatlas metadata for the referenced dataset, if any
     if pid > 0:
-
+        # Update ruid if it has been supplied, otherwise keep it
+        if ruid:
+            sql = f"UPDATE dataset SET in_bioatlas = {bool(status)}, \
+                   bioatlas_resource_uid = '{ruid}' \
+                   WHERE pid = {pid};"
+        else:
+            sql = f"UPDATE dataset SET in_bioatlas = {bool(status)} \
+                   WHERE pid = {pid};"
         try:
             logging.info("Updating Bioatlas status")
-            cursor.execute(f"UPDATE dataset SET in_bioatlas = {bool(status)}, \
-                             bioatlas_resource_uid = '{ruid}' \
-                             WHERE pid = {pid};")
+            cursor.execute(sql)
         except psycopg2.OperationalError as err:
             logging.error("Could not update Bioatlas status")
             logging.error(err)
@@ -72,19 +77,19 @@ if __name__ == '__main__':
 
     PARSER = argparse.ArgumentParser(description=__doc__)
 
-    PARSER.add_argument('pid', type=int,
-                        help=("pid of dataset to be status-updated,"
-                              " or 0 for no dataset (i.e. view-update only)"))
-    PARSER.add_argument('status', type=int,
-                        help=("in_bioatlas value to be set: 0=False, 1=True"))
-    PARSER.add_argument('ruid', type=str,
-                        help=("bioatlas_resource_uid value to be set, "
-                              "e.g. 'dr10'"))
+    PARSER.add_argument('--pid', type=int, default=0,
+                        help="pid of dataset to be status-updated,"
+                             " or 0 for no dataset (i.e. view-update only)")
+    PARSER.add_argument('--status', type=int, default=1,
+                        help="in_bioatlas value to be set: 0=False, 1=True")
+    PARSER.add_argument('--ruid', type=str, default="",
+                        help="bioatlas_resource_uid value to be set, "
+                             "e.g. 'dr10'")
     PARSER.add_argument('--dry-run', action='store_true',
-                        help=("Performs all transactions, but then issues a "
-                              "rollback to the database so that it remains "
-                              "unaffected. This will still increment "
-                              "id sequences."))
+                        help="Performs all transactions, but then issues a "
+                             "rollback to the database so that it remains "
+                             "unaffected. This will still increment "
+                             "id sequences.")
     PARSER.add_argument('-v', '--verbose', action="count", default=0,
                         help="Increase logging verbosity (default: warning).")
     PARSER.add_argument('-q', '--quiet', action="count", default=3,
@@ -95,4 +100,5 @@ if __name__ == '__main__':
     # Set log level based on ./scripts/import_excel argument
     # E.g: --v means log level = 10(3-2) = 10
     logging.basicConfig(level=(10*(ARGS.quiet - ARGS.verbose)))
+
     run_update(ARGS.pid, ARGS.status, ARGS.ruid, ARGS.dry_run)
