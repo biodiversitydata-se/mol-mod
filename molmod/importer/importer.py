@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 The mol-mod data importer takes an Excel or Tar file stream, then rearranges
-and inserts the data into the database.
+and inserts the data into the database. The script is executed inside a running
+container using the import_excel.py wrapper.
 """
 
 import hashlib

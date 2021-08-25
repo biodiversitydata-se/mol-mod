@@ -90,6 +90,7 @@ services:
     volumes:
       - ./blast-databases:/blastdbs
       - blastconfig:/root/.config
+      - ./fasta-exports:/worker/fasta-exports
 
   develop:
     container_name: asv-main
