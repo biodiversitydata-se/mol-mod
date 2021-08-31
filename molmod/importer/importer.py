@@ -549,7 +549,13 @@ def run_validation(data: PandasDict, mapping: dict):
             previous_mistake = False
             if 'validation' not in settings:
                 continue
-            validator = re.compile(settings['validation'])
+            try:
+                validator = re.compile(settings['validation'])
+            except re.error as err:
+                logging.error('Seems to be something wrong with a regular '
+                              'expression used in validation. Please check '
+                              'data-mapping.json.\nPython says: "%s"', err)
+                sys.exit(1)
             for value in data[sheet][field]:
                 if not validator.fullmatch(str(value)):
                     valid = False
