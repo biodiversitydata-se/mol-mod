@@ -2,7 +2,8 @@
   "dataset": {
     "targetTable": "dataset",
     "dataset_id": {"validation": "(SBDI-ASV-)[0-9]*"},
-    "filename": {"validation": "[a-zA-Z0-9_.+-]+_[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+_[0-9]{6}-[0-9]{6}"},
+    "filename": {},
+    "filename": {"validation": "[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+_[0-9]{6}-[0-9]{6}_[a-zA-Z0-9_.+-]+\\.(xlsx(.zip)?|tar.(gz|bz2|lz))"},
     "bioatlas_resource_uid": {"validation": "((dr)[0-9]*|nan)" }
   },
   "event": {

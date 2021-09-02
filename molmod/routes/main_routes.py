@@ -94,7 +94,7 @@ def upload():
     # Add user email & time
     email = cas_attributes['cas:email']
     upload_time = dt.now().strftime("%y%m%d-%H%M%S")
-    ext_filename = filename + '_' + email + '_' + upload_time
+    ext_filename = email + '_' + upload_time + '_' + filename
     # Save file, or report error
     try:
         f.save(os.path.join(CONFIG.UPLOAD_PATH, ext_filename))
@@ -102,11 +102,13 @@ def upload():
                       sender=APP.mail.username,
                       recipients=CONFIG.UPLOAD_EMAIL)
         msg.body = f"""
-        Hello!
+        Hello SBDI-MOL colleagues,
 
         A new file has been uploaded to the ASV portal:
-        user: {email}
-        file: {filename} (saved as {ext_filename})
+
+        Provider email: {email}
+        Upload time: {upload_time}
+        Original filename: {filename}
 
         Have a nice day!
 
