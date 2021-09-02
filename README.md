@@ -128,8 +128,9 @@ You can list uploaded files in running asv-main container:
 ```
   $ docker exec asv-main ls /uploads
 ```
-It is also possible to copy these to current host dir with:
+It is also possible to copy a specific file, or the whole directory, to the host, using either of these commands:
 ```
+  $ mkdir -p uploads && docker cp asv-main:/uploads/[filename] uploads
   $ docker cp  asv-main:/uploads .
 ```
 When a file is uploaded, an email notification is sent to each of the addresses included in the environmental variables UPLOAD_EMAIL or DEV_UPLOAD_EMAIL.
