@@ -72,15 +72,8 @@ restore:
 #
 
 # Build blastdb from datasets with in_bioatlas = true
-blast-build:
+blastdb:
 	python3 ./scripts/build_blast_db.py -v
-
-# Copy blastdb into worker container
-blast-copy:
-	for file in blast-databases/*; do docker cp $$file mol-mod_blast-worker_1:/blastdbs/; done;
-
-# Build and copy blastdb into container
-blast: blast-build blast-copy
 
 # Export a fasta file of all ASVs currently annotated with reference database
 # Example: make fasta ref=UNITE:8.0

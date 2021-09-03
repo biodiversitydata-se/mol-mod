@@ -34,7 +34,7 @@ Then, start up services:
 ```
 The development site should now be available at http://localhost:5000.
 
-Once the system is up and running, see *Production environment* below for how to insert data into the database, and how to build a blast database from sequences in the Bioatlas etc.
+Once the system is up and running, see *Production environment* below for how to insert data into the database, and how to build a blast database from sequences in the Bioatlas etc. Note, that the bind-mounted directory 'blast-databases' is only used in development.
 
 The server will automatically rebuild on changes to the python code for ease of
 development (except for changes in worker.py, as it is copied into container at startup, i.e. not mounted from host). Note that this setup is not intended for production, and should not
@@ -67,14 +67,11 @@ Once the system is running, you can insert the default data into the database:
 ```
   $ make restore
 ```
-You also need to copy the BLAST database into the worker container:
+You also need to build a BLAST database:
 ```
-  $ make blast-copy
+  $ make blastdb
 ```
-Alternatively, you may want to *generate and* copy the blast-db:
-```
-  $ make blast
-```
+
 As BLAST, filter search and About stats will only return data from datasets already in the Bioatlas, you may also need to update the Bioatlas metadata for a dataset:
 ```
   $ make status pid=17 status=1 ruid=dr15
