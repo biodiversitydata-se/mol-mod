@@ -5,11 +5,6 @@
 compose = docker-compose.prod.yml
 SHELL = bash
 
-run: pull up
-
-# Implement (updated) image, restore db, blastdb and stats page
-test: clean pull up wait restore blast-copy stats
-
 #
 # GENERAL DOCKER
 #
@@ -18,11 +13,11 @@ test: clean pull up wait restore blast-copy stats
 build:
 	docker-compose -f $(compose) build --no-cache
 
-pull:
-	docker-compose -f $(compose) pull
-
 push:
 	docker-compose -f $(compose) push
+
+pull:
+	docker-compose -f $(compose) pull
 
 # Start service in background
 up:
@@ -35,19 +30,15 @@ stop:
 down:
 	docker-compose -f $(compose) down --remove-orphans
 
+# Stop and remove containers, and remove network and volumes
+clean:
+	docker-compose -f $(compose) down -v
+
 logs:
 	docker-compose -f $(compose) logs -f
 
 ps:
 	docker-compose -f $(compose) ps
-
-# Stop and remove containers, and remove network and volumes
-clean:
-	docker-compose -f $(compose) down -v
-
-wait:
-	$(info Waiting for services to start)
-	sleep 10
 
 #
 # SECRETS
@@ -88,6 +79,7 @@ fasta:
 # Example: make import file=/some/path/to/file.xlsx
 import:
 	python3 ./scripts/import_excel.py $(file) -v
+# Test import
 dry-import:
 	python3 ./scripts/import_excel.py $(file) -v --dry-run
 
@@ -95,6 +87,7 @@ dry-import:
 # Example: make status pid=1 status=0 ruid=dr188
 status:
 	python3 ./scripts/update_bas_status.py --pid $(pid) --status $(status) --ruid $(ruid) -v
+
 # Update stats view
 stats:
 	python3 ./scripts/update_bas_status.py -v
