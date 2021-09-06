@@ -3,6 +3,7 @@ __pycache__/
 postgres-data/
 backups/
 db-backup/db-dump-data_20*
+fasta-exports/
 log-backup/
 uploads/
 .env
