@@ -109,6 +109,7 @@ def upload():
         Provider email: {email}
         Upload time: {upload_time}
         Original filename: {filename}
+        Saved as: {ext_filename}
 
         Have a nice day!
 
