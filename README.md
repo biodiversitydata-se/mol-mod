@@ -97,7 +97,7 @@ For local testing of production environment, you need to run or add this to your
 Otherwise the Bioatlas CAS server will redirect users to 'https://asv-portal.biodiversitydata.se' after logout.
 
 ### Database access
-Database access can be limited to IP ranges listed in environment variable `DBACCESS` in .env file. As a default, this is set to include loopback/same device, private and Docker networking defaults:
+Database access can be limited to IP ranges listed in environment variable `DBACCESS` in *.env* file. As a default, this is set to include loopback/same device, private and Docker networking defaults:
 ```
 DBACCESS=127.0.0.1/8 192.168.0.0/16 10.0.0.0/8 172.16.0.0/12
 ```
@@ -128,13 +128,13 @@ It is also possible to copy a specific file, or the whole directory, to the host
 When a file is uploaded, an email notification is sent to each of the addresses included in the environmental variables *UPLOAD_EMAIL* or *DEV_UPLOAD_EMAIL*.
 
 ### Data import
-Before uploaded files can be imported into the postgres database, you need to do some preprocessing, including adding dataset and annotation tabs/files, and possibly cleaning data. Use the standalone R script *./scripts/asv-input-processing.R)*, which can be customised and stored together with each uploaded file. The (*\*.tar.gz*) output can then be imported into postgres, using a separate python script that executes *importer.py* inside the main container. Check the *PARSER.add_argument* section in the importer for available arguments, which can be added to main function call like so:
+Before uploaded files can be imported into the postgres database, you need to do some preprocessing, including adding dataset and annotation tabs/files, and possibly cleaning data. Use the standalone R script *./scripts/asv-input-processing.R)*, which can be customised and stored together with each uploaded file. The (*\*.tar.gz*) output can then be imported into postgres, using a separate python script that executes *importer.py* inside the main container. Note that the importer accepts *\*.xlsx* files as well, but that the *\*.xlsx* output from our R script currently only works if you open and save it in Excel first. Check the *PARSER.add_argument* section in the importer for available arguments, which can be added to main function call like so:
 ```
   $ ./scripts/import_excel.py /path/to/file.xlsx --dry-run -vv
 ```
 Alternatively, use a Makefile rule, e.g.:
 ```
-  $ make dry-import file=/path/to/file.xlsx
+  $ make dry-import file=/path/to/file.tar.gz
   $ make import file=/path/to/file.xlsx
 ```
 Import includes some rudimentary validation (see e.g. regular expressions in *./molmod/importer/data-mapping.json*), but this should be improved in the future.
