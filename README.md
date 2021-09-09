@@ -2,7 +2,7 @@
 Module ([the Swedish ASV portal](http://asv-portal.biodiversitydata.se/)) for handling sequence-based occurrence data in [SBDI](https://biodiversitydata.se/).
 
 ### Overview
-Flask + jQuery app for BLAST and metadata search of sequence-based occurrences in SBDI, via separate BLAST and Amplicon Sequence Variant (ASV) databases. Views of the ASV db are exposed via [postgREST server](https://postgrest.org/en/v7.0.0/index.html), and accessed in API calls (for metadata search part). Note that different contributors have used different tools for communicating with the database (see /scripts dir). This could perhaps be made more consistent in the future.
+Flask + jQuery app for BLAST and metadata search of sequence-based occurrences in SBDI, via separate BLAST and Amplicon Sequence Variant (ASV) databases. Views of the ASV db are exposed via [postgREST server](https://postgrest.org/en/v7.0.0/index.html), and accessed in API calls (for metadata search part). Note that different contributors have used different tools for communicating with the database (see */scripts* dir). This could perhaps be made more consistent in the future.
 
 ### Prerequisites
 The application can be run as a docker-compose environment, assuming you have [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed. Mac users may additionally need to install coreutils, to access the included greadlink tool, plus a newer version of bash, to run some db maintenance scripts. This can e.g. be done with Homebrew:
@@ -12,7 +12,7 @@ The application can be run as a docker-compose environment, assuming you have [D
 ```
 
 ### Environmental variables
-Use .env.template to create .env file, and add missing values to the latter, before proceeding.
+Use *.env.template* to create *.env* file, and add missing values to the latter, before proceeding.
 ```
   $ cp .env.template .env
 ```
@@ -34,10 +34,10 @@ Then, start up services:
 ```
 The development site should now be available at http://localhost:5000.
 
-Once the system is up and running, see *Production environment*, below, for how to insert data into the database, and how to build a blast database from sequences in the Bioatlas etc. Note that the bind-mounted directory 'blast-databases' is only used in development.
+Once the system is up and running, see *Production environment*, below, for how to insert data into the database, and how to build a blast database from sequences in the Bioatlas etc. Note that the bind-mounted directory *blast-databases* is only used in development.
 
 The server will automatically rebuild on changes to the python code for ease of
-development (except for changes in worker.py, as it is copied into container at startup, i.e. not mounted from host). Note that this setup is not intended for production, and should not
+development (except for changes in *worker.py*, as it is copied into container at startup, i.e. not mounted from host). Note that this setup is not intended for production, and should not
 be used as such.
 
 To stop and remove containers as well as remove network and volumes:
@@ -50,7 +50,7 @@ You may also want to get rid of dangling images and associated volumes:
 ```
 
 ### Production environment
-In production, postgres and blastdb data are saved to named volumes (mol-mod_postgres-db & mol-mod_blast-db), and compose operations are simplified using a Makefile (which also includes rules for executing various scripts, in either environment).
+In production, postgres and blastdb data are saved to named volumes (*mol-mod_postgres-db* & *mol-mod_blast-db*), and compose operations are simplified using a Makefile (which also includes rules for executing various scripts, in either environment).
 
 Again, you need to either generate secrets, or reuse old ones:
 ```
@@ -78,7 +78,7 @@ You also need to build a BLAST database:
 ```
 
 Note that the blast-worker uses the same Dockerfile for both development and production, but that we set
-FLASK_ENV=production in docker-compose.prod.yml.
+*FLASK_ENV=production* in *docker-compose.prod.yml*.
 
 You can use a script to create incremental backups of the database, container logs and uploaded files to (host) folder [repos-path]/backups:
 ```
@@ -90,7 +90,7 @@ This script can also be used to run from crontab (time-based job scheduler). Sug
 ```
 
 ### CAS authentication
-For local testing of production environment, you need to run or add this to your bash startup file (e.g. ~/.bash_profile):
+For local testing of production environment, you need to run or add this to your bash startup file (e.g. *~/.bash_profile*):
 ```
   $ export HOST_URL=http://localhost:5000
 ```
@@ -103,7 +103,7 @@ DBACCESS=127.0.0.1/8 192.168.0.0/16 10.0.0.0/8 172.16.0.0/12
 ```
 Note that you need to stop services and remove the database for any changes to take effect.
 
-Alternatively, to add new address range(s) without removing the database, you can run a script inside the container, and then restart it for changes in pg_hba.conf to take effect:
+Alternatively, to add new address range(s) without removing the database, you can run a script inside the container, and then restart it for changes in *pg_hba.conf* to take effect:
 ```
   $ docker exec -e DBACCESS='xxx.xx.xx.xxx/32' asv-db docker-entrypoint-initdb.d/04-restrict-db.sh
   $ docker restart asv-db
@@ -114,7 +114,7 @@ Note that you may have to edit firewall settings to allow incoming connections t
 ```
 
 ### File uploads
-The size limit you set in nginx (molecular.conf: client_max_body_size) needs to correspond to the setting in flask (.env: MAX_CONTENT_LENGTH) for restriction to work properly. Note that neither the flask development server nor uwsgi handles this well, resulting in a connection reset error instead of a 413 response (See Connection Reset Issue in [Flask documentation](https://flask.palletsprojects.com/en/1.1.x/patterns/fileuploads/) when testing locally.
+The size limit you set in nginx (*molecular.conf: client_max_body_size*) needs to correspond to the setting in flask (*.env: MAX_CONTENT_LENGTH*) for restriction to work properly. Note that neither the flask development server nor uwsgi handles this well, resulting in a connection reset error instead of a 413 response (See Connection Reset Issue in [Flask documentation](https://flask.palletsprojects.com/en/1.1.x/patterns/fileuploads/)) *when testing locally*.
 
 You can list uploaded files in running asv-main container:
 ```
@@ -125,10 +125,10 @@ It is also possible to copy a specific file, or the whole directory, to the host
   $ mkdir -p uploads && docker cp asv-main:/uploads/[filename] uploads
   $ docker cp  asv-main:/uploads .
 ```
-When a file is uploaded, an email notification is sent to each of the addresses included in the environmental variables UPLOAD_EMAIL or DEV_UPLOAD_EMAIL.
+When a file is uploaded, an email notification is sent to each of the addresses included in the environmental variables *UPLOAD_EMAIL* or *DEV_UPLOAD_EMAIL*.
 
 ### Data import
-Before uploaded files can be imported into the postgres database, you need to do some preprocessing, including adding dataset and annotation tabs/files, and possibly cleaning data. Use the standalone R script *./scripts/asv-input-processing.R)*, which can be customised and stored together with each uploaded file. The (\*.tar.gz) output can then be imported into postgres, using a separate python script that executes *importer.py* inside the main container. Check the *PARSER.add_argument* section in the importer for available arguments, which can be added to main function call like so:
+Before uploaded files can be imported into the postgres database, you need to do some preprocessing, including adding dataset and annotation tabs/files, and possibly cleaning data. Use the standalone R script *./scripts/asv-input-processing.R)*, which can be customised and stored together with each uploaded file. The (*\*.tar.gz*) output can then be imported into postgres, using a separate python script that executes *importer.py* inside the main container. Check the *PARSER.add_argument* section in the importer for available arguments, which can be added to main function call like so:
 ```
   $ ./scripts/import_excel.py /path/to/file.xlsx --dry-run -vv
 ```
@@ -137,7 +137,7 @@ Alternatively, use a Makefile rule, e.g.:
   $ make dry-import file=/path/to/file.xlsx
   $ make import file=/path/to/file.xlsx
 ```
-Import includes some rudimentary validation (see e.g. regular expressions in ./molmod/importer/data-mapping.json), but this should be improved in the future.
+Import includes some rudimentary validation (see e.g. regular expressions in *./molmod/importer/data-mapping.json*), but this should be improved in the future.
 
 After importing, and publishing a dataset in the Bioatlas, you need change the *in_bioatlas* property to *true*, for data to be included in BLAST, filter search and About stats:
 ```
@@ -171,11 +171,11 @@ During the final step of data import, we add a record in table taxon_annotation 
 ```
   $ make fasta ref=UNITE:8.0
 ```
-This can then be used as input to the [ampliseq pipeline](https://nf-co.re/ampliseq), and the output (minus the asv_id_alias column, and saved as \*.xlsx or \*.csv, for now) can then be fed into the database like so:
+This can then be used as input to the [ampliseq pipeline](https://nf-co.re/ampliseq), and the output (minus the *asv_id_alias* column, and saved as *\*.xlsx* or *\*.csv*, for now) can then be fed into the database like so:
 ```
   $ make reannot file=/path/to/annotation.xlsx
 ```
-Any previous annotations of these ASVs will be given status='old', whereas the new rows will have status='valid'.
+Any previous annotations of these ASVs will be given *status='old'*, whereas the new rows will have *status='valid'*.
 
 ### Tests
 Tests have not been updated and adapted to the docker-compose environment.
