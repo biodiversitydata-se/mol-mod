@@ -18,7 +18,7 @@ Use .env.template to create .env file, and add missing values to the latter, bef
 ```
 
 ### Development environment
-In development, postgres data and config files are written to bind-mounted dir *postgres-data*, which needs to be deleted if you later want to regenerate the db from schema files and dumps in *db* dir. This is also required when you generate new passwords and API config file (secrets).
+In development, postgres data and config files are written to bind-mounted dir *postgres-data*, which needs to be deleted if you later want to regenerate the db from schema files in *db* dir. This is also required when you generate new passwords and API config file (secrets).
 ```
   $ rm -R postgres-data/
 ```
@@ -34,7 +34,7 @@ Then, start up services:
 ```
 The development site should now be available at http://localhost:5000.
 
-Once the system is up and running, see *Production environment* below for how to insert data into the database, and how to build a blast database from sequences in the Bioatlas etc. Note, that the bind-mounted directory 'blast-databases' is only used in development.
+Once the system is up and running, see *Production environment*, below, for how to insert data into the database, and how to build a blast database from sequences in the Bioatlas etc. Note that the bind-mounted directory 'blast-databases' is only used in development.
 
 The server will automatically rebuild on changes to the python code for ease of
 development (except for changes in worker.py, as it is copied into container at startup, i.e. not mounted from host). Note that this setup is not intended for production, and should not
