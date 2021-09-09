@@ -128,7 +128,7 @@ It is also possible to copy a specific file, or the whole directory, to the host
 When a file is uploaded, an email notification is sent to each of the addresses included in the environmental variables *UPLOAD_EMAIL* or *DEV_UPLOAD_EMAIL*.
 
 ### Data import
-Before uploaded files can be imported into the postgres database, you need to do some preprocessing, including adding dataset and annotation tabs/files, and possibly cleaning data. Use the standalone R script *./scripts/asv-input-processing.R)*, which can be customised and stored together with each uploaded file. The (*\*.tar.gz*) output can then be imported into postgres, using a separate python script that executes *importer.py* inside the main container. Note that the importer accepts *\*.xlsx* files as well, but that the *\*.xlsx* output from our R script currently only works if you open and save it in Excel first. Check the *PARSER.add_argument* section in the importer for available arguments, which can be added to main function call like so:
+Before uploaded files can be imported into the postgres database, you need to do some preprocessing, including adding dataset and annotation tabs/files, and possibly cleaning data. Use the standalone R script *./scripts/asv-input-processing.R*, which can be customised and stored together with each uploaded file. The (*.tar.gz*) output can then be imported into postgres, using a separate python script that executes *importer.py* inside the main container. Note that the importer accepts *.xlsx* files as well, but that the *.xlsx* output from our R script currently only works if you open and save it in Excel first. Check the *PARSER.add_argument* section in the importer for available arguments, which can be added to main function call like so:
 ```
   $ ./scripts/import_excel.py /path/to/file.xlsx --dry-run -vv
 ```
@@ -171,7 +171,7 @@ During the final step of data import, we add a record in table taxon_annotation 
 ```
   $ make fasta ref=UNITE:8.0
 ```
-This can then be used as input to the [ampliseq pipeline](https://nf-co.re/ampliseq), and the output (minus the *asv_id_alias* column, and saved as *\*.xlsx* or *\*.csv*, for now) can then be fed into the database like so:
+This can then be used as input to the [ampliseq pipeline](https://nf-co.re/ampliseq), and the output (minus the *asv_id_alias* column, and saved as *.xlsx* or *.csv*, for now) can then be fed into the database like so:
 ```
   $ make reannot file=/path/to/annotation.xlsx
 ```
