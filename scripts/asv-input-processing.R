@@ -1,0 +1,203 @@
+# This script can be used to process file uploads from data providers
+# to make them ready for import into the asv-postgrest db.
+
+# Assumes the following directory structure:
+# ├── [dataset-name]
+#   ├── input
+#     ├── [filename].xlsx or [filename].tar.gz
+#   ├── [this-script-name].R
+
+################################################################################
+# Get required packages & start fresh
+################################################################################
+
+# install.packages("openxlsx")
+library(openxlsx)
+# Clean up environment
+rm(list = ls())
+# Set work dir to script location
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+dir.create('output', showWarnings = FALSE)
+
+################################################################################
+# Set and derive some dataset-specific variables - EDIT HERE, PLEASE!
+################################################################################
+
+# uploaded_file <- 'input/jane.doe@univ.se_210902-212121_ampliseq.tar.gz'
+uploaded_file <- 'input/jane.doe@univ.se_210902-212121_ampliseq.xlsx'
+
+dataset_id <- 'SBDI-ASV-1'
+
+# This will only have a value if data is a version
+# update of set already imported into Bioatlas:
+bioatlas_resource_uid <- NA
+
+# Derive output filenames
+excel_out <- paste0('output/', dataset_id, "-adm.xlsx")
+tar_out <- paste0('output/', dataset_id, "-adm.tar.gz")
+fasta_out <- paste0('output/', dataset_id, '.fasta')
+
+################################################################################
+# Define some functions
+################################################################################
+
+archiveToDFs <- function(archive_file){
+  # Imports delimited text files from a compressed archive into data frames
+
+  untar(uploaded_file, exdir='unpacked')
+  for (xsv in list.files('unpacked', pattern="*.[ct]sv"))
+  {
+    name_parts <- strsplit(xsv, split="\\.")[[1]]
+    if (name_parts[2] == 'tsv') sep = '\t' else sep = ','
+    # Create data frames (envir needed for assign to work inside function)
+    # but skip annotation that user may have submitted
+    if (name_parts[1] != 'annotation')
+      assign(name_parts[1],
+             read.delim(paste0('unpacked/', xsv), sep = sep, dec=".", na.strings=""),
+             envir = parent.frame())
+  }
+  # Delete intermediary dir
+  unlink(paste0(getwd(),'/unpacked'), recursive = TRUE)
+}
+
+excelToDFs <- function(excel_file){
+  # Imports Excel sheets into individual data frames
+
+  # Get all sheet names in case user has renamed something
+  my_sheets <- getSheetNames(excel_file)
+  # Skip guide sheet
+  my_sheets <- my_sheets[my_sheets != 'guide']
+  for (sheet_name in my_sheets)
+  {
+    # Create data frames (envir needed for assign to work inside function)
+    assign(sheet_name, read.xlsx(excel_file, sheet=sheet_name), envir = parent.frame())
+  }
+}
+
+writeFasta <- function(data, filename){
+  # Creates a fasta file from sequences and labels in a data frame
+  fastaLines = c()
+  for (rowNum in 1:nrow(data)){
+    fastaLines = c(fastaLines, as.character(paste(">", data[rowNum,"asv_id_alias"], sep = "")))
+    fastaLines = c(fastaLines,as.character(data[rowNum, "DNA_sequence"]))
+  }
+  fileConn<-file(filename)
+  writeLines(fastaLines, fileConn)
+  close(fileConn)
+}
+
+
+################################################################################
+# Import uploaded data into dataframes
+################################################################################
+
+# Determine (apparent) input type
+if(grepl('xlsx', uploaded_file, fixed = TRUE)){
+  excelToDFs(uploaded_file)
+} else {
+  archiveToDFs(uploaded_file)
+}
+
+# Rename some dataframes as '-' is not allowed in R
+asv_table <- `asv-table`
+emof_simple <- `emof-simple`
+rm(`asv-table`, `emof-simple`)
+
+################################################################################
+# Add dataset metadata
+################################################################################
+
+dataset <- data.frame(dataset_id, filename = basename(uploaded_file), bioatlas_resource_uid)
+
+################################################################################
+# Handle emof data
+################################################################################
+
+# Only keep emof rows that actually have data (and not just event IDs)
+emof_data <- subset(emof, select = -c(event_id_alias))
+emof <- emof[rowSums(is.na(emof_data)) != ncol(emof_data),]
+rm(emof_data)
+
+# If emof-simple is used, transfer data to regular emof
+if (nrow(emof) == 0 & nrow(emof_simple) > 0) {
+  hdrs <- colnames(emof_simple)[colnames(emof_simple) != "event_id_alias"]
+  hdrs <- gsub(".", " ", hdrs, fixed = TRUE)
+  # Make new emof row for each sample-variable combination
+  for (id in emof_simple$event_id_alias){
+    for (i in 1:length(hdrs)) {
+      mlist <- strsplit(hdrs[i], split='[()]')[[1]]
+      type <- trimws(mlist[1])
+      unit <- mlist[2]
+      value <- emof_simple[emof_simple$event_id_alias == id, i+1]
+      emof[nrow(emof) + 1, ] <- c(id,type,NA,value,NA,unit,NA,NA,NA,NA,NA,NA)
+    }
+  }
+}
+rm(emof_simple)
+
+################################################################################
+# Add taxonomy
+################################################################################
+
+# Make fasta for Ampliseq input
+fasta_input <- asv_table[c("asv_id_alias", "DNA_sequence")]
+writeFasta(fasta_input, fasta_out)
+
+# [Run Ampliseq pipeline, and then add tsv output to input dir]
+
+# Import Ampliseq output
+# Disable comment char '#' to handle link/anchor in identification_references
+annotation = read.delim(file = 'input/annotation.tsv', sep = '\t', header = TRUE,
+                        dec = '.', comment.char = "", na.strings="")
+
+################################################################################
+# Remove non-target ASV:s
+################################################################################
+
+# ASVs NOT predicted to be 16S by Barrnap AND having kingdom=Unassigned
+barrnap = 'input/barnap_negative_n_unassigned.txt'
+# Remove from asv-table and annotation tabs
+if (file.exists(barrnap)){
+  todel = read.delim(file = barrnap, sep = '\n', header = FALSE)
+  colnames(todel) = c('asv_id_alias')
+  asv_table = asv_table[!(asv_table$asv_id_alias %in% todel$asv_id_alias),]
+  annotation = annotation[!(annotation$asv_id_alias %in% todel$asv_id_alias),]
+  # Recalculate total read counts
+  sums <- colSums(asv_table[,event$event_id_alias])
+  event$sampleSizeValue <- sums[event$event_id_alias]
+}
+
+################################################################################
+# Fix dataset-specifc problems, if any
+################################################################################
+
+
+################################################################################
+# Create Excel file & compressed archive for import to asv-postgrest db
+
+# We do both, as the Excel file is only accepted by pandas (python library)
+# after you open and save it in Excel, for some reason.
+# Tar import seems to work fine for direct import, though.
+################################################################################
+
+wb <- createWorkbook()
+for (sheet in c('dataset', 'event', 'asv_table', 'mixs', 'emof', 'annotation'))
+{
+  # Revert renaming in output (see above)
+  if (sheet == 'asv_table') sheet_name <- 'asv-table' else sheet_name <- sheet
+
+  # Write df data to Excel workbook
+  addWorksheet(wb, sheetName = sheet_name)
+  writeData(wb, sheet_name, get(sheet), startRow = 1, startCol = 1)
+
+  # and write same data to csv:s
+  write.csv(get(sheet), paste0('output/', sheet_name, ".csv"), row.names=FALSE, na = "")
+}
+# Export [dataset_id]-adm.xlsx
+saveWorkbook(wb, file = excel_out, overwrite = TRUE, )
+
+# Also pack csv:s into [dataset_id]-adm.tar.gz
+tfiles <- paste0('output/', list.files('output', pattern="*.csv"))
+tar(tar_out, files = tfiles, compression = "gzip", tar='tar')
+# Delete csv:s
+unlink(tfiles)

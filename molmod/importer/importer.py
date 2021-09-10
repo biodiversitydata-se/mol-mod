@@ -358,15 +358,25 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     # on occurrences or asvs.
     #
 
-    # 'Unpivot' event columns into rows, keeping 'id_columns' as columns
-    id_columns = ['asv_id_alias', 'DNA_sequence', 'associatedSequences',
-                  'kingdom', 'phylum', 'class', 'order', 'family', 'genus',
-                  'specificEpithet', 'infraspecificEpithet', 'otu']
-    occurrences = data['asv-table'] \
-        .melt(id_columns,
-              # Store event column header and values as:
-              var_name='event_id_alias',
-              value_name='organism_quantity')
+    try:
+        # 'Unpivot' event columns into rows, keeping 'id_columns' as columns
+        id_columns = ['asv_id_alias', 'DNA_sequence', 'associatedSequences',
+                      'kingdom', 'phylum', 'class', 'order', 'family', 'genus',
+                      'specificEpithet', 'infraspecificEpithet', 'otu']
+        occurrences = data['asv-table'] \
+            .melt(id_columns,
+                  # Store event column header and values as:
+                  var_name='event_id_alias',
+                  value_name='organism_quantity')
+    except KeyError:
+        logging.error('Input files seem to not have been read properly. '
+                      'Please, check dimensions (#rows, #cols) below:')
+        for sheet in ['dataset', 'emof', 'mixs', 'asv-table', 'annotation']:
+            logging.error(f'Sheet {sheet} has dimensions {data[sheet].shape}')
+        logging.error('Excel files exported from R have caused this problem '
+                      'before. Try opening and saving input in Excel, '
+                      'or importing data as *.tar.gz instead.')
+        sys.exit(1)
 
     # Remove rows with organism_quantity 0,
     # and reset index so that removed rows are no longer referenced
@@ -539,7 +549,13 @@ def run_validation(data: PandasDict, mapping: dict):
             previous_mistake = False
             if 'validation' not in settings:
                 continue
-            validator = re.compile(settings['validation'])
+            try:
+                validator = re.compile(settings['validation'])
+            except re.error as err:
+                logging.error('Seems to be something wrong with a regular '
+                              'expression used in validation. Please check '
+                              'data-mapping.json.\nPython says: "%s"', err)
+                sys.exit(1)
             for value in data[sheet][field]:
                 if not validator.fullmatch(str(value)):
                     valid = False
