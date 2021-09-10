@@ -50,7 +50,8 @@ You may also want to get rid of dangling images and associated volumes:
 ```
 
 ### Production environment
-In production, postgres and blastdb data are saved to named volumes (*mol-mod_postgres-db* & *mol-mod_blast-db*), and compose operations are simplified using a Makefile (which also includes rules for executing various scripts, in either environment).
+In production, postgres and blastdb data are saved to named volumes (*mol-mod_postgres-db* & *mol-mod_blast-db*), and compose operations are simplified using a Makefile (which also includes rules for executing various scripts, in either environment). We use a
+[dockerised NGINX reverse proxy setup](https://github.com/biodiversitydata-se/proxy-ws-mol-mod-docker).
 
 Again, you need to either generate secrets, or reuse old ones:
 ```
