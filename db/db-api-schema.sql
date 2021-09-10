@@ -138,7 +138,7 @@ CREATE VIEW api.app_filter_mixs_tax AS
    JOIN :data_schema.taxon_annotation ta ON a.pid = ta.asv_pid
    JOIN :data_schema.sampling_event e ON o.event_pid = e.pid
    JOIN :data_schema.dataset d ON e.dataset_pid = d.pid
-   WHERE d.in_bioatlas;
+   WHERE d.in_bioatlas AND ta.status::text = 'valid'::text;
 
 CREATE VIEW api.app_search_mixs_tax AS
  SELECT DISTINCT a.asv_id,
@@ -165,7 +165,7 @@ CREATE VIEW api.app_search_mixs_tax AS
    JOIN :data_schema.taxon_annotation ta ON a.pid = ta.asv_pid
    JOIN :data_schema.sampling_event e ON o.event_pid = e.pid
    JOIN :data_schema.dataset d ON e.dataset_pid = d.pid
-   WHERE d.in_bioatlas
+   WHERE d.in_bioatlas AND ta.status::text = 'valid'::text
   ORDER BY a.asv_id, a.asv_sequence, m.target_gene, m.target_subfragment, (((m.pcr_primer_name_forward)::text || ': '::text) || (m.pcr_primer_forward)::text), (((m.pcr_primer_name_reverse)::text || ': '::text) || (m.pcr_primer_reverse)::text);
 
   CREATE MATERIALIZED VIEW api.app_about_stats AS
@@ -194,7 +194,8 @@ CREATE VIEW api.app_search_mixs_tax AS
               JOIN asv a ON a.pid = o.asv_pid
               JOIN taxon_annotation ta ON a.pid = ta.asv_pid
               JOIN sampling_event e ON o.event_pid = e.pid
-              JOIN dataset d ON e.dataset_pid = d.pid WHERE d.in_bioatlas) sub
+              JOIN dataset d ON e.dataset_pid = d.pid
+              WHERE d.in_bioatlas and ta.status::text = 'valid'::text) sub
    GROUP BY sub.gene
    ORDER BY sub.gene
   WITH DATA;
