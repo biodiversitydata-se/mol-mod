@@ -7,6 +7,12 @@
 #     ├── [filename].xlsx or [filename].tar.gz
 #   ├── [this-script-name].R
 
+# Run down to 'Add taxonomy' section, where you need to run ampliseq pipeline
+# (https://nf-co.re/ampliseq) before finishing the script
+
+# Add code to 'Fix dataset-specifc problems' sections, if needed,
+# and save together with original file to ensure reproducibility
+
 ################################################################################
 # Get required packages & start fresh
 ################################################################################
@@ -168,7 +174,7 @@ if (file.exists(barrnap)){
 }
 
 ################################################################################
-# Fix dataset-specifc problems, if any
+# Fix dataset-specifc problems
 ################################################################################
 
 
