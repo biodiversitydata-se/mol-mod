@@ -100,3 +100,17 @@ delete:
 reannot:
 	# Example: make reannot file=/some/path/to/file.xlsx
 	./scripts/update-annotation.sh $(file)
+
+#
+# UPLOADS
+#
+
+# List uploaded files
+uplist:
+	docker exec asv-main ls /uploads
+# Copy file(s) to host folder:
+upcopy:
+	mkdir -p uploads && docker cp asv-main:/uploads/. uploads
+# Delete files in container
+updel:
+	docker exec asv-main sh -c 'rm -rf /uploads/*'
