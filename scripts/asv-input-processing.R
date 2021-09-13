@@ -1,5 +1,6 @@
 # This script can be used to process file uploads from data providers
 # to make them ready for import into the asv-postgrest db.
+# See README.md for additional context.
 
 # Assumes the following directory structure:
 # ├── [dataset-name]
@@ -10,7 +11,7 @@
 # Run down to 'Add taxonomy' section, where you need to run ampliseq pipeline
 # (https://nf-co.re/ampliseq) before finishing the script
 
-# Add code to 'Fix dataset-specifc problems' sections, if needed,
+# Add code to 'Fix dataset-specifc problems' section, if needed,
 # and save together with original file to ensure reproducibility
 
 ################################################################################
