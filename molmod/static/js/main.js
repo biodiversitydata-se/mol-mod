@@ -76,6 +76,32 @@ $(document).ready(function() {
             break;
 
         case '/upload':
+
+            // If file selection already exists when page loads (because user
+            // has hit browser back button), show it in span
+            if(typeof $("#file")[0] !== "undefined") {
+                var selFile = $("#file")[0].files[0];
+                if(typeof selFile !== "undefined") {
+                    $("#file-shown").text(selFile.name);
+                    // Replace any msg:s with placeholder
+                    $("#upload_err_container").html('<span style="visibility:hidden">placeholder</span>');
+                }
+            }
+
+            // When user selects a new file
+            // (or cancels after selecting, in Chrome but not in Firefox)
+            $("#file").change(function(){
+                // Replace any obsolete msg with placeholder to avoid flicker
+                $("#upload_err_container").html('<span style="visibility:hidden">placeholder</span>');
+                // If 'Cancel' is selected
+                if(typeof $("#file")[0].files[0] === "undefined") {
+                    // Restore placeholder for both span and underlying input
+                    // to avoid flicker and dissaoearing text
+                    $("#file-shown").text('No file selected');
+                    $("#file").jfilestyle({placeholder: ''});
+                }
+            });
+
             $('#uform').on('submit', function() {
             // Checks size and name of selected file against env variables
                 // If file has been selected (otherwise Flask rejects)
