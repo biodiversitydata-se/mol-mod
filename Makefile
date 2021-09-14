@@ -108,9 +108,15 @@ reannot:
 # List uploaded files
 uplist:
 	docker exec asv-main ls /uploads
-# Copy file(s) to host folder:
+
+# Copy file(s) to host folder
+# Apply to single file, if specified, or all files in dir
+cpfile := $(if $(file),$(file),.)
+# Example: make upcopy file=some-file.xlsx
 upcopy:
-	mkdir -p uploads && docker cp asv-main:/uploads/. uploads
+	mkdir -p uploads && docker cp asv-main:/uploads/$(cpfile) uploads
+
 # Delete files in container
+delfile := $(if $(file),$(file),*)
 updel:
-	docker exec asv-main sh -c 'rm -rf /uploads/*'
+	docker exec asv-main sh -c 'rm -rf /uploads/$(delfile)'
