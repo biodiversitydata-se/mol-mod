@@ -115,7 +115,7 @@ Note that you may have to edit firewall settings to allow incoming connections t
 ```
 
 ### File uploads
-The size limit you set in nginx (*molecular.conf: client_max_body_size*) needs to correspond to the setting in flask (*.env: MAX_CONTENT_LENGTH*) for restriction to work properly. Note that neither the flask development server nor uwsgi handles this well, resulting in a connection reset error instead of a 413 response (See Connection Reset Issue in [Flask documentation](https://flask.palletsprojects.com/en/1.1.x/patterns/fileuploads/)) *when testing locally*.
+The size limit you set in nginx (*molecular.conf: client_max_body_size*) needs to correspond to the setting in flask (*.env: MAX_CONTENT_LENGTH*) for restriction to work properly. Note that neither the flask development server nor uwsgi handles this well, resulting in a connection reset error instead of a 413 response (See Connection Reset Issue in [Flask documentation](https://flask.palletsprojects.com/en/1.1.x/patterns/fileuploads/)), but see added file validation in *molmod/static/js/main.js*.
 
 When a file is uploaded, an email notification is sent to each of the addresses included in the environmental variables *UPLOAD_EMAIL* or *DEV_UPLOAD_EMAIL*.
 
@@ -128,13 +128,13 @@ It is also possible to copy a specific file, or the whole directory, to the host
   $ make upcopy
   $ make upcopy file=some-file.xlsx
 ```
-Analogously, to delete a single/all uploaded file(s) in container:
+Analogously, to delete a single/all uploaded file(s) in a running container:
 ```
   $ make updel
   $ make updel file=some-file.xlsx
 ```
 ### Data import
-Before uploaded files can be imported into the postgres database, you need to do some preprocessing, including adding dataset and annotation tabs/files, and possibly cleaning data. Use the standalone R script *./scripts/asv-input-processing.R*, which can be customised and stored together with each uploaded file. The (*.tar.gz*) output can then be imported into postgres, using a separate python script that executes *importer.py* inside the main container. Note that the importer accepts *.xlsx* files as well, but that the *.xlsx* output from our R script currently only works if you open and save it in Excel first. Check the *PARSER.add_argument* section in the importer for available arguments, which can be added to main function call like so:
+Before uploaded files can be imported into the postgres database, you need to do some preprocessing, including adding *dataset* and *annotation* tabs/files, and possibly cleaning data. Use the standalone R script *./scripts/asv-input-processing.R*, which can be customised and stored together with each uploaded file. The (*.tar.gz*) output can then be imported into postgres, using a separate python script that executes *importer.py* inside the main container. Note that the importer accepts *.xlsx* files as well, but that the *.xlsx* output from our R script currently only works if you open and save it in Excel first. Check the *PARSER.add_argument* section in the importer for available arguments, which can be added to main function call like so:
 ```
   $ ./scripts/import_excel.py /path/to/file.xlsx --dry-run -vv
 ```
