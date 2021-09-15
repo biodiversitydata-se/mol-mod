@@ -117,7 +117,11 @@ CREATE TABLE IF NOT EXISTS public.taxon_annotation (
     annotation_confidence numeric,
     taxon_remarks character varying,
     scientific_name character varying,
-    taxon_rank character varying
+    taxon_rank character varying,
+    annotation_target character varying,
+    target_prediction boolean,
+    prediction_criteria character varying
+
 );
 
 CREATE INDEX IF NOT EXISTS taxon_asv ON public.taxon_annotation(asv_pid);
