@@ -262,13 +262,24 @@ function makeSel2drop(drop){
                     xhr.setRequestHeader("X-CSRFToken", $('#csrf_token').val())
                 }
             },
-            error: function (jqXHR, status, error) {
-                // console.log(error);
-                $('#filt_err_container').html('Sorry, something unexpected happened during page load. '
-                + 'Please <a href="' + sbdiContactPage + '">contact SBDI support</a> if this error persists.');
+            error: function(err, errText, errType) {
+                // If user types too fast for select2
+                if (   err.readyState == 0
+                    && err.status == 0
+                    && err.statusText == "abort"
+                    && errText == "abort"
+                    && errType == "abort")
+                {
+                    //Log but do nothing!
+                    console.log('Select2.js fast type-ahead error condition encountered and handled properly');
+                } else {
+                    //process proper errors
+                    $('#filt_err_container').html('Sorry, something unexpected happened during page load. '
+                    + 'Please <a href="' + sbdiContactPage + '">contact SBDI support</a> if this error persists.');
 
-                $('.btn').prop('disabled',true);
-                return { results: [] };
+                    $('.btn').prop('disabled',true);
+                    return { results: [] };
+                }
             }
         }
     });
