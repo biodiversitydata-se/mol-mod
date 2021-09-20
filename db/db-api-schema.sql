@@ -8,7 +8,7 @@
 CREATE SCHEMA api;
 
 CREATE OR REPLACE VIEW api.dwc_oc_emof AS
-SELECT ds.pid AS pid,
+SELECT ds.pid AS dataset_pid,
     ds.dataset_id AS "datasetID",
     ds.dataset_id || ':' || se.event_id_alias AS "eventID",
     ds.dataset_id || ':' || se.event_id_alias || ':' || oc.asv_id_alias AS "occurrenceID",
@@ -30,7 +30,7 @@ SELECT ds.pid AS pid,
    JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid;
 
 CREATE OR REPLACE VIEW api.dwc_oc_mixs AS
-SELECT ds.pid AS pid,
+SELECT ds.pid AS dataset_pid,
     ds.dataset_id AS "datasetID",
     ds.dataset_id || ':' || se.event_id_alias AS "eventID",
     ds.dataset_id || ':' || se.event_id_alias || ':' || oc.asv_id_alias AS "occurrenceID",
@@ -56,7 +56,7 @@ SELECT ds.pid AS pid,
    JOIN :data_schema.asv asv ON asv.pid = oc.asv_pid;
 
 CREATE OR REPLACE VIEW api.dwc_oc_occurrence AS
-SELECT ds.pid AS pid,
+SELECT ds.pid AS dataset_pid,
     ds.dataset_id AS "datasetID",
     ds.dataset_id || ':' || se.event_id_alias AS "eventID",
     ds.dataset_id || ':' || se.event_id_alias || ':' || oc.asv_id_alias AS "occurrenceID",
