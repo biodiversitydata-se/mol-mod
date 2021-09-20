@@ -57,8 +57,12 @@ def request_drop_options(field) -> dict:
                # (otherwise, first selection removes all other options)
                not in ['term', 'page', field]}
 
+    # Clean search term from special characters that cause errors
+    term = request.form['term']
+    term = ''.join(e for e in term if e not in '!()?*')
+
     # Add name of field to be filtered, and (user-typed search) term
-    payload.update({'field': field, 'term': request.form['term']})
+    payload.update({'field': field, 'term': term})
     # Add pagination
     limit = 25
     offset = (int(request.form['page']) - 1) * limit
