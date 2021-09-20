@@ -218,7 +218,7 @@ BEGIN
 			   AND ($5 = ''{}'' OR family IN (SELECT unnest($5)))
 			   AND ($6 = ''{}'' OR genus IN (SELECT unnest($6)))
 			   AND ($7 = ''{}'' OR species IN (SELECT unnest($7)))
-			   AND %I ~ $8
+			   AND %I ~* $8
 			   AND ($9 = ''{}'' OR gene IN (SELECT unnest($9)))
 			   AND ($14 = ''{}'' OR sub IN (SELECT unnest($14)))
 			   AND ($10 = ''{}'' OR fw_prim IN (SELECT unnest($10)))
@@ -234,7 +234,7 @@ BEGIN
 			   	OFFSET $12
 			   	LIMIT $13
 			  ) t', field, field, field, field, field, field, field)
-   USING kingdom, phylum, classs, oorder, family, genus, species, term, gene, fw_prim, rv_prim, noffset, nlimit, sub;
+   USING kingdom, phylum, classs, oorder, family, genus, species, '^'||term||'.*$', gene, fw_prim, rv_prim, noffset, nlimit, sub;
 END
 $_$;
 
