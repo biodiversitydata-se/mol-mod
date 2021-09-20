@@ -7,9 +7,6 @@
 
 CREATE SCHEMA api;
 
-CREATE OR REPLACE VIEW api.test AS
-SELECT pid FROM dataset;
-
 CREATE OR REPLACE VIEW api.dwc_oc_emof AS
 SELECT ds.pid AS dataset_pid,
     ds.dataset_id AS "datasetID",
