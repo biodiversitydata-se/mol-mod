@@ -24,7 +24,7 @@ $(document).ready(function() {
                 { data: null, orderable: false, defaultContent: '', className: 'select-checkbox'},
                 { data: 'asv_id', visible: false },
                 { data: 'qacc', className: 'qacc'},
-                { data: 'sacc', className: 'details-control asv'},
+                { data: 'stitle', className: 'details-control asv'},
                 { data: 'pident'},
                 { data: 'qcovhsp'},
                 { data: 'evalue'},
