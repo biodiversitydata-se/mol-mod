@@ -167,7 +167,7 @@ annotation = read.delim(file = annotation_file, sep = '\t', header = TRUE,
                         dec = '.', comment.char = "", na.strings="")
 
 ################################################################################
-# 8. Remove non-target ASV:s
+# 8. Remove non-target ASV:s and sum counts
 ################################################################################
 
 # If non-target file variable was not commented out
@@ -180,6 +180,9 @@ if (exists('non_target')){
     annotation = annotation[!(annotation$asv_id_alias %in% todel$asv_id_alias),]
   }
 }
+# Sum counts in all event columns
+sums <- colSums(asv_table[,event$event_id_alias])
+event$sampleSizeValue <- sums[event$event_id_alias]
 
 ################################################################################
 # 9. Fix dataset-specifc problems, if any  - EDIT HERE, PLEASE!
