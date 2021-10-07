@@ -60,7 +60,7 @@ def main():
     try:
         form = request.json
 
-        field_names = ['qacc', 'sacc', 'pident', 'qcovhsp', 'evalue']
+        field_names = ['qacc', 'stitle', 'pident', 'qcovhsp', 'evalue']
 
         # Collect BLAST cmd items into list
         cmd = ['blastn']

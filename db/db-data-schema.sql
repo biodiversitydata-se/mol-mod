@@ -54,10 +54,12 @@ CREATE TABLE IF NOT EXISTS public.mixs (
     target_gene character varying NOT NULL,
     target_subfragment character varying NOT NULL,
     lib_layout character varying NOT NULL,
+    seq_meth character varying NOT NULL,
     pcr_primer_name_forward character varying NOT NULL,
     pcr_primer_name_reverse character varying NOT NULL,
     pcr_primer_forward character varying NOT NULL,
     pcr_primer_reverse character varying NOT NULL,
+    denoising_appr character varying NOT NULL,
     env_broad_scale character varying NOT NULL,
     env_local_scale character varying NOT NULL,
     env_medium character varying NOT NULL

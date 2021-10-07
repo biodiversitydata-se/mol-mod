@@ -75,9 +75,9 @@ def blast_run():
         result['qcovhsp'] = f'{result["qcovhsp"]:.1f}'
 
         # Print taxonomy on new line
-        result['sacc'] = result['sacc'].replace(';', '|')
-        # Extract asvid from sacc = id + taxonomy
-        result['asv_id'] = result['sacc'].split('-')[0]
+        result['stitle'] = result['stitle'].replace(';', '|')
+        # Extract asvid from stitle = id + taxonomy
+        result['asv_id'] = result['stitle'].split('-')[0]
 
     # Get Subject sequence via ID, and add to the results
     asv_ids = [f['asv_id'] for f in results]

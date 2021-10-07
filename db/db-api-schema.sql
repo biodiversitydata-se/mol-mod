@@ -8,7 +8,7 @@
 CREATE SCHEMA api;
 
 CREATE OR REPLACE VIEW api.dwc_oc_emof AS
-SELECT ds.pid AS pid,
+SELECT ds.pid AS dataset_pid,
     ds.dataset_id AS "datasetID",
     ds.dataset_id || ':' || se.event_id_alias AS "eventID",
     ds.dataset_id || ':' || se.event_id_alias || ':' || oc.asv_id_alias AS "occurrenceID",
@@ -30,7 +30,7 @@ SELECT ds.pid AS pid,
    JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid;
 
 CREATE OR REPLACE VIEW api.dwc_oc_mixs AS
-SELECT ds.pid AS pid,
+SELECT ds.pid AS dataset_pid,
     ds.dataset_id AS "datasetID",
     ds.dataset_id || ':' || se.event_id_alias AS "eventID",
     ds.dataset_id || ':' || se.event_id_alias || ':' || oc.asv_id_alias AS "occurrenceID",
@@ -43,6 +43,8 @@ SELECT ds.pid AS pid,
     mixs.target_gene,
     mixs.target_subfragment,
     mixs.lib_layout,
+    mixs.seq_meth,
+    mixs.denoising_appr,
     asv.asv_sequence AS "DNA_sequence",
     mixs.env_broad_scale,
     mixs.env_local_scale,
@@ -54,7 +56,7 @@ SELECT ds.pid AS pid,
    JOIN :data_schema.asv asv ON asv.pid = oc.asv_pid;
 
 CREATE OR REPLACE VIEW api.dwc_oc_occurrence AS
-SELECT ds.pid AS pid,
+SELECT ds.pid AS dataset_pid,
     ds.dataset_id AS "datasetID",
     ds.dataset_id || ':' || se.event_id_alias AS "eventID",
     ds.dataset_id || ':' || se.event_id_alias || ':' || oc.asv_id_alias AS "occurrenceID",
@@ -101,12 +103,14 @@ SELECT ds.pid AS pid,
         FROM ( SELECT se.sample_size_value AS "sampleSizeValue",
                       oc.organism_quantity AS "organismQuantity",
                       m.sop,
+                      m.seq_meth,
                       m.pcr_primer_name_forward,
                       m.pcr_primer_forward,
                       m.pcr_primer_name_reverse,
                       m.pcr_primer_reverse,
                       m.target_gene,
                       m.target_subfragment,
+                      m.denoising_appr,
                       m.lib_layout,
                       a.asv_sequence AS "DNA_sequence",
                       m.env_broad_scale,
@@ -138,7 +142,7 @@ CREATE VIEW api.app_filter_mixs_tax AS
    JOIN :data_schema.taxon_annotation ta ON a.pid = ta.asv_pid
    JOIN :data_schema.sampling_event e ON o.event_pid = e.pid
    JOIN :data_schema.dataset d ON e.dataset_pid = d.pid
-   WHERE d.in_bioatlas;
+   WHERE d.in_bioatlas AND ta.status::text = 'valid'::text;
 
 CREATE VIEW api.app_search_mixs_tax AS
  SELECT DISTINCT a.asv_id,
@@ -165,7 +169,7 @@ CREATE VIEW api.app_search_mixs_tax AS
    JOIN :data_schema.taxon_annotation ta ON a.pid = ta.asv_pid
    JOIN :data_schema.sampling_event e ON o.event_pid = e.pid
    JOIN :data_schema.dataset d ON e.dataset_pid = d.pid
-   WHERE d.in_bioatlas
+   WHERE d.in_bioatlas AND ta.status::text = 'valid'::text
   ORDER BY a.asv_id, a.asv_sequence, m.target_gene, m.target_subfragment, (((m.pcr_primer_name_forward)::text || ': '::text) || (m.pcr_primer_forward)::text), (((m.pcr_primer_name_reverse)::text || ': '::text) || (m.pcr_primer_reverse)::text);
 
   CREATE MATERIALIZED VIEW api.app_about_stats AS
@@ -194,7 +198,8 @@ CREATE VIEW api.app_search_mixs_tax AS
               JOIN asv a ON a.pid = o.asv_pid
               JOIN taxon_annotation ta ON a.pid = ta.asv_pid
               JOIN sampling_event e ON o.event_pid = e.pid
-              JOIN dataset d ON e.dataset_pid = d.pid WHERE d.in_bioatlas) sub
+              JOIN dataset d ON e.dataset_pid = d.pid
+              WHERE d.in_bioatlas and ta.status::text = 'valid'::text) sub
    GROUP BY sub.gene
    ORDER BY sub.gene
   WITH DATA;
@@ -215,7 +220,7 @@ BEGIN
 			   AND ($5 = ''{}'' OR family IN (SELECT unnest($5)))
 			   AND ($6 = ''{}'' OR genus IN (SELECT unnest($6)))
 			   AND ($7 = ''{}'' OR species IN (SELECT unnest($7)))
-			   AND %I ~ $8
+			   AND %I ~* $8
 			   AND ($9 = ''{}'' OR gene IN (SELECT unnest($9)))
 			   AND ($14 = ''{}'' OR sub IN (SELECT unnest($14)))
 			   AND ($10 = ''{}'' OR fw_prim IN (SELECT unnest($10)))
@@ -231,7 +236,7 @@ BEGIN
 			   	OFFSET $12
 			   	LIMIT $13
 			  ) t', field, field, field, field, field, field, field)
-   USING kingdom, phylum, classs, oorder, family, genus, species, term, gene, fw_prim, rv_prim, noffset, nlimit, sub;
+   USING kingdom, phylum, classs, oorder, family, genus, species, '^'||term||'.*$', gene, fw_prim, rv_prim, noffset, nlimit, sub;
 END
 $_$;
 

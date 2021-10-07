@@ -50,7 +50,8 @@ You may also want to get rid of dangling images and associated volumes:
 ```
 
 ### Production environment
-In production, postgres and blastdb data are saved to named volumes (*mol-mod_postgres-db* & *mol-mod_blast-db*), and compose operations are simplified using a Makefile (which also includes rules for executing various scripts, in either environment).
+In production, postgres and blastdb data are saved to named volumes (*mol-mod_postgres-db* & *mol-mod_blast-db*), and compose operations are simplified using a Makefile (which also includes rules for executing various scripts, in either environment). We use a
+[dockerised NGINX reverse proxy setup](https://github.com/biodiversitydata-se/proxy-ws-mol-mod-docker).
 
 Again, you need to either generate secrets, or reuse old ones:
 ```
@@ -114,21 +115,26 @@ Note that you may have to edit firewall settings to allow incoming connections t
 ```
 
 ### File uploads
-The size limit you set in nginx (*molecular.conf: client_max_body_size*) needs to correspond to the setting in flask (*.env: MAX_CONTENT_LENGTH*) for restriction to work properly. Note that neither the flask development server nor uwsgi handles this well, resulting in a connection reset error instead of a 413 response (See Connection Reset Issue in [Flask documentation](https://flask.palletsprojects.com/en/1.1.x/patterns/fileuploads/)) *when testing locally*.
+The size limit you set in nginx (*molecular.conf: client_max_body_size*) needs to correspond to the setting in flask (*.env: MAX_CONTENT_LENGTH*) for restriction to work properly. Note that neither the flask development server nor uwsgi handles this well, resulting in a connection reset error instead of a 413 response (See Connection Reset Issue in [Flask documentation](https://flask.palletsprojects.com/en/1.1.x/patterns/fileuploads/)), but see added file validation in *molmod/static/js/main.js*.
 
-You can list uploaded files in running asv-main container:
+When a file is uploaded, an email notification is sent to each of the addresses included in the environmental variables *UPLOAD_EMAIL* or *DEV_UPLOAD_EMAIL*.
+
+You can list uploaded files in the running asv-main container using a Makefile rule:
 ```
-  $ docker exec asv-main ls /uploads
+  $ make uplist
 ```
 It is also possible to copy a specific file, or the whole directory, to the host, using either of these commands:
 ```
-  $ mkdir -p uploads && docker cp asv-main:/uploads/[filename] uploads
-  $ docker cp  asv-main:/uploads .
+  $ make upcopy
+  $ make upcopy file=some-file.xlsx
 ```
-When a file is uploaded, an email notification is sent to each of the addresses included in the environmental variables *UPLOAD_EMAIL* or *DEV_UPLOAD_EMAIL*.
-
+Analogously, to delete a single/all uploaded file(s) in a running container:
+```
+  $ make updel
+  $ make updel file=some-file.xlsx
+```
 ### Data import
-Before uploaded files can be imported into the postgres database, you need to do some preprocessing, including adding dataset and annotation tabs/files, and possibly cleaning data. Use the standalone R script *./scripts/asv-input-processing.R*, which can be customised and stored together with each uploaded file. The (*.tar.gz*) output can then be imported into postgres, using a separate python script that executes *importer.py* inside the main container. Note that the importer accepts *.xlsx* files as well, but that the *.xlsx* output from our R script currently only works if you open and save it in Excel first. Check the *PARSER.add_argument* section in the importer for available arguments, which can be added to main function call like so:
+Before uploaded files can be imported into the postgres database, you need to do some preprocessing, including adding *dataset* and *annotation* tabs/files, and possibly cleaning data. Use the standalone R script *./scripts/asv-input-processing.R*, which can be customised and stored together with each uploaded file. The (*.tar.gz*) output can then be imported into postgres, using a separate python script that executes *importer.py* inside the main container. Note that the importer accepts *.xlsx* files as well, but that the *.xlsx* output from our R script currently only works if you open and save it in Excel first. Check the *PARSER.add_argument* section in the importer for available arguments, which can be added to main function call like so:
 ```
   $ ./scripts/import_excel.py /path/to/file.xlsx --dry-run -vv
 ```
@@ -178,4 +184,4 @@ This can then be used as input to the [ampliseq pipeline](https://nf-co.re/ampli
 Any previous annotations of these ASVs will be given *status='old'*, whereas the new rows will have *status='valid'*.
 
 ### Tests
-Tests have not been updated and adapted to the docker-compose environment.
+Note that tests have not been updated and adapted to the docker-compose environment.
