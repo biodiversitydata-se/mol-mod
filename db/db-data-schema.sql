@@ -120,7 +120,7 @@ CREATE TABLE IF NOT EXISTS public.taxon_annotation (
     taxon_rank character varying,
     annotation_target character varying,
     target_prediction boolean,
-    prediction_criteria character varying
+    target_criteria character varying
 
 );
 
