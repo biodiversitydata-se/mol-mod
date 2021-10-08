@@ -110,6 +110,9 @@
     "identification_references": {"validation": "(?!nan).*"},
     "taxon_remarks": {},
     "scientificName": {"validation": "(?!nan).*"},
-    "taxonRank": {"validation": "(?!nan).*"}
+    "taxonRank": {"validation": "(?!nan).*"},
+    "annotation_target": {"validation": "(?!nan).*"},
+    "target_prediction": {"validation": "(True|False)"},
+    "target_criteria": {"validation": "(?!nan).*"}
   }
 }
