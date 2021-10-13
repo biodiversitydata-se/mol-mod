@@ -270,6 +270,10 @@ def read_data_file(data_file: str, sheets: List[str]):
             pandas.read_excel(data_file)
         except (ValueError, KeyError):
             logging.error("Input neither recognized as tar nor as Excel.")
+            logging.error('Was your *.tar.gz file not recognized as a tarfile?'
+                          ' This sometimes happens when small test archives '
+                          'get negative compression ratios. Try adding dummy '
+                          'rows to your annotation file and rerun import.')
             sys.exit(1)
 
     data = {}
