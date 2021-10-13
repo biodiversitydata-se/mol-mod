@@ -274,6 +274,7 @@ def compare_annotations(data: pandas.DataFrame, db_cursor: DictCursor,
                target_criteria
                FROM taxon_annotation ta, asv
                WHERE ta.asv_pid = asv.pid AND asv_pid in ({pid_str})
+               AND status = 'valid'
             '''
     total = len(data.values)
     start = 0
