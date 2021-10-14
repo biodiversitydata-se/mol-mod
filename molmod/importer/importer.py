@@ -346,6 +346,7 @@ def compare_annotations(data: pandas.DataFrame, db_cursor: DictCursor,
                           pformat(issues))
             logging.error("No data were imported.")
             sys.exit(1)
+
         # Return asv_pid:s for any updates to be made
         return updates
 
@@ -613,13 +614,16 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
 
     # Check annotations for existing asvs
     matches = data['annotation'][data['annotation'].asv_pid <= old_max_asv]
-    updated_pids = compare_annotations(matches, cursor, batch_size)
-    invalidate_annotations(updated_pids, cursor)
+    update_pids = compare_annotations(matches, cursor, batch_size)
+    if (update_pids):
+        invalidate_annotations(update_pids, cursor)
 
-    # Add new or updated annotations
-    new = data['annotation'][data['annotation'].asv_pid > old_max_asv]
-    updates = data['annotation'][data['annotation'].asv_pid.isin(updated_pids)]
-    annotation = new.append(updates)
+    # Add new and updated annotations
+    annotation = data['annotation'][data['annotation'].asv_pid > old_max_asv]
+    if (update_pids):
+        updates = \
+            data['annotation'][data['annotation'].asv_pid.isin(update_pids)]
+        annotation = annotation.append(updates)
     annotation.reset_index(inplace=True)
     logging.info(" * annotations")
     insert_common(annotation, mapping['annotation'], cursor, batch_size)
