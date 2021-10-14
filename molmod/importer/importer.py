@@ -263,19 +263,20 @@ def compare_annotations(data: pandas.DataFrame, db_cursor: DictCursor,
     retrieves corresponding data from db, and checks for diffs in annotation
     target and prediction between these. Groups issues according to:
 
-    target	pred	pred	pred	pred
 
-    db  A	TRUE	FALSE	TRUE	FALSE
-    new A	TRUE	TRUE	FALSE	FALSE
-            Ignore	Check	Check	Ignore
+    --	target	pred	pred	pred	pred
 
-    db  A	TRUE	FALSE	TRUE	FALSE
-    new B	TRUE	TRUE	FALSE	FALSE
-            Check	Update	ignore	Ignore
+    db	geneA	TRUE	FALSE	TRUE	FALSE
+    new	geneA	TRUE	TRUE	FALSE	FALSE
+    --	----	Ignore	Check	Check	Ignore
+
+    db	geneA	TRUE	FALSE	TRUE	FALSE
+    new	geneB	TRUE	TRUE	FALSE	FALSE
+    --	----	Check	Update	ignore	Ignore
 
     Cancels import if any issues needs to be checked and resolved,
     and returns pids for annotations that can be updated directly.
-    NOTE: This 'validation' is applied durin insertion (rather than before) so
+    NOTE: This 'validation' is applied during insertion (rather than before) so
     that we can run it on pre-existing ASVs only. We only compare targets, i.e.
     not taxon annotations as such.
     """
