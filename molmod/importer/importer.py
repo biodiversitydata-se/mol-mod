@@ -260,12 +260,24 @@ def compare_annotations(data: pandas.DataFrame, db_cursor: DictCursor,
                         batch_size: int = 1000):
     """
     Takes incoming annotation data on ASVs that already exist in db,
-    retrieves corresponding data from db, and checks for diffs in gene target
-    and prediction between these, e.g. if an existing '16S' ASV suddenly comes
-    in as '18S'. Reports and sorts diffs into ignored and fatal, cancelling
-    import if any of the latter are detected. Validation applied during
-    insertion (rather than before) so that we can run it only on existing ASVs.
-    NOTE: only compares target and not taxon annotation as such!
+    retrieves corresponding data from db, and checks for diffs in annotation
+    target and prediction between these. Groups issues according to:
+
+    target	pred	pred	pred	pred
+
+    db  A	TRUE	FALSE	TRUE	FALSE
+    new A	TRUE	TRUE	FALSE	FALSE
+            Ignore	Check	Check	Ignore
+
+    db  A	TRUE	FALSE	TRUE	FALSE
+    new B	TRUE	TRUE	FALSE	FALSE
+            Check	Update	ignore	Ignore
+
+    Cancels import if any issues needs to be checked and resolved,
+    and returns pids for annotations that can be updated directly.
+    NOTE: This 'validation' is applied durin insertion (rather than before) so
+    that we can run it on pre-existing ASVs only. We only compare targets, i.e.
+    not taxon annotations as such.
     """
 
     pid_str = ",".join([str(int) for int in data['asv_pid']])
@@ -294,38 +306,66 @@ def compare_annotations(data: pandas.DataFrame, db_cursor: DictCursor,
         start = end
         end = min(total, end + batch_size)
 
-        fatal_issues = []
-        ignored_issues = []
+        issues = []
+        updates = []
 
         # For every matching annotation record in db
         for d in db_annotations:
+
             # Get corresponding new record
             nfull = data[data['asv_pid'] == d['asv_pid']].to_dict('records')[0]
             # Only keep common fields, so that we can identify data diffs below
             asv_id = d['asv_id']
             del d['asv_id']
             n = dict((k, nfull[k]) for k in d.keys())
-            # If any annotation data differ, save issue for report
+
+            # If annotations differ between incoming data and db
             if (n != d):
                 issue = {'asv_id': asv_id, 'new': n, 'db': d}
-                # If targets differ and new prediction is True,
-                # save as issue that requires fix
-                if ((d['annotation_target'] != n['annotation_target']) &
-                        (n['target_prediction'] is True)):
-                    fatal_issues.append(issue)
-                # Otherwise, just note diff
-                else:
-                    ignored_issues.append(issue)
-        # Report issues and stop import when resolution is needed.
-        if len(ignored_issues):
-            logging.info('Annotation issues that were ignored: \n %s',
-                         pformat(ignored_issues))
-        if len(fatal_issues):
+                # If same target but different predictions
+                # e.g. if ampliseq setup was unintentionally changed
+                if (((d['annotation_target'] == n['annotation_target']) &
+                     (d['target_prediction'] != n['target_prediction'])) or
+                    # ...or if different targets, but same predictions
+                    # i.e. different target prediction methods disagree
+                    ((d['annotation_target'] != n['annotation_target']) &
+                     (d['target_prediction'] is True) &
+                     (n['target_prediction'] is True))):
+                    # Save for check
+                    issues.append(issue)
+                # If new True target comes in for ASV with False target
+                elif ((d['annotation_target'] != n['annotation_target']) &
+                      (d['target_prediction'] is False) &
+                      (n['target_prediction'] is True)):
+                    # Save for update
+                    updates.append(d['asv_pid'])
+        # Quit if any issues need resolution
+        if len(issues):
             logging.error('Annotation issues that need to be resolved:\n %s',
-                          pformat(fatal_issues))
+                          pformat(issues))
             logging.error("No data were imported.")
             sys.exit(1)
-        return
+        # Return asv_pid:s for any updates to be made
+        return updates
+
+
+def invalidate_annotations(pids: list, db_cursor: DictCursor):
+    """
+    Takes a list of asv_pid:s, and removes 'valid' status from current
+    taxon annotations of these in db.
+    """
+
+    pid_str = ",".join([str(int) for int in pids])
+    query = f'''UPDATE taxon_annotation
+                SET status = 'old'
+                WHERE asv_pid IN ({pid_str})
+            '''
+    try:
+        db_cursor.execute(query)
+    except psycopg2.Error as err:
+        logging.error(err)
+        logging.error("No data were imported.")
+        sys.exit(1)
 
 
 def read_data_file(data_file: str, sheets: List[str]):
@@ -570,15 +610,15 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
         .join(asvs['pid'], on='asv_id_alias', how='inner')
     data['annotation'].rename(columns={'pid': 'asv_pid'}, inplace=True)
 
-    # Annotations for existing ASVs
+    # Check annotations for existing asvs
     matches = data['annotation'][data['annotation'].asv_pid <= old_max_asv]
-    logging.info(f'   * # matching: {matches.shape[0]}')
-    # Compare gene targets and predictions between incoming and db data
-    compare_annotations(matches, cursor, batch_size)
+    updated_pids = compare_annotations(matches, cursor, batch_size)
+    invalidate_annotations(updated_pids, cursor)
 
-    # Anotations for new ASVs
-    annotation = data['annotation'][data['annotation'].asv_pid > old_max_asv]
-    logging.info(f'   * # new: {annotation.shape[0]}')
+    # Add new or updated annotations
+    new = data['annotation'][data['annotation'].asv_pid > old_max_asv]
+    updates = data['annotation'][data['annotation'].asv_pid.isin(updated_pids)]
+    annotation = new.append(updates)
     annotation.reset_index(inplace=True)
     logging.info(" * annotations")
     insert_common(annotation, mapping['annotation'], cursor, batch_size)
