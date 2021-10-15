@@ -260,6 +260,9 @@ BEGIN
    USING kingdom, phylum, classs, oorder, family, genus, species, '^'||term||'.*$', gene, fw_prim, rv_prim, noffset, nlimit, sub;
 END
 $_$;
+COMMENT ON FUNCTION api.app_drop_options(text, bigint, integer, text, text[], text[], text[], text[], text[], text[], text[], text[], text[], text[], text[])
+    IS 'Example call: select api.app_drop_options(''classs'', 0, 25, ''Acidi'', ''{Bacteria}'')';
+
 
 CREATE VIEW api.app_asvs_for_blastdb AS
 SELECT DISTINCT asv_id, higher_taxonomy, asv_sequence
@@ -285,3 +288,6 @@ CREATE FUNCTION api.app_seq_from_id(ids character varying[])
 	   SELECT unnest(ids)
 	)
 $$;
+COMMENT ON FUNCTION api.app_seq_from_id(character varying[])
+    IS 'Seems PostgREST does not allow POST:ing to views, and no. of ID:s that we can fit into GET url is limited, so we use function instead. Example call:
+SELECT api.app_seq_from_idx(''{ASV:40b37890b1b1fcdf0ece91f1da34c1ca}'')';
