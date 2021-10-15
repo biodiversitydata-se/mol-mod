@@ -262,22 +262,20 @@ END
 $_$;
 
 CREATE VIEW api.app_asvs_for_blastdb AS
-SELECT asv.asv_id,
-    concat_ws(';'::text, ta.kingdom, ta.phylum, ta.class, ta.oorder, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS higher_taxonomy,
-    asv.asv_sequence
-FROM public.asv
-   JOIN public.taxon_annotation ta ON asv.pid = ta.asv_pid
-WHERE asv.pid IN (
-    SELECT DISTINCT ib.pid
-    FROM asv ib
-       JOIN public.occurrence oc ON oc.asv_pid = ib.pid
-       JOIN public.sampling_event se ON oc.event_pid = se.pid
-       JOIN public.mixs ON se.pid = mixs.pid
-       JOIN public.taxon_annotation tg ON tg.asv_pid = ib.pid
-       JOIN public.dataset ds ON se.dataset_pid = ds.pid
-    WHERE ds.in_bioatlas AND tg.annotation_target = mixs.target_gene
-       AND tg.status::text = 'valid'::text
-       AND tg.target_prediction = True);
+SELECT DISTINCT asv_id, higher_taxonomy, asv_sequence
+    FROM (SELECT asv.asv_id,
+            concat_ws(';'::text, ta.kingdom, ta.phylum, ta.class, ta.oorder, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS higher_taxonomy,
+            asv.asv_sequence
+        FROM :data_schema.asv
+            JOIN :data_schema.taxon_annotation ta ON asv.pid = ta.asv_pid
+            JOIN :data_schema.occurrence oc ON oc.asv_pid = asv.pid
+            JOIN :data_schema.sampling_event se ON oc.event_pid = se.pid
+            JOIN :data_schema.mixs ON se.pid = mixs.pid
+            JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid
+        WHERE ds.in_bioatlas
+            AND ta.annotation_target::text = mixs.target_gene::text
+            AND ta.status::text = 'valid'::text AND ta.target_prediction = true) rd;
+
 
 CREATE FUNCTION api.app_seq_from_id(ids character varying[])
     RETURNS TABLE(asv_id CHARACTER(36), ASV_SEQUENCE CHARACTER VARYING)
