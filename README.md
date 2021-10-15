@@ -186,6 +186,9 @@ This can then be used as input to the [ampliseq pipeline](https://nf-co.re/ampli
 ```
 Any previous annotations of these ASVs will be given *status='old'*, whereas the new rows will have *status='valid'*.
 
+### Target prediction checks
+For at least some target genes, it is possible to predict whether an ASV actually derives from a specified target, using some additional tool (e.g. the BAsic Rapid Ribosomal RNA Predictor; *Barrnap*), likely in combination with the annotation output itself. For example, we may decide that only ASVs that are annotated at least at kingdom level OR get positive Barrnap prediction should be considered as true 16S rRNA sequences. To enable later re-evaluation, however, we import all ASVs, and store our combined prediction (here based on kingdom + Barrnap) for each of these in the annotation table (see fields *annotation_target*, *target_prediction* and *target_criteria*). An ASV is then only represented in filter options, blast db, search results and total read counts, if its  *target_gene* equals the *annotation_target* of the current *valid* taxon annotation of that ASV, and if *target_prediction* is set to *True* for that same annotation. To handle possible conflicts of target predictions between different datasets (although these may be rare), we compare incoming annotations with corresponding database records, during import. See */molmod/importer/importer.py* and function *compare_annotations* for details.
+
 ### Tests
 Note that tests have not been updated and adapted to the docker-compose environment.
 
