@@ -192,10 +192,6 @@ if (exists('non_target')){
   annotation$target_prediction <- TRUE
 }
 
-# Sum counts in all event columns
-sums <- colSums(asv_table[,event$event_id_alias])
-event$sampleSizeValue <- sums[event$event_id_alias]
-
 ################################################################################
 # 9. Fix dataset-specifc problems, if any  - EDIT HERE, PLEASE!
 ################################################################################
