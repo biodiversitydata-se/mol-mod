@@ -86,7 +86,7 @@ SELECT ds.pid AS dataset_pid,
     oc.associated_sequences AS "associatedSequences",
     se.recorded_by AS "recordedBy",
     se.material_sample_id AS "materialSampleID",
-    se.sample_size_value AS "sampleSizeValue",
+    calc.size AS "sampleSizeValue",
     'DNA sequence reads'::text AS "sampleSizeUnit",
     se.sampling_protocol AS "samplingProtocol",
     'DNA sequence reads'::text AS "organismQuantityType",
@@ -108,31 +108,40 @@ SELECT ds.pid AS dataset_pid,
     ta.identification_references AS "identificationReferences",
     (((ta.annotation_algorithm::text || ' annotation confidence (at lowest specified taxon): '::text) || ta.annotation_confidence) || ', against reference database: '::text) || ta.reference_db::text AS "identificationRemarks",
     'Identified by data provider as: '::text || oc.previous_identifications::text AS "previousIdentifications",
-    row_to_json(( SELECT ds.*::record AS d
-        FROM ( SELECT se.sample_size_value AS "sampleSizeValue",
-            oc.organism_quantity AS "organismQuantity",
-            mixs.sop,
-            mixs.seq_meth,
-            mixs.pcr_primer_name_forward,
-            mixs.pcr_primer_forward,
-            mixs.pcr_primer_name_reverse,
-            mixs.pcr_primer_reverse,
-            mixs.target_gene,
-            mixs.target_subfragment,
-            mixs.denoising_appr,
-            mixs.lib_layout,
-            asv.asv_sequence AS "DNA_sequence",
-            mixs.env_broad_scale,
-            mixs.env_local_scale,
-            mixs.env_medium) d
-    )) AS "dynamicProperties"
+    row_to_json(( SELECT d.*::record AS d
+           FROM ( SELECT calc.size AS "sampleSizeValue",
+                oc.organism_quantity AS "organismQuantity",
+                mixs.sop,
+                mixs.seq_meth,
+                mixs.pcr_primer_name_forward,
+                mixs.pcr_primer_forward,
+                mixs.pcr_primer_name_reverse,
+                mixs.pcr_primer_reverse,
+                mixs.target_gene,
+                mixs.target_subfragment,
+                mixs.denoising_appr,
+                mixs.lib_layout,
+                asv.asv_sequence AS "DNA_sequence",
+                mixs.env_broad_scale,
+                mixs.env_local_scale,
+                mixs.env_medium) d)) AS "dynamicProperties"
 FROM :data_schema.sampling_event se
     JOIN :data_schema.occurrence oc ON oc.event_pid = se.pid
     JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid
     JOIN :data_schema.asv ON asv.pid = oc.asv_pid
     JOIN :data_schema.mixs ON mixs.pid = se.pid
     JOIN :data_schema.taxon_annotation ta ON asv.pid = ta.asv_pid
-WHERE ta.status::text = 'valid'
+    JOIN (SELECT sum(oc.organism_quantity) as size, se.pid
+        FROM sampling_event se
+            JOIN :data_schema.occurrence oc ON oc.event_pid = se.pid
+            JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid
+            JOIN :data_schema.asv ON asv.pid = oc.asv_pid
+            JOIN :data_schema.mixs ON mixs.pid = se.pid
+            JOIN :data_schema.taxon_annotation ta ON asv.pid = ta.asv_pid
+        WHERE ta.target_prediction = true AND ta.annotation_target::text = mixs.target_gene::text
+        GROUP BY se.pid) calc ON se.pid = calc.pid
+WHERE ds.in_bioatlas
+    AND ta.status::text = 'valid'
     AND ta.target_prediction = true
     AND ta.annotation_target::text = mixs.target_gene::text;
 
