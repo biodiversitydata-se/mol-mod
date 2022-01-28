@@ -75,7 +75,7 @@ You also need to build a BLAST database:
 ```
 ...and update the materialised view used for the About stats.
 ```
-  $ make status
+  $ make stats
 ```
 
 Note that the blast-worker uses the same Dockerfile for both development and production, but that we set
