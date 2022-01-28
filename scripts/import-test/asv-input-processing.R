@@ -199,10 +199,12 @@ event$sampleSizeValue <- sums[event$event_id_alias]
 ################################################################################
 
 wb <- createWorkbook()
-for (sheet in c('dataset', 'event', 'asv_table', 'mixs', 'emof', 'annotation'))
+for (sheet in c('dataset', 'event', 'asv_table', 'dna', 'emof', 'annotation'))
 {
   # Revert renaming in output (see above)
-  if (sheet == 'asv_table') sheet_name <- 'asv-table' else sheet_name <- sheet
+  if (sheet == 'asv_table') sheet_name <- 'asv-table'
+  else if (sheet == 'dna') sheet_name <- 'mixs'
+  else sheet_name <- sheet
 
   # Write df data to Excel workbook
   addWorksheet(wb, sheetName = sheet_name)

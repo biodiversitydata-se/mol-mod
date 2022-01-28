@@ -134,7 +134,7 @@ Analogously, to delete a single/all uploaded file(s) in a running container:
   $ make updel file=some-file.xlsx
 ```
 ### Data import
-Before uploaded files can be imported into the postgres database, you need to do some preprocessing, including adding *dataset* and *annotation* tabs/files, and possibly cleaning data. Use the standalone R script *./scripts/asv-input-processing.R*, which can be customised and stored together with each uploaded file. The (*.tar.gz*) output can then be imported into postgres, using a separate python script that executes *importer.py* inside the main container. Note that the importer accepts *.xlsx* files as well, but that the *.xlsx* output from our R script currently only works if you open and save it in Excel first. Check the *PARSER.add_argument* section in the importer for available arguments, which can be added to main function call like so:
+Before uploaded files can be imported into the postgres database, you need to do some preprocessing, including adding *dataset* and *annotation* tabs/files, and possibly cleaning data. Use the standalone R script *./scripts/import-test/asv-input-processing.R*, which can be customised and stored together with each uploaded file, for reproducibility. You can use the dummy data in *./scripts/import-test/input* to test the R script. The (*.tar.gz*) output can then be imported into postgres, using a separate python script that executes *importer.py* inside the main container. Note that the importer accepts *.xlsx* files as well, but that the *.xlsx* output from our R script currently only works if you open and save it in Excel first. Check the *PARSER.add_argument* section in the importer for available arguments, which can be added to main function call like so:
 ```
   $ ./scripts/import_excel.py /path/to/file.xlsx --dry-run -vv
 ```
@@ -143,6 +143,7 @@ Alternatively, use a Makefile rule, e.g.:
   $ make dry-import file=/path/to/file.tar.gz
   $ make import file=/path/to/file.xlsx
 ```
+
 Import includes some rudimentary validation (see e.g. regular expressions in *./molmod/importer/data-mapping.json*), but this should be improved in the future.
 
 After importing, and publishing a dataset in the Bioatlas, you need change the *in_bioatlas* property to *true*, for data to be included in BLAST, filter search and About stats:
@@ -189,16 +190,16 @@ Note that tests have not been updated and adapted to the docker-compose environm
 ### Licenses
 This code (biodiversitydata-se/mol-mod) is released under CC0 (see https://github.com/biodiversitydata-se/mol-mod/blob/master/LICENSE), but uses the following components with MIT licenses:
 
-[jQuery](https://github.com/jquery/jquery/blob/main/LICENSE.txt): 
+[jQuery](https://github.com/jquery/jquery/blob/main/LICENSE.txt):
 Copyright OpenJS Foundation and other contributors, https://openjsf.org/
 
-[DataTables](https://datatables.net/license/mit#MIT-license): 
+[DataTables](https://datatables.net/license/mit#MIT-license):
 Copyright (C) 2008-2022, SpryMedia Ltd.
 
-[select2](https://github.com/select2/select2/blob/develop/LICENSE.md): 
+[select2](https://github.com/select2/select2/blob/develop/LICENSE.md):
 Copyright (c) 2012-2017 Kevin Brown, Igor Vaynberg, and Select2 contributors
 
-The following permission statement apply to each of the above: 
+The following permission statement apply to each of the above:
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
