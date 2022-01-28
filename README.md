@@ -189,13 +189,13 @@ Note that tests have not been updated and adapted to the docker-compose environm
 ### Licenses
 This code (biodiversitydata-se/mol-mod) is released under CC0 (see https://github.com/biodiversitydata-se/mol-mod/blob/master/LICENSE), but uses the following components with MIT licenses:
 
-[jQuery](https://github.com/jquery/jquery/blob/main/LICENSE.txt)
+[jQuery](https://github.com/jquery/jquery/blob/main/LICENSE.txt): 
 Copyright OpenJS Foundation and other contributors, https://openjsf.org/
 
-[DataTables](https://datatables.net/license/mit#MIT-license)
+[DataTables](https://datatables.net/license/mit#MIT-license): 
 Copyright (C) 2008-2022, SpryMedia Ltd.
 
-[select2](https://github.com/select2/select2/blob/develop/LICENSE.md)
+[select2](https://github.com/select2/select2/blob/develop/LICENSE.md): 
 Copyright (c) 2012-2017 Kevin Brown, Igor Vaynberg, and Select2 contributors
 
 The following permission statement apply to each of the above:
