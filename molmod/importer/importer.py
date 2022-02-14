@@ -259,10 +259,9 @@ def insert_asvs(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
 def compare_annotations(data: pandas.DataFrame, db_cursor: DictCursor,
                         batch_size: int = 1000):
     """
-    Takes incoming annotation data on ASVs that already exist in db,
-    retrieves corresponding data from db, and checks for diffs in annotation
-    target and prediction between these. Groups issues according to:
-
+    Compares target gene and prediction of incoming ('new') annotations to
+    existing, valid ('db') annotations for supplied ASVs (should only include
+    ASVs that already exist in db), with the following outcomes and responses:
 
     --	target	pred	pred	pred	pred
 
@@ -274,8 +273,14 @@ def compare_annotations(data: pandas.DataFrame, db_cursor: DictCursor,
     new	geneB	TRUE	TRUE	FALSE	FALSE
     --	----	Check	Update	ignore	Ignore
 
-    Cancels import if any issues needs to be checked and resolved,
+    E.g., for top left case: an ASV in a new dataset comes in with an
+    annotation for geneA, is also predicted to be a TRUE geneA sequence, and
+    this corresponds with what is already noted in the database for that ASV,
+    so we do nothing.
+
+    Cancels import if any issues need to be checked and resolved,
     and returns pids for annotations that can be updated directly.
+
     NOTE: This 'validation' is applied during insertion (rather than before) so
     that we can run it on pre-existing ASVs only. We only compare targets, i.e.
     not taxon annotations as such.

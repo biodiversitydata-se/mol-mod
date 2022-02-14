@@ -186,8 +186,39 @@ This can then be used as input to the [ampliseq pipeline](https://nf-co.re/ampli
 ```
 Any previous annotations of these ASVs will be given *status='old'*, whereas the new rows will have *status='valid'*.
 
-### Target prediction checks
-For at least some target genes, it is possible to predict whether an ASV actually derives from a specified target, using some additional tool (e.g. the BAsic Rapid Ribosomal RNA Predictor; *Barrnap*), likely in combination with the annotation output itself. For example, we may decide that only ASVs that are annotated at least at kingdom level OR get positive Barrnap prediction should be considered as true 16S rRNA sequences. To enable later re-evaluation, however, we import all ASVs, and store our combined prediction (here based on kingdom + Barrnap) for each of these in the annotation table (see fields *annotation_target*, *target_prediction* and *target_criteria*). An ASV is then only represented in filter options, blast db, search results and total read counts, if its  *target_gene* equals the *annotation_target* of the current *valid* taxon annotation of that ASV, and if *target_prediction* is set to *True* for that same annotation. To handle possible conflicts of target predictions between different datasets (although these may be rare), we compare incoming annotations with corresponding database records, during import. See */molmod/importer/importer.py* and function *compare_annotations* for details.
+### Target prediction filtering
+In version 2.0.0, we make it possible to import all denoised sequences from a dataset, and then dynamically filter out any ASVs that we do not (currently) predict to derive from the targeted gene, thereby excluding these from BLAST and filter searches, result displays and IPT views. ASVs are thus only imported once, but their status can change, e.g. at taxonomic re-annotation. Criteria used for ASV exclusion may vary between genes / groups of organisms, but could e.g. combine the output from the *BAsic Rapid Ribosomal RNA Predictor (barrnap)* with the taxonomic annotation itself. For example, we may decide that only ASVs that are annotated at least at kingdom level OR get positive barrnap prediction should be considered as TRUE 16S rRNA sequences.
+
+We implement this as follows:
+
+Before import of a new dataset, we add the following annotation data to each ASV:
+- *annotation_target* = target gene of reference database used for taxonomic annotation (eg. *16S rRNA*). At this stage, *annotation_target* will equal the *target_gene* of the dataset.
+- *target_prediction* = whether the ASV is predicted to derive from the annotation_target (*TRUE/FALSE*).
+- *target_criteria* = criteria used for setting *target_prediction* to *TRUE* (eg. *'Assigned kingdom OR Barrnap-positive'*, or *'None: defaults to TRUE'*).
+
+During import, we compare annotation targets and predictions of ASVs in new datasets to annotations that already exist in db, with the following possible outcomes and responses:
+
+```
+--	target	pred	pred	pred	pred
+db	geneA	TRUE	FALSE	TRUE	FALSE
+new	geneA	TRUE	TRUE	FALSE	FALSE
+--	----	Ignore	Check	Check	Ignore
+
+db	geneA	TRUE	FALSE	TRUE	FALSE
+new	geneB	TRUE	TRUE	FALSE	FALSE
+--	----	Check	Update	ignore	Ignore
+```
+
+For example, in the top left case, an ASV in a new dataset comes in with an annotation for geneA, is also predicted to be a TRUE geneA sequence, and this corresponds with what is already noted in the database for that ASV, so we do nothing (the existing annotation remains). If, instead, a new dataset has a TRUE geneB prediction for an ASV that has previously been considered a FALSE geneA, this annotation can be automatically updated. Other conflicts likely require manual inspection and will cancel import with a notice of this. See */molmod/importer/importer.py* and function *compare_annotations* for details.
+
+After import, we filter all database views with an extended WHERE clause:
+```
+WHERE ta.status::text = 'valid'
+    # Criteria added for target prediction:
+    AND ta.target_prediction = true
+    AND ta.annotation_target::text = mixs.target_gene::text;
+```
+See */db/db-api-schema.sql*.
 
 ### Tests
 Note that tests have not been updated and adapted to the docker-compose environment.
