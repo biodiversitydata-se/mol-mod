@@ -54,9 +54,10 @@ secrets:
 backup:
 	./scripts/database-backup.sh data
 
-# Restore latest db dump in db container
+# Restore from latest (or specified) db dump
+# Example: make restore (OR make restore rfile=/some/path/to/dump.sql.tar)
 restore:
-	./scripts/database-backup.sh restore
+	./scripts/database-backup.sh restore $(rfile)
 
 #
 # BLAST & FASTA
