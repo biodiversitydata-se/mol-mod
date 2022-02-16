@@ -118,8 +118,12 @@ if (exists('emof-simple')){
   emof_simple <- `emof-simple`
   rm(`emof-simple`)
 }
-mixs <- dna
-
+# If an outdated version of the import template was used,
+# the 'mixs' tab also needs to be renamed
+if (exists('mixs')){
+  dna <- `mixs`
+  rm(`mixs`)
+}
 
 ################################################################################
 # 5. Add dataset metadata
@@ -171,7 +175,7 @@ writeFasta(fasta_input, fasta_out)
 annotation = read.delim(file = annotation_file, sep = '\t', header = TRUE,
                         dec = '.', comment.char = "", na.strings="")
 # Assume target_gene is same for all ASVs here
-annotation$annotation_target <- mixs$target_gene[1]
+annotation$annotation_target <- dna$target_gene[1]
 
 ################################################################################
 # 8. Flag non-target ASV:s
