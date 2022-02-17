@@ -16,7 +16,7 @@
 # 1. Get required packages & start fresh
 ################################################################################
 
-# install.packages("openxlsx")
+#install.packages("openxlsx")
 library(openxlsx)
 # Clean up environment
 rm(list = ls())
@@ -233,3 +233,4 @@ tfiles <- paste0('output/', list.files('output', pattern="*.csv"))
 tar(tar_out, files = tfiles, compression = "gzip", tar='tar')
 # Delete csv:s
 unlink(tfiles)
+
