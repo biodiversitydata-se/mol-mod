@@ -180,11 +180,11 @@ During the final step of data import, we add a record in table taxon_annotation 
 ```
   $ make fasta ref=UNITE:8.0
 ```
-This can then be used as input to the [ampliseq pipeline](https://nf-co.re/ampliseq), and the output (minus the *asv_id_alias* column, and saved as *.xlsx* or *.csv*, for now. See  *./scripts/update-annotation.sh* for info on structure of input) can then be fed into the database like so:
+This can then be used as input to the [ampliseq pipeline](https://nf-co.re/ampliseq), and the output (minus the *asv_id_alias* column, and saved as *.xlsx* or *.csv*, for now) can then be fed into the database like so:
 ```
   $ make reannot file=/path/to/annotation.xlsx
 ```
-Any previous annotations of these ASVs will be given *status='old'*, whereas the new rows will have *status='valid'*. Note that you have to update stats to make any changes visible in the *About* page table:
+You can use the dummy data file *./scripts/processing/input/reannotation.xlsx* as a template, or to just test the reannotation script. Any previous annotations of these ASVs will be given *status='old'*, whereas the new rows will have *status='valid'*. Note that you have to update stats to make any changes visible in the *About* page table:
 ```
   $ make stats
 ```
