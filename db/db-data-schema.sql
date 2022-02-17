@@ -110,16 +110,16 @@ CREATE TABLE IF NOT EXISTS public.taxon_annotation (
     infraspecific_epithet character varying NOT NULL DEFAULT '',
     otu character varying NOT NULL DEFAULT '',
     date_identified date NOT NULL,
-    identification_references character varying,
+    identification_references character varying NOT NULL,
     reference_db character varying NOT NULL,
     annotation_algorithm character varying NOT NULL,
-    annotation_confidence numeric,
+    annotation_confidence numeric NOT NULL,
     taxon_remarks character varying,
-    scientific_name character varying,
-    taxon_rank character varying,
-    annotation_target character varying,
-    target_prediction boolean,
-    target_criteria character varying
+    scientific_name character varying NOT NULL,
+    taxon_rank character varying NOT NULL,
+    annotation_target character varying NOT NULL,
+    target_prediction boolean NOT NULL,
+    target_criteria character varying NOT NULL
 
 );
 
