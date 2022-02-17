@@ -55,9 +55,9 @@ backup:
 	./scripts/database-backup.sh data
 
 # Restore from latest (or specified) db dump
-# Example: make restore (OR make restore rfile=some-db-dump.sql.tar)
+# Example: make restore (OR make restore file=some-db-dump.sql.tar)
 restore:
-	./scripts/database-backup.sh restore $(rfile)
+	./scripts/database-backup.sh restore $(file)
 
 #
 # BLAST & FASTA
