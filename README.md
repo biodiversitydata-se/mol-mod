@@ -180,11 +180,15 @@ During the final step of data import, we add a record in table taxon_annotation 
 ```
   $ make fasta ref=UNITE:8.0
 ```
-This can then be used as input to the [ampliseq pipeline](https://nf-co.re/ampliseq), and the output (minus the *asv_id_alias* column, and saved as *.xlsx* or *.csv*, for now) can then be fed into the database like so:
+This can then be used as input to the [ampliseq pipeline](https://nf-co.re/ampliseq), and the output (minus the *asv_id_alias* column, and saved as *.xlsx* or *.csv*, for now. See  *./scripts/update-annotation.sh* for info on structure of input) can then be fed into the database like so:
 ```
   $ make reannot file=/path/to/annotation.xlsx
 ```
-Any previous annotations of these ASVs will be given *status='old'*, whereas the new rows will have *status='valid'*.
+Any previous annotations of these ASVs will be given *status='old'*, whereas the new rows will have *status='valid'*. Note that you have to update stats to make any changes visible in the *About* page table:
+```
+  $ make stats
+```
+
 
 ### Target prediction filtering
 In version 2.0.0, we make it possible to import all denoised sequences from a dataset, and then dynamically filter out any ASVs that we do not (currently) predict to derive from the targeted gene, thereby excluding these from BLAST and filter searches, result displays and IPT views. ASVs are thus only imported once, but their status can change, e.g. at taxonomic re-annotation. Criteria used for ASV exclusion may vary between genes / groups of organisms, but could e.g. combine the output from the *BAsic Rapid Ribosomal RNA Predictor (barrnap)* with the taxonomic annotation itself. For example, we may decide that only ASVs that are annotated at least at kingdom level OR get positive barrnap prediction should be considered as TRUE 16S rRNA sequences.

@@ -8,23 +8,27 @@
 # The columns names in the file are expected to be the following (order
 # is *not* important):
 #
-#	annotation_algorithm
-#	annotation_confidence
-#	class
-#	date_identified
-#	family
-#	genus
-#	identification_references
-#	infraspecificEpithet
-#	kingdom
-#	order
-#	otu
-#	phylum
-#	reference_db
-#	scientificName
-#	specificEpithet
-#	taxonRank
-#	taxon_remarks
+# asv_sequence
+# kingdom
+# phylum
+# class
+# order
+# family
+# genus
+# specificEpithet
+# infraspecificEpithet
+# otu
+# scientificName
+# taxonRank
+# date_identified
+# reference_db
+# annotation_algorithm
+# identification_references
+# annotation_confidence
+# taxon_remarks
+# annotation_target
+# target_prediction
+# target_criteria
 #
 # We allow for a "domain" column as well, as ampliseq may include it,
 # (but until GBIF also does, we actually ignore it)
@@ -84,6 +88,9 @@ colname_map=(
 	[identification_references]=identification_references
 	[annotation_confidence]=annotation_confidence
 	[taxon_remarks]=taxon_remarks
+    [annotation_target]=annotation_target
+    [target_prediction]=target_prediction
+    [target_criteria]=target_criteria
 )
 
 # Make readlink use GNU readlink on macOS.
