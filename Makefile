@@ -54,9 +54,10 @@ secrets:
 backup:
 	./scripts/database-backup.sh data
 
-# Restore latest db dump in db container
+# Restore from latest (or specified) db dump
+# Example: make restore (OR make restore file=some-db-dump.sql.tar)
 restore:
-	./scripts/database-backup.sh restore
+	./scripts/database-backup.sh restore $(file)
 
 #
 # BLAST & FASTA
@@ -99,7 +100,7 @@ delete:
 # Reannotate ASVs
 reannot:
 	# Example: make reannot file=/some/path/to/file.xlsx
-	./scripts/update-annotation.sh $(file)
+	./scripts/update-annotation.sh $(file) && make stats
 
 #
 # UPLOADS

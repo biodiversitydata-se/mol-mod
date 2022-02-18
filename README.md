@@ -136,7 +136,7 @@ Analogously, to delete a single/all uploaded file(s) in a running container:
   $ make updel file=some-file.xlsx
 ```
 ### Data import
-Before uploaded files can be imported into the postgres database, you need to do some preprocessing, including adding *dataset* and *annotation* tabs/files, and possibly cleaning data. Use the standalone R script *./scripts/import-test/asv-input-processing.R*, which can be customised and stored together with each uploaded file, for reproducibility. You can use the dummy data in *./scripts/import-test/input* to test the R script. The (*.tar.gz*) output can then be imported into postgres, using a separate python script that executes *importer.py* inside the main container. Note that the importer accepts *.xlsx* files as well, but that the *.xlsx* output from our R script currently only works if you open and save it in Excel first. Check the *PARSER.add_argument* section in the importer for available arguments, which can be added to main function call like so:
+Before uploaded files can be imported into the postgres database, you need to do some preprocessing, including adding *dataset* and *annotation* tabs/files, and possibly cleaning data. Use the standalone R script *./scripts/processing/asv-input-processing.R*, which can be customised and stored together with each uploaded file, for reproducibility. You can use the dummy data in *./scripts/processing/input* to test the R script. The (*.tar.gz*) output can then be imported into postgres, using a separate python script that executes *importer.py* inside the main container. Note that the importer accepts *.xlsx* files as well, but that the *.xlsx* output from our R script currently only works if you open and save it in Excel first. Check the *PARSER.add_argument* section in the importer for available arguments, which can be added to main function call like so:
 ```
   $ ./scripts/import_excel.py /path/to/file.xlsx --dry-run -vv
 ```
@@ -175,16 +175,50 @@ or:
 ```
 Both commands will bring up a menu with instructions for how to proceed with deletions. Remember to update status accordingly (see above).
 
-### Taxonomic annotation
-During the final step of data import, we add a record in table taxon_annotation for every new(!) ASV in the dataset. This is the standard SBDI annotation that we also plan to update as reference databases and/or annotation algorithms develop. To update the annotation of all ASV:s currently annotated against a specific reference database, you should first export a fasta file with those ASVs, using e.g.:
+### Taxonomic (re)annotation
+During the final step of data import, we automatically add a record in table taxon_annotation for every new(!) ASV in the dataset. This is the standard SBDI annotation that we also plan to update as reference databases and/or annotation algorithms develop. To *update* the annotation of all ASV:s currently annotated against a specific reference database, you should first export a fasta file with those ASVs, using e.g.:
 ```
   $ make fasta ref=UNITE:8.0
 ```
-This can then be used as input to the [ampliseq pipeline](https://nf-co.re/ampliseq), and the output (minus the *asv_id_alias* column, and saved as *.xlsx* or *.csv*, for now) can then be fed into the database like so:
+This can then be used as input to the [ampliseq pipeline](https://nf-co.re/ampliseq), and the output (saved as *.xlsx* or *.csv*) can then be fed into the database like so:
 ```
-  $ make reannot file=/path/to/annotation.xlsx
+  $ make reannot file=/path/to/reannotation.xlsx
 ```
-Any previous annotations of these ASVs will be given *status='old'*, whereas the new rows will have *status='valid'*.
+At the moment (220218), Ampliseq output is not yet adapted to include target-prediction fields, but you can use *reannotation.xlsx* for reannotation of the dummy data set in *./scripts/processing/input*, or as a template for editing your own file. Any previous annotations of ASVs will be given *status='old'*, whereas the new rows will have *status='valid'*.
+
+### Target prediction filtering
+In version 2.0.0, we make it possible to import all denoised sequences from a dataset, and then dynamically filter out any ASVs that we do not (currently) predict to derive from the targeted gene, thereby excluding these from BLAST and filter searches, result displays and IPT views. ASVs are thus only imported once, but their status can change, e.g. at taxonomic re-annotation. Criteria used for ASV exclusion may vary between genes / groups of organisms, but could e.g. combine the output from the *BAsic Rapid Ribosomal RNA Predictor (barrnap)* with the taxonomic annotation itself. For example, we may decide that only ASVs that are annotated at least at kingdom level OR get positive barrnap prediction should be considered as TRUE 16S rRNA sequences.
+
+We implement this as follows:
+
+Before import of a new dataset, we add the following annotation data to each ASV:
+- *annotation_target* = target gene of reference database used for taxonomic annotation (eg. *16S rRNA*). At this stage, *annotation_target* will equal the *target_gene* of the dataset.
+- *target_prediction* = whether the ASV is predicted to derive from the annotation_target (*TRUE/FALSE*).
+- *target_criteria* = criteria used for setting *target_prediction* to *TRUE* (eg. *'Assigned kingdom OR Barrnap-positive'*, or *'None: defaults to TRUE'*).
+
+During import, we compare annotation targets and predictions of ASVs in new datasets to annotations that already exist in db, with the following possible outcomes and responses:
+
+```
+--	target	pred	pred	pred	pred
+db	geneA	TRUE	FALSE	TRUE	FALSE
+new	geneA	TRUE	TRUE	FALSE	FALSE
+--	----	Ignore	Check	Check	Ignore
+
+db	geneA	TRUE	FALSE	TRUE	FALSE
+new	geneB	TRUE	TRUE	FALSE	FALSE
+--	----	Check	Update	ignore	Ignore
+```
+
+For example, in the top left case, an ASV in a new dataset comes in with an annotation for geneA, is also predicted to be a TRUE geneA sequence, and this corresponds with what is already noted in the database for that ASV, so we do nothing (the existing annotation remains). If, instead, a new dataset has a TRUE geneB prediction for an ASV that has previously been considered a FALSE geneA, this annotation can be automatically updated. Other conflicts likely require manual inspection and will cancel import with a notice of this. See */molmod/importer/importer.py* and function *compare_annotations* for details.
+
+After import, we filter all database views with an extended WHERE clause:
+```
+WHERE ta.status::text = 'valid'
+    # Criteria added for target prediction:
+    AND ta.target_prediction = true
+    AND ta.annotation_target::text = mixs.target_gene::text;
+```
+See */db/db-api-schema.sql*.
 
 ### Tests
 Note that tests have not been updated and adapted to the docker-compose environment.

@@ -17,6 +17,7 @@ import tempfile
 from collections import OrderedDict
 from datetime import date
 from io import BytesIO
+from pprint import pformat
 from typing import List, Mapping, Optional
 
 import pandas
@@ -255,6 +256,125 @@ def insert_asvs(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
     return data.assign(pid=pids), old_max_pid or 0
 
 
+def compare_annotations(data: pandas.DataFrame, db_cursor: DictCursor,
+                        batch_size: int = 1000):
+    """
+    Compares target gene and prediction of incoming ('new') annotations to
+    existing, valid ('db') annotations for supplied ASVs (should only include
+    ASVs that already exist in db), with the following outcomes and responses:
+
+    --	target	pred	pred	pred	pred
+
+    db	geneA	TRUE	FALSE	TRUE	FALSE
+    new	geneA	TRUE	TRUE	FALSE	FALSE
+    --	----	Ignore	Check	Check	Ignore
+
+    db	geneA	TRUE	FALSE	TRUE	FALSE
+    new	geneB	TRUE	TRUE	FALSE	FALSE
+    --	----	Check	Update	ignore	Ignore
+
+    E.g., for top left case: an ASV in a new dataset comes in with an
+    annotation for geneA, is also predicted to be a TRUE geneA sequence, and
+    this corresponds with what is already noted in the database for that ASV,
+    so we do nothing.
+
+    Cancels import if any issues need to be checked and resolved,
+    and returns pids for annotations that can be updated directly.
+
+    NOTE: This 'validation' is applied during insertion (rather than before) so
+    that we can run it on pre-existing ASVs only. We only compare targets, i.e.
+    not taxon annotations as such.
+    """
+
+    pid_str = ",".join([str(int) for int in data['asv_pid']])
+    # Get target prediction info for matching asvs in db
+    query = f'''SELECT asv_id, asv_pid, annotation_target, target_prediction,
+               target_criteria
+               FROM taxon_annotation ta, asv
+               WHERE ta.asv_pid = asv.pid AND asv_pid in ({pid_str})
+               AND status = 'valid'
+            '''
+    total = len(data.values)
+    start = 0
+    end = min(total, batch_size)
+    db_annotations = []
+
+    while start < total:
+
+        try:
+            db_cursor.execute(query)
+            db_annotations += [dict(r) for r in db_cursor.fetchall()]
+        except psycopg2.Error as err:
+            logging.error(err)
+            logging.error("No data were imported.")
+            sys.exit(1)
+
+        start = end
+        end = min(total, end + batch_size)
+
+        issues = []
+        updates = []
+
+        # For every matching annotation record in db
+        for d in db_annotations:
+
+            # Get corresponding new record
+            nfull = data[data['asv_pid'] == d['asv_pid']].to_dict('records')[0]
+            # Only keep common fields, so that we can identify data diffs below
+            asv_id = d['asv_id']
+            del d['asv_id']
+            n = dict((k, nfull[k]) for k in d.keys())
+
+            # If annotations differ between incoming data and db
+            if (n != d):
+                issue = {'asv_id': asv_id, 'new': n, 'db': d}
+                # If same target but different predictions
+                # e.g. if ampliseq setup was unintentionally changed
+                if (((d['annotation_target'] == n['annotation_target']) &
+                     (d['target_prediction'] != n['target_prediction'])) or
+                    # ...or if different targets, but same predictions
+                    # i.e. different target prediction methods disagree
+                    ((d['annotation_target'] != n['annotation_target']) &
+                     (d['target_prediction'] is True) &
+                     (n['target_prediction'] is True))):
+                    # Save for check
+                    issues.append(issue)
+                # If new True target comes in for ASV with False target
+                elif ((d['annotation_target'] != n['annotation_target']) &
+                      (d['target_prediction'] is False) &
+                      (n['target_prediction'] is True)):
+                    # Save for update
+                    updates.append(d['asv_pid'])
+        # Quit if any issues need resolution
+        if len(issues):
+            logging.error('Annotation issues that need to be resolved:\n %s',
+                          pformat(issues))
+            logging.error("No data were imported.")
+            sys.exit(1)
+
+        # Return asv_pid:s for any updates to be made
+        return updates
+
+
+def invalidate_annotations(pids: list, db_cursor: DictCursor):
+    """
+    Takes a list of asv_pid:s, and removes 'valid' status from current
+    taxon annotations of these in db.
+    """
+
+    pid_str = ",".join([str(int) for int in pids])
+    query = f'''UPDATE taxon_annotation
+                SET status = 'old'
+                WHERE asv_pid IN ({pid_str})
+            '''
+    try:
+        db_cursor.execute(query)
+    except psycopg2.Error as err:
+        logging.error(err)
+        logging.error("No data were imported.")
+        sys.exit(1)
+
+
 def read_data_file(data_file: str, sheets: List[str]):
     """
     Opens and reads the given `sheets` from `data_file`. `data_file` must be a
@@ -270,6 +390,10 @@ def read_data_file(data_file: str, sheets: List[str]):
             pandas.read_excel(data_file)
         except (ValueError, KeyError):
             logging.error("Input neither recognized as tar nor as Excel.")
+            logging.error('Was your *.tar.gz file not recognized as a tarfile?'
+                          ' This sometimes happens when small test archives '
+                          'get negative compression ratios. Try adding dummy '
+                          'rows to your annotation file and rerun import.')
             sys.exit(1)
 
     data = {}
@@ -489,15 +613,23 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
 
     # Join with asv to add 'asv_pid'
     asvs = data['asv'].set_index('asv_id_alias')
-
-    # Use inner join so that annotation is only added for new asvs
     data['annotation'] = data['annotation'] \
         .join(asvs['pid'], on='asv_id_alias', how='inner')
     data['annotation'].rename(columns={'pid': 'asv_pid'}, inplace=True)
 
-    annotation = data['annotation'][data['annotation'].asv_pid > old_max_asv]
-    annotation.reset_index(inplace=True)
+    # Check annotations for existing asvs
+    matches = data['annotation'][data['annotation'].asv_pid <= old_max_asv]
+    update_pids = compare_annotations(matches, cursor, batch_size)
+    if (update_pids):
+        invalidate_annotations(update_pids, cursor)
 
+    # Add new and updated annotations
+    annotation = data['annotation'][data['annotation'].asv_pid > old_max_asv]
+    if (update_pids):
+        updates = \
+            data['annotation'][data['annotation'].asv_pid.isin(update_pids)]
+        annotation = annotation.append(updates)
+    annotation.reset_index(inplace=True)
     logging.info(" * annotations")
     insert_common(annotation, mapping['annotation'], cursor, batch_size)
 
