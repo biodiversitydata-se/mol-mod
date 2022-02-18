@@ -175,20 +175,16 @@ or:
 ```
 Both commands will bring up a menu with instructions for how to proceed with deletions. Remember to update status accordingly (see above).
 
-### Taxonomic annotation
-During the final step of data import, we add a record in table taxon_annotation for every new(!) ASV in the dataset. This is the standard SBDI annotation that we also plan to update as reference databases and/or annotation algorithms develop. To update the annotation of all ASV:s currently annotated against a specific reference database, you should first export a fasta file with those ASVs, using e.g.:
+### Taxonomic (re)annotation
+During the final step of data import, we automatically add a record in table taxon_annotation for every new(!) ASV in the dataset. This is the standard SBDI annotation that we also plan to update as reference databases and/or annotation algorithms develop. To *update* the annotation of all ASV:s currently annotated against a specific reference database, you should first export a fasta file with those ASVs, using e.g.:
 ```
   $ make fasta ref=UNITE:8.0
 ```
-This can then be used as input to the [ampliseq pipeline](https://nf-co.re/ampliseq), and the output (minus the *asv_id_alias* column, and saved as *.xlsx* or *.csv*, for now) can then be fed into the database like so:
+This can then be used as input to the [ampliseq pipeline](https://nf-co.re/ampliseq), and the output (saved as *.xlsx* or *.csv*) can then be fed into the database like so:
 ```
-  $ make reannot file=/path/to/annotation.xlsx
+  $ make reannot file=/path/to/reannotation.xlsx
 ```
-You can use the dummy data file *./scripts/processing/input/reannotation.xlsx* as a template, or to just test the reannotation script. Any previous annotations of these ASVs will be given *status='old'*, whereas the new rows will have *status='valid'*. Note that you have to update stats to make any changes visible in the *About* page table:
-```
-  $ make stats
-```
-
+At the moment (220218), Ampliseq output is not yet adapted to include target-prediction fields, but you can use *reannotation.xlsx* for reannotation of the dummy data set in *./scripts/processing/input*, or as a template for editing your own file. Any previous annotations of ASVs will be given *status='old'*, whereas the new rows will have *status='valid'*.
 
 ### Target prediction filtering
 In version 2.0.0, we make it possible to import all denoised sequences from a dataset, and then dynamically filter out any ASVs that we do not (currently) predict to derive from the targeted gene, thereby excluding these from BLAST and filter searches, result displays and IPT views. ASVs are thus only imported once, but their status can change, e.g. at taxonomic re-annotation. Criteria used for ASV exclusion may vary between genes / groups of organisms, but could e.g. combine the output from the *BAsic Rapid Ribosomal RNA Predictor (barrnap)* with the taxonomic annotation itself. For example, we may decide that only ASVs that are annotated at least at kingdom level OR get positive barrnap prediction should be considered as TRUE 16S rRNA sequences.
