@@ -102,7 +102,6 @@ def insert_random_sampling_event(dataset):
     event_id = f"{dataset}-{uuid.uuid1().hex}"
     event_date = datetime.today().strftime('%Y-%m-%d')
     sampling_protocol = 'test'
-    sample_size_value = random.randint(10, 1000)
     location_id = 'test'
     decimal_latitude = random.random() * 180 - 90
     decimal_longitude = random.random() * 360 - 180
@@ -110,10 +109,10 @@ def insert_random_sampling_event(dataset):
     execute_on_db(f"""INSERT INTO sampling_event(
                       event_id, dataset_id,
                       event_date, sampling_protocol,
-                      sample_size_value, location_id,
+                      location_id,
                       decimal_latitude, decimal_longitude)
                       VALUES('{event_id}', '{dataset}', '{event_date}',
-                             '{sampling_protocol}', '{sample_size_value}',
+                             '{sampling_protocol}',
                              '{location_id}',
                              '{decimal_latitude}', '{decimal_longitude}');
                    """)

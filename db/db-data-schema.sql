@@ -31,7 +31,6 @@ CREATE TABLE IF NOT EXISTS public.sampling_event (
     dataset_pid integer NOT NULL REFERENCES public.dataset(pid) ON DELETE CASCADE,
     event_date character varying NOT NULL,
     sampling_protocol character varying NOT NULL,
-    sample_size_value integer NOT NULL,
     location_id character varying,
     decimal_latitude numeric NOT NULL,
     decimal_longitude numeric NOT NULL,
@@ -111,13 +110,17 @@ CREATE TABLE IF NOT EXISTS public.taxon_annotation (
     infraspecific_epithet character varying NOT NULL DEFAULT '',
     otu character varying NOT NULL DEFAULT '',
     date_identified date NOT NULL,
-    identification_references character varying,
+    identification_references character varying NOT NULL,
     reference_db character varying NOT NULL,
     annotation_algorithm character varying NOT NULL,
-    annotation_confidence numeric,
+    annotation_confidence numeric NOT NULL,
     taxon_remarks character varying,
-    scientific_name character varying,
-    taxon_rank character varying
+    scientific_name character varying NOT NULL,
+    taxon_rank character varying NOT NULL,
+    annotation_target character varying NOT NULL,
+    target_prediction boolean NOT NULL,
+    target_criteria character varying NOT NULL
+
 );
 
 CREATE INDEX IF NOT EXISTS taxon_asv ON public.taxon_annotation(asv_pid);

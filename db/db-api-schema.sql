@@ -24,10 +24,15 @@ SELECT ds.pid AS dataset_pid,
     emof.measurement_determined_by AS "measurementDeterminedBy",
     emof.measurement_method AS "measurementMethod",
     emof.measurement_remarks AS "measurementRemarks"
-   FROM :data_schema.emof
-   JOIN :data_schema.sampling_event se ON emof.event_pid = se.pid
-   JOIN :data_schema.occurrence oc ON oc.event_pid = se.pid
-   JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid;
+FROM :data_schema.emof
+    JOIN :data_schema.sampling_event se ON emof.event_pid = se.pid
+    JOIN :data_schema.occurrence oc ON oc.event_pid = se.pid
+    JOIN :data_schema.taxon_annotation ta ON ta.asv_pid = oc.asv_pid
+    JOIN :data_schema.mixs ON mixs.pid = oc.event_pid
+    JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid
+WHERE ta.status::text = 'valid'
+    AND ta.target_prediction = true
+    AND ta.annotation_target::text = mixs.target_gene::text;
 
 CREATE OR REPLACE VIEW api.dwc_oc_mixs AS
 SELECT ds.pid AS dataset_pid,
@@ -49,11 +54,15 @@ SELECT ds.pid AS dataset_pid,
     mixs.env_broad_scale,
     mixs.env_local_scale,
     mixs.env_medium
-   FROM :data_schema.mixs
-   JOIN :data_schema.sampling_event se ON mixs.pid = se.pid
-   JOIN :data_schema.occurrence oc ON oc.event_pid = se.pid
-   JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid
-   JOIN :data_schema.asv asv ON asv.pid = oc.asv_pid;
+FROM :data_schema.mixs
+    JOIN :data_schema.sampling_event se ON mixs.pid = se.pid
+    JOIN :data_schema.occurrence oc ON oc.event_pid = se.pid
+    JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid
+    JOIN :data_schema.asv ON asv.pid = oc.asv_pid
+    JOIN :data_schema.taxon_annotation ta ON ta.asv_pid = oc.asv_pid
+WHERE ta.status::text = 'valid'
+    AND ta.target_prediction = true
+    AND ta.annotation_target::text = mixs.target_gene::text;
 
 CREATE OR REPLACE VIEW api.dwc_oc_occurrence AS
 SELECT ds.pid AS dataset_pid,
@@ -77,12 +86,12 @@ SELECT ds.pid AS dataset_pid,
     oc.associated_sequences AS "associatedSequences",
     se.recorded_by AS "recordedBy",
     se.material_sample_id AS "materialSampleID",
-    se.sample_size_value AS "sampleSizeValue",
+    calc.size AS "sampleSizeValue",
     'DNA sequence reads'::text AS "sampleSizeUnit",
     se.sampling_protocol AS "samplingProtocol",
     'DNA sequence reads'::text AS "organismQuantityType",
     oc.organism_quantity AS "organismQuantity",
-    a.asv_id AS "taxonID",
+    asv.asv_id AS "taxonID",
     ta.scientific_name AS "scientificName",
     ta.taxon_rank AS "taxonRank",
     ta.kingdom,
@@ -100,35 +109,47 @@ SELECT ds.pid AS dataset_pid,
     (((ta.annotation_algorithm::text || ' annotation confidence (at lowest specified taxon): '::text) || ta.annotation_confidence) || ', against reference database: '::text) || ta.reference_db::text AS "identificationRemarks",
     'Identified by data provider as: '::text || oc.previous_identifications::text AS "previousIdentifications",
     row_to_json(( SELECT d.*::record AS d
-        FROM ( SELECT se.sample_size_value AS "sampleSizeValue",
-                      oc.organism_quantity AS "organismQuantity",
-                      m.sop,
-                      m.seq_meth,
-                      m.pcr_primer_name_forward,
-                      m.pcr_primer_forward,
-                      m.pcr_primer_name_reverse,
-                      m.pcr_primer_reverse,
-                      m.target_gene,
-                      m.target_subfragment,
-                      m.denoising_appr,
-                      m.lib_layout,
-                      a.asv_sequence AS "DNA_sequence",
-                      m.env_broad_scale,
-                      m.env_local_scale,
-                      m.env_medium) d)) AS "dynamicProperties"
-   FROM :data_schema.sampling_event se
-   JOIN :data_schema.occurrence oc ON oc.event_pid = se.pid
-   JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid
-   JOIN :data_schema.asv a ON a.pid = oc.asv_pid
-   JOIN :data_schema.mixs m ON m.pid = se.pid
-   JOIN :data_schema.taxon_annotation ta ON a.pid = ta.asv_pid
-   AND ta.status::text = 'valid';
+           FROM ( SELECT calc.size AS "sampleSizeValue",
+                oc.organism_quantity AS "organismQuantity",
+                mixs.sop,
+                mixs.seq_meth,
+                mixs.pcr_primer_name_forward,
+                mixs.pcr_primer_forward,
+                mixs.pcr_primer_name_reverse,
+                mixs.pcr_primer_reverse,
+                mixs.target_gene,
+                mixs.target_subfragment,
+                mixs.denoising_appr,
+                mixs.lib_layout,
+                asv.asv_sequence AS "DNA_sequence",
+                mixs.env_broad_scale,
+                mixs.env_local_scale,
+                mixs.env_medium) d)) AS "dynamicProperties"
+FROM :data_schema.sampling_event se
+    JOIN :data_schema.occurrence oc ON oc.event_pid = se.pid
+    JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid
+    JOIN :data_schema.asv ON asv.pid = oc.asv_pid
+    JOIN :data_schema.mixs ON mixs.pid = se.pid
+    JOIN :data_schema.taxon_annotation ta ON asv.pid = ta.asv_pid
+    JOIN (SELECT sum(oc.organism_quantity) as size, se.pid
+        FROM sampling_event se
+            JOIN :data_schema.occurrence oc ON oc.event_pid = se.pid
+            JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid
+            JOIN :data_schema.asv ON asv.pid = oc.asv_pid
+            JOIN :data_schema.mixs ON mixs.pid = se.pid
+            JOIN :data_schema.taxon_annotation ta ON asv.pid = ta.asv_pid
+        WHERE ta.target_prediction = true AND ta.annotation_target::text = mixs.target_gene::text
+        GROUP BY se.pid) calc ON se.pid = calc.pid
+WHERE ds.in_bioatlas
+    AND ta.status::text = 'valid'
+    AND ta.target_prediction = true
+    AND ta.annotation_target::text = mixs.target_gene::text;
 
 CREATE VIEW api.app_filter_mixs_tax AS
- SELECT m.target_gene AS gene,
-    m.target_subfragment AS sub,
-    ((((m.pcr_primer_name_forward)::text || ': '::text) || (m.pcr_primer_forward)::text))::character varying AS fw_prim,
-    ((((m.pcr_primer_name_reverse)::text || ': '::text) || (m.pcr_primer_reverse)::text))::character varying AS rv_prim,
+SELECT mixs.target_gene AS gene,
+    mixs.target_subfragment AS sub,
+    ((((mixs.pcr_primer_name_forward)::text || ': '::text) || (mixs.pcr_primer_forward)::text))::character varying AS fw_prim,
+    ((((mixs.pcr_primer_name_reverse)::text || ': '::text) || (mixs.pcr_primer_reverse)::text))::character varying AS rv_prim,
     ta.kingdom,
     ta.phylum,
     ta.class AS classs,
@@ -136,26 +157,29 @@ CREATE VIEW api.app_filter_mixs_tax AS
     ta.family,
     ta.genus,
     ta.specific_epithet AS species
-   FROM :data_schema.mixs m
-   JOIN :data_schema.occurrence o ON o.event_pid = m.pid
-   JOIN :data_schema.asv a ON a.pid = o.asv_pid
-   JOIN :data_schema.taxon_annotation ta ON a.pid = ta.asv_pid
-   JOIN :data_schema.sampling_event e ON o.event_pid = e.pid
-   JOIN :data_schema.dataset d ON e.dataset_pid = d.pid
-   WHERE d.in_bioatlas AND ta.status::text = 'valid'::text;
+FROM :data_schema.mixs
+    JOIN :data_schema.occurrence oc ON oc.event_pid = mixs.pid
+    JOIN :data_schema.asv ON asv.pid = oc.asv_pid
+    JOIN :data_schema.taxon_annotation ta ON asv.pid = ta.asv_pid
+    JOIN :data_schema.sampling_event se ON oc.event_pid = se.pid
+    JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid
+WHERE ds.in_bioatlas
+    AND ta.status::text = 'valid'::text
+    AND ta.target_prediction = true
+    AND ta.annotation_target::text = mixs.target_gene::text;
 
 CREATE VIEW api.app_search_mixs_tax AS
- SELECT DISTINCT a.asv_id,
-    concat_ws('|'::text, concat_ws(''::text, a.asv_id, '-', ta.kingdom), ta.phylum, ta.class, ta.oorder, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS asv_tax,
-    a.asv_sequence,
-    m.target_gene AS gene,
-    m.target_subfragment AS sub,
-    (m.pcr_primer_name_forward)::text AS fw_name,
-    (m.pcr_primer_forward)::text AS fw_sequence,
-    (m.pcr_primer_name_reverse)::text AS rv_name,
-    (m.pcr_primer_reverse)::text AS rv_sequence,
-    (((m.pcr_primer_name_forward)::text || ': '::text) || (m.pcr_primer_forward)::text) AS fw_prim,
-    (((m.pcr_primer_name_reverse)::text || ': '::text) || (m.pcr_primer_reverse)::text) AS rv_prim,
+SELECT DISTINCT asv.asv_id,
+    concat_ws('|'::text, concat_ws(''::text, asv.asv_id, '-', ta.kingdom), ta.phylum, ta.class, ta.oorder, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS asv_tax,
+    asv.asv_sequence,
+    mixs.target_gene AS gene,
+    mixs.target_subfragment AS sub,
+    (mixs.pcr_primer_name_forward)::text AS fw_name,
+    (mixs.pcr_primer_forward)::text AS fw_sequence,
+    (mixs.pcr_primer_name_reverse)::text AS rv_name,
+    (mixs.pcr_primer_reverse)::text AS rv_sequence,
+    (((mixs.pcr_primer_name_forward)::text || ': '::text) || (mixs.pcr_primer_forward)::text) AS fw_prim,
+    (((mixs.pcr_primer_name_reverse)::text || ': '::text) || (mixs.pcr_primer_reverse)::text) AS rv_prim,
     ta.kingdom,
     ta.phylum,
     ta.class AS classs,
@@ -163,14 +187,17 @@ CREATE VIEW api.app_search_mixs_tax AS
     ta.family,
     ta.genus,
     ta.specific_epithet AS species
-   FROM :data_schema.mixs m
-   JOIN :data_schema.occurrence o ON o.event_pid = m.pid
-   JOIN :data_schema.asv a ON a.pid = o.asv_pid
-   JOIN :data_schema.taxon_annotation ta ON a.pid = ta.asv_pid
-   JOIN :data_schema.sampling_event e ON o.event_pid = e.pid
-   JOIN :data_schema.dataset d ON e.dataset_pid = d.pid
-   WHERE d.in_bioatlas AND ta.status::text = 'valid'::text
-  ORDER BY a.asv_id, a.asv_sequence, m.target_gene, m.target_subfragment, (((m.pcr_primer_name_forward)::text || ': '::text) || (m.pcr_primer_forward)::text), (((m.pcr_primer_name_reverse)::text || ': '::text) || (m.pcr_primer_reverse)::text);
+FROM :data_schema.mixs
+    JOIN :data_schema.occurrence oc ON oc.event_pid = mixs.pid
+    JOIN :data_schema.asv ON asv.pid = oc.asv_pid
+    JOIN :data_schema.taxon_annotation ta ON asv.pid = ta.asv_pid
+    JOIN :data_schema.sampling_event se ON oc.event_pid = se.pid
+    JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid
+WHERE ds.in_bioatlas
+    AND ta.status::text = 'valid'::text
+    AND ta.target_prediction = True
+    AND ta.annotation_target = mixs.target_gene
+ORDER BY asv.asv_id, asv.asv_sequence, mixs.target_gene, mixs.target_subfragment, (((mixs.pcr_primer_name_forward)::text || ': '::text) || (mixs.pcr_primer_forward)::text), (((mixs.pcr_primer_name_reverse)::text || ': '::text) || (mixs.pcr_primer_reverse)::text);
 
   CREATE MATERIALIZED VIEW api.app_about_stats AS
   SELECT sub.gene,
@@ -183,9 +210,9 @@ CREATE VIEW api.app_search_mixs_tax AS
      count(DISTINCT CASE WHEN sub.genus <> '' then sub.genus end) AS genera,
      count(DISTINCT CASE WHEN sub.species <> '' then sub.species end) AS species,
      count(DISTINCT sub.asv_id) AS asvs
-    FROM ( SELECT d.pid as dataset,
-             a.asv_id,
-             m.target_gene AS gene,
+    FROM ( SELECT ds.pid as dataset,
+             asv.asv_id,
+             mixs.target_gene AS gene,
              ta.kingdom,
              ta.phylum,
              ta.class AS classs,
@@ -193,13 +220,15 @@ CREATE VIEW api.app_search_mixs_tax AS
              ta.family,
              ta.genus,
              ta.genus::text || ta.specific_epithet::text AS species
-            FROM mixs m
-              JOIN occurrence o ON o.event_pid = m.pid
-              JOIN asv a ON a.pid = o.asv_pid
-              JOIN taxon_annotation ta ON a.pid = ta.asv_pid
-              JOIN sampling_event e ON o.event_pid = e.pid
-              JOIN dataset d ON e.dataset_pid = d.pid
-              WHERE d.in_bioatlas and ta.status::text = 'valid'::text) sub
+            FROM mixs
+              JOIN :data_schema.occurrence oc ON oc.event_pid = mixs.pid
+              JOIN :data_schema.asv ON asv.pid = oc.asv_pid
+              JOIN :data_schema.taxon_annotation ta ON asv.pid = ta.asv_pid
+              JOIN :data_schema.sampling_event se ON oc.event_pid = se.pid
+              JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid
+              WHERE ds.in_bioatlas and ta.status::text = 'valid'::text
+                 AND ta.target_prediction = True
+                 AND ta.annotation_target = mixs.target_gene) sub
    GROUP BY sub.gene
    ORDER BY sub.gene
   WITH DATA;
@@ -239,27 +268,34 @@ BEGIN
    USING kingdom, phylum, classs, oorder, family, genus, species, '^'||term||'.*$', gene, fw_prim, rv_prim, noffset, nlimit, sub;
 END
 $_$;
+COMMENT ON FUNCTION api.app_drop_options(text, bigint, integer, text, text[], text[], text[], text[], text[], text[], text[], text[], text[], text[], text[])
+    IS 'Example call: select api.app_drop_options(''classs'', 0, 25, ''Acidi'', ''{Bacteria}'')';
+
 
 CREATE VIEW api.app_asvs_for_blastdb AS
- SELECT a.asv_id,
-        concat_ws(';'::text, ta.kingdom, ta.phylum, ta.class, ta.oorder, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS higher_taxonomy,
-        a.asv_sequence
-   FROM :data_schema.asv a
-   JOIN :data_schema.taxon_annotation ta ON a.pid = ta.asv_pid
-  WHERE ta.status::text = 'valid'::text
-    AND a.pid IN (
-        SELECT DISTINCT ib.pid
-          FROM :data_schema.asv ib
-          JOIN :data_schema.occurrence o ON o.asv_pid = a.pid
-          JOIN :data_schema.sampling_event e ON o.event_pid = e.pid
-          JOIN :data_schema.dataset d ON e.dataset_pid = d.pid
-         WHERE d.in_bioatlas
-        );
+SELECT DISTINCT asv_id, higher_taxonomy, asv_sequence
+    FROM (SELECT asv.asv_id,
+            concat_ws(';'::text, ta.kingdom, ta.phylum, ta.class, ta.oorder, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS higher_taxonomy,
+            asv.asv_sequence
+        FROM :data_schema.asv
+            JOIN :data_schema.taxon_annotation ta ON asv.pid = ta.asv_pid
+            JOIN :data_schema.occurrence oc ON oc.asv_pid = asv.pid
+            JOIN :data_schema.sampling_event se ON oc.event_pid = se.pid
+            JOIN :data_schema.mixs ON se.pid = mixs.pid
+            JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid
+        WHERE ds.in_bioatlas
+            AND ta.annotation_target::text = mixs.target_gene::text
+            AND ta.status::text = 'valid'::text AND ta.target_prediction = true) rd;
 
-CREATE FUNCTION api.app_seq_from_id(ids character varying[]) RETURNS TABLE(asv_id CHARACTER(36), ASV_SEQUENCE CHARACTER VARYING)
+
+CREATE FUNCTION api.app_seq_from_id(ids character varying[])
+    RETURNS TABLE(asv_id CHARACTER(36), ASV_SEQUENCE CHARACTER VARYING)
     LANGUAGE sql IMMUTABLE
     AS $$
-   SELECT asv_id, asv_sequence FROM api.app_asvs_for_blastdb WHERE asv_id IN (
+    SELECT asv_id, asv_sequence FROM api.app_asvs_for_blastdb WHERE asv_id IN (
 	   SELECT unnest(ids)
 	)
 $$;
+COMMENT ON FUNCTION api.app_seq_from_id(character varying[])
+    IS 'Seems PostgREST does not allow POST:ing to views, and no. of ID:s that we can fit into GET url is limited, so we use function instead. Example call:
+SELECT api.app_seq_from_idx(''{ASV:40b37890b1b1fcdf0ece91f1da34c1ca}'')';
