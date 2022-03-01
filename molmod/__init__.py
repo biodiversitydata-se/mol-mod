@@ -5,13 +5,12 @@ import logging
 import os
 from logging.config import dictConfig
 
+import errors
+from config import get_config
 from flask import Flask
 from flask_cas import CAS
 from flask_mail import Mail
 from flask_wtf.csrf import CSRFProtect
-
-from . import errors
-from .config import get_config
 
 
 def create_app():
@@ -75,7 +74,7 @@ def create_app():
         )
 
     with app.app_context():
-        from molmod.routes import blast_routes, filter_routes, main_routes
+        from routes import blast_routes, filter_routes, main_routes
         app.register_blueprint(main_routes.main_bp)
         app.register_blueprint(blast_routes.blast_bp)
         app.register_blueprint(filter_routes.filter_bp)

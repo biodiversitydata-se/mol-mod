@@ -1,13 +1,13 @@
 FROM python:3.9-slim-buster
 
 # create dir
-RUN mkdir /code
-COPY /molmod/requirements.txt /code
+RUN mkdir /app
+COPY /molmod/requirements.txt /app
 
 RUN mkdir -p /uploads
 RUN chown www-data:www-data /uploads
 
-WORKDIR /code
+WORKDIR /app
 
 RUN pip3 install -r requirements.txt
 
