@@ -5,13 +5,13 @@ from smtplib import SMTPException
 from ssl import SSLError
 
 import requests
+from config import get_config
 from flask import Blueprint, abort
 from flask import current_app as APP
 from flask import render_template, request, send_from_directory, session
 from flask_cas import login_required
 from flask_mail import Message
-from molmod.config import get_config
-from molmod.forms import UploadForm
+from forms import UploadForm
 from werkzeug.utils import secure_filename
 
 CONFIG = get_config()
