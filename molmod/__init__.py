@@ -5,12 +5,13 @@ import logging
 import os
 from logging.config import dictConfig
 
-import errors
-from config import get_config
 from flask import Flask
 from flask_cas import CAS
 from flask_mail import Mail
 from flask_wtf.csrf import CSRFProtect
+
+import errors
+from config import get_config
 
 
 def create_app():

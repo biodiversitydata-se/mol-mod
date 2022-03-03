@@ -6,13 +6,13 @@ result display. The blast-worker containers are called from the
 import json
 
 import requests
-from config import get_config
 from flask import Blueprint
 from flask import current_app as APP
 from flask import jsonify, render_template, request
 from flask_cas import login_required
-# pylint: disable=import-error
 from forms import BlastResultForm, BlastSearchForm
+
+from config import get_config
 
 CONFIG = get_config()
 

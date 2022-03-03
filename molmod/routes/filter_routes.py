@@ -5,12 +5,13 @@ result display.
 import json
 
 import requests
-from config import get_config
 from flask import Blueprint
 from flask import current_app as APP
 from flask import render_template, request
 from flask_cas import login_required
 from forms import FilterResultForm, FilterSearchForm
+
+from config import get_config
 
 CONFIG = get_config()
 
