@@ -473,26 +473,8 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     logging.info("Loading data file")
     data = read_data_file(data_file, list(mapping.keys()))
 
-    #
-    # Derive occurrence and asv 'sheets' from asv-table sheet.
-    #
-    # We do this already here, to include asv and occurrence fields subsequent
-    # validation (which expects 'unpivoted' rows). This means, however,
-    # that asv-table defaults (added in data-mapping.json) will have no effects
-    # on occurrences or asvs.
-    #
-
-    try:
-        # 'Unpivot' event columns into rows, keeping 'id_columns' as columns
-        id_columns = ['asv_id_alias', 'DNA_sequence', 'associatedSequences',
-                      'kingdom', 'phylum', 'class', 'order', 'family', 'genus',
-                      'specificEpithet', 'infraspecificEpithet', 'otu']
-        occurrences = data['asv-table'] \
-            .melt(id_columns,
-                  # Store event column header and values as:
-                  var_name='event_id_alias',
-                  value_name='organism_quantity')
-    except KeyError:
+    # Check for possible problem with R-generated Excel file
+    if data['dataset'].shape[0] == 0:
         logging.error('Input files seem to not have been read properly. '
                       'Please, check dimensions (#rows, #cols) below:')
         for sheet in ['dataset', 'emof', 'mixs', 'asv-table', 'annotation']:
@@ -502,13 +484,54 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
                       'or importing data as *.tar.gz instead.')
         sys.exit(1)
 
+    #
+    # Derive occurrence and asv 'sheets' from asv-table sheet.
+    #
+    # We do this already here, to include asv and occurrence fields subsequent
+    # validation (which expects 'unpivoted' rows). This means, however,
+    # that asv-table defaults (added in data-mapping.json) will have no effects
+    # on occurrences or asvs.
+    #
+
+    # Check for un-matched columns in asv-table tab
+    all_cols = data['asv-table'].columns
+    id_cols = ['asv_id_alias', 'DNA_sequence', 'associatedSequences',
+               'kingdom', 'phylum', 'class', 'order', 'family', 'genus',
+               'specificEpithet', 'infraspecificEpithet', 'otu']
+    events = data['event']['event_id_alias'].tolist()
+    extra_cols = [c for c in all_cols if c not in id_cols + events]
+    if (len(extra_cols) > 0):
+        msg = f'Please remove un-matched asv-table columns: {extra_cols}.'
+        logging.error(msg)
+        sys.exit(1)
+
+    try:
+        # 'Unpivot' event columns into rows, keeping 'id_cols' as columns
+        occurrences = data['asv-table'] \
+            .melt(id_cols,
+                  # Store event column header and values as:
+                  var_name='event_id_alias',
+                  value_name='organism_quantity')
+
+    except KeyError as err:
+        logging.error("There was a problem 'unpivoting' the ASV tab into "
+                      "occurrence rows.")
+        logging.error(err)
+        sys.exit(1)
+
     # Remove rows with organism_quantity 0,
     # and reset index so that removed rows are no longer referenced
     # As we do this before validation, we need to catch potential TypeError
     try:
         occurrences = occurrences[occurrences.organism_quantity > 0]
     except TypeError:
+        # Check for non-integer counts
+        df = data['asv-table'][events]
+        df = df[~df.applymap(lambda x: isinstance(x, (int))).all(1)]
+        errors = data['asv-table']['asv_id_alias'].loc[df.index]
         logging.error('Counts in asv-table include non-numeric values. '
+                      'Please check the following ASV aliases: \n'
+                      f'{errors.to_string(index=False)} \n'
                       'No data were imported.')
         sys.exit(1)
     else:
