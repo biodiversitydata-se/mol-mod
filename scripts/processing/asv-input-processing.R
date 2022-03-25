@@ -84,7 +84,7 @@ excelToDFs <- function(excel_file){
   for (sheet_name in my_sheets)
   {
     # Create data frames (envir needed for assign to work inside function)
-    assign(sheet_name, read.xlsx(excel_file, sheet=sheet_name), envir = parent.frame())
+    assign(sheet_name, read.xlsx(excel_file, sheet=sheet_name, detectDates = TRUE), envir = parent.frame())
   }
 }
 
