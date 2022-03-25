@@ -20,14 +20,14 @@ from io import BytesIO
 from pprint import pformat
 from typing import List, Mapping, Optional
 
-import pandas
+import pandas as pd
 import psycopg2
 from psycopg2.extras import DictCursor
 
 DEFAULT_MAPPING = os.path.join(os.path.dirname(__file__), 'data-mapping.json')
 
 # Define pandas dict of sheets type. This is what's returned from read_excel()
-PandasDict = Mapping[str, pandas.DataFrame]
+PandasDict = Mapping[str, pd.DataFrame]
 
 
 def as_snake_case(text: str) -> str:
@@ -110,7 +110,7 @@ def format_value(value):
     return value
 
 
-def format_values(data: pandas.DataFrame, mapping: dict,
+def format_values(data: pd.DataFrame, mapping: dict,
                   start: int = 0, end: Optional[int] = 0) -> str:
     """
     Formats the values in `data` according to the given `mapping` in a way that
@@ -128,7 +128,7 @@ def format_values(data: pandas.DataFrame, mapping: dict,
     return values
 
 
-def insert_common(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
+def insert_common(data: pd.DataFrame, mapping: dict, db_cursor: DictCursor,
                   batch_size: int = 1000):
     """
     Inserts `data` into the database based on the given `mapping`.
@@ -156,7 +156,7 @@ def insert_common(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
         end = min(total, end + batch_size)
 
 
-def insert_dataset(data: pandas.DataFrame, mapping: dict,
+def insert_dataset(data: pd.DataFrame, mapping: dict,
                    db_cursor: DictCursor) -> int:
     """
     Inserts a single dataset into the database, and returns the database `pid`.
@@ -180,8 +180,8 @@ def insert_dataset(data: pandas.DataFrame, mapping: dict,
     return db_cursor.fetchall()[0]['pid']
 
 
-def insert_events(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
-                  batch_size: int = 1000) -> pandas.DataFrame:
+def insert_events(data: pd.DataFrame, mapping: dict, db_cursor: DictCursor,
+                  batch_size: int = 1000) -> pd.DataFrame:
     """
     Inserts sampling events, reeturning the given dataframe with updated
     `pid`'s from the database.
@@ -214,8 +214,8 @@ def insert_events(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
     return data.assign(pid=pids)
 
 
-def insert_asvs(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
-                batch_size: int = 1000) -> (pandas.DataFrame, int):
+def insert_asvs(data: pd.DataFrame, mapping: dict, db_cursor: DictCursor,
+                batch_size: int = 1000) -> (pd.DataFrame, int):
     """
     Inserts asv's into the database, returning the database `pid`'s. Unlike the
     other categories asv conflicts returns the id of the previously registered
@@ -256,7 +256,7 @@ def insert_asvs(data: pandas.DataFrame, mapping: dict, db_cursor: DictCursor,
     return data.assign(pid=pids), old_max_pid or 0
 
 
-def compare_annotations(data: pandas.DataFrame, db_cursor: DictCursor,
+def compare_annotations(data: pd.DataFrame, db_cursor: DictCursor,
                         batch_size: int = 1000):
     """
     Compares target gene and prediction of incoming ('new') annotations to
@@ -387,7 +387,7 @@ def read_data_file(data_file: str, sheets: List[str]):
         tar = tarfile.open(data_file)
     else:
         try:
-            pandas.read_excel(data_file)
+            pd.read_excel(data_file)
         except (ValueError, KeyError):
             logging.error("Input neither recognized as tar nor as Excel.")
             logging.error('Was your *.tar.gz file not recognized as a tarfile?'
@@ -416,13 +416,13 @@ def read_data_file(data_file: str, sheets: List[str]):
                 if not content:
                     raise KeyError
                 try:
-                    data[sheet] = pandas.read_csv(content)
+                    data[sheet] = pd.read_csv(content)
                 except Exception:
                     logging.error("Input file '%s' could not be read. "
                                   "Please inpect file.", member.name)
                     sys.exit(1)
             else:
-                data[sheet] = pandas.read_excel(data_file, sheet_name=sheet)
+                data[sheet] = pd.read_excel(data_file, sheet_name=sheet)
         except KeyError:
             logging.error("Input sheet '%s' not found. Aborting.", sheet)
             sys.exit(1)
@@ -440,7 +440,7 @@ def read_data_file(data_file: str, sheets: List[str]):
     return data
 
 
-def handle_dates(dates: pandas.Series):
+def handle_dates(dates: pd.Series):
     '''
     Removes time digits (e.g. 00:00:00) from (Excel) date / timestamp field,
     as they mess up validation. Does nothing if field is text / string.
@@ -574,7 +574,7 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     # Replace remaining missing values with None.
     # These will be transformed by format_value, and inserted into db as [null]
     for sheet in data.keys():
-        data[sheet] = data[sheet].where(pandas.notnull(data[sheet]), None)
+        data[sheet] = data[sheet].where(pd.notnull(data[sheet]), None)
 
     #
     # Insert DATASET
