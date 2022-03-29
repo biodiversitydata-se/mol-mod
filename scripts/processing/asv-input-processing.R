@@ -84,7 +84,7 @@ excelToDFs <- function(excel_file){
   for (sheet_name in my_sheets)
   {
     # Create data frames (envir needed for assign to work inside function)
-    assign(sheet_name, read.xlsx(excel_file, sheet=sheet_name), envir = parent.frame())
+    assign(sheet_name, read.xlsx(excel_file, sheet=sheet_name, detectDates = TRUE), envir = parent.frame())
   }
 }
 
@@ -100,8 +100,20 @@ writeFasta <- function(data, filename){
   close(fileConn)
 }
 
+trimConvert <- function(df){
+  # Removes any leading/trailing Unicode horizontal/vertical white space
+  # in string cols, and converts to numeric, if possible
+  df <- as.data.frame(lapply(df, function(col) {
+    if (typeof(col) == "character") {
+      col <- trimws(col, whitespace = "[\\h\\v]")
+      col <- tryCatch({ as.numeric(col) }, warning = function(w) { col }) }
+    else { col }
+  }))
+  return(df)
+}
+
 ################################################################################
-# 4. Import uploaded data into dataframes
+# 4. Import uploaded data into dataframes, and clean up a bit
 ################################################################################
 
 # Determine (apparent) input type
@@ -124,6 +136,13 @@ if (exists('mixs')){
   dna <- `mixs`
   rm(`mixs`)
 }
+
+# Remove white space & format to numeric where possible
+event <- trimConvert(event)
+asv_table <- trimConvert(asv_table)
+dna <- trimConvert(dna)
+emof <- trimConvert(emof)
+emof_simple <- trimConvert(emof_simple)
 
 ################################################################################
 # 5. Add dataset metadata
@@ -233,4 +252,3 @@ tfiles <- paste0('output/', list.files('output', pattern="*.csv"))
 tar(tar_out, files = tfiles, compression = "gzip", tar='tar')
 # Delete csv:s
 unlink(tfiles)
-

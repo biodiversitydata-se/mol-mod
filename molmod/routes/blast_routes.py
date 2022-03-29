@@ -10,9 +10,9 @@ from flask import Blueprint
 from flask import current_app as APP
 from flask import jsonify, render_template, request
 from flask_cas import login_required
-from molmod.config import get_config
-# pylint: disable=import-error
-from molmod.forms import BlastResultForm, BlastSearchForm
+from forms import BlastResultForm, BlastSearchForm
+
+from config import get_config
 
 CONFIG = get_config()
 

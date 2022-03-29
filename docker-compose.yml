@@ -101,7 +101,7 @@ services:
     volumes:
       - type: bind
         source: ./
-        target: /code
+        target: /app
       - uploads:/uploads
     env_file:
       - .env
