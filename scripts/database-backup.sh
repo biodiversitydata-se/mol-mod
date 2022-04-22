@@ -9,13 +9,6 @@
 # requiring data to be restored with this script, together with a dump
 # produced with 'data' option.
 
-readlink () {
-	case $OSTYPE in
-		linux*) command readlink "$@" ;;
-		*) command greadlink "$@" ;;
-	esac
-}
-
 topdir=$( readlink -f "$( dirname "$0" )/.." )
 
 DIR='db-backup'

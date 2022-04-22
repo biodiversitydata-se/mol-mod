@@ -104,15 +104,6 @@ then
 	exit 1
 fi >&2
 
-# Use greadlink to get path, if running on Mac
-case $OSTYPE in
-		darwin*)
-			readlink () {
-				command greadlink "$@"
-			}
-			;;
-esac
-
 topdir=$( readlink -f "$( dirname "$0" )/.." )
 backup_dir=$topdir/backups
 

@@ -7,10 +7,16 @@ Module ([the Swedish ASV portal](http://asv-portal.biodiversitydata.se/)) for ha
 Flask + jQuery app for BLAST and metadata search of sequence-based occurrences in SBDI, via separate BLAST and Amplicon Sequence Variant (ASV) databases. Views of the ASV db are exposed via [postgREST server](https://postgrest.org/en/v7.0.0/index.html), and accessed in API calls (for metadata search part). Note that different contributors have used different tools for communicating with the database (see */scripts* dir). This could perhaps be made more consistent in the future.
 
 ### Prerequisites
-The application can be run as a docker-compose environment, assuming you have [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed. Mac users may additionally need to install coreutils, to access the included greadlink tool, plus a newer version of bash, to run some db maintenance scripts. This can e.g. be done with Homebrew:
+The application can be run as a docker-compose environment, assuming you have [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
+
+Mac users may additionally need to install a newer version of bash, as well as GNU Core Utilities (coreutils), to run some maintenance scripts. This can be done with Homebrew:
 ```
   $ brew install coreutils
   $ brew install bash
+```
+Coreutils include the same versions of basic tools like e.g. *readlink* and *stat* that are used on Linux (and which sometimes differ a bit from MacOS versions in syntax). By default, Homebrew installs these tools with the prefix 'g' (e.g. *greadlink*), so to be able use commands with normal (i.e. Linux) names, you also need to add a "gnubin" directory to your PATH (in e.g. your *.bash_profile* file):
+```
+  PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
 ```
 
 ### Environmental variables
