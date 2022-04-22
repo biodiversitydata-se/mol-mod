@@ -140,8 +140,7 @@ FROM :data_schema.sampling_event se
             JOIN :data_schema.taxon_annotation ta ON asv.pid = ta.asv_pid
         WHERE ta.target_prediction = true AND ta.annotation_target::text = mixs.target_gene::text
         GROUP BY se.pid) calc ON se.pid = calc.pid
-WHERE ds.in_bioatlas
-    AND ta.status::text = 'valid'
+WHERE ta.status::text = 'valid'
     AND ta.target_prediction = true
     AND ta.annotation_target::text = mixs.target_gene::text;
 
