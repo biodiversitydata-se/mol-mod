@@ -162,13 +162,18 @@ Generate a new BLAST database (including ASVs from datasets that have been impor
 ```
 
 ### Backups
-You can use a script to make a database dump and incremental backups of the container logs and uploaded files to host folders *db_backup*, *log_backup* and *uploads*, respectively. The script also copies all of these to a joint backup folder that defaults to *[repos-path]/backups* (see script for details).
+You can use a script to make a database dump and incremental backups of the container logs and uploaded files to host folders *db_backup*, *log_backup* and *uploads*, respectively:
 ```
   $ ./scripts/scheduled-backup.sh
 ```
-This script can also be used to run from crontab (time-based job scheduler). Suggested crontab entry for twice-daily backups as 9 AM and 9 PM:
+The script also copies files to a joint backup folder that defaults to *[repos-path]/backups* (see script for details), and can be used to run from crontab (time-based job scheduler). Suggested crontab entry for twice-daily backups as 9 AM and 9 PM:
 ```
   0 9,21 * * * /opt/mol-mod/scripts/scheduled-backup.sh
+```
+There are two Makefile rules available to simplify backup:
+```
+  make db-backup    # Database dump only
+  make backup       # Db, logs & uploads
 ```
 
 ### Data deletions
