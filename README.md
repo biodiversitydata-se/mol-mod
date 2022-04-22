@@ -89,15 +89,6 @@ You also need to build a BLAST database:
 Note that the blast-worker uses the same Dockerfile for both development and production, but that we set
 *FLASK_ENV=production* in *docker-compose.prod.yml*.
 
-You can use a script to create incremental backups of the database, container logs and uploaded files to (host) folder [repos-path]/backups:
-```
-  $ ./scripts/scheduled-backup.sh
-```
-This script can also be used to run from crontab (time-based job scheduler). Suggested crontab entry for twice-daily backups as 9 AM and 9 PM:
-```
-  0 9,21 * * * /opt/mol-mod/scripts/scheduled-backup.sh
-```
-
 ### CAS authentication
 For local testing of production environment, you need to run or add this to your bash startup file (e.g. *~/.bash_profile*):
 ```
@@ -168,6 +159,16 @@ Generate a new BLAST database (including ASVs from datasets that have been impor
 ...or use a Makefile rule:
 ```
   $ make blastdb
+```
+
+### Backups
+You can use a script to make a database dump and incremental backups of the container logs and uploaded files to host folders *db_backup*, *log_backup* and *uploads*, respectively. The script also copies all of these to a joint backup folder that defaults to *[repos-path]/backups* (see script for details).
+```
+  $ ./scripts/scheduled-backup.sh
+```
+This script can also be used to run from crontab (time-based job scheduler). Suggested crontab entry for twice-daily backups as 9 AM and 9 PM:
+```
+  0 9,21 * * * /opt/mol-mod/scripts/scheduled-backup.sh
 ```
 
 ### Data deletions

@@ -48,11 +48,15 @@ secrets:
 	python3 ./scripts/generate_secrets.py --skip-existing
 
 #
-# DB BACKUP & RESTORE
+# BACKUP & RESTORE
 #
 
-backup:
+# Just make a dabase dump
+db-backup:
 	./scripts/database-backup.sh data
+# Make a full backup (db, logs & uploads)
+backup:
+	./scripts/scheduled-backup.sh
 
 # Restore from latest (or specified) db dump
 # Example: make restore (OR make restore file=some-db-dump.sql.tar)
