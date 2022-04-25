@@ -107,7 +107,7 @@ SELECT ds.pid AS dataset_pid,
     ta.date_identified AS "dateIdentified",
     ta.identification_references AS "identificationReferences",
     (((ta.annotation_algorithm::text || ' annotation confidence (at lowest specified taxon): '::text) || ta.annotation_confidence) || ', against reference database: '::text) || ta.reference_db::text AS "identificationRemarks",
-    'Identified by data provider as: '::text || oc.previous_identifications::text AS "previousIdentifications",
+    (('By data provider: '::text || oc.previous_identifications::text) || '; By ASV portal: '::text) || concat_ws('|'::text, ta.kingdom, ta.phylum, ta.oorder, ta.class, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS "previousIdentifications",
     row_to_json(( SELECT d.*::record AS d
            FROM ( SELECT calc.size AS "sampleSizeValue",
                 oc.organism_quantity AS "organismQuantity",
