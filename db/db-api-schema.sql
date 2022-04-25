@@ -106,7 +106,7 @@ SELECT ds.pid AS dataset_pid,
     ta.taxon_remarks AS "taxonRemarks",
     ta.date_identified AS "dateIdentified",
     ta.identification_references AS "identificationReferences",
-    (((ta.annotation_algorithm::text || ' annotation confidence (at lowest specified taxon): '::text) || ta.annotation_confidence) || ', against reference database: '::text) || ta.reference_db::text AS "identificationRemarks",
+    concat_ws(' '::text, ta.annotation_algorithm, 'annotation against', ta.reference_db::text || ';'::text, 'confidence at lowest specified (ASV portal) taxon:', ta.annotation_confidence) AS "identificationRemarks",
     (('By data provider: '::text || oc.previous_identifications::text) || '; By ASV portal: '::text) || concat_ws('|'::text, ta.kingdom, ta.phylum, ta.oorder, ta.class, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS "previousIdentifications",
     row_to_json(( SELECT d.*::record AS d
            FROM ( SELECT calc.size AS "sampleSizeValue",
