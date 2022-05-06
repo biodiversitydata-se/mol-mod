@@ -27,7 +27,8 @@ WHERE in_bioatlas = True;
 
 CREATE TABLE IF NOT EXISTS public.sampling_event (
     pid BIGSERIAL PRIMARY KEY,
-    material_sample_id character varying UNIQUE NOT NULL,
+    material_sample_id character varying NOT NULL,
+    associated_sequences character varying,
     dataset_pid integer NOT NULL REFERENCES public.dataset(pid) ON DELETE CASCADE,
     event_date character varying NOT NULL,
     sampling_protocol character varying NOT NULL,
@@ -92,8 +93,7 @@ CREATE TABLE IF NOT EXISTS public.occurrence (
     asv_pid integer NOT NULL REFERENCES public.asv(pid) ON DELETE CASCADE,
     organism_quantity integer NOT NULL,
     previous_identifications character varying NOT NULL,
-    asv_id_alias character varying NOT NULL,
-    associated_sequences character varying
+    asv_id_alias character varying NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS public.taxon_annotation (
