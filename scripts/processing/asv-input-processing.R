@@ -106,9 +106,11 @@ trimConvert <- function(df){
   df <- as.data.frame(lapply(df, function(col) {
     if (typeof(col) == "character") {
       col <- trimws(col, whitespace = "[\\h\\v]")
-      col <- tryCatch({ as.numeric(col) }, warning = function(w) { col }) }
+      col <- tryCatch({ as.numeric(col) }, warning = function(w) { col })
+    }
     else { col }
-  }))
+  # Do not add 'X' to names starting with digit, e.g. '16S_1'
+  }), check.names = FALSE)
   return(df)
 }
 
