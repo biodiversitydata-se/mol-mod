@@ -106,9 +106,11 @@ trimConvert <- function(df){
   df <- as.data.frame(lapply(df, function(col) {
     if (typeof(col) == "character") {
       col <- trimws(col, whitespace = "[\\h\\v]")
-      col <- tryCatch({ as.numeric(col) }, warning = function(w) { col }) }
+      col <- tryCatch({ as.numeric(col) }, warning = function(w) { col })
+    }
     else { col }
-  }))
+  # Do not add 'X' to names starting with digit, e.g. '16S_1'
+  }), check.names = FALSE)
   return(df)
 }
 
@@ -142,7 +144,10 @@ event <- trimConvert(event)
 asv_table <- trimConvert(asv_table)
 dna <- trimConvert(dna)
 emof <- trimConvert(emof)
-emof_simple <- trimConvert(emof_simple)
+# Again, for older versions of the template
+if (exists('emof_simple')){
+  emof_simple <- trimConvert(emof_simple)
+}
 
 ################################################################################
 # 5. Add dataset metadata

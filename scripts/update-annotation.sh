@@ -93,15 +93,6 @@ colname_map=(
     [target_criteria]=target_criteria
 )
 
-# Make readlink use GNU readlink on macOS.
-case $OSTYPE in
-		darwin*)
-			readlink () {
-				command greadlink "$@"
-			}
-			;;
-esac
-
 # Simplifies making a query to the database in the asv-db container.
 do_dbquery () {
         # Use --command if we got an argument.  Otherwise, read SQL

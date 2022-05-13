@@ -495,7 +495,7 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
 
     # Check for un-matched columns in asv-table tab
     all_cols = data['asv-table'].columns
-    id_cols = ['asv_id_alias', 'DNA_sequence', 'associatedSequences',
+    id_cols = ['asv_id_alias', 'DNA_sequence',
                'kingdom', 'phylum', 'class', 'order', 'family', 'genus',
                'specificEpithet', 'infraspecificEpithet', 'otu']
     events = data['event']['event_id_alias'].tolist()
@@ -810,7 +810,7 @@ def compare_fields(data: PandasDict, mapping: dict):
     # Unpivoted event fields from asv-table - which are dataset-specific
     events = data['occurrence']['event_id_alias'].tolist()
     # Fields used for deriving db fields, or that are moved to derived sheets
-    expected = ['event_id_alias', 'associatedSequences', 'DNA_sequence',
+    expected = ['event_id_alias', 'DNA_sequence',
                 'asv_sequence', 'asv_id_alias', 'order', 'phylum', 'kingdom',
                 'class', 'family', 'genus', 'infraspecificEpithet',
                 'index', 'otu', 'specificEpithet']

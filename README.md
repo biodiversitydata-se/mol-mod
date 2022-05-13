@@ -4,13 +4,19 @@ Module ([the Swedish ASV portal](http://asv-portal.biodiversitydata.se/)) for ha
 [![DOI](https://zenodo.org/badge/220973056.svg)](https://zenodo.org/badge/latestdoi/220973056)
 
 ### Overview
-Flask + jQuery app for BLAST and metadata search of sequence-based occurrences in SBDI, via separate BLAST and Amplicon Sequence Variant (ASV) databases. Views of the ASV db are exposed via [postgREST server](https://postgrest.org/en/v7.0.0/index.html), and accessed in API calls (for metadata search part). Note that different contributors have used different tools for communicating with the database (see */scripts* dir). This could perhaps be made more consistent in the future.
+Flask + jQuery app for BLAST and metadata search of sequence-based occurrences in SBDI, via separate BLAST and Amplicon Sequence Variant (ASV) databases. Views of the ASV db are exposed via [postgREST server](https://postgrest.org/en/v7.0.0/index.html), and accessed in API calls (for metadata search part). Note that different contributors have used different tools for communicating with the database (see *scripts* dir). This could perhaps be made more consistent in the future.
 
 ### Prerequisites
-The application can be run as a docker-compose environment, assuming you have [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed. Mac users may additionally need to install coreutils, to access the included greadlink tool, plus a newer version of bash, to run some db maintenance scripts. This can e.g. be done with Homebrew:
+The application can be run as a docker-compose environment, assuming you have [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
+
+Mac users may additionally need to install a newer version of bash, as well as GNU Core Utilities (coreutils), to run some maintenance scripts. This can be done with Homebrew:
 ```
   $ brew install coreutils
   $ brew install bash
+```
+Coreutils include the same versions of basic tools like e.g. *readlink* and *stat* that are used on Linux (and which sometimes differ a bit from MacOS versions in syntax). By default, Homebrew installs these tools with the prefix 'g' (e.g. *greadlink*), so to be able use commands with normal (i.e. Linux) names, you also need to add a "gnubin" directory to your PATH (in e.g. your *.bash_profile* file):
+```
+  export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
 ```
 
 ### Environmental variables
@@ -83,15 +89,6 @@ You also need to build a BLAST database:
 Note that the blast-worker uses the same Dockerfile for both development and production, but that we set
 *FLASK_ENV=production* in *docker-compose.prod.yml*.
 
-You can use a script to create incremental backups of the database, container logs and uploaded files to (host) folder [repos-path]/backups:
-```
-  $ ./scripts/scheduled-backup.sh
-```
-This script can also be used to run from crontab (time-based job scheduler). Suggested crontab entry for twice-daily backups as 9 AM and 9 PM:
-```
-  0 9,21 * * * /opt/mol-mod/scripts/scheduled-backup.sh
-```
-
 ### CAS authentication
 For local testing of production environment, you need to run or add this to your bash startup file (e.g. *~/.bash_profile*):
 ```
@@ -162,6 +159,21 @@ Generate a new BLAST database (including ASVs from datasets that have been impor
 ...or use a Makefile rule:
 ```
   $ make blastdb
+```
+
+### Backups
+You can use a script to make a database dump and incremental backups of the container logs and uploaded files to host folders *db_backup*, *log_backup* and *uploads*, respectively:
+```
+  $ ./scripts/scheduled-backup.sh
+```
+The script also copies files to a joint backup folder that defaults to *[repos-path]/backups* (see script for details), and can be used to run from crontab (time-based job scheduler). Suggested crontab entry for twice-daily backups as 9 AM and 9 PM:
+```
+  0 9,21 * * * /opt/mol-mod/scripts/scheduled-backup.sh
+```
+There are two Makefile rules available to simplify backup:
+```
+  make db-backup    # Database dump only
+  make backup       # Db, logs & uploads
 ```
 
 ### Data deletions

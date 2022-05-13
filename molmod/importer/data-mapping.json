@@ -10,7 +10,8 @@
     "targetTable": "sampling_event",
     "dataset_pid": {},
     "event_id_alias": {"validation": "(?!nan).*"},
-    "materialSampleID": {"validation": "(?!nan).*"},
+    "materialSampleID": {"validation": "https://*.*"},
+    "associatedSequences": {"validation": "https://*.*"},
     "eventDate": {"validation": "[0-9]{2,4}(\\-(0[1-9]|1[0-2])(\\-(0[1-9]|[1-2][0-9]|3[0-1]))?)?(T([01][0-9]|2[0-3])(:[0-5][0-9](:[0-5][0-9](\\.[0-9]+)?)?)?(Z|[+-]([01][0-9]|2[0-3])(:)?([0-5][0-9])?)?)?(/(([0-9]{2,4}(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?)|((0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)|((0[1-9]|[1-2][0-9]|3[0-1])))(T((([01][0-9]|2[0-3])(:([0-5][0-9])(:([0-5][0-9]))?)?)|(([0-5][0-9])(:([0-5][0-9]))?)|(([0-5][0-9])))?)?(Z|[+-]([01][0-9]|2[0-3])(:)?([0-5][0-9])?)?)?",
     "note": "non-foolproof ISO 8601. See also https://dwc.tdwg.org/terms/#dwc:eventDate"},
     "samplingProtocol": {"validation": "(?!nan).*"},
@@ -83,8 +84,7 @@
     "asv_pid": {},
     "organism_quantity": {"validation": "[0-9]+(\\.0)?"},
     "previous_identifications": {},
-    "asv_id_alias": {},
-    "associatedSequences": {}
+    "asv_id_alias": {}
   },
   "annotation": {
     "asv_pid": {},

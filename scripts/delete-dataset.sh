@@ -8,13 +8,6 @@
 # The script have no command line opitons and takes no other arguments.
 #
 
-readlink () {
-	case $OSTYPE in
-		linux*) command readlink "$@" ;;
-		*) command greadlink "$@" ;;
-	esac
-}
-
 topdir=$( readlink -f "$( dirname "$0" )/.." )
 
 # Refuse to run non-interactively.

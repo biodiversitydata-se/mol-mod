@@ -83,7 +83,7 @@ SELECT ds.pid AS dataset_pid,
     se.decimal_longitude AS "decimalLongitude",
     se.geodetic_datum AS "geodeticDatum",
     se.coordinate_uncertainty_in_meters AS "coordinateUncertaintyInMeters",
-    oc.associated_sequences AS "associatedSequences",
+    se.associated_sequences AS "associatedSequences",
     se.recorded_by AS "recordedBy",
     se.material_sample_id AS "materialSampleID",
     calc.size AS "sampleSizeValue",
@@ -106,8 +106,8 @@ SELECT ds.pid AS dataset_pid,
     ta.taxon_remarks AS "taxonRemarks",
     ta.date_identified AS "dateIdentified",
     ta.identification_references AS "identificationReferences",
-    (((ta.annotation_algorithm::text || ' annotation confidence (at lowest specified taxon): '::text) || ta.annotation_confidence) || ', against reference database: '::text) || ta.reference_db::text AS "identificationRemarks",
-    'Identified by data provider as: '::text || oc.previous_identifications::text AS "previousIdentifications",
+    concat_ws(' '::text, ta.annotation_algorithm, 'annotation against', ta.reference_db::text || ';'::text, 'confidence at lowest specified (ASV portal) taxon:', ta.annotation_confidence) AS "identificationRemarks",
+    (('By data provider: '::text || oc.previous_identifications::text) || '; By ASV portal: '::text) || concat_ws('|'::text, ta.kingdom, ta.phylum, ta.oorder, ta.class, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS "previousIdentifications",
     row_to_json(( SELECT d.*::record AS d
            FROM ( SELECT calc.size AS "sampleSizeValue",
                 oc.organism_quantity AS "organismQuantity",
@@ -140,8 +140,7 @@ FROM :data_schema.sampling_event se
             JOIN :data_schema.taxon_annotation ta ON asv.pid = ta.asv_pid
         WHERE ta.target_prediction = true AND ta.annotation_target::text = mixs.target_gene::text
         GROUP BY se.pid) calc ON se.pid = calc.pid
-WHERE ds.in_bioatlas
-    AND ta.status::text = 'valid'
+WHERE ta.status::text = 'valid'
     AND ta.target_prediction = true
     AND ta.annotation_target::text = mixs.target_gene::text;
 
