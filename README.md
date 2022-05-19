@@ -4,12 +4,10 @@ Module ([the Swedish ASV portal](http://asv-portal.biodiversitydata.se/)) for ha
 [![DOI](https://zenodo.org/badge/220973056.svg)](https://zenodo.org/badge/latestdoi/220973056)
 
 ### Overview
-Flask + jQuery app for BLAST and metadata search of sequence-based occurrences in SBDI, via separate BLAST and Amplicon Sequence Variant (ASV) databases. Views of the ASV db are exposed via [postgREST server](https://postgrest.org/en/v7.0.0/index.html), and accessed in API calls (for metadata search part). Note that different contributors have used different tools for communicating with the database (see *scripts* dir). This could perhaps be made more consistent in the future.
+The ASV portal mainly consists of a Python-Flask + jQuery app for BLAST and metadata search of sequence-based occurrences in SBDI, via separate BLAST and Amplicon Sequence Variant (ASV) databases. Views of the ASV db (PostgreSQL) are exposed via [postgREST server](https://postgrest.org/en/v7.0.0/index.html), and accessed in API calls. In addition to search (and subsequently added data upload) functionality aimed at ordinary web users, the repo also includes a number of utility scripts for ASV database administrators (see *scripts* dir). These e.g. include scripts for importing, backing up and deleting data, and were added rather hurriedly by different contributors favouring different tools (python/psycopg2 vs. bash/psql) for communicating with the database. This could (time permitting) be made more consistent in the future. Ideally, we should perhaps add an admin blueprint to the app, and allow for all of these tasks to be performed via the GUI.
 
 ### Prerequisites
-The application can be run as a docker-compose environment, assuming you have [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
-
-Mac users may additionally need to install a newer version of bash, as well as GNU Core Utilities (coreutils), to run some maintenance scripts. This can be done with Homebrew:
+The application can be run as a docker-compose environment, assuming you have [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed. While this makes the web application platform independent, the utility scripts for administrators (see Overview) are python wrappers or bash scripts that run on your host. Administrators using mac (at least for testing) may thus additionally need to install a newer version of bash, as well as GNU Core Utilities (coreutils). This can be done with Homebrew:
 ```
   $ brew install coreutils
   $ brew install bash
@@ -234,6 +232,9 @@ See */db/db-api-schema.sql*.
 
 ### Tests
 Note that tests have not been updated and adapted to the docker-compose environment.
+
+### Coding contributions
+Suggestions and coding contributions are most welcome. During times of collaboration, we have adopted some version of the Git-Flow branching model, but during long periods of solo development, this has collapsed somewhat... The general idea, though, is to follow suggestions [here](https://developpaper.com/git-flow-specification-and-instructions/).
 
 ### Licenses
 This code (biodiversitydata-se/mol-mod) is released under CC0 (see https://github.com/biodiversitydata-se/mol-mod/blob/master/LICENSE), but uses the following components with MIT licenses:
