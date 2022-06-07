@@ -821,7 +821,8 @@ def compare_fields(data: PandasDict, mapping: dict):
         set2 = set(mapping[sheet].keys())
         diff = set1.difference(set2)
         if diff:
-            logging.error(f'Fields {diff} not in mapping.')
+            msg = f"Fields {diff} in sheet '{sheet}' missing from mapping."
+            logging.error(msg)
             nodiff &= False
 
     return nodiff
