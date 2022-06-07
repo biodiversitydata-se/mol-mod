@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS public.sampling_event (
     decimal_longitude numeric NOT NULL,
     geodetic_datum character varying,
     coordinate_uncertainty_in_meters numeric,
-    event_id_alias character varying,
+    event_id character varying,
     recorded_by character varying,
     verbatim_locality character varying,
     municipality character varying,

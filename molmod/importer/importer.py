@@ -498,7 +498,7 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     id_cols = ['asv_id_alias', 'DNA_sequence',
                'kingdom', 'phylum', 'class', 'order', 'family', 'genus',
                'specificEpithet', 'infraspecificEpithet', 'otu']
-    events = data['event']['event_id_alias'].tolist()
+    events = data['event']['eventID'].tolist()
     extra_cols = [c for c in all_cols if c not in id_cols + events]
     if (len(extra_cols) > 0):
         msg = f'Please remove un-matched asv-table columns: {extra_cols}.'
@@ -510,7 +510,7 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
         occurrences = data['asv-table'] \
             .melt(id_cols,
                   # Store event column header and values as:
-                  var_name='event_id_alias',
+                  var_name='eventID',
                   value_name='organism_quantity')
 
     except KeyError as err:
@@ -564,7 +564,7 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
             logging.error("No data were imported.")
             sys.exit(1)
 
-    if not compare_aliases(data):
+    if not compare_id_fields(data):
         logging.error("No data were imported.")
         sys.exit(1)
 
@@ -598,8 +598,8 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     #
 
     # Join with 'event' to get 'event_pid' as 'pid'
-    events = data['event'].set_index('event_id_alias')
-    data['mixs'] = data['mixs'].join(events['pid'], on='event_id_alias')
+    events = data['event'].set_index('eventID')
+    data['mixs'] = data['mixs'].join(events['pid'], on='eventID')
 
     logging.info(" * mixs")
     insert_common(data['mixs'], mapping['mixs'], cursor, batch_size)
@@ -610,7 +610,7 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
 
     # Join with 'event' to get 'event_pid'
     data['emof'] = data['emof'] \
-        .join(events['pid'], on='event_id_alias')
+        .join(events['pid'], on='eventID')
     data['emof'].rename(columns={'pid': 'event_pid'}, inplace=True)
 
     logging.info(" * emof")
@@ -671,7 +671,7 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     occurrences[tax_fields] = occurrences[tax_fields].fillna('')
 
     # Join with events to add 'event_pid'
-    occurrences = occurrences.join(events, on='event_id_alias')
+    occurrences = occurrences.join(events, on='eventID')
     occurrences.rename(columns={'pid': 'event_pid'}, inplace=True)
 
     # Concatenate contributor´s taxon rank fields
@@ -764,7 +764,7 @@ def compare_sheets(data: PandasDict, sheet1: str, sheet2: str, field1: str,
     return True
 
 
-def compare_aliases(data: PandasDict):
+def compare_id_fields(data: PandasDict):
     """
     Compares sets of key fields between sheets, and returns false if
     if there is any difference.
@@ -772,10 +772,10 @@ def compare_aliases(data: PandasDict):
     nodiff = True
     # Check if any events in dependent sheets are missing from event sheet
     for sheet in ['mixs', 'emof', 'occurrence']:
-        nodiff &= compare_sheets(data, sheet, 'event', 'event_id_alias')
+        nodiff &= compare_sheets(data, sheet, 'event', 'eventID')
 
     # Check if any events lack occurrences
-    nodiff &= compare_sheets(data, 'event', 'occurrence', 'event_id_alias')
+    nodiff &= compare_sheets(data, 'event', 'occurrence', 'eventID')
 
     # Check if any asvs lack annotation
     nodiff &= compare_sheets(data, 'asv', 'annotation', 'asv_id_alias')
@@ -796,7 +796,7 @@ def compare_fields(data: PandasDict, mapping: dict):
                     if k not in [
                         # Fields not expected in input
                         'status', 'targetTable', 'asv_pid',
-                        'dataset_pid', 'pid', 'event_pid', 'asv_id',
+                        'dataset_pid', 'pid', 'asv_id',
                         'previous_identifications', 'event_pid'
                     ]])
         set2 = set(data[sheet].keys())
@@ -808,9 +808,10 @@ def compare_fields(data: PandasDict, mapping: dict):
     # Check if any input fields are missing from mapping
     # Ignore fields that are always expected to be missing, e.g.
     # Unpivoted event fields from asv-table - which are dataset-specific
-    events = data['occurrence']['event_id_alias'].tolist()
+    events = data['occurrence']['eventID'].tolist()
+    # logging.error(f'Events {events}.')
     # Fields used for deriving db fields, or that are moved to derived sheets
-    expected = ['event_id_alias', 'DNA_sequence',
+    expected = ['eventID', 'DNA_sequence',
                 'asv_sequence', 'asv_id_alias', 'order', 'phylum', 'kingdom',
                 'class', 'family', 'genus', 'infraspecificEpithet',
                 'index', 'otu', 'specificEpithet']
