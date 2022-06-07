@@ -27,6 +27,12 @@ WHERE in_bioatlas = True;
 
 CREATE TABLE IF NOT EXISTS public.sampling_event (
     pid BIGSERIAL PRIMARY KEY,
+    institution_code character varying,
+    institution_id character varying,
+    collection_code character varying,
+    field_number character varying,
+    catalogue_number character varying,
+    references_ character varying,
     material_sample_id character varying NOT NULL,
     associated_sequences character varying NOT NULL,
     dataset_pid integer NOT NULL REFERENCES public.dataset(pid) ON DELETE CASCADE,
