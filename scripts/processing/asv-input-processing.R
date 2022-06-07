@@ -3,7 +3,7 @@
 # See README.md for additional context.
 
 # Assumes the following directory structure:
-# ├── [dataset-name]
+# ├── [datasetID - see tab/file event]
 #   ├── input
 #     ├── [filename].xlsx or [filename].tar.gz
 #   ├── [this-script-name].R
@@ -153,29 +153,31 @@ if (exists('emof_simple')){
 # 5. Add dataset metadata
 ################################################################################
 
-dataset <- data.frame(dataset_id, filename = basename(uploaded_file), bioatlas_resource_uid)
+dataset <- data.frame(datasetID = dataset_id, filename = basename(uploaded_file), bioatlas_resource_uid)
+# And remove datasetID from event tab/file
+event <- event[ , -which(names(event) == "datasetID")]
 
 ################################################################################
 # 6. Handle emof data
 ################################################################################
 
 # Only save EMOF rows that actually have data (and not just event IDs)
-emof_data <- subset(emof, select = -c(event_id_alias))
+emof_data <- subset(emof, select = -c(eventID))
 emof <- emof[rowSums(is.na(emof_data)) != ncol(emof_data),]
 rm(emof_data)
 
 # If emof-simple is used, transfer data to regular emof
 if (nrow(emof) == 0 & exists('emof_simple')) {
   if (nrow(emof_simple) > 0){
-    hdrs <- colnames(emof_simple)[colnames(emof_simple) != "event_id_alias"]
+    hdrs <- colnames(emof_simple)[colnames(emof_simple) != "eventID"]
     hdrs <- gsub(".", " ", hdrs, fixed = TRUE)
     # Make new emof row for each sample-variable combination
-    for (id in emof_simple$event_id_alias){
+    for (id in emof_simple$eventID){
       for (i in 1:length(hdrs)) {
         mlist <- strsplit(hdrs[i], split='[()]')[[1]]
         type <- trimws(mlist[1])
         unit <- mlist[2]
-        value <- emof_simple[emof_simple$event_id_alias == id, i+1]
+        value <- emof_simple[emof_simple$eventID == id, i+1]
         emof[nrow(emof) + 1, ] <- c(id,type,NA,value,NA,unit,NA,NA,NA,NA,NA,NA)
       }
     }
