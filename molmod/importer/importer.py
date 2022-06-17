@@ -495,7 +495,7 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
 
     # Check for un-matched columns in asv-table tab
     all_cols = data['asv-table'].columns
-    id_cols = ['asv_id_alias', 'DNA_sequence',
+    id_cols = ['asv_id_alias', 'DNA_sequence', 'associatedSequences',
                'kingdom', 'phylum', 'class', 'order', 'family', 'genus',
                'specificEpithet', 'infraspecificEpithet', 'otu']
     events = data['event']['eventID'].tolist()
@@ -671,6 +671,10 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     occurrences[tax_fields] = occurrences[tax_fields].fillna('')
 
     # Join with events to add 'event_pid'
+    # But drop event-level associatedSequences field first,
+    # as we also allow users to add associations at asv level,
+    # which is what we want to store here
+    del events['associatedSequences']
     occurrences = occurrences.join(events, on='eventID')
     occurrences.rename(columns={'pid': 'event_pid'}, inplace=True)
 
@@ -811,7 +815,7 @@ def compare_fields(data: PandasDict, mapping: dict):
     events = data['occurrence']['eventID'].tolist()
     # logging.error(f'Events {events}.')
     # Fields used for deriving db fields, or that are moved to derived sheets
-    expected = ['eventID', 'DNA_sequence',
+    expected = ['eventID', 'DNA_sequence', 'associatedSequences',
                 'asv_sequence', 'asv_id_alias', 'order', 'phylum', 'kingdom',
                 'class', 'family', 'genus', 'infraspecificEpithet',
                 'index', 'otu', 'specificEpithet']

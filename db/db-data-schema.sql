@@ -99,6 +99,7 @@ CREATE TABLE IF NOT EXISTS public.occurrence (
     asv_pid integer NOT NULL REFERENCES public.asv(pid) ON DELETE CASCADE,
     organism_quantity integer NOT NULL,
     previous_identifications character varying NOT NULL,
+    associated_sequences character varying,
     asv_id_alias character varying NOT NULL
 );
 
