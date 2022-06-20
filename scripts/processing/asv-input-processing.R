@@ -132,22 +132,12 @@ if (exists('emof-simple')){
   emof_simple <- `emof-simple`
   rm(`emof-simple`)
 }
-# If an outdated version of the import template was used,
-# the 'mixs' tab also needs to be renamed
-if (exists('mixs')){
-  dna <- `mixs`
-  rm(`mixs`)
-}
 
 # Remove white space & format to numeric where possible
 event <- trimConvert(event)
 asv_table <- trimConvert(asv_table)
 dna <- trimConvert(dna)
 emof <- trimConvert(emof)
-# Again, for older versions of the template
-if (exists('emof_simple')){
-  emof_simple <- trimConvert(emof_simple)
-}
 
 ################################################################################
 # 5. Add dataset metadata
@@ -226,7 +216,13 @@ if (exists('non_target')){
 # 9. Fix dataset-specifc problems, if any  - EDIT HERE, PLEASE!
 ################################################################################
 
-
+# We concatenate datasetID with eventID in DwC output, so to avoid redundancy,
+# remove datasetID + separator from eventID, if present
+# sep <- ':'
+# df_list <- list(event=event,dna=dna, emof=emof, emof_simple=emof_simple)
+# df_list=lapply(list(event=event,dna=dna),
+#               function(x) {x$eventID <- sub(paste0(dataset_id, sep), '', x$eventID);x})
+# list2env(df_list,.GlobalEnv)
 
 ################################################################################
 # 10. Create Excel file & compressed archive for import to asv-postgrest db
