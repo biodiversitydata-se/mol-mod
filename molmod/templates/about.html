@@ -80,19 +80,21 @@ About
                         <th># ASV:s</th>
                     </tr>
                 </thead>
+
                     {% if rows %}
                     {% for row in rows %}
+
                     <tr>
-                        <td>{{ row.gene }}</a></td>
-                        <td>{{ row.kingdoms }}</a></td>
-                        <td align="center">{{ row.datasets }}</a></td>
-                        <td align="center">{{ row.phyla }}</a></td>
-                        <td align="center">{{ row.classes }}</a></td>
-                        <td align="center">{{ row.orders }}</a></td>
-                        <td align="center">{{ row.families }}</a></td>
-                        <td align="center">{{ row.genera }}</a></td>
-                        <td align="center">{{ row.species }}</a></td>
-                        <td align="center">{{ row.asvs }}</a></td>
+                        <td>{{ row.gene }}</td>
+                        <td id="top_ranks">{{ row.kingdoms }}</td>
+                        <td>{{ row.datasets }}</td>
+                        <td>{{ row.phyla }}</td>
+                        <td>{{ row.classes }}</td>
+                        <td>{{ row.orders }}</td>
+                        <td>{{ row.families }}</td>
+                        <td>{{ row.genera }}</td>
+                        <td>{{ row.species }}</td>
+                        <td>{{ row.asvs }}</td>
                     </tr>
                     {% endfor %}
                     {% endif %}
