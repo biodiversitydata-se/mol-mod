@@ -69,7 +69,7 @@ About
                 <thead>
                     <tr>
                         <th>Marker</th>
-                        <th>Domains/Kingdoms</th>
+                        <th>Domains/Kingdoms/Supergroups<sup>*</sup></th>
                         <th># Datasets</th>
                         <th># Phyla</th>
                         <th># Classes</th>
@@ -98,7 +98,7 @@ About
                     {% endif %}
             </table>
         </p>
-        <br>
+        {% include ['tax_explainer.html'] ignore missing %}
         <p>
             We are currently working on improving the accessibility of this website.
             <a href="{{ sbdi_contact_page }}">Please contact SBDI support</a> with any questions or suggestions!

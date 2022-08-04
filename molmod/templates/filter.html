@@ -51,7 +51,7 @@ Filter search
         </div>
         <div class='row'>
             <div class='col-md-3'>
-                <label for='kingdom'>Domain or Kingdom</label>
+                <label for='kingdom'>Domain/Kingdom/Supergroup<sup>*</sup></label>
                 {{ sform.kingdom(id='kingdom', class='form-control select2') }}
             </div>
             <div class='col-md-3'>
@@ -84,8 +84,8 @@ Filter search
         </div>
         <div class='row'>
             <div class='col-md-12'>
-               <br><p>Read more about ASV taxonomy in SBDI
-              <a href="{{ taxonomy_page }}">here</a>.</p>
+               <br>
+               {% include ['tax_explainer.html'] ignore missing %}
             </div>
        </div>
         <hr>
