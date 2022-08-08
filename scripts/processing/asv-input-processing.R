@@ -38,8 +38,8 @@ annotation_file <- 'input/annotation.tsv'
 # Target prediction (comment out whole chunk if no prediction was performed)
 # Criteria for predicting ASV as non-target (state even if prediction identified no non-targets)
 target_criteria <- 'Assigned kingdom OR barrnap-positive'
-# File listing ASVs NOT predicted to be target gene (comment out if non-existing)
-non_target <- 'input/barnap_negative_n_unassigned.txt'
+# File listing ASVs predicted to be target gene (comment out if non-existing)
+target_list <- 'input/rrna.bac.gff'
 
 dataset_id <- 'SBDI-ASV-1'
 
@@ -194,19 +194,18 @@ annotation = read.delim(file = annotation_file, sep = '\t', header = TRUE,
 annotation$annotation_target <- dna$target_gene[1]
 
 ################################################################################
-# 8. Flag non-target ASV:s
+# 8. Flag ASV:s based on target prediction outcome (Barrnap)
 ################################################################################
 
-# If target prediction was made, flag non-targets
-if (exists('non_target')){
-  if (file.exists(non_target)){
-    todel = read.delim(file = non_target, sep = '\n', header = FALSE)
-    colnames(todel) = c('asv_id_alias')
+# If target prediction was made, flag ASVs as TRUE/FALSE based on this
+if (exists('target_list')){
+  if (file.exists(target_list)){
+    true_targets = read.delim(file = target_list, sep = '\t', header = FALSE, skip = 1)
     annotation$target_criteria <- target_criteria
-    annotation$target_prediction[(annotation$asv_id_alias %in% todel$asv_id_alias)] <- FALSE
-    annotation$target_prediction[!(annotation$asv_id_alias %in% todel$asv_id_alias)] <- TRUE
+    annotation$target_prediction[(annotation$asv_id_alias %in% true_targets[,1])] <- TRUE
+    annotation$target_prediction[!(annotation$asv_id_alias %in% true_targets[,1])] <- FALSE
   }
-# If no prediction was made, use defaults
+  # If no prediction was made, use defaults
 } else {
   annotation$target_criteria <- 'None'
   annotation$target_prediction <- TRUE

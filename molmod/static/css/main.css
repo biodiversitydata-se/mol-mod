@@ -81,6 +81,17 @@ select.form-control.input-sm {
     background-color: #bed9e5 !important;
 }
 
+/* STATS TABLE */
+#top_ranks {
+    word-wrap: break-word;
+    max-width: 50px;
+    min-width: 50px;
+}
+
+#stats_table td:nth-child(n+3) {
+    text-align: center;
+}
+
 /* HELP */
 /* Empty SBDI post requests, table/dropdown loading errors etc.*/
 /* Hide by default */
