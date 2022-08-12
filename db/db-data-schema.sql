@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS public.sampling_event (
     institution_id character varying,
     collection_code character varying,
     field_number character varying,
-    catalogue_number character varying,
+    catalog_number character varying,
     references_ character varying,
     material_sample_id character varying NOT NULL,
     associated_sequences character varying NOT NULL,
