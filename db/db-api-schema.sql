@@ -203,14 +203,13 @@ CREATE FUNCTION api.app_drop_options(
     rv_prim text[] DEFAULT '{}'::text[])
     RETURNS TABLE(data json)
     LANGUAGE plpgsql IMMUTABLE
-    AS $_$
+    AS $$
 BEGIN
     -- Execute dynamically, i.e. modify the query based on 1) which dropdown sent
     -- the request, 2) what the user typed, if anything, and 3) which
     -- selections have previously been made in other dropdowns, if any
 	RETURN QUERY EXECUTE format(
-        -- Create temp table 'filtered' to use in subsequent SELECTs
-        'with filtered as (
+        'with filtered as ( -- temp table to use in JSON build
             SELECT DISTINCT %I
             FROM api.app_filter_mixs_tax
             WHERE %I <> '''' AND %I IS NOT NULL
@@ -241,18 +240,20 @@ BEGIN
             ORDER BY %I
             OFFSET $12
             LIMIT $13
-        -- Insertion of the SQL identifier (target droppdown) must be handled by format
+        -- Insertion of the SQL identifier (target droppdown) must be handled by format - not USING clause
         -- See e.g: https://www.postgresql.org/docs/13/plpgsql-statements.html#PLPGSQL-STATEMENTS-EXECUTING-DYN
         ) t', field, field, field, field, field, field, field
     )
-    -- 2) Insertion of data values can be handled here
     USING kingdom, phylum, classs, oorder, family, genus, species, '^'||term||'.*$', gene, fw_prim, rv_prim, noffset, nlimit, sub;
 END
-$_$;
+$$;
+COMMENT ON FUNCTION api.app_drop_options(text, bigint, integer, text, text[], text[], text[], text[], text[], text[], text[], text[], text[], text[], text[])
+    IS 'Example call (view in Properties | General to get quotes right):
+SELECT api.app_drop_options(''classs'', 0, 25, ''T'', ''{}'', ''{Actinobacteriota, Bacteroidota}'');';
 
-    --
-    -- View for populating filter search result table
-    --
+--
+-- View for populating filter search result table
+--
 
 CREATE VIEW api.app_search_mixs_tax AS
 SELECT DISTINCT asv.asv_id,
@@ -318,8 +319,8 @@ CREATE FUNCTION api.app_seq_from_id(ids character varying[])
 	)
 $$;
 COMMENT ON FUNCTION api.app_seq_from_id(character varying[])
-    IS 'Seems PostgREST does not allow POST:ing to views, and no. of ID:s that we can fit into GET url is limited, so we use function instead. Example call:
-SELECT api.app_seq_from_idx(''{ASV:40b37890b1b1fcdf0ece91f1da34c1ca}'')';
+    IS 'Example call (view in Properties | General to get quotes right):
+SELECT api.app_seq_from_id(''{ASV:40b37890b1b1fcdf0ece91f1da34c1ca}'')';
 
 --
 -- View used for populating stats table in About page. It is 'materialized' to
