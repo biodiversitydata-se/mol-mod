@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""
+This module defines classes used for creating form objects in route modules.
+It also includes (server-side) validation of form input.
+"""
 
 import re
 
@@ -87,6 +91,12 @@ def cover_check(form, field):
 
 
 def file_check(form, field):
+    '''Checks that data delivery uploads have correct format. See also main.js
+    for file size validation that is performed in browser, for quicker
+    response, and limits to file upload size set both in .env and in proxy
+    config:
+    https://github.com/biodiversitydata-se/proxy-ws-mol-mod-docker/blob/master/nginx-proxy.conf
+    '''
     file = field.data
     valid_ext = APP.config['VALID_EXTENSIONS']
     ext_str = ", ".join(valid_ext)
