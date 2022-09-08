@@ -1,6 +1,5 @@
 """
-This module contains routes involved in filter search and
-result display.
+This module contains routes involved in filter search and result display.
 """
 import json
 
@@ -27,6 +26,7 @@ def filter():
        result tables on submit via (DataTables) AJAX call to '/filter_run'.
     '''
 
+    # Create forms from classes in forms.py
     sform = FilterSearchForm()
     rform = FilterResultForm()
 
@@ -46,8 +46,9 @@ def filter():
 
 @filter_bp.route('/request_drop_options/<field>', methods=['POST'])
 def request_drop_options(field) -> dict:
-    '''Forwards (Select2) AJAX request for filtered dropdown options to
-    API, and returns paginated data in dict with Select2-specific format'''
+    '''Forwards (Select2) AJAX request for filtered dropdown options
+    (see main.js) to API, and returns paginated data in dict with Select2
+    -specific format.'''
 
     # Make dict of selected list values while renaming list keys,
     # e.g. 'kingdom[]' to 'kingdom'
@@ -64,15 +65,23 @@ def request_drop_options(field) -> dict:
 
     # Add name of field to be filtered, and (user-typed search) term
     payload.update({'field': field, 'term': term})
-    # Add pagination
+    # Add pagination data.
     limit = 25
     offset = (int(request.form['page']) - 1) * limit
+    # Examples (assuming more=TRUE, see below):
+    # 1) User opens dropdown -> select2 sends page=1 -> offset = 0 -> get
+    # records 1-25 from db
+    # 2) User scrolls past limit -> page = 2 -> offset = 25 -> get 26-50
     payload.update({'nlimit': limit, 'noffset': offset})
 
     #
     # Send API request
     #
 
+    # Data are sent to a stored db procedure (app_drop_options) which,
+    # in turn, dynamically filters data from a db view (app_filter_mixs_tax),
+    # based on target field, typed input and selections made in
+    # other dropdowns (see db/db-api-schema.sql)
     url = f"{CONFIG.POSTGREST}/rpc/app_drop_options"
     payload = json.dumps(payload)
     APP.logger.debug(f'Payload sent to /rpc/app_drop_options: {payload}')
@@ -83,6 +92,8 @@ def request_drop_options(field) -> dict:
     except Exception as e:
         APP.logger.error(f'API request for select options resulted in: {e}')
     else:
+        # Repackage data into custom format for Select2 boxes
+        # Set more = TRUE if there are additional records to retrieve from db
         results = json.loads(response.text)[0]['data']['results']
         count = json.loads(response.text)[0]['data']['count']
         return {'results': results,
