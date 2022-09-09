@@ -23,11 +23,12 @@ blast_bp = Blueprint('blast_bp', __name__,
 @blast_bp.route('/blast', methods=['GET', 'POST'])
 @login_required
 def blast():
-    '''Displays both blast search and result forms. Result table is
-       populated on submit via (DataTables) AJAX call to '/blast_run'
+    '''Displays both blast search and result forms. The result table is
+       populated on submit via (DataTables) AJAX call to '/blast_run',
        which in turn calls a blast-worker container.
     '''
 
+    # Create forms from classes in forms.py
     sform = BlastSearchForm()
     rform = BlastResultForm()
 

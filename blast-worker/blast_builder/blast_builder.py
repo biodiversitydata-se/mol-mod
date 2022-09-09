@@ -19,9 +19,8 @@ from psycopg2.extras import DictCursor
 
 def connect_db(pass_file: str = '/run/secrets/postgres_pass'):
     """
-    Uses environment variables to set postgres connection settings, and
-    creates a database connection. A simple query to list datasets is then
-    used to verify the connection.
+    Uses environment variables to set up a database connection. A simple
+    query to list datasets is then used to verify the connection.
     """
     try:
         with open(pass_file) as password:
@@ -53,7 +52,7 @@ def connect_db(pass_file: str = '/run/secrets/postgres_pass'):
 def list_datasets_in_bioatlas(cursor: DictCursor) -> list:
     """
     Returns a list of all datasets available in the database where
-    `in_bioatlas`is `true`.
+    `in_bioatlas` is `true`.
     """
     query = "SELECT pid, dataset_id FROM public.dataset \
              WHERE in_bioatlas;"
