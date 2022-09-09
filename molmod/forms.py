@@ -23,8 +23,8 @@ def fasta_check(form, field):
     if len(field.data) < 1:
         raise ValidationError('Please submit an input sequence')
     if len(field.data) > 50000:
-        raise ValidationError('''Input sequence must be less
-                              than 50000 characters''')
+        raise ValidationError("""Input sequence must be less
+                              than 50000 characters""")
 
     # Check that this is actually a valid fasta file, that we can process
     fasta_chars = r'AaCcGgTtUuIiRrYyKkMmSsWwBbDdHhVvNn\-'
@@ -91,12 +91,12 @@ def cover_check(form, field):
 
 
 def file_check(form, field):
-    '''Checks that data delivery uploads have correct format. See also main.js
+    """Checks that data delivery uploads have correct format. See also main.js
     for file size validation that is performed in browser, for quicker
     response, and limits to file upload size set both in .env and in proxy
     config:
     https://github.com/biodiversitydata-se/proxy-ws-mol-mod-docker/blob/master/nginx-proxy.conf
-    '''
+    """
     file = field.data
     valid_ext = APP.config['VALID_EXTENSIONS']
     ext_str = ", ".join(valid_ext)

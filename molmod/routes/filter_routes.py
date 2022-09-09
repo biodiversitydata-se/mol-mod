@@ -21,10 +21,10 @@ filter_bp = Blueprint('filter_bp', __name__,
 @filter_bp.route('/filter', methods=['GET', 'POST'])
 @login_required
 def filter():
-    '''Displays both filter search and result forms. Search form dropdowns
+    """Displays both filter search and result forms. Search form dropdowns
        are populates via (Select2) AJAX call to '/request_drop_options/';
        result tables on submit via (DataTables) AJAX call to '/filter_run'.
-    '''
+    """
 
     # Create forms from classes in forms.py
     sform = FilterSearchForm()
@@ -46,9 +46,9 @@ def filter():
 
 @filter_bp.route('/request_drop_options/<field>', methods=['POST'])
 def request_drop_options(field) -> dict:
-    '''Forwards (Select2) AJAX request for filtered dropdown options
+    """Forwards (Select2) AJAX request for filtered dropdown options
     (see main.js) to API, and returns paginated data in dict with Select2
-    -specific format.'''
+    -specific format."""
 
     # Make dict of selected list values while renaming list keys,
     # e.g. 'kingdom[]' to 'kingdom'
@@ -102,9 +102,9 @@ def request_drop_options(field) -> dict:
 
 @filter_bp.route('/filter_run', methods=['POST'])
 def filter_run() -> dict:
-    '''Composes API request for filtered ASV occurrences, based on data
+    """Composes API request for filtered ASV occurrences, based on data
        received in (DataTable) AJAX request, and returns dict
-       with DataTables-specific format'''
+       with DataTables-specific format"""
 
     # Set base URL for API search
     url = f"{CONFIG.POSTGREST}/app_search_mixs_tax"

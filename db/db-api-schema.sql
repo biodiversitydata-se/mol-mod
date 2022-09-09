@@ -212,7 +212,7 @@ BEGIN
         'with filtered as ( -- temp table to use in JSON build
             SELECT DISTINCT %I
             FROM api.app_filter_mixs_tax
-            WHERE %I <> '''' AND %I IS NOT NULL
+            WHERE %I <> """' AND %I IS NOT NULL
             -- Expand supplied arrays of dropdown selections into tables
             AND ($1 = ''{}'' OR kingdom IN (SELECT unnest($1)))
             AND ($2 = ''{}'' OR phylum IN (SELECT unnest($2)))

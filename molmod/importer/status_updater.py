@@ -24,10 +24,10 @@ from importer import connect_db
 
 def run_update(pid: int = 0, status: int = 1, ruid: str = '',
                dry_run: bool = False):
-    '''Updates 'in_bioatlas status' and 'bioatlas_resource_uid' for a dataset,
+    """Updates 'in_bioatlas status' and 'bioatlas_resource_uid' for a dataset,
        and/or updates the materialized db view that summarizes data for
        datasets that are currently used in the Bioatlas.
-       '''
+       """
 
     logging.info("Connecting to database")
     connection, cursor = connect_db()

@@ -5,9 +5,9 @@ import secrets
 
 
 def get_env_variable(name: str):
-    '''
+    """
     Gets env var or warns if missing
-    '''
+    """
     try:
         return os.environ[name]
     except KeyError:
@@ -127,9 +127,9 @@ class TestConfig(Config):
 
 
 def get_config():
-    '''
+    """
     Uses FLASK_ENV (set in compose file) to determine app environment.
-    '''
+    """
     try:
         env = get_env_variable('FLASK_ENV')
     except Exception:

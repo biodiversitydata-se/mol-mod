@@ -288,12 +288,12 @@ def compare_annotations(data: pd.DataFrame, db_cursor: DictCursor,
 
     pid_str = ",".join([str(int) for int in data['asv_pid']])
     # Get target prediction info for matching asvs in db
-    query = f'''SELECT asv_id, asv_pid, annotation_target, target_prediction,
+    query = f"""SELECT asv_id, asv_pid, annotation_target, target_prediction,
                target_criteria
                FROM taxon_annotation ta, asv
                WHERE ta.asv_pid = asv.pid AND asv_pid in ({pid_str})
                AND status = 'valid'
-            '''
+            """
     total = len(data.values)
     start = 0
     end = min(total, batch_size)
@@ -363,10 +363,10 @@ def invalidate_annotations(pids: list, db_cursor: DictCursor):
     """
 
     pid_str = ",".join([str(int) for int in pids])
-    query = f'''UPDATE taxon_annotation
+    query = f"""UPDATE taxon_annotation
                 SET status = 'old'
                 WHERE asv_pid IN ({pid_str})
-            '''
+            """
     try:
         db_cursor.execute(query)
     except psycopg2.Error as err:
@@ -441,10 +441,10 @@ def read_data_file(data_file: str, sheets: List[str]):
 
 
 def handle_dates(dates: pd.Series):
-    '''
+    """
     Removes time digits (e.g. 00:00:00) from (Excel) date / timestamp field,
     as they mess up validation. Does nothing if field is text / string.
-    '''
+    """
     try:
         dates = dates.dt.date
     # E.g. if field is text
