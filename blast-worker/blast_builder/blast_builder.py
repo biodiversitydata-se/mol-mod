@@ -52,7 +52,7 @@ def connect_db(pass_file: str = '/run/secrets/postgres_pass'):
 def list_datasets_in_bioatlas(cursor: DictCursor) -> list:
     """
     Returns a list of all datasets available in the database where
-    `in_bioatlas` is `true`.
+    'in_bioatlas' is 'true'.
     """
     query = "SELECT pid, dataset_id FROM public.dataset \
              WHERE in_bioatlas;"
@@ -63,8 +63,8 @@ def list_datasets_in_bioatlas(cursor: DictCursor) -> list:
 
 def create_input_fasta(cursor: DictCursor, filename: str = 'blast_input'):
     """
-    Uses the given database `cursor` to extract sequences to be placed in
-    `filename`.
+    Uses the given database 'cursor' to extract sequences to be placed in
+    'filename'.
     """
     logging.info("Creating input fasta file: %s.fasta", filename)
 
@@ -76,7 +76,7 @@ def create_input_fasta(cursor: DictCursor, filename: str = 'blast_input'):
 
 def create_blast_db_from_fasta(fasta: str, db_name: str):
     """
-    Creates a blast database `db_name` from the sequences in  `fasta`.
+    Creates a blast database 'db_name' from the sequences in  'fasta'.
     """
     logging.info("Creating blast database %s from %s", db_name, fasta)
 
@@ -87,8 +87,8 @@ def create_blast_db_from_fasta(fasta: str, db_name: str):
 
 def create_blast_db(filename: str, db_dir: str = '.'):
     """
-    Creates a blast database at `db_dir`/`filename`, made from all the datasets
-    that have `in_bioatlas` set to `true`.
+    Creates a blast database at 'db_dir'/'filename', made from all the datasets
+    that have 'in_bioatlas' set to 'true'.
     """
 
     _, cursor = connect_db()

@@ -34,7 +34,7 @@ def as_snake_case(text: str) -> str:
     """
     Converts CamelCase to snake_case.
 
-    As a special case, this function converts `ID` to `_id` instead of `_i_d`.
+    As a special case, this function converts 'ID' to '_id' instead of '_i_d'.
     """
     output = ""
     for i, char in enumerate(text):
@@ -81,7 +81,7 @@ def connect_db(pass_file='/run/secrets/postgres_pass'):
 
 def get_base_query(table_mapping: dict):
     """
-    Creates an SQL insert query base using the given `table_mapping`.
+    Creates an SQL insert query base using the given 'table_mapping'.
 
     Note that the retured query will not be complete as it will not include any
     data values.
@@ -101,7 +101,7 @@ def get_base_query(table_mapping: dict):
 
 def format_value(value):
     """
-    Formats `value` in a manner suitable for postgres insert queries.
+    Formats 'value' in a manner suitable for postgres insert queries.
     """
     if isinstance(value, (str, date)):
         return f"'{value}'"
@@ -113,8 +113,8 @@ def format_value(value):
 def format_values(data: pd.DataFrame, mapping: dict,
                   start: int = 0, end: Optional[int] = 0) -> str:
     """
-    Formats the values in `data` according to the given `mapping` in a way that
-    is suitable for database insert queries. Only values from `start` to `end`
+    Formats the values in 'data' according to the given 'mapping' in a way that
+    is suitable for database insert queries. Only values from 'start' to 'end'
     will be used.
     """
     values = []
@@ -131,7 +131,7 @@ def format_values(data: pd.DataFrame, mapping: dict,
 def insert_common(data: pd.DataFrame, mapping: dict, db_cursor: DictCursor,
                   batch_size: int = 1000):
     """
-    Inserts `data` into the database based on the given `mapping`.
+    Inserts 'data' into the database based on the given 'mapping'.
     """
     base_query, field_mapping = get_base_query(mapping)
 
@@ -159,7 +159,7 @@ def insert_common(data: pd.DataFrame, mapping: dict, db_cursor: DictCursor,
 def insert_dataset(data: pd.DataFrame, mapping: dict,
                    db_cursor: DictCursor) -> int:
     """
-    Inserts a single dataset into the database, and returns the database `pid`.
+    Inserts a single dataset into the database, and returns the database 'pid'.
     """
     base_query, field_mapping = get_base_query(mapping['dataset'])
 
@@ -184,7 +184,7 @@ def insert_events(data: pd.DataFrame, mapping: dict, db_cursor: DictCursor,
                   batch_size: int = 1000) -> pd.DataFrame:
     """
     Inserts sampling events, reeturning the given dataframe with updated
-    `pid`'s from the database.
+    'pid''s from the database.
     """
     base_query, field_mapping = get_base_query(mapping['event'])
 
@@ -217,7 +217,7 @@ def insert_events(data: pd.DataFrame, mapping: dict, db_cursor: DictCursor,
 def insert_asvs(data: pd.DataFrame, mapping: dict, db_cursor: DictCursor,
                 batch_size: int = 1000) -> (pd.DataFrame, int):
     """
-    Inserts asv's into the database, returning the database `pid`'s. Unlike the
+    Inserts asv's into the database, returning the database 'pid''s. Unlike the
     other categories asv conflicts returns the id of the previously registered
     entry.
     """
@@ -377,7 +377,7 @@ def invalidate_annotations(pids: list, db_cursor: DictCursor):
 
 def read_data_file(data_file: str, sheets: List[str]):
     """
-    Opens and reads the given `sheets` from `data_file`. `data_file` must be a
+    Opens and reads the given 'sheets' from 'data_file'. 'data_file' must be a
     valid excel or tar file.
     """
 
@@ -699,7 +699,7 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
 
 def run_validation(data: PandasDict, mapping: dict):
     """
-    Uses `mapping` to run regexp validation of the fields in data.
+    Uses 'mapping' to run regexp validation of the fields in data.
     """
     valid = True
     for sheet, fields in mapping.items():
@@ -734,7 +734,7 @@ def run_validation(data: PandasDict, mapping: dict):
 
 def update_defaults(data: PandasDict, mapping: dict):
     """
-    Uses the `mapping` dict to set default values in `data`.
+    Uses the 'mapping' dict to set default values in 'data'.
     """
     for sheet, fields in mapping.items():
         logging.info(" * %s", sheet)

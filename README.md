@@ -95,7 +95,7 @@ For local testing of production environment, you need to run or add this to your
 Otherwise the Bioatlas CAS server will redirect users to 'https://asv-portal.biodiversitydata.se' after logout.
 
 ### Database access
-Database access can be limited to IP ranges listed in environment variable `DBACCESS` in *.env* file. As a default, this is set to include loopback/same device, private and Docker networking defaults:
+Database access can be limited to IP ranges listed in environment variable 'DBACCESS' in *.env* file. As a default, this is set to include loopback/same device, private and Docker networking defaults:
 ```
 DBACCESS=127.0.0.1/8 192.168.0.0/16 10.0.0.0/8 172.16.0.0/12
 ```
