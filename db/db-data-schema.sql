@@ -10,20 +10,20 @@ CREATE TABLE IF NOT EXISTS public.dataset (
     dataset_id character varying NOT NULL,
     filename character varying UNIQUE,
     insertion_time timestamp without time zone NOT NULL DEFAULT now(),
-    in_bioatlas boolean default false,
+    in_bioatlas boolean default FALSE,
     bioatlas_resource_uid character varying
 );
 
 --- Only a single version of a dataset is allowed in the Bioatlas at any
 --- point in time, i.e. multiple dataset rows can only have same dataset_id
---- and/or bioatlas_resource_uid if all but one has in_bioatlas status = False
+--- and/or bioatlas_resource_uid if all but one has in_bioatlas status = FALSE
 CREATE UNIQUE INDEX IF NOT EXISTS datasetid_status
 ON public.dataset(dataset_id, in_bioatlas)
-WHERE in_bioatlas = True;
+WHERE in_bioatlas = TRUE;
 
 CREATE UNIQUE INDEX IF NOT EXISTS ruid_status
 ON public.dataset(bioatlas_resource_uid, in_bioatlas)
-WHERE in_bioatlas = True;
+WHERE in_bioatlas = TRUE;
 
 CREATE TABLE IF NOT EXISTS public.sampling_event (
     pid BIGSERIAL PRIMARY KEY,
