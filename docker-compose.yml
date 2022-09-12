@@ -62,6 +62,7 @@ services:
     # ... but these need to be explicitly read - see db-roles.sql
       - PGRST_DB_ANON_PASS_FILE=./run/secrets/postgrest_anon_pass
       - POSTGRES_IPT_PASS_FILE=./run/secrets/ipt_pass
+    # Avoid permission issues on Mac by setting container dir for db stats
     command: postgres -c stats_temp_directory=/tmp
 
   postgrest:
