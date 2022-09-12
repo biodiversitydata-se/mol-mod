@@ -36,7 +36,7 @@ def about():
 
 @main_bp.route('/stats', methods=['GET'])
 def get_stats() -> dict:
-    '''Makes API request for db stats, and returns dict.'''
+    """Makes API request for db stats, and returns dict."""
 
     url = f"{CONFIG.POSTGREST}/app_about_stats"
 
@@ -55,13 +55,13 @@ def get_stats() -> dict:
 # Redirect user to Bioatlas CAS login
 @login_required
 def upload():
-    '''Checks whether logged-in user has required role (UPLOAD_ROLE) for file
+    """Checks whether logged-in user has required role (UPLOAD_ROLE) for file
        upload. Authorized users are sent to upload page; unauthorized users to
        custom 403 Forbidden page. Selected files currently need to pass
        validation in both forms.py and js, the latter of which was added to be
        able to reject larger files faster, and to avoid getting 413 response
        directly from nginx.
-    '''
+    """
 
     # Get CAS user roles from session
     cas_attributes = session.get('CAS_ATTRIBUTES', None)

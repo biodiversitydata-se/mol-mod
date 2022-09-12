@@ -103,7 +103,8 @@ $(document).ready(function() {
             });
 
             $('#uform').on('submit', function() {
-            // Checks size and name of selected file against env variables
+            // Checks size and name of selected file against env variables (in .env)
+            // Also see forms.py and proxy config: https://github.com/biodiversitydata-se/proxy-ws-mol-mod-docker/blob/master/nginx-proxy.conf
                 // If file has been selected (otherwise Flask rejects)
                 if ($("#file").val()) {
                     var selFile = $('#file')[0].files[0];
@@ -257,6 +258,7 @@ function makeSel2drop(drop){
                 }
             },
             cache: true,
+            // Add the CSRF token to HTTP header
             beforeSend: function(xhr, settings) {
                 if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
                     xhr.setRequestHeader("X-CSRFToken", $('#csrf_token').val())
@@ -273,7 +275,7 @@ function makeSel2drop(drop){
                     //Log but do nothing!
                     console.log('Select2.js fast type-ahead error condition encountered and handled properly');
                 } else {
-                    //process proper errors
+                    //Process proper errors
                     $('#filt_err_container').html('Sorry, something unexpected happened during page load. '
                     + 'Please <a href="' + sbdiContactPage + '">contact SBDI support</a> if this error persists.');
 

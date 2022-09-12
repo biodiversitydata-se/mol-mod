@@ -35,7 +35,7 @@ class FlaskTest(unittest.TestCase):
 
     def setUp(self):
         """
-        Starts the flask APP on port `self.PORT`.
+        Starts the flask APP on port 'self.PORT'.
         """
         APP.config["TESTING"] = True
         APP.config["WTF_CSRF_ENABLED"] = False

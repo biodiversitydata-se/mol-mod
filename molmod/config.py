@@ -5,9 +5,9 @@ import secrets
 
 
 def get_env_variable(name: str):
-    '''
+    """
     Gets env var or warns if missing
-    '''
+    """
     try:
         return os.environ[name]
     except KeyError:
@@ -21,7 +21,7 @@ def load_config_values(target: object, filename: str):
       key1 = value
       key2 = value
       [...]
-    and sets the loaded key/value pairs in the `target` object.
+    and sets the loaded key/value pairs in the 'target' object.
     """
     with open(filename) as f:
         for row in f:
@@ -45,8 +45,8 @@ def load_config_values(target: object, filename: str):
 
 
 def to_list(raw: str) -> list:
-    """If the `raw` string is formatted like a list, it is converted to a list,
-    otherwise returns a list with `raw` as the single item.
+    """If the 'raw' string is formatted like a list, it is converted to a list,
+    otherwise returns a list with 'raw' as the single item.
     """
     raw = raw.strip()
     retval = []
@@ -127,9 +127,9 @@ class TestConfig(Config):
 
 
 def get_config():
-    '''
+    """
     Uses FLASK_ENV (set in compose file) to determine app environment.
-    '''
+    """
     try:
         env = get_env_variable('FLASK_ENV')
     except Exception:

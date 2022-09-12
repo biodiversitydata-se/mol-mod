@@ -23,7 +23,7 @@ for line in open('../.env'):
 
 def random_string(length, letters="abcdefghijklmnopqrstuvwxyz"):
     """
-    Returns a random string  of length `length` from a set of letters.
+    Returns a random string  of length 'length' from a set of letters.
     """
     return "".join([random.choice(letters) for _ in range(length)])
 
@@ -165,7 +165,7 @@ def insert_random_mixs(dataset):
 
 def insert_random_asvs(dataset, number, batch=100):
     """
-    Inserts `number` random asv's into the dataset, prefixed with the dataset
+    Inserts 'number' random asv's into the dataset, prefixed with the dataset
     id so that they can be removed when the test dataset is purged.
     """
     current_batch = []
@@ -240,7 +240,7 @@ def insert_random_taxon_annotations(dataset, batch=100):
 
 def insert_random_occurences(event_id, dataset, occurences, batch=100):
     """
-    Inserts `number` random occurrences into the sampling event, prefixed with
+    Inserts 'number' random occurrences into the sampling event, prefixed with
     the dataset id so that they can be removed when the test dataset is purged.
     The occurrences will be assigned to a random asv from the dataset.
     """

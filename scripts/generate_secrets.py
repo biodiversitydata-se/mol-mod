@@ -14,10 +14,10 @@ import sys
 
 def generate_secret(filename, skip_existing: bool = False):
     """
-    Generates single secret value (using `secrets.token_hex()`) and saves it
-    as given `filename`. The permissions of the filename will be set to 400.
+    Generates single secret value (using 'secrets.token_hex()') and saves it
+    as given 'filename'. The permissions of the filename will be set to 400.
 
-    If `skip_existing` is set, the function will just return the content of the
+    If 'skip_existing' is set, the function will just return the content of the
     currently existing file.
     """
 
@@ -46,10 +46,10 @@ def generate_secret(filename, skip_existing: bool = False):
 
 def write_config(config_file, template_file, skip_existing=False, **variables):
     """
-    Reads the `template_file`, replaces variables formatted like <var> with the
-    content in `variables`.
+    Reads the 'template_file', replaces variables formatted like <var> with the
+    content in 'variables'.
 
-    ex. <user> gets replaces with the content of `user`.
+    ex. <user> gets replaces with the content of 'user'.
         "<user>" -> "postgres"
 
     """
