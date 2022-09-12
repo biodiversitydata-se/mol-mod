@@ -60,25 +60,20 @@ tr.shown td.details-control {
 select.form-control.input-sm {
     -webkit-appearance: menulist !important;
 }
-/* Restore striped table look */
-/* Odd rows */
-.table tr:nth-child(odd) td,
+/* Restore striped look */
 .table tr th,
-/* Use same look for form input fields */
-.form-control {
+.table tr:nth-child(odd) td {
     color: #4c4c4c !important;
     background-color: white !important;
 }
-/* Even rows */
 .table tr:nth-child(even) td {
     color: #4c4c4c !important;
     background-color: #f9f9f9 !important;
 }
 /* Selected rows */
-.table tr.selected:nth-child(odd) td,
-.table tr.selected:nth-child(even) td {
+.table tr.selected td {
     color: black !important;
-    background-color: #bed9e5 !important;
+    box-shadow: inset 0 0 0 9999px #bed9e5 !important;
 }
 
 /* STATS TABLE */
@@ -87,7 +82,6 @@ select.form-control.input-sm {
     max-width: 50px;
     min-width: 50px;
 }
-
 #stats_table td:nth-child(n+3) {
     text-align: center;
 }

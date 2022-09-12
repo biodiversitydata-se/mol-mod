@@ -2,8 +2,9 @@
 
 # Pull web dependencies
 
-DTCSS=https://cdn.datatables.net/v/bs/jszip-2.5.0/dt-1.10.24/b-1.7.0/b-html5-1.7.0/sl-1.3.3/datatables.min.css
-DTJS=https://cdn.datatables.net/v/bs/jszip-2.5.0/dt-1.10.24/b-1.7.0/b-html5-1.7.0/sl-1.3.3/datatables.min.js
+DTCSS=https://cdn.datatables.net/v/bs/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-html5-2.2.3/sl-1.4.0/datatables.min.css
+DTJS=https://cdn.datatables.net/v/bs/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-html5-2.2.3/sl-1.4.0/datatables.min.js
+
 SELECTTWO=https://github.com/select2/select2/archive/refs/tags/4.0.13.tar.gz
 SELECTTWOBS=https://raw.githubusercontent.com/select2/select2-bootstrap-theme/master/dist/select2-bootstrap.min.css
 
