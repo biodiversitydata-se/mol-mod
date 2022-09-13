@@ -15,9 +15,9 @@ Upload file
         {{ form.csrf_token }}
         <div class='row'>
             <div class='col-md-12'>
-                <!-- Actual upload, which is hidden -->
+                <!-- Actual file upload field, which is hidden -->
                 {{ form.file(id='file') }}
-                <!-- Custom upload button -->
+                <!-- Fake upload button (it's really a label) -->
                 <label for="file" class='btn btn-default' id='file_label'>Select</label>
                 <!-- Name of selected file -->
                 <span id="file-shown">No file selected</span>

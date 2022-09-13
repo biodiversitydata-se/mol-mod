@@ -96,7 +96,7 @@ $(document).ready(function() {
                 // If 'Cancel' is selected
                 if(typeof $("#file")[0].files[0] === "undefined") {
                     // Restore placeholder for both span and underlying input
-                    // to avoid flicker and dissaoearing text
+                    // to avoid flicker and disappearing text
                     $("#file-shown").text('No file selected');
                     $("#file").jfilestyle({placeholder: ''});
                 }
