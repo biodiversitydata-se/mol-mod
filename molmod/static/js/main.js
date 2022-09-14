@@ -103,8 +103,8 @@ $(document).ready(function() {
             });
 
             $('#uform').on('submit', function() {
-            // Checks size and name of selected file against env variables (in .env)
-            // Also see forms.py and proxy config: https://github.com/biodiversitydata-se/proxy-ws-mol-mod-docker/blob/master/nginx-proxy.conf
+                // Checks size and name of selected file against env variables (in .env)
+                // Also see forms.py and proxy config: https://github.com/biodiversitydata-se/proxy-ws-mol-mod-docker/blob/master/nginx-proxy.conf
                 // If file has been selected (otherwise Flask rejects)
                 if ($("#file").val()) {
                     var selFile = $('#file')[0].files[0];
@@ -134,7 +134,7 @@ $(document).ready(function() {
                     }
                 }
                 return true;
-        });
+            });
 
     }
 
