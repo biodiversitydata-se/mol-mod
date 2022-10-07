@@ -17,6 +17,7 @@ import tempfile
 from collections import OrderedDict
 from datetime import date
 from io import BytesIO
+from math import isnan
 from pprint import pformat
 from typing import List, Mapping, Optional
 
@@ -105,8 +106,11 @@ def format_value(value):
     """
     if isinstance(value, (str, date)):
         return f"'{value}'"
-    if value is None:
+    # Missing values, but note that missing ranks are read into pandas and db
+    # as empty strings, as it was useful for outputting taxon strings later
+    if isnan(value):
         return 'NULL'
+
     return value
 
 
@@ -436,7 +440,6 @@ def read_data_file(data_file: str, sheets: List[str]):
     # Drop 'domain' column if e.g. ampliseq has included that
     for sheet in ['asv-table', 'annotation']:
         data[sheet] = data[sheet].drop(columns=['domain'], errors='ignore')
-
     return data
 
 
@@ -570,11 +573,6 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
 
     logging.info("Updating defaults")
     update_defaults(data, mapping)
-
-    # Replace remaining missing values with None.
-    # These will be transformed by format_value, and inserted into db as [null]
-    for sheet in data.keys():
-        data[sheet] = data[sheet].where(pd.notnull(data[sheet]), None)
 
     #
     # Insert DATASET
