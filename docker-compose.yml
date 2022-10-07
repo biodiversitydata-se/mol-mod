@@ -33,7 +33,7 @@ services:
 
   postgres:
     restart: always
-    image: postgres:13
+    image: postgres:14
     container_name: asv-db
     logging: *default-logging
     volumes:
