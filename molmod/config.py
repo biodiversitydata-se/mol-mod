@@ -78,7 +78,8 @@ class Config:
     UPLOAD_ROLE = get_env_variable('UPLOAD_ROLE')
     MAX_CONTENT_LENGTH = int(get_env_variable('MAX_CONTENT_LENGTH'))
     VALID_EXTENSIONS = get_env_variable('VALID_EXTENSIONS').split(' ')
-    SEND_FILE_MAX_AGE_DEFAULT = get_env_variable('SEND_FILE_MAX_AGE_DEFAULT')
+    SEND_FILE_MAX_AGE_DEFAULT = int(get_env_variable(
+        'SEND_FILE_MAX_AGE_DEFAULT'))
 
     def __init__(self, config_file: str = "/run/secrets/email_config"):
         """
