@@ -92,7 +92,6 @@ class Config:
 
 
 class ProductionConfig(Config):
-    DEBUG = False
     BATCH_SEARCH_URL = get_env_variable('BATCH_SEARCH_URL')
     REDIRECT_URL = get_env_variable('REDIRECT_URL')
     CAS_AFTER_LOGOUT = os.environ['HOST_URL'] or \
@@ -119,15 +118,12 @@ def get_config():
     try:
         env = get_env_variable('FLASK_ENV')
     except Exception:
-        env = 'development'
+        env = 'production'
         print('FLASK_ENV is not set, using FLASK_ENV:', env)
 
     if env == 'production':
         return ProductionConfig()
     elif env == 'test':
         return TestConfig()
-
-    # also set FLASK_DEBUG during development
-    os.environ['FLASK_DEBUG'] = '1'
 
     return DevelopmentConfig()
