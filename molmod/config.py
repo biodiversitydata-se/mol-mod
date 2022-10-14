@@ -81,10 +81,7 @@ class Config:
     UPLOAD_ROLE = get_env_variable('UPLOAD_ROLE')
     MAX_CONTENT_LENGTH = int(get_env_variable('MAX_CONTENT_LENGTH'))
     VALID_EXTENSIONS = get_env_variable('VALID_EXTENSIONS').split(' ')
-
-    # Cache settings (Flask internal), but see also molecular.config in proxy
-    # (https://github.com/biodiversitydata-se/proxy-ws-mol-mod-docker)
-    SEND_FILE_MAX_AGE_DEFAULT = 300  # 300 seconds = 5 minutes
+    SEND_FILE_MAX_AGE_DEFAULT = get_env_variable('SEND_FILE_MAX_AGE_DEFAULT')
 
     # To be inherited by both Prod/Dev config
     def __init__(self, config_file: str = "/run/secrets/email_config"):
@@ -101,9 +98,8 @@ class Config:
 class ProductionConfig(Config):
     DEBUG = False
     # For POST requests from search result forms to BioAtlas/SBDI
-    BATCH_SEARCH_URL = 'https://records.biodiversitydata.se/' \
-                       'ws/occurrences/batchSearch'
-    REDIRECT_URL = 'https://records.biodiversitydata.se/occurrences/search'
+    BATCH_SEARCH_URL = get_env_variable('BATCH_SEARCH_URL')
+    REDIRECT_URL = get_env_variable('REDIRECT_URL')
     # Don't use get_env_variable for HOST_URL, as it is expected to be missing
     # from production environment, and this should not raise an Exception
     CAS_AFTER_LOGOUT = os.environ['HOST_URL'] or \
@@ -114,9 +110,8 @@ class ProductionConfig(Config):
 class DevelopmentConfig(Config):
     DEBUG = True
     # For POST requests from search result forms to BioAtlas/SBDI
-    BATCH_SEARCH_URL = 'https://molecular.infrabas.se/' \
-                       'biocache-service/occurrences/batchSearch'
-    REDIRECT_URL = 'https://molecular.infrabas.se/ala-hub/occurrences/search'
+    BATCH_SEARCH_URL = get_env_variable('TEST_BATCH_SEARCH_URL')
+    REDIRECT_URL = get_env_variable('TEST_REDIRECT_URL')
     CAS_AFTER_LOGOUT = get_env_variable('HOST_URL')
     UPLOAD_EMAIL = get_env_variable('DEV_UPLOAD_EMAIL')
 
