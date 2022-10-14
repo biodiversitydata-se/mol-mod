@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-
+"""
+Collects environment variables set in .env(.template) to create distinct
+configuration classes for running the main app in different contexts.
+Also provides a function to select the corrrect class, based on the value of
+RUN_ENV, which in turn is supplied in the dockerfile.
+Finally, handles config of email used to send notification of uploaded files
+"""
 
 import os
 import secrets
@@ -114,7 +120,7 @@ class TestConfig(Config):
 
 def get_config():
     """
-    Uses RUN_ENV (set in compose file) to determine app environment.
+    Uses RUN_ENV (set in dockerfile) to determine app environment.
     """
     try:
         env = get_env_variable('RUN_ENV')
