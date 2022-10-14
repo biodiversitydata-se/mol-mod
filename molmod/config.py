@@ -67,23 +67,19 @@ class Config:
     BLAST_DB = get_env_variable('BLAST_DB')
     DEBUG = False
     TESTING = False
-    # SBDI links etc.
     SBDI_START_PAGE = get_env_variable('SBDI_START_PAGE')
     SBDI_CONTACT_PAGE = get_env_variable('SBDI_CONTACT_PAGE')
     TAXONOMY_PAGE = get_env_variable('TAXONOMY_PAGE')
     ENA_GUIDE_PAGE = get_env_variable('ENA_GUIDE_PAGE')
     AMPLISEQ_PAGE = get_env_variable('AMPLISEQ_PAGE')
-    # CAS authentication
     CAS_SERVER = get_env_variable('CAS_SERVER')
     CAS_AFTER_LOGIN = get_env_variable('CAS_AFTER_LOGIN')
-    # Data submission
     UPLOAD_PATH = get_env_variable('UPLOAD_PATH')
     UPLOAD_ROLE = get_env_variable('UPLOAD_ROLE')
     MAX_CONTENT_LENGTH = int(get_env_variable('MAX_CONTENT_LENGTH'))
     VALID_EXTENSIONS = get_env_variable('VALID_EXTENSIONS').split(' ')
     SEND_FILE_MAX_AGE_DEFAULT = get_env_variable('SEND_FILE_MAX_AGE_DEFAULT')
 
-    # To be inherited by both Prod/Dev config
     def __init__(self, config_file: str = "/run/secrets/email_config"):
         """
         Loads the email config values.
@@ -97,11 +93,8 @@ class Config:
 
 class ProductionConfig(Config):
     DEBUG = False
-    # For POST requests from search result forms to BioAtlas/SBDI
     BATCH_SEARCH_URL = get_env_variable('BATCH_SEARCH_URL')
     REDIRECT_URL = get_env_variable('REDIRECT_URL')
-    # Don't use get_env_variable for HOST_URL, as it is expected to be missing
-    # from production environment, and this should not raise an Exception
     CAS_AFTER_LOGOUT = os.environ['HOST_URL'] or \
         get_env_variable('CAS_AFTER_LOGOUT')
     UPLOAD_EMAIL = get_env_variable('UPLOAD_EMAIL')
@@ -109,7 +102,6 @@ class ProductionConfig(Config):
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    # For POST requests from search result forms to BioAtlas/SBDI
     BATCH_SEARCH_URL = get_env_variable('TEST_BATCH_SEARCH_URL')
     REDIRECT_URL = get_env_variable('TEST_REDIRECT_URL')
     CAS_AFTER_LOGOUT = get_env_variable('HOST_URL')
