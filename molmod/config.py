@@ -114,13 +114,13 @@ class TestConfig(Config):
 
 def get_config():
     """
-    Uses FLASK_ENV (set in compose file) to determine app environment.
+    Uses RUN_ENV (set in compose file) to determine app environment.
     """
     try:
-        env = get_env_variable('FLASK_ENV')
+        env = get_env_variable('RUN_ENV')
     except Exception:
         env = 'production'
-        print('FLASK_ENV is not set, using FLASK_ENV:', env)
+        print('RUN_ENV is not set, using RUN_ENV:', env)
 
     if env == 'production':
         return ProductionConfig()

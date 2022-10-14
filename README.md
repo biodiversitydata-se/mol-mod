@@ -85,7 +85,7 @@ You also need to build a BLAST database:
 ```
 
 Note that the blast-worker uses the same Dockerfile for both development and production, but that we set
-*FLASK_ENV=production* in *docker-compose.prod.yml*.
+*RUN_ENV=production* in *docker-compose.prod.yml*.
 
 ### CAS authentication
 For local testing of production environment, you need to run or add this to your bash startup file (e.g. *~/.bash_profile*):

@@ -86,7 +86,7 @@ services:
     secrets:
       - postgres_pass
     environment:
-      - FLASK_ENV=production
+      - RUN_ENV=production
     volumes:
       - blast-db:/blastdbs
       - blastconfig:/root/.config

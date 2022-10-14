@@ -11,6 +11,6 @@ RUN apt-get -y install libpq-dev # Avoid pg_config error
 
 RUN pip3 install -r requirements.txt
 
-ENV FLASK_ENV="production"
+ENV RUN_ENV="production"
 ENV FLASK_APP="worker.py"
 CMD ["flask", "run", "--host=0.0.0.0"]
