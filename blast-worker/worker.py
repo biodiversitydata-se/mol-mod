@@ -17,7 +17,7 @@ from flask import Flask, jsonify, request
 #
 
 # Figure out environment to set log config
-environment = os.getenv('FLASK_ENV')
+environment = os.getenv('RUN_ENV')
 if environment != 'production':
     environment = 'development'
 

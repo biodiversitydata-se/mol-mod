@@ -86,7 +86,7 @@ services:
     secrets:
       - postgres_pass
     environment:
-      - FLASK_ENV=production
+      - RUN_ENV=production
     volumes:
       - blast-db:/blastdbs
       - blastconfig:/root/.config
@@ -109,8 +109,9 @@ services:
       - email_config
     environment:
       - POSTGRES_PASSWORD_FILE=./run/secrets/postgres_pass
-      # If present, used to overwrite default CAS_AFTER_LOGOUT, see config
-      - CAS_AFTER_LOGOUT=${HOST_URL}
+      # Replaces CAS_AFTER_LOGOUT if NOT running in actual production env, see config.py
+      - HOST_URL=${HOST_URL}
+      - PYTHONPATH=/app/molmod
     ports:
       - 5000:5000
     depends_on:

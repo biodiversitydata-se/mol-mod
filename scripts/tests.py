@@ -13,7 +13,7 @@ import unittest
 # set some environment variables as they will be needed when we import
 # create_app
 
-os.environ['FLASK_ENV'] = 'development'
+os.environ['RUN_ENV'] = 'development'
 os.environ['SECRET_KEY'] = 'testing'
 os.environ['POSTGREST_HOST'] = 'localhost'
 
