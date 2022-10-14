@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+
 import os
 import secrets
 
@@ -103,12 +104,10 @@ class ProductionConfig(Config):
     BATCH_SEARCH_URL = 'https://records.biodiversitydata.se/' \
                        'ws/occurrences/batchSearch'
     REDIRECT_URL = 'https://records.biodiversitydata.se/occurrences/search'
-    # For testing in local production env, run or add this to ~/.bash_profile:
-    # ´export HOST_URL=http://localhost:5000´
-    # docker-compose.prod.yml then uses this to set env var CAS_AFTER_LOGOUT
-    # In production, we use site URL instead
-    CAS_AFTER_LOGOUT = get_env_variable('CAS_AFTER_LOGOUT') or \
-        'https://asv-portal.biodiversitydata.se'
+    # Don't use get_env_variable for HOST_URL, as it is expected to be missing
+    # from production environment, and this should not raise an Exception
+    CAS_AFTER_LOGOUT = os.environ['HOST_URL'] or \
+        get_env_variable('CAS_AFTER_LOGOUT')
     UPLOAD_EMAIL = get_env_variable('UPLOAD_EMAIL')
 
 
@@ -118,7 +117,7 @@ class DevelopmentConfig(Config):
     BATCH_SEARCH_URL = 'https://molecular.infrabas.se/' \
                        'biocache-service/occurrences/batchSearch'
     REDIRECT_URL = 'https://molecular.infrabas.se/ala-hub/occurrences/search'
-    CAS_AFTER_LOGOUT = 'http://localhost:5000'
+    CAS_AFTER_LOGOUT = get_env_variable('HOST_URL')
     UPLOAD_EMAIL = get_env_variable('DEV_UPLOAD_EMAIL')
 
 

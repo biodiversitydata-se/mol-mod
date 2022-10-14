@@ -115,7 +115,8 @@ services:
       - email_config
     environment:
       - POSTGRES_PASSWORD_FILE=./run/secrets/postgres_pass
-      - CAS_AFTER_LOGOUT=${HOST_URL}
+      # Replaces CAS_AFTER_LOGOUT if NOT running in actual production env, see config.py
+      - HOST_URL=${HOST_URL}
       - PYTHONPATH=/app/molmod
     ports:
       - 5000:5000
