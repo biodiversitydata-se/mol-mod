@@ -111,6 +111,7 @@ services:
       - POSTGRES_PASSWORD_FILE=./run/secrets/postgres_pass
       # If present, used to overwrite default CAS_AFTER_LOGOUT, see config
       - CAS_AFTER_LOGOUT=${HOST_URL}
+      - PYTHONPATH=/app/molmod
     ports:
       - 5000:5000
     depends_on:

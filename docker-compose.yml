@@ -116,6 +116,7 @@ services:
     environment:
       - POSTGRES_PASSWORD_FILE=./run/secrets/postgres_pass
       - CAS_AFTER_LOGOUT=${HOST_URL}
+      - PYTHONPATH=/app/molmod
     ports:
       - 5000:5000
     depends_on:
