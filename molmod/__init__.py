@@ -15,10 +15,10 @@ from config import get_config
 
 
 def create_app():
-    '''Application factory'''
+    """Application factory"""
 
     # Figure out environment to set log config
-    environment = os.getenv('FLASK_ENV')
+    environment = os.getenv('RUN_ENV')
     if environment != 'production':
         environment = 'development'
 

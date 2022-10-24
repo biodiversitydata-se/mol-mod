@@ -75,9 +75,9 @@ if [ "$1" = 'restore' ]; then
     for pathname do
         [ "$pathname" -nt "$FILE" ] && FILE="$pathname"
     done
-    
+
   # Otherwise use specified dump
-  elif [ -f "$2" ]; then 
+  elif [ -f "$2" ]; then
     FILE="$2"
   else
     FILE="$topdir/$DIR/$2"
@@ -98,7 +98,7 @@ if [ "$1" = 'restore' ]; then
 #
 else
   # If 'data' arg is given, dump data (from schema public) only,
-  # to produce file that can be used with `restore` option later
+  # to produce file that can be used with 'restore' option later
   # Otherwise schema api (views and functions, no data) are dumped
   if [ "$1" = 'data' ]; then
     FILE="$topdir/$DIR/$BASE-data_$TIMESTAMP.sql"

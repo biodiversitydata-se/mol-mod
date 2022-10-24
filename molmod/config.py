@@ -1,13 +1,20 @@
 #!/usr/bin/env python3
+"""
+Collects environment variables set in .env(.template) to create distinct
+configuration classes for running the main app in different contexts.
+Also provides a function to select the corrrect class, based on the value of
+RUN_ENV, which in turn is supplied in the dockerfile.
+Finally, handles config of email used to send notification of uploaded files
+"""
 
 import os
 import secrets
 
 
 def get_env_variable(name: str):
-    '''
+    """
     Gets env var or warns if missing
-    '''
+    """
     try:
         return os.environ[name]
     except KeyError:
@@ -21,7 +28,7 @@ def load_config_values(target: object, filename: str):
       key1 = value
       key2 = value
       [...]
-    and sets the loaded key/value pairs in the `target` object.
+    and sets the loaded key/value pairs in the 'target' object.
     """
     with open(filename) as f:
         for row in f:
@@ -45,8 +52,8 @@ def load_config_values(target: object, filename: str):
 
 
 def to_list(raw: str) -> list:
-    """If the `raw` string is formatted like a list, it is converted to a list,
-    otherwise returns a list with `raw` as the single item.
+    """If the 'raw' string is formatted like a list, it is converted to a list,
+    otherwise returns a list with 'raw' as the single item.
     """
     raw = raw.strip()
     retval = []
@@ -66,26 +73,20 @@ class Config:
     BLAST_DB = get_env_variable('BLAST_DB')
     DEBUG = False
     TESTING = False
-    # SBDI links etc.
     SBDI_START_PAGE = get_env_variable('SBDI_START_PAGE')
     SBDI_CONTACT_PAGE = get_env_variable('SBDI_CONTACT_PAGE')
     TAXONOMY_PAGE = get_env_variable('TAXONOMY_PAGE')
     ENA_GUIDE_PAGE = get_env_variable('ENA_GUIDE_PAGE')
     AMPLISEQ_PAGE = get_env_variable('AMPLISEQ_PAGE')
-    # CAS authentication
     CAS_SERVER = get_env_variable('CAS_SERVER')
     CAS_AFTER_LOGIN = get_env_variable('CAS_AFTER_LOGIN')
-    # Data submission
     UPLOAD_PATH = get_env_variable('UPLOAD_PATH')
     UPLOAD_ROLE = get_env_variable('UPLOAD_ROLE')
     MAX_CONTENT_LENGTH = int(get_env_variable('MAX_CONTENT_LENGTH'))
     VALID_EXTENSIONS = get_env_variable('VALID_EXTENSIONS').split(' ')
+    SEND_FILE_MAX_AGE_DEFAULT = int(get_env_variable(
+        'SEND_FILE_MAX_AGE_DEFAULT'))
 
-    # Cache settings (Flask internal), but see also molecular.config in proxy
-    # (https://github.com/biodiversitydata-se/proxy-ws-mol-mod-docker)
-    SEND_FILE_MAX_AGE_DEFAULT = 300  # 300 seconds = 5 minutes
-
-    # To be inherited by both Prod/Dev config
     def __init__(self, config_file: str = "/run/secrets/email_config"):
         """
         Loads the email config values.
@@ -98,27 +99,18 @@ class Config:
 
 
 class ProductionConfig(Config):
-    DEBUG = False
-    # For POST requests from search result forms to BioAtlas/SBDI
-    BATCH_SEARCH_URL = 'https://records.biodiversitydata.se/' \
-                       'ws/occurrences/batchSearch'
-    REDIRECT_URL = 'https://records.biodiversitydata.se/occurrences/search'
-    # For testing in local production env, run or add this to ~/.bash_profile:
-    # ´export HOST_URL=http://localhost:5000´
-    # docker-compose.prod.yml then uses this to set env var CAS_AFTER_LOGOUT
-    # In production, we use site URL instead
-    CAS_AFTER_LOGOUT = get_env_variable('CAS_AFTER_LOGOUT') or \
-        'https://asv-portal.biodiversitydata.se'
+    BATCH_SEARCH_URL = get_env_variable('BATCH_SEARCH_URL')
+    REDIRECT_URL = get_env_variable('REDIRECT_URL')
+    CAS_AFTER_LOGOUT = os.environ['HOST_URL'] or \
+        get_env_variable('CAS_AFTER_LOGOUT')
     UPLOAD_EMAIL = get_env_variable('UPLOAD_EMAIL')
 
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    # For POST requests from search result forms to BioAtlas/SBDI
-    BATCH_SEARCH_URL = 'https://molecular.infrabas.se/' \
-                       'biocache-service/occurrences/batchSearch'
-    REDIRECT_URL = 'https://molecular.infrabas.se/ala-hub/occurrences/search'
-    CAS_AFTER_LOGOUT = 'http://localhost:5000'
+    BATCH_SEARCH_URL = get_env_variable('TEST_BATCH_SEARCH_URL')
+    REDIRECT_URL = get_env_variable('TEST_REDIRECT_URL')
+    CAS_AFTER_LOGOUT = get_env_variable('HOST_URL')
     UPLOAD_EMAIL = get_env_variable('DEV_UPLOAD_EMAIL')
 
 
@@ -127,21 +119,18 @@ class TestConfig(Config):
 
 
 def get_config():
-    '''
-    Uses FLASK_ENV (set in compose file) to determine app environment.
-    '''
+    """
+    Uses RUN_ENV (set in dockerfile) to determine app environment.
+    """
     try:
-        env = get_env_variable('FLASK_ENV')
+        env = get_env_variable('RUN_ENV')
     except Exception:
-        env = 'development'
-        print('FLASK_ENV is not set, using FLASK_ENV:', env)
+        env = 'production'
+        print('RUN_ENV is not set, using RUN_ENV:', env)
 
     if env == 'production':
         return ProductionConfig()
     elif env == 'test':
         return TestConfig()
-
-    # also set FLASK_DEBUG during development
-    os.environ['FLASK_DEBUG'] = '1'
 
     return DevelopmentConfig()

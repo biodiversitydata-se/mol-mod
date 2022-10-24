@@ -1,9 +1,15 @@
 #!/bin/bash -e
 
-# Pull web dependencies
+# This script pulls third party web dependencies (i.e. CSS and javascript files
+# required by DataTables and Select2 [dropdown] components, but not ALA/SBDI
+# downloads) into an app dir (molmod/static), making the app more independent.
+# These are then loaded from layout.html, which is included in all templates.
+# Version updates requires links below to be edited:
 
-DTCSS=https://cdn.datatables.net/v/bs/jszip-2.5.0/dt-1.10.24/b-1.7.0/b-html5-1.7.0/sl-1.3.3/datatables.min.css
-DTJS=https://cdn.datatables.net/v/bs/jszip-2.5.0/dt-1.10.24/b-1.7.0/b-html5-1.7.0/sl-1.3.3/datatables.min.js
+# DataTables - see also https://datatables.net/download
+DTCSS=https://cdn.datatables.net/v/bs/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-html5-2.2.3/sl-1.4.0/datatables.min.css
+DTJS=https://cdn.datatables.net/v/bs/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-html5-2.2.3/sl-1.4.0/datatables.min.js
+# Select2 - see also https://github.com/select2/select2/tags)
 SELECTTWO=https://github.com/select2/select2/archive/refs/tags/4.0.13.tar.gz
 SELECTTWOBS=https://raw.githubusercontent.com/select2/select2-bootstrap-theme/master/dist/select2-bootstrap.min.css
 

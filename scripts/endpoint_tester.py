@@ -28,8 +28,8 @@ except ModuleNotFoundError:
 
 class CSRFFinder(HTMLParser):
     """
-    Simple HTMLParser that reports the `value` of any tag that has
-    `id='csrf_token'`.
+    Simple HTMLParser that reports the 'value' of any tag that has
+    'id'='csrf_token'.
     """
     def __init__(self):
         super().__init__()
@@ -66,7 +66,7 @@ class EndpointTester():
     def _prepare_headers(self):
         """
         Prepares the neccessary headers needed to make requests to the host.
-        This is done by sending a GET request to `self.host/self.csrf_url` and
+        This is done by sending a GET request to 'self.host/self.csrf_url' and
         extracting a session cookie and a csrf token.
         """
         csrf_url = f'{self.host}/{self.csrf_url}'
@@ -84,7 +84,7 @@ class EndpointTester():
 
     def run_test(self, num_requests=10):
         """
-        Sends the prepared request `num_requests` times, and reports statistics
+        Sends the prepared request 'num_requests' times, and reports statistics
         for the request times.
         """
         req_type = {'GET': requests.get, 'POST': requests.post}[self.protocol]

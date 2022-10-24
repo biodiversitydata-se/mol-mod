@@ -1,4 +1,4 @@
-FROM python:3.9-buster
+FROM python:3.10-bullseye
 
 RUN mkdir -p /app
 RUN mkdir -p /app/molmod
@@ -19,7 +19,7 @@ RUN pip3 install -r molmod/requirements.txt
 RUN pip3 install uwsgi
 
 RUN apt-get update
-RUN apt-get -y install rsync
+RUN apt-get -y install rsync # Used in backup script
 
-ENV FLASK_ENV="production"
+ENV RUN_ENV="production"
 CMD ["uwsgi", "--ini", "uwsgi-config.ini", "--uid", "www-data"]

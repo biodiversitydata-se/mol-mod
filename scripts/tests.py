@@ -13,7 +13,7 @@ import unittest
 # set some environment variables as they will be needed when we import
 # create_app
 
-os.environ['FLASK_ENV'] = 'development'
+os.environ['RUN_ENV'] = 'development'
 os.environ['SECRET_KEY'] = 'testing'
 os.environ['POSTGREST_HOST'] = 'localhost'
 
@@ -35,7 +35,7 @@ class FlaskTest(unittest.TestCase):
 
     def setUp(self):
         """
-        Starts the flask APP on port `self.PORT`.
+        Starts the flask APP on port 'self.PORT'.
         """
         APP.config["TESTING"] = True
         APP.config["WTF_CSRF_ENABLED"] = False

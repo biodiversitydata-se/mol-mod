@@ -1,6 +1,5 @@
-FROM python:3.9-slim-buster
+FROM python:3.10-slim-bullseye
 
-# create dir
 RUN mkdir /app
 COPY /molmod/requirements.txt /app
 
@@ -12,7 +11,7 @@ WORKDIR /app
 RUN pip3 install -r requirements.txt
 
 RUN apt-get update
-RUN apt-get -y install rsync
+RUN apt-get -y install rsync # Used in backup script
 
-ENV FLASK_ENV="development"
+ENV RUN_ENV="development"
 CMD ["python3", "wsgi.py"]

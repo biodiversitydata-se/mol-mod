@@ -12,7 +12,7 @@ from importer import as_snake_case
 
 class AsSnakeCaseTest(unittest.TestCase):
     """
-    Tests that the `as_snake_case` function behaves according to expectation.
+    Tests that the 'as_snake_case' function behaves according to expectation.
     """
 
     def test_camel_case(self):

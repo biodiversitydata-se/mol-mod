@@ -1,7 +1,8 @@
-/*
-Bypass cache in Chrome/Mac: shift + cmd + r
-CSS class selector: .xxx, id selector: #xxx
-*/
+/* This file contains custom CSS to complement, and override/fix problems in,
+CSS files downloaded from ALA/Bioatlas, DataTables and Select2 sources
+(see layout.html). You may need to empty cache in Chrome/Mac: 'shift + cmd + r'
+for changes to take effect in dev environment.
+Remember CSS class selector is: .xxx; id selector: #xxx */
 
 /* GENERAL */
 .main-content {
@@ -25,30 +26,31 @@ h2 {
 }
 
 /* FORMS */
-/* Hide forms (until styled) */
+/* Hide forms until Bootstrap/dataTables/Select2 styling is done (see main.js) */
 #rform, #sform {
     visibility: hidden;
 }
-/* BLAST form validation errors */
+/* Colour BLAST form validation error messages */
 .help-block {
     color: #c44d34;
 }
 
 /* RESULT TABLES */
-/* Query (user sequence ID) col */
+/* Adjust Query sequence ID column to better fit table on page */
 .qacc {
     word-wrap: break-word;
     max-width: 100px;
     min-width: 100px;
 }
-/* Subject / ASV col (also for child rows)*/
+/* Adjust Subject sequence column to better fit table on page (also affects
+child rows containing actual sequences) */
 .asv,.child{
     word-wrap: break-word;
     max-width: 400px;
     min-width: 400px;
     padding-right: 30px;
 }
-/* +/- symbols for expandable seqs */
+/* Add +/- symbols for expandable seqs */
 td.details-control {
     background: url('../img/details_open.png') no-repeat top 13px right 10px !important;
     cursor: pointer;
@@ -61,44 +63,38 @@ select.form-control.input-sm {
     -webkit-appearance: menulist !important;
 }
 /* Restore striped table look */
-/* Odd rows */
-.table tr:nth-child(odd) td,
 .table tr th,
-/* Use same look for form input fields */
-.form-control {
+.table tr:nth-child(odd) td {
     color: #4c4c4c !important;
     background-color: white !important;
 }
-/* Even rows */
 .table tr:nth-child(even) td {
     color: #4c4c4c !important;
     background-color: #f9f9f9 !important;
 }
-/* Selected rows */
-.table tr.selected:nth-child(odd) td,
-.table tr.selected:nth-child(even) td {
+/* Change colour of selected rows */
+.table tr.selected td {
     color: black !important;
-    background-color: #bed9e5 !important;
+    box-shadow:inset 0 0 0 9999px rgba(190, 217, 229, 0.5) !important;
 }
 
 /* STATS TABLE */
+/* Adjust columns to better fit table on page */
 #top_ranks {
     word-wrap: break-word;
     max-width: 50px;
     min-width: 50px;
 }
-
 #stats_table td:nth-child(n+3) {
     text-align: center;
 }
 
 /* HELP */
-/* Empty SBDI post requests, table/dropdown loading errors etc.*/
-/* Hide by default */
+/* Hide unless we get e.g. empty SBDI request or table/dropdown loading error */
 .hiddenElem {
     visibility: hidden;
 }
-/* Highlight table checkbox column in pink */
+/* Highlight table checkbox column if user attempts request without selection */
 .table tr td:first-child.visHlpElem {
     background-color: #f8dbd3 !important;
 }
@@ -111,10 +107,12 @@ select.form-control.input-sm {
 }
 
 /* FILE UPLOAD */
-/* Hide actual browse button (replace with label below)*/
+/* Hide the actual file upload field (as we replace it with a label that is
+easier to style - see upload.html & main.js) */
 #file {
     visibility: hidden;
 }
+/* Style the span showing selected files */
 #file-shown {
   padding: 10px;
   display: inline-block;
@@ -138,7 +136,7 @@ select.form-control.input-sm {
     text-transform: uppercase;
 }
 
-/* Text meant only for screen readers. */
+/* Add for screen readers: */
 .screen-reader-text {
     position:absolute;
     left:-10000px;

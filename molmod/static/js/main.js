@@ -76,37 +76,48 @@ $(document).ready(function() {
             break;
 
         case '/upload':
+            // Note that the actual file upload field (#file) is hidden, and a
+            // span element (#file-shown) is shown instead, for styling reasons
 
-            // If file selection already exists when page loads (because user
-            // has hit browser back button), show it in span
-            if(typeof $("#file")[0] !== "undefined") {
+            // When a user selects a new file
+            // (or, in Chrome, cancels after previously selecting one. No
+            // change is detected in Firefox or Safari for the latter case)
+            $("#file").change(function(){
                 var selFile = $("#file")[0].files[0];
+                // If a file was actually selected, show that name in span
                 if(typeof selFile !== "undefined") {
                     $("#file-shown").text(selFile.name);
-                    // Replace any msg:s with placeholder
-                    $("#upload_err_container").html('<span style="visibility:hidden">placeholder</span>');
                 }
-            }
-
-            // When user selects a new file
-            // (or cancels after selecting, in Chrome but not in Firefox)
-            $("#file").change(function(){
-                // Replace any obsolete msg with placeholder to avoid flicker
-                $("#upload_err_container").html('<span style="visibility:hidden">placeholder</span>');
-                // If 'Cancel' is selected
-                if(typeof $("#file")[0].files[0] === "undefined") {
-                    // Restore placeholder for both span and underlying input
-                    // to avoid flicker and dissaoearing text
+                // If the selection was cancelled after a previous
+                // selection was made, Chrome empties the actual input field,
+                // so reapply the placeholder in the visble span element
+                else {
                     $("#file-shown").text('No file selected');
-                    $("#file").jfilestyle({placeholder: ''});
                 }
+                // Replace any obsolete msg with original placeholder to avoid flicker
+                $("#upload_err_container").html('<span style="visibility:hidden">placeholder</span>');
+
             });
 
             $('#uform').on('submit', function() {
-            // Checks size and name of selected file against env variables
-                // If file has been selected (otherwise Flask rejects)
+                // Checks file size and name against variables in .env file.
+                // Additional validation is performed in flask (see forms.py),
+                // and size limits are also set in proxy config:
+                // https://github.com/biodiversitydata-se/proxy-ws-mol-mod-docker/blob/master/nginx-proxy.confin but this will allow
+                // but these checks allow for quicker response for large files.
+
+                // Stop if span is empty, even if the hidden field has data
+                // (may happen in Chrome when user hits back + fw buttons),
+                // to avoid confusion.
+                if ($('#file-shown').text() === 'No file selected') {
+                    $("#upload_err_container").html('Please select a file!');
+                    return false;
+                }
+
                 if ($("#file").val()) {
+
                     var selFile = $('#file')[0].files[0];
+
                     // Check size
                     if( selFile.size > maxFileSize ) {
                         $('#upload_err_container').html('The file you tried to upload was larger than the ' + maxFileSize / (1024 * 1024) + ' MB we can deal with here. '
@@ -133,7 +144,7 @@ $(document).ready(function() {
                     }
                 }
                 return true;
-        });
+            });
 
     }
 
@@ -214,11 +225,6 @@ $(document).ready(function() {
         });
     }
 
-    $("#file").on('change', function(){
-        var filename = $(this).val().split('\\').pop();
-        $('#file-shown').text(filename);
-    });
-
 });
 
 function makeSel2drop(drop){
@@ -257,6 +263,7 @@ function makeSel2drop(drop){
                 }
             },
             cache: true,
+            // Add the CSRF token to HTTP header
             beforeSend: function(xhr, settings) {
                 if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
                     xhr.setRequestHeader("X-CSRFToken", $('#csrf_token').val())
@@ -273,7 +280,7 @@ function makeSel2drop(drop){
                     //Log but do nothing!
                     console.log('Select2.js fast type-ahead error condition encountered and handled properly');
                 } else {
-                    //process proper errors
+                    //Process proper errors
                     $('#filt_err_container').html('Sorry, something unexpected happened during page load. '
                     + 'Please <a href="' + sbdiContactPage + '">contact SBDI support</a> if this error persists.');
 
