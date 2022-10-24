@@ -6,7 +6,7 @@
   "description": "/blastdbs/asvdb.fasta",
   "number-of-letters": 1256365,
   "number-of-sequences": 3049,
-  "last-updated": "2022-10-10T09:29:00",
+  "last-updated": "2022-10-24T09:02:00",
   "number-of-volumes": 1,
   "bytes-total": 967967,
   "bytes-to-cache": 352354,
