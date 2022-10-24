@@ -79,7 +79,9 @@ blastdb:
 # Export a fasta file of all ASVs currently annotated with reference database
 # Example: make fasta ref=UNITE:8.0
 fasta:
-	python3 ./scripts/build_blast_db.py --ref $(ref) -v
+	$(eval worker=$(shell docker ps --format '{{.Names}}' | grep -E blast.*1))
+	python3 ./scripts/build_blast_db.py --ref $(ref) --container ${worker} -v
+
 
 #
 # DATA MANIPULATION
