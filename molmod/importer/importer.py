@@ -245,6 +245,15 @@ def insert_asvs(data: pd.DataFrame, mapping: dict, db_cursor: DictCursor,
                 "ON CONFLICT (asv_sequence) DO UPDATE SET pid = asv.pid " + \
                 "RETURNING pid;"
 
+        # In the unlikely event of hash collision, i.e. that the MD5 algorithm
+        # calculates the same hash for two different sequences, insertion of
+        # the 2nd sequence will give a duplicate key value violation error
+        # Check by modifying the sequence of an existing seq and run in pgAdmin
+        # INSERT INTO asv ("asv_id", "asv_sequence")
+        # VALUES ('ASV:919a2aa9d306e4cf3fa9ca02a2aa5730',
+        # 'TCGAGAATTTTTCACAATGGGGGAAACCCTGATGGAGCGACGCCG...')
+        # ON CONFLICT (asv_sequence) DO UPDATE SET pid = asv.pid RETURNING pid;
+
         try:
             db_cursor.execute(query)
             pids += [r['pid'] for r in db_cursor.fetchall()]
