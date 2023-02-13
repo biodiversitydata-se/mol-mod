@@ -16,6 +16,7 @@ Coreutils include the same versions of basic tools like e.g. *readlink* and *sta
 ```
   export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
 ```
+Mac users should also note that port 5000 is supposed to be allocated to the flask/asv-main service (see *docker-compose.yml*), but that this port may already be used by Apple's AirPlay Receiver, on MacOS 12 or later. You can turn the latter feature off in System Settings | AirDrop & Handoff | AirPlay Receiver, though.
 
 ### Environmental variables
 Use *.env.template* to create *.env* file, and add missing values to the latter, before proceeding.
