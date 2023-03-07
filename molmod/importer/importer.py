@@ -434,7 +434,7 @@ def read_data_file(data_file: str, sheets: List[str]):
                     data[sheet] = pd.read_csv(content)
                 except Exception:
                     logging.error("Input file '%s' could not be read. "
-                                  "Please inpect file.", member.name)
+                                  "Please inspect file.", member.name)
                     sys.exit(1)
             else:
                 data[sheet] = pd.read_excel(data_file, sheet_name=sheet)
