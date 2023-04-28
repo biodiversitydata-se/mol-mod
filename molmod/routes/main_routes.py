@@ -1,8 +1,6 @@
 import json
 import os
 from datetime import datetime as dt
-from smtplib import SMTPException
-from ssl import SSLError
 
 import requests
 from flask import Blueprint, abort
@@ -96,9 +94,17 @@ def upload():
     email = cas_attributes['cas:email']
     upload_time = dt.now().strftime("%y%m%d-%H%M%S")
     ext_filename = email + '_' + upload_time + '_' + filename
-    # Save file, or report error
+
+    # Save file
     try:
         f.save(os.path.join(CONFIG.UPLOAD_PATH, ext_filename))
+    except Exception as ex:
+        APP.logger.error(
+            f'File {ext_filename} could not be saved due to {ex}')
+    else:
+        APP.logger.info(f'Successfully uploaded file {ext_filename}')
+
+        # Notify admin
         msg = Message('New file upload',
                       sender=APP.mail.username,
                       recipients=CONFIG.UPLOAD_EMAIL)
@@ -116,17 +122,18 @@ def upload():
 
         / Swedish ASV portal
         """
-        APP.mail.send(msg)
-    except (SMTPException, SSLError) as ex:
-        APP.logger.error(
-            f"Could not send e-mail notification on file upload due to {ex}")
-    except Exception as err:
-        APP.logger.error(
-            f'File {ext_filename} could not be saved due to {err}')
-        return render_template('upload.html', form=form, upload_error=True)
+        try:
+            APP.mail.send(msg)
+        except Exception as ex:
+            APP.logger.error(f"Could not send upload notification due to {ex}")
+        else:
+            APP.logger.info('Successfully sent upload notification.')
+            # Display 'success page' only if upload AND notification worked
+            return render_template('uploaded.html', filename=filename)
 
-    APP.logger.info(f'Uploaded file {ext_filename}')
-    return render_template('uploaded.html', filename=filename)
+    # Display error msg if EITHER upload OR email failed, so that data
+    # providers get a chance to tell us about uploaded files
+    return render_template('upload.html', form=form, upload_error=True)
 
 
 @main_bp.route('/submit')
