@@ -335,12 +335,14 @@ def compare_annotations(data: pd.DataFrame, db_cursor: DictCursor,
             nfull = data[data['asv_pid'] == d['asv_pid']].to_dict('records')[0]
             # Only keep common fields, so that we can identify data diffs below
             asv_id = d['asv_id']
+            alias = nfull['asv_id_alias']
             del d['asv_id']
             n = dict((k, nfull[k]) for k in d.keys())
 
             # If annotations differ between incoming data and db
             if (n != d):
-                issue = {'asv_id': asv_id, 'new': n, 'db': d}
+                issue = {'asv_id': asv_id, 'new': n, 'db': d,
+                         'alias': alias}
                 # If same target but different predictions
                 # e.g. if ampliseq setup was unintentionally changed
                 if (((d['annotation_target'] == n['annotation_target']) &
@@ -432,7 +434,7 @@ def read_data_file(data_file: str, sheets: List[str]):
                     data[sheet] = pd.read_csv(content)
                 except Exception:
                     logging.error("Input file '%s' could not be read. "
-                                  "Please inpect file.", member.name)
+                                  "Please inspect file.", member.name)
                     sys.exit(1)
             else:
                 data[sheet] = pd.read_excel(data_file, sheet_name=sheet)
