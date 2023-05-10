@@ -248,8 +248,13 @@ BEGIN
 END
 $$;
 COMMENT ON FUNCTION api.app_drop_options(text, bigint, integer, text, text[], text[], text[], text[], text[], text[], text[], text[], text[], text[], text[])
-    IS 'Example call (view in Properties | General to get quotes right):
-SELECT api.app_drop_options(''classs'', 0, 25, ''T'', ''{}'', ''{Actinobacteriota, Bacteroidota}'');';
+    IS 'Example call 1 (view in Properties | General to get quotes right):
+SELECT api.app_drop_options(''classs'', 0, 25, ''T'', ''{}'', ''{Actinobacteriota, Bacteroidota}'');
+
+Example call 2 (view in Properties | General to get quotes right):
+-- Payload sent to /rpc/app_drop_options: {"kingdom": ["Bacteria"], "phylum": ["Planctomycetes"], "field": "classs", "term": "", "nlimit": 25, "noffset": 0}
+SELECT api.app_drop_options(''classs'', 0, 25, '''', ''{Bacteria}'',''{Planctomycetes}'');
+';
 
 --
 -- View for populating filter search result table
