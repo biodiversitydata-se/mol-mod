@@ -300,7 +300,7 @@ ORDER BY asv.asv_id, asv.asv_sequence, mixs.target_gene, mixs.target_subfragment
 -- 2) PostgREST does not allow POST requests for SELECT operations on views
 --
 
-CREATE VIEW api.app_asvs_for_blastdb AS
+CREATE MATERIALIZED VIEW IF NOT EXISTS api.app_asvs_for_blastdb AS
 SELECT DISTINCT asv_id, higher_taxonomy, asv_sequence
     FROM (SELECT asv.asv_id,
             concat_ws(';'::text, ta.kingdom, ta.phylum, ta.class, ta.oorder, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS higher_taxonomy,
