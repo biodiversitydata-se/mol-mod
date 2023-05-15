@@ -314,6 +314,7 @@ SELECT DISTINCT asv_id, higher_taxonomy, asv_sequence
         WHERE ds.in_bioatlas
             AND ta.annotation_target::text = mixs.target_gene::text
             AND ta.status::text = 'valid'::text AND ta.target_prediction = TRUE) rd;
+CREATE INDEX IF NOT EXISTS blast_asv ON api.app_asvs_for_blastdb(asv_id);
 
 CREATE FUNCTION api.app_seq_from_id(ids character varying[])
     RETURNS TABLE(asv_id CHARACTER(36), ASV_SEQUENCE CHARACTER VARYING)
