@@ -185,67 +185,61 @@ WHERE ds.in_bioatlas
     AND ta.target_prediction = TRUE
     AND ta.annotation_target::text = mixs.target_gene::text;
 
-CREATE FUNCTION api.app_drop_options(
+CREATE OR REPLACE FUNCTION api.app_drop_options(
     field text,
     noffset bigint,
     nlimit integer,
-    term text DEFAULT ''::text,
-    kingdom text[] DEFAULT '{}'::text[],
-    phylum text[] DEFAULT '{}'::text[],
-    classs text[] DEFAULT '{}'::text[],
-    oorder text[] DEFAULT '{}'::text[],
-    family text[] DEFAULT '{}'::text[],
-    genus text[] DEFAULT '{}'::text[],
-    species text[] DEFAULT '{}'::text[],
-    gene text[] DEFAULT '{}'::text[],
-    sub text[] DEFAULT '{}'::text[],
-    fw_prim text[] DEFAULT '{}'::text[],
-    rv_prim text[] DEFAULT '{}'::text[])
-    RETURNS TABLE(data json)
-    LANGUAGE plpgsql IMMUTABLE
-    AS $$
+    term text DEFAULT '',
+    kingdom text[] DEFAULT '{}',
+    phylum text[] DEFAULT '{}',
+    classs text[] DEFAULT '{}',
+    oorder text[] DEFAULT '{}',
+    family text[] DEFAULT '{}',
+    genus text[] DEFAULT '{}',
+    species text[] DEFAULT '{}',
+    gene text[] DEFAULT '{}',
+    sub text[] DEFAULT '{}',
+    fw_prim text[] DEFAULT '{}',
+    rv_prim text[] DEFAULT '{}')
+RETURNS TABLE(data json)
+LANGUAGE plpgsql
+AS $$
 BEGIN
     -- Execute dynamically, i.e. modify the query based on 1) which dropdown sent
     -- the request, 2) what the user typed, if anything, and 3) which
     -- selections have previously been made in other dropdowns, if any
-	RETURN QUERY EXECUTE format(
-        'with filtered as ( -- temp table to use in JSON build
-            SELECT DISTINCT %I
-            FROM api.app_filter_mixs_tax
-            WHERE %I <> '''' AND %I IS NOT NULL
-            -- Expand supplied arrays of dropdown selections into tables
-            AND ($1 = ''{}'' OR kingdom IN (SELECT unnest($1)))
-            AND ($2 = ''{}'' OR phylum IN (SELECT unnest($2)))
-            AND ($3 = ''{}'' OR classs IN (SELECT unnest($3)))
-            AND ($4 = ''{}'' OR oorder IN (SELECT unnest($4)))
-            AND ($5 = ''{}'' OR family IN (SELECT unnest($5)))
-            AND ($6 = ''{}'' OR genus IN (SELECT unnest($6)))
-            AND ($7 = ''{}'' OR species IN (SELECT unnest($7)))
-            -- Make case-insensitive reg-exp comparison with user-provided term
-            -- i.e. if user types "bac" in kingdom, this should match "Bacteria"
-            AND %I ~* $8
-            AND ($9 = ''{}'' OR gene IN (SELECT unnest($9)))
-            AND ($14 = ''{}'' OR sub IN (SELECT unnest($14)))
-            AND ($10 = ''{}'' OR fw_prim IN (SELECT unnest($10)))
-            AND ($11 = ''{}'' OR rv_prim IN (SELECT unnest($11)))
-        )
-        -- Format & paginate according to select2 requirements
-        SELECT json_build_object(
+    RETURN QUERY EXECUTE format(
+        '-- Put filtered options in temp table
+		WITH filtered AS (
+		 	SELECT DISTINCT %I AS id
+         	FROM api.app_filter_mixs_tax
+         	WHERE %I <> '''' AND %I IS NOT NULL
+         	AND ($1 = ''{}'' OR kingdom = ANY($1))
+         	AND ($2 = ''{}'' OR phylum = ANY($2))
+         	AND ($3 = ''{}'' OR classs = ANY($3))
+         	AND ($4 = ''{}'' OR oorder = ANY($4))
+         	AND ($5 = ''{}'' OR family = ANY($5))
+         	AND ($6 = ''{}'' OR genus = ANY($6))
+         	AND ($7 = ''{}'' OR species = ANY($7))
+            -- Make case-insensitive comparison with user-provided term
+         	AND %I ~* $8
+         	AND ($9 = ''{}'' OR gene = ANY($9))
+         	AND ($10 = ''{}'' OR sub = ANY($10))
+         	AND ($11 = ''{}'' OR fw_prim = ANY($11))
+         	AND ($12 = ''{}'' OR rv_prim = ANY($12))
+         	ORDER BY %I
+         	OFFSET $13
+         	LIMIT $14)
+		-- Format & paginate according to select2 requirements
+		SELECT json_build_object(
             ''count'', (SELECT COUNT(*) FROM filtered),
-            ''results'', COALESCE(json_agg(to_json(t)),''[]'')
-        )
-        FROM (
-            SELECT %I AS "id", %I AS "text"
-            FROM filtered
-            ORDER BY %I
-            OFFSET $12
-            LIMIT $13
-        -- Insertion of the SQL identifier (target droppdown) must be handled by format - not USING clause
-        -- See e.g: https://www.postgresql.org/docs/13/plpgsql-statements.html#PLPGSQL-STATEMENTS-EXECUTING-DYN
-        ) t', field, field, field, field, field, field, field
-    )
-    USING kingdom, phylum, classs, oorder, family, genus, species, '^'||term||'.*$', gene, fw_prim, rv_prim, noffset, nlimit, sub;
-END
+            ''results'', COALESCE(json_agg(json_build_object(''id'', f.id, ''text'', f.id)),''[]'')
+		-- Format dynamic field NAME
+		) FROM filtered f', field, field, field, field, field, field)
+	-- Set dynamic field VALUES
+    USING kingdom, phylum, classs, oorder, family, genus, species, '^'||term||'.*$',
+	gene, sub, fw_prim, rv_prim, noffset, nlimit;
+END;
 $$;
 COMMENT ON FUNCTION api.app_drop_options(text, bigint, integer, text, text[], text[], text[], text[], text[], text[], text[], text[], text[], text[], text[])
     IS 'Example call 1 (view in Properties | General to get quotes right):
