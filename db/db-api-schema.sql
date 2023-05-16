@@ -254,7 +254,7 @@ SELECT api.app_drop_options(''classs'', 0, 25, '''', ''{Bacteria}'',''{Planctomy
 -- View for populating filter search result table
 --
 
-CREATE VIEW api.app_search_mixs_tax AS
+CREATE MATERIALIZED VIEW api.app_search_mixs_tax AS
 SELECT DISTINCT asv.asv_id,
     concat_ws('|'::text, concat_ws(''::text, asv.asv_id, '-', ta.kingdom), ta.phylum, ta.class, ta.oorder, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS asv_tax,
     asv.asv_sequence,
