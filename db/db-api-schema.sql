@@ -162,8 +162,8 @@ WHERE ta.status::text = 'valid'
 -- the function dynamically filters these and paginates results
 --
 
-CREATE VIEW api.app_filter_mixs_tax AS
-SELECT mixs.target_gene AS gene,
+CREATE MATERIALIZED VIEW IF NOT EXISTS api.app_filter_mixs_tax AS
+SELECT DISTINCT mixs.target_gene AS gene,
     mixs.target_subfragment AS sub,
     ((((mixs.pcr_primer_name_forward)::text || ': '::text) || (mixs.pcr_primer_forward)::text))::character varying AS fw_prim,
     ((((mixs.pcr_primer_name_reverse)::text || ': '::text) || (mixs.pcr_primer_reverse)::text))::character varying AS rv_prim,
