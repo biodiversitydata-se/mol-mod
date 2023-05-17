@@ -311,9 +311,8 @@ CREATE FUNCTION api.app_seq_from_id(ids character varying[])
     RETURNS TABLE(asv_id CHARACTER(36), ASV_SEQUENCE CHARACTER VARYING)
     LANGUAGE sql IMMUTABLE
     AS $$
-    SELECT asv_id, asv_sequence FROM api.app_asvs_for_blastdb WHERE asv_id IN (
-	   SELECT unnest(ids)
-	)
+    SELECT asv_id, asv_sequence FROM api.app_asvs_for_blastdb
+    WHERE asv_id = ANY(ids)
 $$;
 COMMENT ON FUNCTION api.app_seq_from_id(character varying[])
     IS 'Example call (view in Properties | General to get quotes right):
