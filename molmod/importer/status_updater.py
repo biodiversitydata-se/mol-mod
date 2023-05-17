@@ -58,17 +58,17 @@ def run_update(pid: int = 0, status: int = 1, ruid: str = '',
     except psycopg2.OperationalError as err:
         logging.error(err)
         sys.exit(1)
-    # Filter dropdowns
-    try:
-        logging.info("Updating data for filter dropdown options")
-        cursor.execute("REFRESH MATERIALIZED VIEW api.app_filter_mixs_tax;")
-    except psycopg2.OperationalError as err:
-        logging.error(err)
-        sys.exit(1)
     # Filter results
     try:
         logging.info("Updating data for filter search results")
         cursor.execute("REFRESH MATERIALIZED VIEW api.app_search_mixs_tax;")
+    except psycopg2.OperationalError as err:
+        logging.error(err)
+        sys.exit(1)
+    # Filter dropdowns
+    try:
+        logging.info("Updating data for filter dropdown options")
+        cursor.execute("REFRESH MATERIALIZED VIEW api.app_filter_mixs_tax;")
     except psycopg2.OperationalError as err:
         logging.error(err)
         sys.exit(1)

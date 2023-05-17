@@ -157,16 +157,25 @@ WHERE ta.status::text = 'valid'
     AND ta.annotation_target::text = mixs.target_gene::text;
 
 --
--- Objects used for populating filter page (select2) dropdowns:
--- the view lists available combinations of sequencing and taxonomy values,
--- the function dynamically filters these and paginates results
+-- Objects used in FILTER page
+-- Views are materialized to increase search performance, and need to updated after
+-- data import / db restore (see 'make status' / 'make stats' in Makefile)
 --
 
-CREATE MATERIALIZED VIEW IF NOT EXISTS api.app_filter_mixs_tax AS
-SELECT DISTINCT mixs.target_gene AS gene,
+-- View for data displayed in the FILTER search result table,
+-- also used by view for FILTER dropdown options (below)
+CREATE MATERIALIZED VIEW api.app_search_mixs_tax AS
+SELECT DISTINCT asv.asv_id,
+    concat_ws('|'::text, concat_ws(''::text, asv.asv_id, '-', ta.kingdom), ta.phylum, ta.class, ta.oorder, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS asv_tax,
+    asv.asv_sequence,
+    mixs.target_gene AS gene,
     mixs.target_subfragment AS sub,
-    ((((mixs.pcr_primer_name_forward)::text || ': '::text) || (mixs.pcr_primer_forward)::text))::character varying AS fw_prim,
-    ((((mixs.pcr_primer_name_reverse)::text || ': '::text) || (mixs.pcr_primer_reverse)::text))::character varying AS rv_prim,
+    (mixs.pcr_primer_name_forward)::text AS fw_name,
+    (mixs.pcr_primer_forward)::text AS fw_sequence,
+    (mixs.pcr_primer_name_reverse)::text AS rv_name,
+    (mixs.pcr_primer_reverse)::text AS rv_sequence,
+    (((mixs.pcr_primer_name_forward)::text || ': '::text) || (mixs.pcr_primer_forward)::text) AS fw_prim,
+    (((mixs.pcr_primer_name_reverse)::text || ': '::text) || (mixs.pcr_primer_reverse)::text) AS rv_prim,
     ta.kingdom,
     ta.phylum,
     ta.class AS classs,
@@ -183,8 +192,28 @@ FROM :data_schema.mixs
 WHERE ds.in_bioatlas
     AND ta.status::text = 'valid'::text
     AND ta.target_prediction = TRUE
-    AND ta.annotation_target::text = mixs.target_gene::text;
+    AND ta.annotation_target = mixs.target_gene
+ORDER BY asv.asv_id, asv.asv_sequence, mixs.target_gene, mixs.target_subfragment, (((mixs.pcr_primer_name_forward)::text || ': '::text) || (mixs.pcr_primer_forward)::text), (((mixs.pcr_primer_name_reverse)::text || ': '::text) || (mixs.pcr_primer_reverse)::text);
 
+-- View for FILTER dropdown options (dynamically filtered in function, below)
+CREATE MATERIALIZED VIEW api.app_filter_mixs_tax AS
+SELECT DISTINCT gene, sub,
+    fw_name || ': ' || fw_sequence AS fw_prim,
+	rv_name || ': ' || rv_sequence AS rv_prim,
+    kingdom,
+    phylum,
+    classs,
+    oorder,
+    family,
+    genus,
+    species
+FROM api.app_search_mixs_tax;
+
+-- Function executed as the user clicks a FILTER dropdown, getting data from
+-- a materialized view (above), and dynamically modifying the query based on
+-- 1) which dropdown sent the request,
+-- 2) what the user typed in the dropdown, if anything, and
+-- 3) which selections have previously been made in other dropdowns, if any
 CREATE OR REPLACE FUNCTION api.app_drop_options(
     field text,
     noffset bigint,
@@ -250,50 +279,18 @@ Example call 2 (view in Properties | General to get quotes right):
 SELECT api.app_drop_options(''classs'', 0, 25, '''', ''{Bacteria}'',''{Planctomycetes}'');
 ';
 
---
--- View for populating filter search result table
---
-
-CREATE MATERIALIZED VIEW api.app_search_mixs_tax AS
-SELECT DISTINCT asv.asv_id,
-    concat_ws('|'::text, concat_ws(''::text, asv.asv_id, '-', ta.kingdom), ta.phylum, ta.class, ta.oorder, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS asv_tax,
-    asv.asv_sequence,
-    mixs.target_gene AS gene,
-    mixs.target_subfragment AS sub,
-    (mixs.pcr_primer_name_forward)::text AS fw_name,
-    (mixs.pcr_primer_forward)::text AS fw_sequence,
-    (mixs.pcr_primer_name_reverse)::text AS rv_name,
-    (mixs.pcr_primer_reverse)::text AS rv_sequence,
-    (((mixs.pcr_primer_name_forward)::text || ': '::text) || (mixs.pcr_primer_forward)::text) AS fw_prim,
-    (((mixs.pcr_primer_name_reverse)::text || ': '::text) || (mixs.pcr_primer_reverse)::text) AS rv_prim,
-    ta.kingdom,
-    ta.phylum,
-    ta.class AS classs,
-    ta.oorder,
-    ta.family,
-    ta.genus,
-    ta.specific_epithet AS species
-FROM :data_schema.mixs
-    JOIN :data_schema.occurrence oc ON oc.event_pid = mixs.pid
-    JOIN :data_schema.asv ON asv.pid = oc.asv_pid
-    JOIN :data_schema.taxon_annotation ta ON asv.pid = ta.asv_pid
-    JOIN :data_schema.sampling_event se ON oc.event_pid = se.pid
-    JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid
-WHERE ds.in_bioatlas
-    AND ta.status::text = 'valid'::text
-    AND ta.target_prediction = TRUE
-    AND ta.annotation_target = mixs.target_gene
-ORDER BY asv.asv_id, asv.asv_sequence, mixs.target_gene, mixs.target_subfragment, (((mixs.pcr_primer_name_forward)::text || ': '::text) || (mixs.pcr_primer_forward)::text), (((mixs.pcr_primer_name_reverse)::text || ': '::text) || (mixs.pcr_primer_reverse)::text);
 
 --
+-- Objects used in BLAST page
+--
+
 -- View used by A) portal admin to produce a fasta file for building a BLAST db,
 -- and also B) by webb app to retrieve subject sequences to add to BLAST result
 -- tables, as these are not included in normal BLAST output. View output is then
 -- filtered via a POST request to the below function, because:
 -- 1) we may need to send more ASV IDs than we can fit into an URL to filter a GET request, and
 -- 2) PostgREST does not allow POST requests for SELECT operations on views
---
-
+-- Materialized (see above), and updated with 'make blastdb'
 CREATE MATERIALIZED VIEW IF NOT EXISTS api.app_asvs_for_blastdb AS
 SELECT DISTINCT asv_id, higher_taxonomy, asv_sequence
     FROM (SELECT asv.asv_id,
@@ -322,12 +319,8 @@ COMMENT ON FUNCTION api.app_seq_from_id(character varying[])
     IS 'Example call (view in Properties | General to get quotes right):
 SELECT api.app_seq_from_id(''{ASV:40b37890b1b1fcdf0ece91f1da34c1ca}'')';
 
---
--- View used for populating stats table in About page. It is 'materialized' to
--- increase speed, meaning that it needs to be manually updated after new
--- imports (see 'make stats' in Makefile).
---
-
+-- View used for populating stats table in About page
+-- Materialized (see above), and updated with 'make status' / 'make stats'
 CREATE MATERIALIZED VIEW api.app_about_stats AS
 SELECT sub.gene,
    string_agg(DISTINCT sub.kingdom::text, ', '::text) AS kingdoms,
