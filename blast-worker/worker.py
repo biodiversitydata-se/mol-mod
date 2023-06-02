@@ -125,7 +125,13 @@ def main():
                         value = float(field)
                     except ValueError:
                         value = field
-                    result[field_names[i]] = value
+                    try:
+                        result[field_names[i]] = value
+                    except Exception:
+                        APP.logger.error(
+                            f"Could not assign field {i} of {field_names}"
+                            f" for row: {row}."
+                        )
                 results += [result]
 
             return jsonify(data=results)
