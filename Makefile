@@ -11,34 +11,34 @@ SHELL = bash
 
 # Build service, or rebuild to implement changes in Dockerfile
 build:
-	docker-compose -f $(compose) build --no-cache
+	docker compose -f $(compose) build --no-cache
 
 push:
-	docker-compose -f $(compose) push
+	docker compose -f $(compose) push
 
 pull:
-	docker-compose -f $(compose) pull
+	docker compose -f $(compose) pull
 
 # Start service in background
 up:
-	docker-compose -f $(compose) up -d
+	docker compose -f $(compose) up -d
 
 stop:
-	docker-compose -f $(compose) stop
+	docker compose -f $(compose) stop
 
 # Stop and remove containers
 down:
-	docker-compose -f $(compose) down --remove-orphans
+	docker compose -f $(compose) down --remove-orphans
 
 # Stop and remove containers, and remove network and volumes
 clean:
-	docker-compose -f $(compose) down -v
+	docker compose -f $(compose) down -v
 
 logs:
-	docker-compose -f $(compose) logs -f
+	docker compose -f $(compose) logs -f
 
 ps:
-	docker-compose -f $(compose) ps
+	docker compose -f $(compose) ps
 
 #
 # SECRETS
