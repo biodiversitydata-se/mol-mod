@@ -87,6 +87,7 @@ services:
       - postgres_pass
     environment:
       - RUN_ENV=production
+      - BLAST_USAGE_REPORT=false
     volumes:
       - blast-db:/blastdbs
       - blastconfig:/root/.config
