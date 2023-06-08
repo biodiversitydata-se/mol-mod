@@ -91,7 +91,8 @@ def create_blast_db(filename: str, db_dir: str = '.'):
     that have 'in_bioatlas' set to 'true'.
     """
 
-    _, cursor = connect_db()
+    logging.info("Connecting to database")
+    connection, cursor = connect_db()
 
     # Fetch all datasets that are to be added to the blast database. These are
     # only used to inform the user, the api.app_asvs_for_blastdb function
@@ -111,6 +112,15 @@ def create_blast_db(filename: str, db_dir: str = '.'):
     db_name = f'{os.path.join(db_dir, filename)}'
     fasta = f'{db_name}.fasta'
 
+    # Update data used in blastdb build (and BLAST search)
+    try:
+        logging.info("Refreshing api.app_asvs_for_blastdb")
+        cursor.execute("REFRESH MATERIALIZED VIEW api.app_asvs_for_blastdb;")
+    except psycopg2.OperationalError as err:
+        logging.error("Could not refresh materialized view")
+        logging.error(err)
+        sys.exit(1)
+
     # Create the fasta file
     create_input_fasta(cursor, db_name)
 
@@ -119,6 +129,9 @@ def create_blast_db(filename: str, db_dir: str = '.'):
 
     # and finally, remove the fasta file, as it's no longer needed
     os.remove(fasta)
+
+    logging.info("Committing update of api.app_asvs_for_blastdb")
+    connection.commit()
 
 
 def create_output_fasta(ref_db: str = ''):

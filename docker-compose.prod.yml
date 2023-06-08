@@ -10,7 +10,6 @@ x-logging:
 volumes:
   postgres-db:
   blast-db:
-  blastconfig:
   uploads:
 
 secrets:
@@ -87,9 +86,9 @@ services:
       - postgres_pass
     environment:
       - RUN_ENV=production
+      - BLAST_USAGE_REPORT=false
     volumes:
       - blast-db:/blastdbs
-      - blastconfig:/root/.config
       - ./fasta-exports:/worker/fasta-exports
 
   asv-main:
