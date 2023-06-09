@@ -32,8 +32,8 @@
     "verbatimLocality": {},
     "municipality": {},
     "country": {},
-    "minimumElevationInMeters": {"validation": "[0-9]+(\\.[0-9]+)?|nan"},
-    "maximumElevationInMeters": {"validation": "[0-9]+(\\.[0-9]+)?|nan"},
+    "minimumElevationInMeters": {"validation": "-?[0-9]+(\\.[0-9]+)?|nan"},
+    "maximumElevationInMeters": {"validation": "-?[0-9]+(\\.[0-9]+)?|nan"},
     "minimumDepthInMeters": {"validation": "[0-9]+(\\.[0-9]+)?|nan"},
     "maximumDepthInMeters": {"validation": "[0-9]+(\\.[0-9]+)?|nan"}
   },
