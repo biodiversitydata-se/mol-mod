@@ -414,9 +414,6 @@ def read_data_file(data_file: str, sheets: List[str]):
     data = {}
     # Read one sheet at the time, to catch any missing sheets
     for sheet in sheets:
-        # Skip occurrences and asvs, as they are taken from asv-table sheet
-        if sheet in ['asv', 'occurrence']:
-            continue
         try:
             if is_tar:
                 # Find correct file in tar archive
@@ -449,7 +446,7 @@ def read_data_file(data_file: str, sheets: List[str]):
         data[sheet] = data[sheet].drop(data[sheet].filter(regex="Unnamed"),
                                        axis='columns')
     # Drop 'domain' column if e.g. ampliseq has included that
-    for sheet in ['asv-table', 'annotation']:
+    for sheet in ['asv', 'annotation']:
         data[sheet] = data[sheet].drop(columns=['domain'], errors='ignore')
     return data
 
@@ -491,74 +488,12 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     if data['dataset'].shape[0] == 0:
         logging.error('Input files seem to not have been read properly. '
                       'Please, check dimensions (#rows, #cols) below:')
-        for sheet in ['dataset', 'emof', 'mixs', 'asv-table', 'annotation']:
+        for sheet in ['dataset', 'emof', 'mixs', 'asv', 'annotation']:
             logging.error(f'Sheet {sheet} has dimensions {data[sheet].shape}')
         logging.error('Excel files exported from R have caused this problem '
                       'before. Try opening and saving input in Excel, '
                       'or importing data as *.tar.gz instead.')
         sys.exit(1)
-
-    #
-    # Derive occurrence and asv 'sheets' from asv-table sheet.
-    #
-    # We do this already here, to include asv and occurrence fields subsequent
-    # validation (which expects 'unpivoted' rows). This means, however,
-    # that asv-table defaults (added in data-mapping.json) will have no effects
-    # on occurrences or asvs.
-    #
-
-    # Check for un-matched columns in asv-table tab
-    all_cols = data['asv-table'].columns
-    id_cols = ['asv_id_alias', 'DNA_sequence', 'associatedSequences',
-               'kingdom', 'phylum', 'class', 'order', 'family', 'genus',
-               'specificEpithet', 'infraspecificEpithet', 'otu']
-    events = data['event']['eventID'].tolist()
-    extra_cols = [c for c in all_cols if c not in id_cols + events]
-    if (len(extra_cols) > 0):
-        msg = f'Please remove un-matched asv-table columns: {extra_cols}.'
-        logging.error(msg)
-        sys.exit(1)
-
-    try:
-        # 'Unpivot' event columns into rows, keeping 'id_cols' as columns
-        occurrences = data['asv-table'] \
-            .melt(id_cols,
-                  # Store event column header and values as:
-                  var_name='eventID',
-                  value_name='organism_quantity')
-
-    except KeyError as err:
-        logging.error("There was a problem 'unpivoting' the ASV tab into "
-                      "occurrence rows.")
-        logging.error(err)
-        sys.exit(1)
-
-    # Remove rows with organism_quantity 0,
-    # and reset index so that removed rows are no longer referenced
-    # As we do this before validation, we need to catch potential TypeError
-    try:
-        occurrences = occurrences[occurrences.organism_quantity > 0]
-    except TypeError:
-        # Check for non-integer counts
-        df = data['asv-table'][events]
-        df = df[~df.applymap(lambda x: isinstance(x, (int))).all(1)]
-        errors = data['asv-table']['asv_id_alias'].loc[df.index]
-        logging.error('Counts in asv-table include non-numeric values. '
-                      'Please check the following ASV aliases: \n'
-                      f'{errors.to_string(index=False)} \n'
-                      'No data were imported.')
-        sys.exit(1)
-    else:
-        occurrences.reset_index(inplace=True)
-
-    # Store as 'sheet' in data object
-    data['occurrence'] = occurrences
-    # Also create asv 'sheet'
-    data['asv'] = occurrences[['asv_id_alias', 'DNA_sequence']]
-    # Make sure we have unique asv rows,
-    # to avoid ON CONFLICT - DO UPDATE errors in insert_asvs
-    data['asv'] = data['asv'].drop_duplicates()
-    data['asv'].reset_index(inplace=True)
 
     # Check for field differences between data input and mapping
     logging.info("Checking fields")
@@ -673,12 +608,6 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     occurrences = data['occurrence'].join(asvs['pid'], on='asv_id_alias')
     occurrences.rename(columns={'pid': 'asv_pid'}, inplace=True)
 
-    # Set contributor´s taxon ranks to empty strings
-    # to allow for concatenation
-    tax_fields = ["kingdom", "phylum", "class", "order", "family", "genus",
-                  "specificEpithet", "infraspecificEpithet", "otu"]
-    occurrences[tax_fields] = occurrences[tax_fields].fillna('')
-
     # Join with events to add 'event_pid'
     # But drop event-level associatedSequences field first,
     # as we also allow users to add associations at asv level,
@@ -686,10 +615,6 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     del events['associatedSequences']
     occurrences = occurrences.join(events, on='eventID')
     occurrences.rename(columns={'pid': 'event_pid'}, inplace=True)
-
-    # Concatenate contributor´s taxon rank fields
-    occurrences['previous_identifications'] = \
-        ["|".join(z) for z in zip(*[occurrences[f] for f in tax_fields])]
 
     logging.info(" * occurrences")
     insert_common(occurrences, mapping['occurrence'], cursor, batch_size)
