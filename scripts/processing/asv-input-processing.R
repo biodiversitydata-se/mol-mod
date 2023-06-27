@@ -204,11 +204,12 @@ asv_table[,fasta := NULL]
 # [Run Ampliseq pipeline, and then add tsv output to input dir]
 
 # Import Ampliseq output
-# Disable comment char '#' to handle link/anchor in identification_references
 annotation = fread(file = annotation_file, sep = '\t', header = TRUE,
                    dec = '.', na.strings="")
 # Add 'Unassigned' to kingdom until fixed in ampliseq SBDI-export
-annotation[is.na(kingdom), kingdom := 'Unassigned']
+annotation[is.na(kingdom) | kingdom == "", kingdom := 'Unassigned']
+# Temp. escape quotation marks until properly handled in python import
+annotation[, taxon_remarks := gsub("[']", "''", taxon_remarks)]
 
 ################################################################################
 # 9. Flag ASV:s based on target prediction outcome (Barrnap)
@@ -234,8 +235,6 @@ if (target_criteria == 'None') {
   }
   annotation[, c(scores, 'prob_domain', 'eval_method') := NULL]
 } 
-# Temp. escape quotation marks until properly handled in python import
-annotation$taxon_remarks <- gsub("[']", "''", annotation$taxon_remarks)
 
 ################################################################################
 # 10. Fix dataset-specific problems, if any  - EDIT HERE, PLEASE!
