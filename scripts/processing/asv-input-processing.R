@@ -133,9 +133,7 @@ for (nm in dt_names) {
   dt <- get(nm)
   # Remove whitespace
   dt[, names(dt) := lapply(.SD, trimws, whitespace="[\\h\\v]")]
-  # Temp. escape quotation marks until properly handled in python import
-  dt[, names(dt) := lapply(.SD, gsub, pattern="[']", replacement="''")]
-  
+
   # # Make cols numeric, if possible
   # dt[, names(dt) := lapply(.SD, function(col) tryCatch(as.numeric(col), warning=function(w) col))]
   
@@ -208,8 +206,6 @@ annotation = fread(file = annotation_file, sep = '\t', header = TRUE,
                    dec = '.', na.strings="")
 # Add 'Unassigned' to kingdom until fixed in ampliseq SBDI-export
 annotation[is.na(kingdom) | kingdom == "", kingdom := 'Unassigned']
-# Temp. escape quotation marks until properly handled in python import
-annotation[, taxon_remarks := gsub("[']", "''", taxon_remarks)]
 
 ################################################################################
 # 9. Flag ASV:s based on target prediction outcome (Barrnap)

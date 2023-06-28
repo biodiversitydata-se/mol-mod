@@ -21,6 +21,7 @@ from math import isnan
 from pprint import pformat
 from typing import List, Mapping, Optional
 
+import numpy
 import pandas as pd
 import psycopg2
 from psycopg2.extras import DictCursor
@@ -105,11 +106,18 @@ def format_value(value):
     Formats 'value' in a manner suitable for postgres insert queries.
     """
     if isinstance(value, (str, date)):
-        return f"'{value}'"
+        return f"{value}"
     # Missing values, but note that missing ranks are read into pandas and db
     # as empty strings, as it was useful for outputting taxon strings later
     if isnan(value):
-        return 'NULL'
+        return None
+    # psycopg2 don't understand numpy values, so we convert them to regular
+    # values
+    if isinstance(value, numpy.int64):
+        return int(value)
+
+    if isinstance(value, numpy.bool_):
+        return bool(value)
 
     return value
 
@@ -123,11 +131,11 @@ def format_values(data: pd.DataFrame, mapping: dict,
     """
     values = []
     for i in range(start, end):
-        value = []
+        row = []
         for field in mapping:
-            value += [format_value(data[field][i])]
+            row += [format_value(data[field][i])]
 
-        values += [f'({", ".join(map(str, value))})']
+        values += [tuple(row)]
 
     return values
 
@@ -143,14 +151,17 @@ def insert_common(data: pd.DataFrame, mapping: dict, db_cursor: DictCursor,
     start = 0
     end = min(total, batch_size)
 
+    query = base_query + " VALUES %s"
+
     while start < total:
         logging.info("   * inserting %s to %s", start, end)
         values = format_values(data, field_mapping, start, end)
 
-        query = f"{base_query} VALUES {', '.join(values)};"
-
         try:
-            db_cursor.execute(query)
+            logging.debug("query: %s", query)
+            psycopg2.extras.execute_values (
+                db_cursor, query, values
+            )
         except psycopg2.Error as err:
             logging.error(err)
             logging.error("No data were imported.")
@@ -172,16 +183,22 @@ def insert_dataset(data: pd.DataFrame, mapping: dict,
         sys.exit(1)
 
     values = format_values(data, field_mapping, 0, 1)
-    query = f"{base_query} VALUES {', '.join(values)} RETURNING pid;"
 
+    query = base_query + " VALUES %s RETURNING pid;"
+
+    dataset_id = None
     try:
-        db_cursor.execute(query)
+        logging.debug("query: %s", query)
+        ids = psycopg2.extras.execute_values (
+            db_cursor, query, values, fetch=True
+        )
+        dataset_id = ids[0][0]
     except psycopg2.Error as err:
         logging.error(err)
         logging.error("No data were imported.")
         sys.exit(1)
 
-    return db_cursor.fetchall()[0]['pid']
+    return dataset_id
 
 
 def insert_events(data: pd.DataFrame, mapping: dict, db_cursor: DictCursor,
@@ -197,15 +214,16 @@ def insert_events(data: pd.DataFrame, mapping: dict, db_cursor: DictCursor,
     end = min(total, batch_size)
 
     pids = []
+    query = base_query + " VALUES %s RETURNING pid;"
     while start < total:
         logging.info("   * inserting %s to %s", start, end)
         values = format_values(data, field_mapping, start, end)
 
-        query = f"{base_query} VALUES {', '.join(values)} RETURNING pid;"
-
         try:
-            db_cursor.execute(query)
-            pids += [r['pid'] for r in db_cursor.fetchall()]
+            logging.debug("query: %s", query)
+            pids += psycopg2.extras.execute_values (
+                db_cursor, query, values, fetch=True
+            )
         except psycopg2.Error as err:
             logging.error(err)
             logging.error("No data were imported.")
@@ -215,7 +233,7 @@ def insert_events(data: pd.DataFrame, mapping: dict, db_cursor: DictCursor,
         end = min(total, end + batch_size)
 
     # assign pids to data for future joins
-    return data.assign(pid=pids)
+    return data.assign(pid=[v[0] for v in pids])
 
 
 def insert_asvs(data: pd.DataFrame, mapping: dict, db_cursor: DictCursor,
@@ -236,14 +254,14 @@ def insert_asvs(data: pd.DataFrame, mapping: dict, db_cursor: DictCursor,
     db_cursor.execute("SELECT MAX(pid) FROM asv;")
     old_max_pid = db_cursor.fetchone()[0]
 
+    query = f"{base_query} VALUES %s" + \
+            "ON CONFLICT (asv_sequence) DO UPDATE SET pid = asv.pid " + \
+            "RETURNING pid;"
+
     pids = []
     while start < total:
         logging.info("   * inserting %s to %s", start, end)
         values = format_values(data, field_mapping, start, end)
-
-        query = f"{base_query} VALUES {', '.join(values)} " + \
-                "ON CONFLICT (asv_sequence) DO UPDATE SET pid = asv.pid " + \
-                "RETURNING pid;"
 
         # In the unlikely event of hash collision, i.e. that the MD5 algorithm
         # calculates the same hash for two different sequences, insertion of
@@ -255,8 +273,10 @@ def insert_asvs(data: pd.DataFrame, mapping: dict, db_cursor: DictCursor,
         # ON CONFLICT (asv_sequence) DO UPDATE SET pid = asv.pid RETURNING pid;
 
         try:
-            db_cursor.execute(query)
-            pids += [r['pid'] for r in db_cursor.fetchall()]
+            logging.debug("query: %s", query)
+            pids += psycopg2.extras.execute_values (
+                db_cursor, query, values, fetch=True
+            )
         except psycopg2.Error as err:
             logging.error(err)
             logging.error("No data were imported.")
@@ -266,7 +286,7 @@ def insert_asvs(data: pd.DataFrame, mapping: dict, db_cursor: DictCursor,
         end = min(total, end + batch_size)
 
     # assign pids to data for future joins
-    return data.assign(pid=pids), old_max_pid or 0
+    return data.assign(pid=[v[0] for v in pids]), old_max_pid or 0
 
 
 def compare_annotations(data: pd.DataFrame, db_cursor: DictCursor,
