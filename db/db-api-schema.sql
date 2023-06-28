@@ -157,105 +157,14 @@ WHERE ta.status::text = 'valid'
     AND ta.annotation_target::text = mixs.target_gene::text;
 
 --
--- Objects used for populating filter page (select2) dropdowns:
--- the view lists available combinations of sequencing and taxonomy values,
--- the function dynamically filters these and paginates results
+-- Objects used in FILTER page
+-- Views are materialized to increase search performance, and need to updated after
+-- data import / db restore (see 'make status' / 'make stats' in Makefile)
 --
 
-CREATE VIEW api.app_filter_mixs_tax AS
-SELECT mixs.target_gene AS gene,
-    mixs.target_subfragment AS sub,
-    ((((mixs.pcr_primer_name_forward)::text || ': '::text) || (mixs.pcr_primer_forward)::text))::character varying AS fw_prim,
-    ((((mixs.pcr_primer_name_reverse)::text || ': '::text) || (mixs.pcr_primer_reverse)::text))::character varying AS rv_prim,
-    ta.kingdom,
-    ta.phylum,
-    ta.class AS classs,
-    ta.oorder,
-    ta.family,
-    ta.genus,
-    ta.specific_epithet AS species
-FROM :data_schema.mixs
-    JOIN :data_schema.occurrence oc ON oc.event_pid = mixs.pid
-    JOIN :data_schema.asv ON asv.pid = oc.asv_pid
-    JOIN :data_schema.taxon_annotation ta ON asv.pid = ta.asv_pid
-    JOIN :data_schema.sampling_event se ON oc.event_pid = se.pid
-    JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid
-WHERE ds.in_bioatlas
-    AND ta.status::text = 'valid'::text
-    AND ta.target_prediction = TRUE
-    AND ta.annotation_target::text = mixs.target_gene::text;
-
-CREATE FUNCTION api.app_drop_options(
-    field text,
-    noffset bigint,
-    nlimit integer,
-    term text DEFAULT ''::text,
-    kingdom text[] DEFAULT '{}'::text[],
-    phylum text[] DEFAULT '{}'::text[],
-    classs text[] DEFAULT '{}'::text[],
-    oorder text[] DEFAULT '{}'::text[],
-    family text[] DEFAULT '{}'::text[],
-    genus text[] DEFAULT '{}'::text[],
-    species text[] DEFAULT '{}'::text[],
-    gene text[] DEFAULT '{}'::text[],
-    sub text[] DEFAULT '{}'::text[],
-    fw_prim text[] DEFAULT '{}'::text[],
-    rv_prim text[] DEFAULT '{}'::text[])
-    RETURNS TABLE(data json)
-    LANGUAGE plpgsql IMMUTABLE
-    AS $$
-BEGIN
-    -- Execute dynamically, i.e. modify the query based on 1) which dropdown sent
-    -- the request, 2) what the user typed, if anything, and 3) which
-    -- selections have previously been made in other dropdowns, if any
-	RETURN QUERY EXECUTE format(
-        'with filtered as ( -- temp table to use in JSON build
-            SELECT DISTINCT %I
-            FROM api.app_filter_mixs_tax
-            WHERE %I <> '''' AND %I IS NOT NULL
-            -- Expand supplied arrays of dropdown selections into tables
-            AND ($1 = ''{}'' OR kingdom IN (SELECT unnest($1)))
-            AND ($2 = ''{}'' OR phylum IN (SELECT unnest($2)))
-            AND ($3 = ''{}'' OR classs IN (SELECT unnest($3)))
-            AND ($4 = ''{}'' OR oorder IN (SELECT unnest($4)))
-            AND ($5 = ''{}'' OR family IN (SELECT unnest($5)))
-            AND ($6 = ''{}'' OR genus IN (SELECT unnest($6)))
-            AND ($7 = ''{}'' OR species IN (SELECT unnest($7)))
-            -- Make case-insensitive reg-exp comparison with user-provided term
-            -- i.e. if user types "bac" in kingdom, this should match "Bacteria"
-            AND %I ~* $8
-            AND ($9 = ''{}'' OR gene IN (SELECT unnest($9)))
-            AND ($14 = ''{}'' OR sub IN (SELECT unnest($14)))
-            AND ($10 = ''{}'' OR fw_prim IN (SELECT unnest($10)))
-            AND ($11 = ''{}'' OR rv_prim IN (SELECT unnest($11)))
-        )
-        -- Format & paginate according to select2 requirements
-        SELECT json_build_object(
-            ''count'', (SELECT COUNT(*) FROM filtered),
-            ''results'', COALESCE(json_agg(to_json(t)),''[]'')
-        )
-        FROM (
-            SELECT %I AS "id", %I AS "text"
-            FROM filtered
-            ORDER BY %I
-            OFFSET $12
-            LIMIT $13
-        -- Insertion of the SQL identifier (target droppdown) must be handled by format - not USING clause
-        -- See e.g: https://www.postgresql.org/docs/13/plpgsql-statements.html#PLPGSQL-STATEMENTS-EXECUTING-DYN
-        ) t', field, field, field, field, field, field, field
-    )
-    USING kingdom, phylum, classs, oorder, family, genus, species, '^'||term||'.*$', gene, fw_prim, rv_prim, noffset, nlimit, sub;
-END
-$$;
-COMMENT ON FUNCTION api.app_drop_options(text, bigint, integer, text, text[], text[], text[], text[], text[], text[], text[], text[], text[], text[], text[])
-    IS 'Example call (view in Properties | General to get quotes right):
-SELECT api.app_drop_options(''classs'', 0, 25, ''T'', ''{}'', ''{Actinobacteriota, Bacteroidota}'');';
-
---
--- View for populating filter search result table
---
-
-CREATE VIEW api.app_search_mixs_tax AS
+-- View for data displayed in the FILTER search result table,
+-- also used by view for FILTER dropdown options (below)
+CREATE MATERIALIZED VIEW api.app_search_mixs_tax AS
 SELECT DISTINCT asv.asv_id,
     concat_ws('|'::text, concat_ws(''::text, asv.asv_id, '-', ta.kingdom), ta.phylum, ta.class, ta.oorder, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS asv_tax,
     asv.asv_sequence,
@@ -286,16 +195,103 @@ WHERE ds.in_bioatlas
     AND ta.annotation_target = mixs.target_gene
 ORDER BY asv.asv_id, asv.asv_sequence, mixs.target_gene, mixs.target_subfragment, (((mixs.pcr_primer_name_forward)::text || ': '::text) || (mixs.pcr_primer_forward)::text), (((mixs.pcr_primer_name_reverse)::text || ': '::text) || (mixs.pcr_primer_reverse)::text);
 
+-- View for FILTER dropdown options (dynamically filtered in function, below)
+CREATE MATERIALIZED VIEW api.app_filter_mixs_tax AS
+SELECT DISTINCT gene, sub,
+    fw_name || ': ' || fw_sequence AS fw_prim,
+	rv_name || ': ' || rv_sequence AS rv_prim,
+    kingdom,
+    phylum,
+    classs,
+    oorder,
+    family,
+    genus,
+    species
+FROM api.app_search_mixs_tax;
+
+-- Function executed as the user clicks a FILTER dropdown, getting data from
+-- a materialized view (above), and dynamically modifying the query based on
+-- 1) which dropdown sent the request,
+-- 2) what the user typed in the dropdown, if anything, and
+-- 3) which selections have previously been made in other dropdowns, if any
+CREATE OR REPLACE FUNCTION api.app_drop_options(
+    field text,
+    noffset bigint,
+    nlimit integer,
+    term text DEFAULT '',
+    kingdom text[] DEFAULT '{}',
+    phylum text[] DEFAULT '{}',
+    classs text[] DEFAULT '{}',
+    oorder text[] DEFAULT '{}',
+    family text[] DEFAULT '{}',
+    genus text[] DEFAULT '{}',
+    species text[] DEFAULT '{}',
+    gene text[] DEFAULT '{}',
+    sub text[] DEFAULT '{}',
+    fw_prim text[] DEFAULT '{}',
+    rv_prim text[] DEFAULT '{}')
+RETURNS TABLE(data json)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    -- Execute dynamically, i.e. modify the query based on 1) which dropdown sent
+    -- the request, 2) what the user typed, if anything, and 3) which
+    -- selections have previously been made in other dropdowns, if any
+    RETURN QUERY EXECUTE format(
+        '-- Put filtered options in temp table
+		WITH filtered AS (
+		 	SELECT DISTINCT %I AS id
+         	FROM api.app_filter_mixs_tax
+         	WHERE %I <> '''' AND %I IS NOT NULL
+         	AND ($1 = ''{}'' OR kingdom = ANY($1))
+         	AND ($2 = ''{}'' OR phylum = ANY($2))
+         	AND ($3 = ''{}'' OR classs = ANY($3))
+         	AND ($4 = ''{}'' OR oorder = ANY($4))
+         	AND ($5 = ''{}'' OR family = ANY($5))
+         	AND ($6 = ''{}'' OR genus = ANY($6))
+         	AND ($7 = ''{}'' OR species = ANY($7))
+            -- Make case-insensitive comparison with user-provided term
+         	AND %I ~* $8
+         	AND ($9 = ''{}'' OR gene = ANY($9))
+         	AND ($10 = ''{}'' OR sub = ANY($10))
+         	AND ($11 = ''{}'' OR fw_prim = ANY($11))
+         	AND ($12 = ''{}'' OR rv_prim = ANY($12))
+         	ORDER BY %I
+         	OFFSET $13
+         	LIMIT $14)
+		-- Format & paginate according to select2 requirements
+		SELECT json_build_object(
+            ''count'', (SELECT COUNT(*) FROM filtered),
+            ''results'', COALESCE(json_agg(json_build_object(''id'', f.id, ''text'', f.id)),''[]'')
+		-- Format dynamic field NAME
+		) FROM filtered f', field, field, field, field, field, field)
+	-- Set dynamic field VALUES
+    USING kingdom, phylum, classs, oorder, family, genus, species, '^'||term||'.*$',
+	gene, sub, fw_prim, rv_prim, noffset, nlimit;
+END;
+$$;
+COMMENT ON FUNCTION api.app_drop_options(text, bigint, integer, text, text[], text[], text[], text[], text[], text[], text[], text[], text[], text[], text[])
+    IS 'Example call 1 (view in Properties | General to get quotes right):
+SELECT api.app_drop_options(''classs'', 0, 25, ''T'', ''{}'', ''{Actinobacteriota, Bacteroidota}'');
+
+Example call 2 (view in Properties | General to get quotes right):
+-- Payload sent to /rpc/app_drop_options: {"kingdom": ["Bacteria"], "phylum": ["Planctomycetes"], "field": "classs", "term": "", "nlimit": 25, "noffset": 0}
+SELECT api.app_drop_options(''classs'', 0, 25, '''', ''{Bacteria}'',''{Planctomycetes}'');
+';
+
+
 --
+-- Objects used in BLAST page
+--
+
 -- View used by A) portal admin to produce a fasta file for building a BLAST db,
 -- and also B) by webb app to retrieve subject sequences to add to BLAST result
 -- tables, as these are not included in normal BLAST output. View output is then
 -- filtered via a POST request to the below function, because:
 -- 1) we may need to send more ASV IDs than we can fit into an URL to filter a GET request, and
 -- 2) PostgREST does not allow POST requests for SELECT operations on views
---
-
-CREATE VIEW api.app_asvs_for_blastdb AS
+-- Materialized (see above), and updated with 'make blastdb'
+CREATE MATERIALIZED VIEW IF NOT EXISTS api.app_asvs_for_blastdb AS
 SELECT DISTINCT asv_id, higher_taxonomy, asv_sequence
     FROM (SELECT asv.asv_id,
             concat_ws(';'::text, ta.kingdom, ta.phylum, ta.class, ta.oorder, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS higher_taxonomy,
@@ -309,25 +305,21 @@ SELECT DISTINCT asv_id, higher_taxonomy, asv_sequence
         WHERE ds.in_bioatlas
             AND ta.annotation_target::text = mixs.target_gene::text
             AND ta.status::text = 'valid'::text AND ta.target_prediction = TRUE) rd;
+CREATE INDEX IF NOT EXISTS blast_asv ON api.app_asvs_for_blastdb(asv_id);
 
 CREATE FUNCTION api.app_seq_from_id(ids character varying[])
     RETURNS TABLE(asv_id CHARACTER(36), ASV_SEQUENCE CHARACTER VARYING)
     LANGUAGE sql IMMUTABLE
     AS $$
-    SELECT asv_id, asv_sequence FROM api.app_asvs_for_blastdb WHERE asv_id IN (
-	   SELECT unnest(ids)
-	)
+    SELECT asv_id, asv_sequence FROM api.app_asvs_for_blastdb
+    WHERE asv_id = ANY(ids)
 $$;
 COMMENT ON FUNCTION api.app_seq_from_id(character varying[])
     IS 'Example call (view in Properties | General to get quotes right):
 SELECT api.app_seq_from_id(''{ASV:40b37890b1b1fcdf0ece91f1da34c1ca}'')';
 
---
--- View used for populating stats table in About page. It is 'materialized' to
--- increase speed, meaning that it needs to be manually updated after new
--- imports (see 'make stats' in Makefile).
---
-
+-- View used for populating stats table in About page
+-- Materialized (see above), and updated with 'make status' / 'make stats'
 CREATE MATERIALIZED VIEW api.app_about_stats AS
 SELECT sub.gene,
    string_agg(DISTINCT sub.kingdom::text, ', '::text) AS kingdoms,

@@ -50,12 +50,26 @@ def run_update(pid: int = 0, status: int = 1, ruid: str = '',
             logging.error(err)
             sys.exit(1)
 
-    # Always update view so that About page shows correct summary stats
+    # Update materialized views
+    # About stats
     try:
         logging.info("Updating stats for About page")
         cursor.execute("REFRESH MATERIALIZED VIEW api.app_about_stats;")
     except psycopg2.OperationalError as err:
-        logging.error("Could not update materialized view")
+        logging.error(err)
+        sys.exit(1)
+    # Filter results
+    try:
+        logging.info("Updating data for filter search results")
+        cursor.execute("REFRESH MATERIALIZED VIEW api.app_search_mixs_tax;")
+    except psycopg2.OperationalError as err:
+        logging.error(err)
+        sys.exit(1)
+    # Filter dropdowns
+    try:
+        logging.info("Updating data for filter dropdown options")
+        cursor.execute("REFRESH MATERIALIZED VIEW api.app_filter_mixs_tax;")
+    except psycopg2.OperationalError as err:
         logging.error(err)
         sys.exit(1)
 

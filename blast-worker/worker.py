@@ -120,12 +120,18 @@ def main():
                 # Format as dictionary using list of field names,
                 # transforming numerical strings into numbers
                 result = {}
-                for i, field in enumerate(row.split()):
+                for i, field in enumerate(row.split("\t")):
                     try:
                         value = float(field)
                     except ValueError:
                         value = field
-                    result[field_names[i]] = value
+                    try:
+                        result[field_names[i]] = value
+                    except Exception:
+                        APP.logger.error(
+                            f"Could not assign field {i} of {field_names}"
+                            f" for row: {row}."
+                        )
                 results += [result]
 
             return jsonify(data=results)
