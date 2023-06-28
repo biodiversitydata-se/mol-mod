@@ -212,14 +212,16 @@ annotation[is.na(kingdom) | kingdom == "", kingdom := 'Unassigned']
 # 9. Flag ASV:s based on target prediction outcome (Barrnap)
 ################################################################################
 
+
 annotation[, annotation_target := marker]
 annotation[, target_criteria := target_criteria]
+
+scores <- c('euk_eval','bac_eval', 'mito_eval', 'arc_eval')
 
 if (target_criteria == 'None') {
   annotation[, target_prediction := TRUE]
   # Use Barrnap cols (but skip for older files that use list instead)
 } else if (!exists('non_target') & !exists('target_list')) {
-  scores <- c('euk_eval','bac_eval', 'mito_eval', 'arc_eval')
   annotation[, prob_domain := substr(apply(.SD, 1, which.min),3,5), 
              .SDcols = scores]
   if (marker == '18S rRNA'){
@@ -230,8 +232,9 @@ if (target_criteria == 'None') {
                  # 'Assigned kingdom OR barrnap-positive' 
                  (kingdom != 'Unassigned' | prob_domain %in% c('arc', 'bac'))]
   }
-  annotation[, c(scores, 'prob_domain', 'eval_method') := NULL]
+  annotation[, prob_domain := NULL]
 } 
+annotation[, c(scores, 'eval_method') := NULL]
 
 ################################################################################
 # 10. Fix dataset-specific problems, if any  - EDIT HERE, PLEASE!
