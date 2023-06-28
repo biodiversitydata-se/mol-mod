@@ -134,11 +134,12 @@ for (nm in dt_names) {
   # Remove whitespace
   dt[, names(dt) := lapply(.SD, trimws, whitespace="[\\h\\v]")]
 
-  # # Make cols numeric, if possible
-  # dt[, names(dt) := lapply(.SD, function(col) tryCatch(as.numeric(col), warning=function(w) col))]
+  # Make cols numeric, if possible
+  dt[, names(dt) := lapply(.SD, function(col) tryCatch(as.numeric(col), warning=function(w) col))]
   
   # Drop empty rows (all NA:s)
-  dt <- dt[rowSums(is.na(dt)) != ncol(dt)]
+  if (ncol(dt) > 1) { dt <- dt[rowSums(is.na(dt)) != ncol(dt)] }
+  
   assign(nm, dt)
 }
 
