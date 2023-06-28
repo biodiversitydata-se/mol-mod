@@ -69,18 +69,6 @@
     "measurementMethod": {},
     "measurementRemarks": {}
   },
-  "asv-table": {
-      "targetTable": "None",
-      "kingdom": {},
-      "phylum": {},
-      "class": {},
-      "order": {},
-      "family": {},
-      "genus": {},
-      "specificEpithet": {},
-      "infraspecificEpithet": {},
-      "otu": {}
-  },
   "asv": {
     "targetTable": "asv",
     "asv_id": {},
