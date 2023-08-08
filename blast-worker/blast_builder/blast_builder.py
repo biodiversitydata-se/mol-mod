@@ -151,8 +151,8 @@ def create_output_fasta(ref: str = '', target: str = ''):
     sql = f"SELECT DISTINCT(a.asv_id), a.asv_sequence \
            FROM public.taxon_annotation ta, public.asv a \
            WHERE a.pid = ta.asv_pid \
-           AND reference_db = '{ref}' \
-           AND annotation_target = '{target}';"
+           AND split_part(reference_db, ' (', 1) = '{ref}' \
+           AND split_part(annotation_target, ' (', 1) = '{target}';"
 
     with open(f'/worker/fasta-exports/{filename}.fasta', 'w') as fasta:
         cursor.execute(sql)
