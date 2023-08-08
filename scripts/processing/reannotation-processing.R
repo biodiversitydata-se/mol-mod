@@ -14,9 +14,11 @@ marker <- '16S rRNA'
 # Set up
 ################################################################################
 
-# install.packages('openxlsx')
+# Use instead of openxl as some output format is not understood by
+# update.annotation.sh
+# install.packages('WriteXLS')
 # install.packages('data.table')
-library(openxlsx)
+library(WriteXLS)
 library(data.table)
 # Set work dir to script location
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
@@ -33,7 +35,7 @@ annotation[, annotation_target := marker]
 annotation[, target_criteria := target_criteria]
 
 ################################################################################
-# Evaluate 
+# Evaluate
 ################################################################################
 
 scores <- c('euk_eval','bac_eval', 'mito_eval', 'arc_eval')
@@ -60,7 +62,7 @@ annotation[, c(scores, 'eval_method') := NULL]
 ################################################################################
 
 # For smaller data sets only, create excel file
-write.xlsx(annotation, 'output/reannotation.xlsx')
+WriteXLS(annotation, 'output/reannotation.xlsx')
 
 # Write same data to csv
 fwrite(annotation, 'output/reannotation.csv', sep=',', row.names=FALSE)
