@@ -370,3 +370,14 @@ AND se.pid = oc.event_pid
 AND oc.asv_pid = ta.asv_pid
 AND ta.status = 'valid'
 ORDER BY annotation_target, dataset_id;
+
+CREATE OR REPLACE VIEW api.split_annotation_ds
+AS
+SELECT DISTINCT pid, dataset_id, db, algo
+FROM api.annotation_overview
+WHERE dataset_id IN (
+    SELECT dataset_id
+    FROM api.annotation_overview
+    GROUP BY dataset_id
+    HAVING COUNT(DISTINCT db) > 1 OR COUNT(DISTINCT algo) > 1
+);
