@@ -353,3 +353,31 @@ SELECT sub.gene,
  GROUP BY sub.gene
  ORDER BY sub.gene
 WITH DATA;
+
+
+--
+-- 'Utility' views used by admin
+--
+
+-- View listing reference database and algorithm used for annotaton of each dataset
+CREATE OR REPLACE VIEW api.annotation_overview
+AS
+SELECT DISTINCT ds.pid, dataset_id, in_bioatlas, annotation_target, split_part(reference_db, ' (', 1) AS db,
+split_part(annotation_algorithm, ' (', 1) AS algo
+FROM dataset ds, sampling_event se, occurrence oc, taxon_annotation ta
+WHERE ds.pid = se.dataset_pid
+AND se.pid = oc.event_pid
+AND oc.asv_pid = ta.asv_pid
+AND ta.status = 'valid'
+ORDER BY annotation_target, dataset_id;
+
+CREATE OR REPLACE VIEW api.split_annotation_ds
+AS
+SELECT DISTINCT pid, dataset_id, db, algo
+FROM api.annotation_overview
+WHERE dataset_id IN (
+    SELECT dataset_id
+    FROM api.annotation_overview
+    GROUP BY dataset_id
+    HAVING COUNT(DISTINCT db) > 1 OR COUNT(DISTINCT algo) > 1
+);

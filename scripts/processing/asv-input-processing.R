@@ -28,7 +28,7 @@ annotation_file <- 'input/annotation.tsv'
 
 # See section '9. Flag ASV:s based on target prediction outcome (Barrnap)'
 marker <- '16S rRNA'
-# target_criteria <- 'None'
+# target_criteria <- 'None applied'
 target_criteria <- 'Assigned kingdom OR barrnap-positive'
 
 dataset_id <- 'SBDI-ASV-1'
@@ -65,10 +65,10 @@ if(grepl('xlsx', uploaded_file, fixed = TRUE)){
       # Make asv-table & emof-simple R-friendly
       gsub("-", "_", sheet_name),
       data.table(read.xlsx(uploaded_file, sheet=sheet_name, detectDates = TRUE))
-    ) 
+    )
   }
-  
-  # Or, import archived txt    
+
+  # Or, import archived txt
 } else {
   untar(uploaded_file, exdir='unpacked')
   for (xsv in list.files('unpacked', pattern="*.[ct]sv")) {
@@ -100,22 +100,22 @@ if (!exists('emof_simple')){ emof_simple <- data.table() }
 
 # Recreate emof, if missing (as data providers sometimes delete it)
 if (!exists('emof')) {
-  columns = c("eventID", "measurementType", "measurementTypeID", "measurementValue",  
-              "measurementValueID", "measurementUnit", "measurementUnitID", "measurementAccuracy",     
-              "measurementDeterminedDate", "measurementDeterminedBy", "measurementMethod", "measurementRemarks") 
-  emof = data.table(matrix(nrow = 0, ncol = length(columns))) 
+  columns = c("eventID", "measurementType", "measurementTypeID", "measurementValue",
+              "measurementValueID", "measurementUnit", "measurementUnitID", "measurementAccuracy",
+              "measurementDeterminedDate", "measurementDeterminedBy", "measurementMethod", "measurementRemarks")
+  emof = data.table(matrix(nrow = 0, ncol = length(columns)))
   colnames(emof) = columns
 }
 
 # Rename cols
 setnames(event, 'catalogueNumber', 'catalogNumber', skip_absent=TRUE)
 dts <- list(event, dna, emof, emof_simple)
-dts <- lapply(dts, function(dt) setnames(dt, "event_id_alias", "eventID", 
+dts <- lapply(dts, function(dt) setnames(dt, "event_id_alias", "eventID",
                                          skip_absent=TRUE))
 
 # Add new cols, if missing
-event_new <- c('datasetID', 'collectionCode', 'fieldNumber', 'catalogNumber', 
-               'references', 'institutionCode', 'institutionID') 
+event_new <- c('datasetID', 'collectionCode', 'fieldNumber', 'catalogNumber',
+               'references', 'institutionCode', 'institutionID')
 event[, (event_new[!event_new %in% names(event)]) := NA_character_]
 dna_new <- c('seq_meth', 'denoising_appr')
 dna[, (dna_new[!dna_new %in% names(dna)]) := NA_character_]
@@ -136,10 +136,10 @@ for (nm in dt_names) {
 
   # Make cols numeric, if possible
   dt[, names(dt) := lapply(.SD, function(col) tryCatch(as.numeric(col), warning=function(w) col))]
-  
+
   # Drop empty rows (all NA:s)
   if (ncol(dt) > 1) { dt <- dt[rowSums(is.na(dt)) != ncol(dt)] }
-  
+
   assign(nm, dt)
 }
 
@@ -177,15 +177,15 @@ if (nrow(emof) == 0 & nrow(emof_simple) > 0){
   emof_simple[, names(emof_simple) := lapply(.SD, as.character)]
   # Use data.table (!) melt
   emof <- melt(emof_simple, id.vars = c("eventID"), na.rm = T,
-               value.name = "measurementValue", 
+               value.name = "measurementValue",
                variable.name = c("measurementType"))
   # Separate parameter and unit
   emof[, c("measurementType", "measurementUnit"):=
          tstrsplit(measurementType, '[.]?[()]', "")]
   # Add remaining cols
-  more_emof <- c('measurementTypeID', 'measurementUnitID', 'measurementValueID', 
-                 'measurementMethod', 'measurementDeterminedDate', 
-                 'measurementAccuracy', 'measurementRemarks', 
+  more_emof <- c('measurementTypeID', 'measurementUnitID', 'measurementValueID',
+                 'measurementMethod', 'measurementDeterminedDate',
+                 'measurementAccuracy', 'measurementRemarks',
                  'measurementDeterminedBy')
   emof[, (more_emof) := NA]
 }
@@ -218,22 +218,22 @@ annotation[, target_criteria := target_criteria]
 
 scores <- c('euk_eval','bac_eval', 'mito_eval', 'arc_eval')
 
-if (target_criteria == 'None') {
+if (target_criteria == 'None applied') {
   annotation[, target_prediction := TRUE]
   # Use Barrnap cols (but skip for older files that use list instead)
 } else if (!exists('non_target') & !exists('target_list')) {
-  annotation[, prob_domain := substr(apply(.SD, 1, which.min),3,5), 
+  annotation[, prob_domain := substr(apply(.SD, 1, which.min),3,5),
              .SDcols = scores]
   if (marker == '18S rRNA'){
     # 'Barrnap positive'
     annotation[, target_prediction := prob_domain == 'euk']
   } else if (marker == '16S rRNA'){
-    annotation[, target_prediction := 
-                 # 'Assigned kingdom OR barrnap-positive' 
+    annotation[, target_prediction :=
+                 # 'Assigned kingdom OR barrnap-positive'
                  (kingdom != 'Unassigned' | prob_domain %in% c('arc', 'bac'))]
   }
   annotation[, prob_domain := NULL]
-} 
+}
 annotation[, c(scores, 'eval_method') := NULL]
 
 ################################################################################
@@ -245,10 +245,10 @@ annotation[, c(scores, 'eval_method') := NULL]
 ################################################################################
 
 # Taxonomy from data provider
-prv_tax<- c("kingdom", "phylum", "class", "order", "family", "genus", 
+prv_tax<- c("kingdom", "phylum", "class", "order", "family", "genus",
             "specificEpithet", "infraspecificEpithet", "otu")
-asv_table[, previous_identifications := 
-            do.call(paste, c(lapply(.SD, function(x) ifelse(is.na(x), '', x)), 
+asv_table[, previous_identifications :=
+            do.call(paste, c(lapply(.SD, function(x) ifelse(is.na(x), '', x)),
                              sep = '|')), .SDcols = prv_tax]
 asv_table[, c(prv_tax) := NULL]
 setcolorder(asv_table, c('previous_identifications',
@@ -260,10 +260,10 @@ asv_table[, c('DNA_sequence') := NULL]
 labels <- c('asv_id_alias', 'previous_identifications', 'associatedSequences')
 counts <- names(asv_table)[!(names(asv_table) %in% labels)]
 # Set zero counts to NA so that we can drop them during melting
-asv_table[, (counts) := lapply(.SD, function(x) ifelse(x == 0, NA, x)), 
+asv_table[, (counts) := lapply(.SD, function(x) ifelse(x == 0, NA, x)),
           .SDcols = counts]
 occurrence <- melt(asv_table, id.vars = labels, na.rm = T,
-                   value.name = "organism_quantity", 
+                   value.name = "organism_quantity",
                    variable.name = c("eventID"))
 rm(asv_table)
 
@@ -281,11 +281,11 @@ for (sheet in final_sheets)
   if (sheet == 'asv_table') sheet_name <- 'asv-table'
   else if (sheet == 'dna') sheet_name <- 'mixs'
   else sheet_name <- sheet
-  
+
   # Write df data to Excel workbook
   addWorksheet(wb, sheetName = sheet_name)
   writeData(wb, sheet_name, get(sheet), startRow = 1, startCol = 1)
-  
+
   # and write same data to csv:s
   fwrite(get(sheet), paste0('output/', sheet_name, ".csv"), sep=",",
          row.names=FALSE)}
@@ -299,4 +299,3 @@ tar(tar_out, files = tfiles, compression = "gzip", tar='tar')
 unlink(tfiles)
 
 rm(list=setdiff(ls(), final_sheets))
-

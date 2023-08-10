@@ -76,11 +76,12 @@ blastdb:
 	$(eval worker=$(shell docker ps --format '{{.Names}}' | grep -E blast.*1))
 	python3 ./scripts/build_blast_db.py --container ${worker} -v
 
-# Export a fasta file of all ASVs currently annotated with reference database
-# Example: make fasta ref=UNITE:8.0
+# Export a fasta file to use in annotation update, filtering ASVs on target
+# gene and (acronym part of) reference db.
+# Example: make fasta ref="SBDI-GTDB-R07-RS207-1" target="16S rRNA"
 fasta:
 	$(eval worker=$(shell docker ps --format '{{.Names}}' | grep -E blast.*1))
-	python3 ./scripts/build_blast_db.py --ref $(ref) --container ${worker} -v
+	python3 ./scripts/build_blast_db.py --ref '$(ref)' --target '$(target)' --container ${worker} -v
 
 
 #
