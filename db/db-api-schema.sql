@@ -122,7 +122,6 @@ SELECT ds.pid AS dataset_pid,
     row_to_json(( SELECT d.*::record AS d
            FROM ( SELECT calc.size AS "sampleSizeValue",
                 oc.organism_quantity AS "organismQuantity",
-                mixs.sop,
                 mixs.sop || ' ' AS sop,
                 mixs.seq_meth,
                 mixs.pcr_primer_name_forward,
