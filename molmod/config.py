@@ -86,16 +86,19 @@ class Config:
     VALID_EXTENSIONS = get_env_variable('VALID_EXTENSIONS').split(' ')
     SEND_FILE_MAX_AGE_DEFAULT = int(get_env_variable(
         'SEND_FILE_MAX_AGE_DEFAULT'))
+    SQLALCHEMY_SILENCE_UBER_WARNING = int(get_env_variable(
+        'SQLALCHEMY_SILENCE_UBER_WARNING'))
 
-    def __init__(self, config_file: str = "/run/secrets/email_config"):
-        """
-        Loads the email config values.
-        """
-        # Flask-Mail settings
-        load_config_values(self, config_file)
 
-        # Make sure that UPLOAD_EMAIL is a list
-        self.UPLOAD_EMAIL = to_list(self.UPLOAD_EMAIL)
+def __init__(self, config_file: str = "/run/secrets/email_config"):
+    """
+    Loads the email config values.
+    """
+    # Flask-Mail settings
+    load_config_values(self, config_file)
+
+    # Make sure that UPLOAD_EMAIL is a list
+    self.UPLOAD_EMAIL = to_list(self.UPLOAD_EMAIL)
 
 
 class ProductionConfig(Config):
