@@ -58,6 +58,8 @@ fi
 FILE="$topdir/$DIR/${BASE}_$TIMESTAMP.sql"
 FLAGS=( -h localhost -U "$POSTGRES_USER" -d "$POSTGRES_DB" )
 
+mkdir -p "$topdir/db-backup"
+
 #
 # RESTORE DB
 #
