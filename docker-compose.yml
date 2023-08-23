@@ -105,9 +105,8 @@ services:
       dockerfile: docker/develop
     logging: *default-logging
     volumes:
-      - type: bind
-        source: ./
-        target: /app
+      # To make changes take immediate effect (using Flask reload in DEBUG mode)
+      - ./:/app
       - uploads:/uploads
     env_file:
       - .env
