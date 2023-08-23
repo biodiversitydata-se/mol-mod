@@ -90,6 +90,8 @@ services:
     logging: *default-logging
     env_file:
       - .env
+    environment:
+      - FLASK_DEBUG=1
     secrets:
       - postgres_pass
     volumes:
@@ -118,6 +120,7 @@ services:
       # Replaces CAS_AFTER_LOGOUT if NOT running in actual production env, see config.py
       - HOST_URL=${HOST_URL}
       - PYTHONPATH=/app/molmod
+      - FLASK_DEBUG=1
     ports:
       - 5000:5000
     depends_on:

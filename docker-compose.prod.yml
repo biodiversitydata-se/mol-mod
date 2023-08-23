@@ -86,6 +86,7 @@ services:
       - postgres_pass
     environment:
       - RUN_ENV=production
+      - FLASK_DEBUG=0
       - BLAST_USAGE_REPORT=false
     volumes:
       - blast-db:/blastdbs
@@ -111,6 +112,7 @@ services:
       # Replaces CAS_AFTER_LOGOUT if NOT running in actual production env, see config.py
       - HOST_URL=${HOST_URL}
       - PYTHONPATH=/app/molmod
+      - FLASK_DEBUG=0
     ports:
       - 5000:5000
     depends_on:

@@ -71,7 +71,6 @@ class Config:
     SECRET_KEY = secrets.token_hex()
     POSTGREST = get_env_variable('POSTGREST_HOST') or 'http://localhost:3000'
     BLAST_DB = get_env_variable('BLAST_DB')
-    DEBUG = False
     TESTING = False
     SBDI_START_PAGE = get_env_variable('SBDI_START_PAGE')
     SBDI_CONTACT_PAGE = get_env_variable('SBDI_CONTACT_PAGE')
@@ -110,7 +109,6 @@ class ProductionConfig(Config):
 
 
 class DevelopmentConfig(Config):
-    DEBUG = True
     BATCH_SEARCH_URL = get_env_variable('TEST_BATCH_SEARCH_URL')
     REDIRECT_URL = get_env_variable('TEST_REDIRECT_URL')
     CAS_AFTER_LOGOUT = get_env_variable('HOST_URL')
