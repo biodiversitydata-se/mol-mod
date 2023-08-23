@@ -96,7 +96,6 @@ services:
       - postgres_pass
     volumes:
       - ./blast-databases:/blastdbs
-      - blastconfig:/root/.config
       - ./fasta-exports:/worker/fasta-exports
 
   develop:
@@ -127,5 +126,4 @@ services:
       - postgrest
 
 volumes:
-  blastconfig:
   uploads:
