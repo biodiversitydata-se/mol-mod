@@ -8,11 +8,10 @@
 #	    the "-n" command line option.  This writes a compressed dump
 #	    file to the "$topdir/db-backup" directory.
 #
-#	2.  Pull logs from the three Docker containers asv-main,
-#	    asv-db, and asv-rest.  These logs are stored in
-#	    "$topdir/log-backup".  Only the logging data produced since
-#	    the last time this script ran will be stored (empty log
-#	    backups are removed).  The timestamp on the symbolic link
+#	2.  Pull data from Docker container logs and store these in
+#	    "$topdir/log-backup". Only the logging data produced since
+#	    the last time this script ran will be pulled (empty log
+#	    backups are removed). The timestamp on the symbolic link
 #	    "$topdir/backups/latest" (which is re-created at the end of
 #	    this script) is used to determine from when logs are to be
 #	    stored.
@@ -150,10 +149,16 @@ if [ -d "$backup_dir/latest" ]; then
 fi
 
 mkdir -p "$topdir/log-backup"
-for container in asv-main asv-db asv-rest; do
+
+containers=$(docker compose ps | awk 'NR>1 { print $1 }')
+for container in $containers; do
 	backup_file=$topdir/log-backup/$container.log.$now
 
 	docker logs "$@" "$container" >"$backup_file" 2>&1
+
+	# e.g. 'docker logs --timestamps --details --since 1692955416 asv-main > ...'
+	# which pulls entries since 2023-08-25T09:23:36.399165925Z (in UTC time)
+	# and adds UTC timestamp to each log entry (in addition local time added via log_config)
 
 	# Remove log if nothing was logged since last backup.
 	if [ ! -s "$backup_file" ]; then
