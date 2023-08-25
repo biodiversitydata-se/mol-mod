@@ -103,15 +103,14 @@ def __init__(self, config_file: str = "/run/secrets/email_config"):
 class ProductionConfig(Config):
     BATCH_SEARCH_URL = get_env_variable('BATCH_SEARCH_URL')
     REDIRECT_URL = get_env_variable('REDIRECT_URL')
-    CAS_AFTER_LOGOUT = os.environ['HOST_URL'] or \
-        get_env_variable('CAS_AFTER_LOGOUT')
+    CAS_AFTER_LOGOUT = get_env_variable('CAS_AFTER_LOGOUT')
     UPLOAD_EMAIL = get_env_variable('UPLOAD_EMAIL')
 
 
 class DevelopmentConfig(Config):
     BATCH_SEARCH_URL = get_env_variable('TEST_BATCH_SEARCH_URL')
     REDIRECT_URL = get_env_variable('TEST_REDIRECT_URL')
-    CAS_AFTER_LOGOUT = get_env_variable('HOST_URL')
+    CAS_AFTER_LOGOUT = get_env_variable('CAS_AFTER_LOGOUT')
     UPLOAD_EMAIL = get_env_variable('DEV_UPLOAD_EMAIL')
 
 
