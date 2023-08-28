@@ -72,8 +72,7 @@ services:
       - postgres
 
   blast-worker:
-    # Can not have container-name set, as this makes spawning additional
-    # workers on demand fail for some reason
+    # Can not have container-name set
     image: bioatlas/molmod-blast:${TAG:-latest}
     init: true
     build:
