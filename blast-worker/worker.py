@@ -22,6 +22,7 @@ if environment != 'production':
     environment = 'development'
 
 # Load log config, and create log before flask app
+# See note on log_config vs FLASK_DEBUG setting in __init__.py
 log_config = json.load(open(f'log/log_config_{environment}.json'))
 dictConfig(log_config)
 

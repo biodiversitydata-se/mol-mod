@@ -71,7 +71,6 @@ class Config:
     SECRET_KEY = secrets.token_hex()
     POSTGREST = get_env_variable('POSTGREST_HOST') or 'http://localhost:3000'
     BLAST_DB = get_env_variable('BLAST_DB')
-    DEBUG = False
     TESTING = False
     SBDI_START_PAGE = get_env_variable('SBDI_START_PAGE')
     SBDI_CONTACT_PAGE = get_env_variable('SBDI_CONTACT_PAGE')
@@ -86,31 +85,32 @@ class Config:
     VALID_EXTENSIONS = get_env_variable('VALID_EXTENSIONS').split(' ')
     SEND_FILE_MAX_AGE_DEFAULT = int(get_env_variable(
         'SEND_FILE_MAX_AGE_DEFAULT'))
+    SQLALCHEMY_SILENCE_UBER_WARNING = int(get_env_variable(
+        'SQLALCHEMY_SILENCE_UBER_WARNING'))
 
-    def __init__(self, config_file: str = "/run/secrets/email_config"):
-        """
-        Loads the email config values.
-        """
-        # Flask-Mail settings
-        load_config_values(self, config_file)
 
-        # Make sure that UPLOAD_EMAIL is a list
-        self.UPLOAD_EMAIL = to_list(self.UPLOAD_EMAIL)
+def __init__(self, config_file: str = "/run/secrets/email_config"):
+    """
+    Loads the email config values.
+    """
+    # Flask-Mail settings
+    load_config_values(self, config_file)
+
+    # Make sure that UPLOAD_EMAIL is a list
+    self.UPLOAD_EMAIL = to_list(self.UPLOAD_EMAIL)
 
 
 class ProductionConfig(Config):
     BATCH_SEARCH_URL = get_env_variable('BATCH_SEARCH_URL')
     REDIRECT_URL = get_env_variable('REDIRECT_URL')
-    CAS_AFTER_LOGOUT = os.environ['HOST_URL'] or \
-        get_env_variable('CAS_AFTER_LOGOUT')
+    CAS_AFTER_LOGOUT = get_env_variable('CAS_AFTER_LOGOUT')
     UPLOAD_EMAIL = get_env_variable('UPLOAD_EMAIL')
 
 
 class DevelopmentConfig(Config):
-    DEBUG = True
     BATCH_SEARCH_URL = get_env_variable('TEST_BATCH_SEARCH_URL')
     REDIRECT_URL = get_env_variable('TEST_REDIRECT_URL')
-    CAS_AFTER_LOGOUT = get_env_variable('HOST_URL')
+    CAS_AFTER_LOGOUT = get_env_variable('CAS_AFTER_LOGOUT')
     UPLOAD_EMAIL = get_env_variable('DEV_UPLOAD_EMAIL')
 
 

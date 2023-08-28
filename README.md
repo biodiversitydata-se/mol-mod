@@ -231,6 +231,13 @@ WHERE ta.status::text = 'valid'
 ```
 See */db/db-api-schema.sql*.
 
+### Scaling of BLAST functionality
+If needed, the system could be scaled to have more blast instances, by modifying the compose command, e.g. like this:
+```
+  $ docker-compose up --scale=blast-worker=3
+```
+We have not looked into the details of this, though.
+
 ### Tests
 Note that tests have not been updated and adapted to the docker-compose environment.
 

@@ -90,11 +90,12 @@ services:
     logging: *default-logging
     env_file:
       - .env
+    environment:
+      - FLASK_DEBUG=1
     secrets:
       - postgres_pass
     volumes:
       - ./blast-databases:/blastdbs
-      - blastconfig:/root/.config
       - ./fasta-exports:/worker/fasta-exports
 
   develop:
@@ -104,9 +105,8 @@ services:
       dockerfile: docker/develop
     logging: *default-logging
     volumes:
-      - type: bind
-        source: ./
-        target: /app
+      # To make changes take immediate effect (using Flask reload in DEBUG mode)
+      - ./:/app
       - uploads:/uploads
     env_file:
       - .env
@@ -115,14 +115,13 @@ services:
       - email_config
     environment:
       - POSTGRES_PASSWORD_FILE=./run/secrets/postgres_pass
-      # Replaces CAS_AFTER_LOGOUT if NOT running in actual production env, see config.py
-      - HOST_URL=${HOST_URL}
       - PYTHONPATH=/app/molmod
+      - FLASK_DEBUG=1
+      - CAS_AFTER_LOGOUT=${HOST_URL:-${CAS_AFTER_LOGOUT}}
     ports:
       - 5000:5000
     depends_on:
       - postgrest
 
 volumes:
-  blastconfig:
   uploads:

@@ -72,8 +72,7 @@ services:
       - postgres
 
   blast-worker:
-    # Can not have container-name set, as this makes spawning additional
-    # workers on demand fail for some reason
+    # Can not have container-name set
     image: bioatlas/molmod-blast:${TAG:-latest}
     init: true
     build:
@@ -86,6 +85,7 @@ services:
       - postgres_pass
     environment:
       - RUN_ENV=production
+      - FLASK_DEBUG=0
       - BLAST_USAGE_REPORT=false
     volumes:
       - blast-db:/blastdbs
@@ -108,9 +108,9 @@ services:
       - email_config
     environment:
       - POSTGRES_PASSWORD_FILE=./run/secrets/postgres_pass
-      # Replaces CAS_AFTER_LOGOUT if NOT running in actual production env, see config.py
-      - HOST_URL=${HOST_URL}
       - PYTHONPATH=/app/molmod
+      - FLASK_DEBUG=0
+      - CAS_AFTER_LOGOUT=${HOST_URL:-${CAS_AFTER_LOGOUT}}
     ports:
       - 5000:5000
     depends_on:

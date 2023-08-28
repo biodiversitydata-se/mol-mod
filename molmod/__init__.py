@@ -35,10 +35,12 @@ def create_app():
     werkzeug_log = logging.getLogger('werkzeug')
     werkzeug_log.setLevel(logging.root.level)
 
-    # Note that if environment is set to 'development', then the config module
-    # will set FLASK_DEBUG=1, which will also set log-level to DEBUG.
-    # To override this, change log level explicitly here:
+    # Note that if FLASK_DEBUG=1 (see compose file), Flask automatically sets
+    # log-level to DEBUG. To override this with level set in log config:
     # app.logger.setLevel(logging.root.level)
+    # To check actual level:
+    # actual = logging.getLevelName(app.logger.getEffectiveLevel())
+    # print(f"Logger's actual level: {actual}")
 
     # Enable cross-site resource forgery protections
     CSRFProtect(app)
