@@ -69,7 +69,7 @@ def to_list(raw: str) -> list:
 
 class Config:
     SECRET_KEY = secrets.token_hex()
-    POSTGREST = get_env_variable('POSTGREST_HOST') or 'http://localhost:3000'
+    POSTGREST = get_env_variable('POSTGREST_HOST')
     BLAST_DB = get_env_variable('BLAST_DB')
     TESTING = False
     SBDI_START_PAGE = get_env_variable('SBDI_START_PAGE')
