@@ -45,6 +45,7 @@ def filter():
 
 
 @filter_bp.route('/request_drop_options/<field>', methods=['POST'])
+@login_required
 def request_drop_options(field) -> dict:
     """Forwards (Select2) AJAX request for filtered dropdown options
     (see main.js) to API, and returns paginated data in dict with Select2
@@ -101,6 +102,7 @@ def request_drop_options(field) -> dict:
 
 
 @filter_bp.route('/filter_run', methods=['POST'])
+@login_required
 def filter_run() -> dict:
     """Composes API request for filtered ASV occurrences, based on data
        received in (DataTable) AJAX request, and returns dict
