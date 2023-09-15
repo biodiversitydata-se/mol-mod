@@ -5,6 +5,7 @@
 -- Get role names from .env
 \set auth `echo ${PGRST_DB_AUTH_ROLE:-auth}`
 \set anon `echo ${PGRST_DB_ANON_ROLE:-anon}`
+\set ipt `echo ${POSTGRES_IPT_ROLE:-ipt}`
 -- Read pwds from secrets passed to containers via compose file
 \set authpass `cat ${POSTGRES_AUTH_PASS_FILE}`
 \set iptpass `cat ${POSTGRES_IPT_PASS_FILE}`
@@ -22,8 +23,8 @@ CREATE ROLE :anon;
 ALTER ROLE :anon WITH NOSUPERUSER NOINHERIT NOCREATEROLE NOCREATEDB NOLOGIN NOREPLICATION NOBYPASSRLS;
 
 -- Role for connecting to database from IPT
-CREATE ROLE ipt;
-ALTER ROLE ipt WITH NOSUPERUSER NOINHERIT NOCREATEROLE NOCREATEDB LOGIN NOREPLICATION NOBYPASSRLS PASSWORD :'iptpass';
+CREATE ROLE :ipt;
+ALTER ROLE :ipt WITH NOSUPERUSER NOINHERIT NOCREATEROLE NOCREATEDB LOGIN NOREPLICATION NOBYPASSRLS PASSWORD :'iptpass';
 
 --
 -- Role memberships
@@ -44,7 +45,7 @@ GRANT SELECT ON ALL TABLES IN SCHEMA api TO :anon;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA api TO :anon;
 
 -- Only allow IPT user to access Darwin Core views
-GRANT USAGE ON SCHEMA api TO ipt;
-GRANT SELECT ON TABLE api.dwc_oc_occurrence TO ipt;
-GRANT SELECT ON TABLE api.dwc_oc_mixs TO ipt;
-GRANT SELECT ON TABLE api.dwc_oc_emof TO ipt;
+GRANT USAGE ON SCHEMA api TO :ipt;
+GRANT SELECT ON TABLE api.dwc_oc_occurrence TO :ipt;
+GRANT SELECT ON TABLE api.dwc_oc_mixs TO :ipt;
+GRANT SELECT ON TABLE api.dwc_oc_emof TO :ipt;
