@@ -1,5 +1,5 @@
 # This script can be used to process file uploads from data providers
-# to make them ready for import into the asv-postgrest db.
+# to make them ready for import into the asv db.
 # See README.md for additional context.
 
 # Assumes the following directory structure:
@@ -268,7 +268,7 @@ occurrence <- melt(asv_table, id.vars = labels, na.rm = T,
 rm(asv_table)
 
 ################################################################################
-# 12. Create Excel file & compressed archive for import to asv-postgrest db
+# 12. Create Excel file & compressed archive for import to asv-db
 ################################################################################
 
 # For smaller data sets only, create excel file
