@@ -1,5 +1,17 @@
 docker/
 db/
+db-backup/
 postgres-data/
 venv/
 personal/
+.DS_Store
+__pycache__/
+backups/
+fasta-exports/
+log-backup/
+uploads/
+imports/
+.env
+.secret.*
+.Rhistory
+~$*.xls*
