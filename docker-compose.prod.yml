@@ -15,14 +15,14 @@ volumes:
 secrets:
   postgres_pass:
     file: .secret.postgres_pass
-  postgrest_anon_pass:
-    file: .secret.anon_pass
   postgrest_config:
     file: .secret.postgrest_config
   email_config:
     file: .secret.email_config
   ipt_pass:
     file: .secret.ipt_pass
+  auth_pass:
+    file: .secret.auth_pass
 
 services:
 
@@ -44,15 +44,15 @@ services:
       - 5432:5432
     secrets:
       - postgres_pass
-      - postgrest_anon_pass
       - ipt_pass
+      - auth_pass
     environment:
     # This will directly set POSTGRES_PASSWORD during db initialization
     # as explained here: https://hub.docker.com/_/postgres
       - POSTGRES_PASSWORD_FILE=./run/secrets/postgres_pass
     # ... but these need to be explicitly read - see db-roles.sql
-      - PGRST_DB_ANON_PASS_FILE=./run/secrets/postgrest_anon_pass
       - POSTGRES_IPT_PASS_FILE=./run/secrets/ipt_pass
+      - POSTGRES_AUTH_PASS_FILE=./run/secrets/auth_pass
 
   postgrest:
     restart: always
