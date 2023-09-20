@@ -4,36 +4,45 @@
 Download data
 {% endblock title %}
 
-
 {% block body %}
 <div class='container'>
     <div>
-        <h1>Download data</h1>
-        <table id='dataset_table' class='table table-striped'>
-            <thead>
-                <tr>
-                    <th>Dataset to download</th>
-                    <th>Institution code</th>
-                    <th>Target gene</th>
-                </tr>
-            </thead>
-    
-                {% if datasets %}
-                {% for d in datasets %}
-    
-                <tr>
-                    <td><a href="{{ ipt_base_url }}/archive.do?r={{ d.ipt_resource_id }}">{{ d.dataset_name }}</a></td>
-                    <td>{{ d.institution_code }}</td>
-                    <td>{{ d.annotation_target }}</td>
-                </tr>
+        <h1>Download full datasets</h1>
+        <p>Until the Bioatlas includes extension data (e.g. contextual/sequencing metadata) 
+            in their record downloads, we provide download of full Darwin Core Archives, 
+            via the <a href="{{ ipt_base_url }}" rel="noreferrer noopener"> Integrated Publishing Toolkit (IPT)</a>, here.
+        </p>
 
-                {% endfor %}
-                {% endif %}
-        </table>
-        <hr>
-        <p>Contact <a href="{{ atlas_contact_page }}">SBDI support</a>, if you have any questions about data download.
+    {% if rform %}
+        <form action="{{ url_for('main_bp.download') }}" method='post' id='rform' name='rform'>
+            {{ rform.csrf_token }}
+            <div class='row'>
+                <div class='col-md-12'>
+                    <hr>
+                    <table id='dataset_table' class='table'>
+                        <thead>
+                            <tr>
+                                <th style="text-align: center"><input type="checkbox" id="select_all" /></th>
+                                <th>IPT link</th>
+                                <th>Dataset</th>
+                                <th>Institution</th>
+                                <th>Gene</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-md-3 hiddenElem' id='sel_err_container'>Please select at least one row.</div>
+            </div>
+            <br>
+            <div class='row'>
+                <div class='col-md-12'>
+                     {{ rform.download(class='btn btn-primary', value='Download') }}
+                </div>
+            </div>
+        </form>
     </div>
+    {% endif %}
     
-</p>
-</div>
-{% endblock body %}
+    {% endblock body %}

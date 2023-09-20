@@ -31,7 +31,7 @@ $(document).ready(function() {
                 { data: 'asv_sequence', visible: false }
             ];
             // Make BLAST search result table
-            var dTbl = makeDataTbl('blast_run', columns);
+            var dTbl = makeResultTbl('blast_run', columns);
             break;
 
         // FILTER PAGE
@@ -72,7 +72,20 @@ $(document).ready(function() {
                 { data: 'rv_sequence', visible: false }
             ];
             // Make FILTER search result table
-            var dTbl = makeDataTbl('/filter_run', columns);
+            var dTbl = makeResultTbl('/filter_run', columns);
+            break;
+
+        case '/download':
+            // Define columns for FILTER search result table
+            var columns = [
+                { data: null, orderable: false, defaultContent: '', className: 'select-checkbox' },
+                { data: 'ipt_resource_id', visible: false },
+                { data: 'dataset_name'},
+                { data: 'institution_code'},
+                { data: 'annotation_target'}
+            ];
+            // Make dataset download table
+            var dTbl = makeDownloadTbl('/list_datasets', columns);
             break;
 
         case '/upload':
@@ -292,7 +305,7 @@ function makeSel2drop(drop){
     });
 }
 
-function makeDataTbl(url, columns) {
+function makeResultTbl(url, columns) {
     // Makes DataTables-table of (FILTER or BLAST search) results
     // received in AJAX request to Flask endpoint
     // Pagination handled by client
@@ -335,6 +348,52 @@ function makeDataTbl(url, columns) {
         columns : columns,
         processing: true, // Show 'Loading' indicator
         order: [[2, 'asc']], // Required for non-orderable col 0
+        select: { style: 'multi', selector: 'td:nth-child(1)' }, // Checkbox selection
+        // Layout: l=Show.., f=Search, tr=table, i=Showing.., p=pagination
+        dom: "<'row'<'col-md-5'l><'col-md-7'f>>" +
+        "<'row'<'col-md-12't>>" +
+        "<'row'<'col-md-2'B><'col-md-5'i><'col-md-5'p>>",
+        buttons: [ 'excel', 'csv' ]
+    });
+    return dTbl;
+}
+
+function makeDownloadTbl(url, columns) {
+    // xxx
+    $.fn.dataTable.ext.errMode = 'none';
+    var dTbl = $('.table')
+        // Handle errors, including serverside BLAST errors causing response
+        // to be empty string instead of JSON
+        .on('error.dt', function (e, settings, techNote, message) {
+            // console.log( 'An error has been reported by DataTables: ', message );
+            $('#search_err_container').html('Sorry, something unexpected happened during the search. '
+            + 'Please <a href="' + sbdiContactPage + '">contact SBDI support</a> if this error persists.');
+
+            // Disable Bioatlas POST option and data export
+            $("#show_occurrences").prop("disabled",true);
+            dTbl.buttons().disable();
+        })
+        .DataTable({
+        deferRender: true, // Process one page at a time
+        autoWidth : false, // Respect CSS settings
+        ajax: {
+            url: url,
+            type: 'GET',
+            // Disable Bioatlas POST option and data export if no results found
+            dataSrc: function ( json ) {
+                // If (no errors but) no results were found
+                olle=1
+                if (json.data.length < 1) {
+                    // Disable Bioatlas POST option and data export
+                    $("#download").prop("disabled",true);
+                    dTbl.buttons().disable();
+                }
+                return json.data;
+            } 
+        },
+        columns : columns,
+        processing: true, // Show 'Loading' indicator
+        // order: [[2, 'asc']], // Required for non-orderable col 0
         select: { style: 'multi', selector: 'td:nth-child(1)' }, // Checkbox selection
         // Layout: l=Show.., f=Search, tr=table, i=Showing.., p=pagination
         dom: "<'row'<'col-md-5'l><'col-md-7'f>>" +

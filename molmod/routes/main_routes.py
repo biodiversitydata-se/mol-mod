@@ -9,6 +9,7 @@ from flask import render_template, request, send_from_directory, session
 from flask_cas import login_required
 from flask_mail import Message
 from forms import UploadForm
+from forms import DownloadForm
 from werkzeug.utils import secure_filename
 
 from config import get_config
@@ -153,15 +154,22 @@ def files(filename):
         abort(404)
         
 
-@main_bp.route("/download")
+@main_bp.route("/download", methods=['GET','POST'])
 @login_required
 def download():
     """Lists available datasets"""
 
-    datasets = list_datasets()
-    return render_template('download.html', datasets=datasets)
+    # Create forms from classes in forms.py
+    rform = DownloadForm()
+
+    if request.form.get('download'):
+        return 'hej';
+    else:
+        return render_template('download.html', rform=rform)
 
 
+@main_bp.route('/list_datasets', methods=['GET'])
+@login_required
 def list_datasets() -> dict:
     """Makes API request for dataset list, and returns dict."""
 
@@ -171,8 +179,9 @@ def list_datasets() -> dict:
         response = requests.get(url)
         response.raise_for_status()
     except (requests.ConnectionError, requests.exceptions.HTTPError) as e:
-        APP.logger.error(f'API request for dataset list returned: {e}')
+        APP.logger.error(f'API request for filtered occurences returned: {e}')
     else:
         results = json.loads(response.text)
+        APP.logger.debug(type(results))
         # APP.logger.debug(results)
-        return results
+        return {"data": results}
