@@ -32,7 +32,6 @@ def about():
     return render_template('about.html', rows=stats)
 
 
-@main_bp.route('/stats', methods=['GET'])
 def get_stats() -> dict:
     """Makes API request for db stats, and returns dict."""
 
@@ -152,3 +151,28 @@ def files(filename):
         return send_from_directory(dir, filename, as_attachment=True)
     except FileNotFoundError:
         abort(404)
+        
+
+@main_bp.route("/download")
+@login_required
+def download():
+    """Lists available datasets"""
+
+    datasets = list_datasets()
+    return render_template('download.html', datasets=datasets)
+
+
+def list_datasets() -> dict:
+    """Makes API request for dataset list, and returns dict."""
+
+    url = f"{CONFIG.POSTGREST}/app_dataset_list"
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+    except (requests.ConnectionError, requests.exceptions.HTTPError) as e:
+        APP.logger.error(f'API request for dataset list returned: {e}')
+    else:
+        results = json.loads(response.text)
+        # APP.logger.debug(results)
+        return results

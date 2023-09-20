@@ -70,6 +70,7 @@ def create_app():
             taxonomy_page=CONFIG.TAXONOMY_PAGE,
             ena_guide_page=CONFIG.ENA_GUIDE_PAGE,
             ampliseq_page=CONFIG.AMPLISEQ_PAGE,
+            ipt_base_url=CONFIG.IPT_BASE_URL,
             user=user,
             firstname=firstname,
             max_file_size=CONFIG.MAX_CONTENT_LENGTH,

@@ -11,7 +11,9 @@ CREATE TABLE IF NOT EXISTS public.dataset (
     filename character varying UNIQUE,
     insertion_time timestamp without time zone NOT NULL DEFAULT now(),
     in_bioatlas boolean default FALSE,
-    bioatlas_resource_uid character varying
+    bioatlas_resource_uid character varying,
+    dataset_name character varying COLLATE pg_catalog."default",
+    ipt_resource_id character varying COLLATE pg_catalog."default"
 );
 
 --- Only a single version of a dataset is allowed in the Bioatlas at any

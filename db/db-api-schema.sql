@@ -353,6 +353,22 @@ SELECT sub.gene,
  ORDER BY sub.gene
 WITH DATA;
 
+-- View used for populating dataset table in Download data page
+-- Materialized (see above), and updated with 'make status' / 'make stats'
+CREATE MATERIALIZED VIEW IF NOT EXISTS api.app_dataset_list
+TABLESPACE pg_default
+AS
+ SELECT DISTINCT ds.dataset_name,
+    ds.ipt_resource_id,
+    ta.annotation_target
+   FROM :data_schema.dataset ds,
+    :data_schema.sampling_event se,
+    :data_schema.occurrence oc,
+    :data_schema.taxon_annotation ta
+  WHERE ds.in_bioatlas = true AND ds.pid = se.dataset_pid AND se.pid = oc.event_pid AND oc.asv_pid = ta.asv_pid AND ta.status::text = 'valid'::text
+  ORDER BY ta.annotation_target, ds.dataset_name
+WITH DATA;
+
 
 --
 -- 'Utility' views used by admin

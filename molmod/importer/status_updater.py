@@ -72,6 +72,13 @@ def run_update(pid: int = 0, status: int = 1, ruid: str = '',
     except psycopg2.OperationalError as err:
         logging.error(err)
         sys.exit(1)
+    # Dataset table
+    try:
+        logging.info("Updating dataset table in Download data")
+        cursor.execute("REFRESH MATERIALIZED VIEW api.app_dataset_list;")
+    except psycopg2.OperationalError as err:
+        logging.error(err)
+        sys.exit(1)
 
     #
     # Commit or Roll back
