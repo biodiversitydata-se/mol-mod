@@ -7,14 +7,14 @@ Download data
 {% block body %}
 <div class='container'>
     <div>
-        <h1>Download full datasets</h1>
+        <h1>Download datasets</h1>
         <p>Until the Bioatlas includes extension data (e.g. contextual/sequencing metadata) 
-            in their record downloads, we provide download of full Darwin Core Archives, 
-            via the <a href="{{ ipt_base_url }}" rel="noreferrer noopener"> Integrated Publishing Toolkit (IPT)</a>, here.
+            in record downloads, we provide download of full Darwin Core Archives (DwCAs), 
+            from the <a href="{{ ipt_base_url }}" rel="noreferrer noopener"> Integrated Publishing Toolkit (IPT)</a>, here.
         </p>
 
     {% if rform %}
-        <form action="{{ url_for('main_bp.download') }}" method='post' id='rform' name='rform'>
+        <form action='' method='post' id='rform' name='rform'>
             {{ rform.csrf_token }}
             <div class='row'>
                 <div class='col-md-12'>

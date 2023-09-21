@@ -162,10 +162,7 @@ def download():
     # Create forms from classes in forms.py
     rform = DownloadForm()
 
-    if request.form.get('download'):
-        return 'hej';
-    else:
-        return render_template('download.html', rform=rform)
+    return render_template('download.html', rform=rform)
 
 
 @main_bp.route('/list_datasets', methods=['GET'])

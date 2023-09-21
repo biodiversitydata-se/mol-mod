@@ -163,7 +163,7 @@ $(document).ready(function() {
     // to avoid Flash of unstyled content
     $('#rform, #sform').css("visibility", "visible");
 
-    // If we have a (FILTER or BLAST search) result table
+    // If we have a DataTable 
     if(typeof dTbl !== "undefined") {
 
         // Add Select/Deselect-all function to checkbox in table header
@@ -189,51 +189,99 @@ $(document).ready(function() {
             }
         });
 
-        // Toggle show/hide of ASV sequence as child row
-        // when +/- button (or whole cell, actually) is clicked
-        dTbl.on('click', 'td.details-control', function () {
-            var tr = $(this).closest('tr');
-            var row = dTbl.row(tr);
-            var data = row.data().asv_sequence;
-            // Set no. of empty cells to show before data
-            // BLAST
-            if (dTbl.table().node().id === 'blast_result_table'){
-                var tds = '<tr><td></td><td></td><td class="child" colspan="4">';
-            }
-            // SEARCH
-            else { var tds = '<tr><td></td><td class="child" colspan="5">'; }
-            var childRow = $(tds+data+'</td></tr>');
-            // Toggle show/hide
-            if(row.child.isShown()) {
-                row.child.hide();
-                tr.removeClass("shown");
-            }
-            else {
-                row.child(childRow).show();
-                tr.addClass("shown");
-            }
-        });
-
-        // Prepare ASV id:s for POST to Bioatlas
-        $('#rform').on('submit', function() {
-            // Get selected ASV IDs from table
-            var ids = $.map(dTbl.rows({selected: true}).data(), function (item) {
-                return item['asv_id']
+        if (page === '/blast' || page === '/filter') { 
+            // Toggle show/hide of ASV sequence as child row
+            // when +/- button (or whole cell, actually) is clicked
+            dTbl.on('click', 'td.details-control', function () {
+                var tr = $(this).closest('tr');
+                var row = dTbl.row(tr);
+                var data = row.data().asv_sequence;
+                // Set no. of empty cells to show before data
+                // BLAST
+                if (dTbl.table().node().id === 'blast_result_table'){
+                    var tds = '<tr><td></td><td></td><td class="child" colspan="4">';
+                }
+                // SEARCH
+                else { var tds = '<tr><td></td><td class="child" colspan="5">'; }
+                var childRow = $(tds+data+'</td></tr>');
+                // Toggle show/hide
+                if(row.child.isShown()) {
+                    row.child.hide();
+                    tr.removeClass("shown");
+                }
+                else {
+                    row.child(childRow).show();
+                    tr.addClass("shown");
+                }
             });
-            // Remove duplicates
-            ids = ids.filter(function(item, i, ids) {
-                return i == ids.indexOf(item);
-            });
-            // Add IDs to hidden textarea, one row per ID
-            $('#raw_names').val(ids.join('\n'));
 
-            // Warn and abort if no selection has been made in table
-            if (!$('#raw_names').val()) {
-                $('#sel_err_container').addClass('visHlpDiv');
-                $('.table tr td:first-child').addClass('visHlpElem');
+            // Prepare ASV id:s for POST to Bioatlas
+            $('#rform').on('submit', function() {
+                // Get selected ASV IDs from table
+                var ids = $.map(dTbl.rows({selected: true}).data(), function (item) {
+                    return item['asv_id']
+                });
+                // Remove duplicates
+                ids = ids.filter(function(item, i, ids) {
+                    return i == ids.indexOf(item);
+                });
+                // Add IDs to hidden textarea, one row per ID
+                $('#raw_names').val(ids.join('\n'));
+
+                // Warn and abort if no selection has been made in table
+                if (!$('#raw_names').val()) {
+                    $('#sel_err_container').addClass('visHlpDiv');
+                    $('.table tr td:first-child').addClass('visHlpElem');
+                    return false;
+                }
+            });
+        }
+
+        else if (page === '/download') {
+            $('#rform').on('submit', function() {
+                // Get selected ASV IDs from table
+                var ids = $.map(dTbl.rows({selected: true}).data(), function (item) {
+                    return item['ipt_resource_id']
+                });
+            
+                // Warn and abort if no selection has been made in table
+                if (ids.length == 0) {
+                    $('#sel_err_container').addClass('visHlpDiv');
+                    $('.table tr td:first-child').addClass('visHlpElem');
+                    return false;
+                }
+
+                // Function to initiate downloads with a delay
+                function downloadWithDelay(index) {
+                    if (index >= ids.length) {
+                        // All downloads completed
+                        return;
+                    }
+
+                    var downloadLink = iptBaseUrl + '/archive.do?r=' + ids[index];
+
+                    // Create a hidden anchor element and trigger a click to download
+                    var hiddenAnchor = document.createElement('a');
+                    hiddenAnchor.href = downloadLink;
+                    hiddenAnchor.style.display = 'none'; // Hide the anchor
+                    document.body.appendChild(hiddenAnchor);
+                    hiddenAnchor.click();
+                    document.body.removeChild(hiddenAnchor);
+
+                    // Delay before starting the next download (seems to be needed to allow multiple downloads in Chrome, at least)
+                    setTimeout(function () {
+                        downloadWithDelay(index + 1);
+                    }, 1000); // Adjust the delay duration (in milliseconds) as needed
+                }
+
+                // Start the download process from the first link
+                downloadWithDelay(0);
+
                 return false;
-            }
-        });
+
+
+            });
+        }       
     }
 
 });
