@@ -163,7 +163,7 @@ $(document).ready(function() {
     // to avoid Flash of unstyled content
     $('#rform, #sform').css("visibility", "visible");
 
-    // If we have a DataTable 
+    // If we have a DataTable
     if(typeof dTbl !== "undefined") {
 
         // Add Select/Deselect-all function to checkbox in table header
@@ -183,13 +183,11 @@ $(document).ready(function() {
 
         // Remove no-selection warnings when any row is selected
         dTbl.on( 'select', function () {
-            if($('#sel_err_container').hasClass('visHlpDiv')){
-                $('#sel_err_container').removeClass('visHlpDiv');
-                $('.table tr td:first-child').removeClass('visHlpElem');
-            }
+            $('#dtbl_err_container').addClass('hiddenElem');
+            $('.table tr td:first-child').removeClass('visHlpElem');
         });
 
-        if (page === '/blast' || page === '/filter') { 
+        if (page === '/blast' || page === '/filter') {
             // Toggle show/hide of ASV sequence as child row
             // when +/- button (or whole cell, actually) is clicked
             dTbl.on('click', 'td.details-control', function () {
@@ -230,7 +228,8 @@ $(document).ready(function() {
 
                 // Warn and abort if no selection has been made in table
                 if (!$('#raw_names').val()) {
-                    $('#sel_err_container').addClass('visHlpDiv');
+                    $('#dtbl_err_container').removeClass('hiddenElem');
+                    $('#dtbl_err_container').html('Please, select at least one row. ');
                     $('.table tr td:first-child').addClass('visHlpElem');
                     return false;
                 }
@@ -243,10 +242,11 @@ $(document).ready(function() {
                 var ids = $.map(dTbl.rows({selected: true}).data(), function (item) {
                     return item['ipt_resource_id']
                 });
-            
+
                 // Warn and abort if no selection has been made in table
                 if (ids.length == 0) {
-                    $('#sel_err_container').addClass('visHlpDiv');
+                    $('#dtbl_err_container').removeClass('hiddenElem');
+                    $('#dtbl_err_container').html('Please, select at least one row. ');
                     $('.table tr td:first-child').addClass('visHlpElem');
                     return false;
                 }
@@ -281,7 +281,7 @@ $(document).ready(function() {
 
 
             });
-        }       
+        }
     }
 
 });
@@ -340,8 +340,9 @@ function makeSel2drop(drop){
                     console.log('Select2.js fast type-ahead error condition encountered and handled properly');
                 } else {
                     //Process proper errors
+                    $('#filt_err_container').removeClass('hiddenElem');
                     $('#filt_err_container').html('Sorry, something unexpected happened during page load. '
-                    + 'Please <a href="' + sbdiContactPage + '">contact SBDI support</a> if this error persists.');
+                    + 'Please, <a href="' + sbdiContactPage + '">contact SBDI support</a> if this error persists.');
 
                     $('.btn').prop('disabled',true);
                     return { results: [] };
@@ -361,7 +362,8 @@ function makeResultTbl(url, columns) {
         // to be empty string instead of JSON
         .on('error.dt', function (e, settings, techNote, message) {
             // console.log( 'An error has been reported by DataTables: ', message );
-            $('#search_err_container').html('Sorry, something unexpected happened during the search. '
+            $('#dtbl_err_container').removeClass('hiddenElem');
+            $('#dtbl_err_container').html('Sorry, something unexpected happened during the search. '
             + 'Please <a href="' + sbdiContactPage + '">contact SBDI support</a> if this error persists.');
 
             // Disable Bioatlas POST option and data export
@@ -383,7 +385,8 @@ function makeResultTbl(url, columns) {
                     dTbl.buttons().disable();
                 }
                 if (json.data.length > 999) {
-                    $('#search_err_container').html('Please note that only the first 1000 hits are returned. '
+                    $('#dtbl_err_container').removeClass('hiddenElem');
+                    $('#dtbl_err_container').html('Please note that only the first 1000 hits are returned. '
                       + 'Refine your search to make sure results are not truncated.');
                 }
                 return json.data;
@@ -405,14 +408,13 @@ function makeResultTbl(url, columns) {
 }
 
 function makeDownloadTbl(url, columns) {
-    // xxx
     $.fn.dataTable.ext.errMode = 'none';
     var dTbl = $('.table')
         // Handle errors, including serverside BLAST errors causing response
         // to be empty string instead of JSON
         .on('error.dt', function (e, settings, techNote, message) {
             // console.log( 'An error has been reported by DataTables: ', message );
-            $('#search_err_container').html('Sorry, something unexpected happened during the search. '
+            $('#dtbl_err_container').html('Sorry, something unexpected happened during the search. '
             + 'Please <a href="' + sbdiContactPage + '">contact SBDI support</a> if this error persists.');
 
             // Disable Bioatlas POST option and data export
@@ -428,14 +430,13 @@ function makeDownloadTbl(url, columns) {
             // Disable Bioatlas POST option and data export if no results found
             dataSrc: function ( json ) {
                 // If (no errors but) no results were found
-                olle=1
                 if (json.data.length < 1) {
                     // Disable Bioatlas POST option and data export
                     $("#download").prop("disabled",true);
                     dTbl.buttons().disable();
                 }
                 return json.data;
-            } 
+            }
         },
         columns : columns,
         processing: true, // Show 'Loading' indicator
