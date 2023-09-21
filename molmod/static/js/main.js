@@ -410,10 +410,11 @@ function makeResultTbl(url, columns) {
 function makeDownloadTbl(url, columns) {
     $.fn.dataTable.ext.errMode = 'none';
     var dTbl = $('.table')
-        // Handle errors, including serverside BLAST errors causing response
+        // Handle errors, including serverside errors, causing response
         // to be empty string instead of JSON
         .on('error.dt', function (e, settings, techNote, message) {
             // console.log( 'An error has been reported by DataTables: ', message );
+            $('#dtbl_err_container').removeClass('hiddenElem');
             $('#dtbl_err_container').html('Sorry, something unexpected happened during the search. '
             + 'Please <a href="' + sbdiContactPage + '">contact SBDI support</a> if this error persists.');
 
