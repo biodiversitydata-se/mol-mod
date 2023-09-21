@@ -1,8 +1,6 @@
 /* Changes may require cache bypass, in Chrome/Mac: shift + cmd + r */
 $(document).ready(function() {
 
-    var hlpDiv = $('#sel_err_container'); // For displaying no-selection warning
-
     switch(page) {
 
         // BLAST PAGE
