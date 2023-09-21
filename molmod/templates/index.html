@@ -24,22 +24,28 @@ Start
 
 <div class="container">
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <p>
                 Search for ASVs and Bioatlas records using Basic Local Alignment Search Tool (BLAST)<br><br>
                 <a class="btn btn-primary" id=blast_link href="{{ url_for('blast_bp.blast') }}" role="button">BLAST</a>
             </p>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <p>
                 Search for ASVs and Bioatlas records using filters on sequencing details and taxonomy<br><br>
                 <a class="btn btn-primary"  id=filter_link href="{{ url_for('filter_bp.filter') }}" role="button">Filter</a>
             </p>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <p>
                 Submit your metabarcoding dataset to the ASV database and SBDI Bioatlas<br><br>
                 <a class="btn btn-primary"  id=submit_link href="{{ url_for('main_bp.submit') }}" role="button">Submit</a>
+            </p>
+        </div>
+        <div class="col-md-3">
+            <p>
+                Download datasets (DwCAs) <br><br><br><br>
+                <a class="btn btn-primary"  id=submit_link href="{{ url_for('main_bp.download') }}" role="button">Download</a>
             </p>
         </div>
     </div>
