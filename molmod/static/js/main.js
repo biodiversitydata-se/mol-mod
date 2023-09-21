@@ -77,10 +77,10 @@ $(document).ready(function() {
             // Define columns for FILTER search result table
             var columns = [
                 { data: null, orderable: false, defaultContent: '', className: 'select-checkbox' },
-                { data: 'ipt_resource_id', visible: false },
-                { data: 'dataset_name'},
+                { data: 'annotation_target'},
                 { data: 'institution_code'},
-                { data: 'annotation_target'}
+                { data: 'dataset_name', className: 'ds'},
+                { data: 'ipt_resource_id'}
             ];
             // Make dataset download table
             var dTbl = makeDownloadTbl('/list_datasets', columns);
