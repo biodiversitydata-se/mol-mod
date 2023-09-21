@@ -168,8 +168,8 @@ $(document).ready(function() {
 
         // Add Select/Deselect-all function to checkbox in table header
         dTbl.on('click', '#select_all', function () {
-            if ($('#select_all:checked').val() === 'on')
-                dTbl.rows().select();
+            if ($('#select_all:checked').val()  === 'on')
+                dTbl.rows({search: 'applied'}).select(); // Only select filtered records, if filter is applied
             else
                 dTbl.rows().deselect();
         });
