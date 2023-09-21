@@ -440,7 +440,7 @@ function makeDownloadTbl(url, columns) {
         },
         columns : columns,
         processing: true, // Show 'Loading' indicator
-        // order: [[2, 'asc']], // Required for non-orderable col 0
+        order: [], // Required for non-orderable col 0
         select: { style: 'multi', selector: 'td:nth-child(1)' }, // Checkbox selection
         // Layout: l=Show.., f=Search, tr=table, i=Showing.., p=pagination
         dom: "<'row'<'col-md-5'l><'col-md-7'f>>" +
