@@ -250,34 +250,56 @@ $(document).ready(function() {
             $('#rform').on('submit', function() {
 
                 // Get selected IPT resource links from table
-                var links = $.map(dTbl.rows({selected: true}).nodes(), function (row) {
+                var anchors = $.map(dTbl.rows({selected: true}).nodes(), function (row) {
                     return $(row).find('td.iptLink a');
                 });
 
                 // Warn and abort if no selection has been made in table
-                if (links.length == 0) {
+                if (anchors.length == 0) {
                     $('#dtbl_err_container').removeClass('hiddenElem');
                     $('#dtbl_err_container').html('Please, select at least one row. ');
                     $('.table tr td:first-child').addClass('visHlpElem');
                     return false;
                 }
 
+                var invalidIDs = [];
+
                 function downloadWithDelay(index) {
                 // Downloads selected datasets
 
-                    if (index >= links.length) {
+                    if (index >= anchors.length) {
+                        if (invalidIDs.length > 0) {
+                            $('#dtbl_err_container').removeClass('hiddenElem');
+                            $('#dtbl_err_container').html('The following datasets could not be downloaded: ' + invalidIDs.join(', ') + '. '
+                            + 'Please <a href="' + sbdiContactPage + '">contact SBDI support</a> if this error persists.');
+                        }
                         return;
                     }
 
-                    // Trigger a click on the existing <a> element to download
-                    var anchor = links[index];
-                    anchor[0].click();
+                    var anchor = anchors[index];
+                    var link = anchor.attr('href');
 
-                    // Delay before starting the next download
-                    // (to allow multiple downloads in Chrome)
-                    setTimeout(function () {
-                        downloadWithDelay(index + 1);
-                    }, 1000); // Adjust the delay duration (in milliseconds) as needed
+                    // Check if the link is valid (by making a HEAD request to check for a 404 response)
+                    $.ajax({
+                        url: link,
+                        type: 'HEAD',
+                        error: function (xhr) {
+                            if (xhr.status !== 200) {
+                                invalidIDs.push(link.split('=')[1]);
+                            }
+                            downloadWithDelay(index + 1);
+                        },
+                        success: function () {
+                            // Trigger a click on the existing <a> element to download
+                            anchor[0].click();
+
+                            // Delay before starting the next download
+                            // (to allow multiple downloads in Chrome)
+                            setTimeout(function () {
+                                downloadWithDelay(index + 1);
+                            }, 1000); // Adjust the delay duration (in milliseconds) as needed
+                        }
+                    });
                 }
 
                 // Start the download process from the first link
@@ -427,7 +449,6 @@ function makeDownloadTbl(url, columns) {
             dTbl.buttons().disable();
         })
         .DataTable({
-        //pageLength: 100,
         deferRender: true, // Process one page at a time
         autoWidth : false, // Respect CSS settings
         ajax: {

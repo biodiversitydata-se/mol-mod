@@ -358,7 +358,8 @@ WITH DATA;
 CREATE MATERIALIZED VIEW IF NOT EXISTS api.app_dataset_list
 TABLESPACE pg_default
 AS
- SELECT DISTINCT ds.dataset_name,
+ SELECT DISTINCT ds.dataset_id,
+    ds.dataset_name,
     ds.ipt_resource_id,
     ta.annotation_target
    FROM :data_schema.dataset ds,

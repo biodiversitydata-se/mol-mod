@@ -181,12 +181,18 @@ def list_datasets() -> dict:
         APP.logger.error(f'API request for dataset list returned: {e}')
     else:
         results = json.loads(response.text)  # -> list of dicts
-        # Iterate through the results and add the "ipt_download_link" key
-        for dataset in results:
-            dataset['ipt_download_url'] = (
-                CONFIG.IPT_BASE_URL + '/archive.do?r=' +
-                dataset['ipt_resource_id']
-            )
+        # Construct download link
+        for ds in results:
+            try:
+                ds['ipt_download_url'] = (
+                    CONFIG.IPT_BASE_URL + '/archive.do?r=' +
+                    ds['ipt_resource_id']
+                )
+            # Make sure we notice if some dataset is missing IPT details
+            except (TypeError) as e:
+                APP.logger.error(f'Adding IPT resource ID returned: {e}' +
+                                 f', for dataset ID = {ds["dataset_id"]}')
+                abort(500)
 
         # APP.logger.debug(results)
         return {"data": results}  # returns dict
