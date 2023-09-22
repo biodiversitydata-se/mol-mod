@@ -80,7 +80,11 @@ $(document).ready(function() {
                 { data: 'annotation_target'},
                 { data: 'institution_code'},
                 { data: 'dataset_name', className: 'ds'},
-                { data: 'ipt_resource_id'}
+                { data : 'ipt_resource_id',
+                  render : function ( data, type, row ) {
+                      return '<a href="'+iptBaseUrl+'/resource?r='+data+'">'+data+'</a>';
+                  }
+                }
             ];
             // Make dataset download table
             var dTbl = makeDownloadTbl('/list_datasets', columns);
