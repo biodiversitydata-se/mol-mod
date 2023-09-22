@@ -74,7 +74,7 @@ $(document).ready(function() {
             break;
 
         case '/download':
-            // Define columns for FILTER search result table
+            // Define columns for download table
             var columns = [
                 { data: null, orderable: false, defaultContent: '', className: 'select-checkbox' },
                 { data: 'annotation_target'},
@@ -242,7 +242,7 @@ $(document).ready(function() {
 
         else if (page === '/download') {
             $('#rform').on('submit', function() {
-                // Get selected ASV IDs from table
+                // Get selected IPT resource IDs from table
                 var ids = $.map(dTbl.rows({selected: true}).data(), function (item) {
                     return item['ipt_resource_id']
                 });
@@ -255,10 +255,10 @@ $(document).ready(function() {
                     return false;
                 }
 
-                // Function to initiate downloads with a delay
                 function downloadWithDelay(index) {
+                // Downloads selected datasets
+
                     if (index >= ids.length) {
-                        // All downloads completed
                         return;
                     }
 
@@ -272,7 +272,8 @@ $(document).ready(function() {
                     hiddenAnchor.click();
                     document.body.removeChild(hiddenAnchor);
 
-                    // Delay before starting the next download (seems to be needed to allow multiple downloads in Chrome, at least)
+                    // Delay before starting the next download
+                    // (to allow multiple downloads in Chrome)
                     setTimeout(function () {
                         downloadWithDelay(index + 1);
                     }, 1000); // Adjust the delay duration (in milliseconds) as needed
@@ -414,15 +415,14 @@ function makeResultTbl(url, columns) {
 function makeDownloadTbl(url, columns) {
     $.fn.dataTable.ext.errMode = 'none';
     var dTbl = $('.table')
-        // Handle errors, including serverside errors, causing response
-        // to be empty string instead of JSON
+        // Handle errors causing response to be empty string instead of JSON
         .on('error.dt', function (e, settings, techNote, message) {
             // console.log( 'An error has been reported by DataTables: ', message );
             $('#dtbl_err_container').removeClass('hiddenElem');
             $('#dtbl_err_container').html('Sorry, something unexpected happened during the search. '
             + 'Please <a href="' + sbdiContactPage + '">contact SBDI support</a> if this error persists.');
 
-            // Disable Bioatlas POST option and data export
+            // Disable dataset download and list export options
             $("#show_occurrences").prop("disabled",true);
             dTbl.buttons().disable();
         })
@@ -432,11 +432,10 @@ function makeDownloadTbl(url, columns) {
         ajax: {
             url: url,
             type: 'GET',
-            // Disable Bioatlas POST option and data export if no results found
             dataSrc: function ( json ) {
                 // If (no errors but) no results were found
                 if (json.data.length < 1) {
-                    // Disable Bioatlas POST option and data export
+                    // Disable dataset download and list export options
                     $("#download").prop("disabled",true);
                     dTbl.buttons().disable();
                 }
