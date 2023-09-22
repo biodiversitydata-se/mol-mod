@@ -82,7 +82,7 @@ $(document).ready(function() {
                 { data: 'dataset_name', className: 'ds'},
                 { data : 'ipt_resource_id',
                   render : function ( data, type, row ) {
-                      return '<a href="'+iptBaseUrl+'/resource?r='+data+'">'+data+'</a>';
+                      return '<a href="'+iptBaseUrl+'/resource?r='+data+'" target="_blank">'+data+'</a>';
                   }
                 }
             ];
