@@ -88,7 +88,8 @@ $(document).ready(function() {
                 { data : null,
                   render : function ( data, type, row ) {
                       return '<a href="'+data.ipt_download_url+'" target="_blank">'+data.ipt_resource_id+'</a>';
-                  }
+                  },
+                  className: 'iptLink'
                  }
             ];
             // Make dataset download table
@@ -247,13 +248,14 @@ $(document).ready(function() {
 
         else if (page === '/download') {
             $('#rform').on('submit', function() {
-                // Get selected IPT resource IDs from table
-                var ids = $.map(dTbl.rows({selected: true}).data(), function (item) {
-                    return item['ipt_resource_id']
+
+                // Get selected IPT resource links from table
+                var links = $.map(dTbl.rows({selected: true}).nodes(), function (row) {
+                    return $(row).find('td.iptLink a');
                 });
 
                 // Warn and abort if no selection has been made in table
-                if (ids.length == 0) {
+                if (links.length == 0) {
                     $('#dtbl_err_container').removeClass('hiddenElem');
                     $('#dtbl_err_container').html('Please, select at least one row. ');
                     $('.table tr td:first-child').addClass('visHlpElem');
@@ -263,19 +265,13 @@ $(document).ready(function() {
                 function downloadWithDelay(index) {
                 // Downloads selected datasets
 
-                    if (index >= ids.length) {
+                    if (index >= links.length) {
                         return;
                     }
 
-                    var downloadLink = iptBaseUrl + '/archive.do?r=' + ids[index];
-
-                    // Create a hidden anchor element and trigger a click to download
-                    var hiddenAnchor = document.createElement('a');
-                    hiddenAnchor.href = downloadLink;
-                    hiddenAnchor.style.display = 'none'; // Hide the anchor
-                    document.body.appendChild(hiddenAnchor);
-                    hiddenAnchor.click();
-                    document.body.removeChild(hiddenAnchor);
+                    // Trigger a click on the existing <a> element to download
+                    var anchor = links[index];
+                    anchor[0].click();
 
                     // Delay before starting the next download
                     // (to allow multiple downloads in Chrome)
@@ -288,7 +284,6 @@ $(document).ready(function() {
                 downloadWithDelay(0);
 
                 return false;
-
 
             });
         }
