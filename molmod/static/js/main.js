@@ -79,12 +79,17 @@ $(document).ready(function() {
                 { data: null, orderable: false, defaultContent: '', className: 'select-checkbox' },
                 { data: 'annotation_target'},
                 { data: 'institution_code'},
-                { data: 'dataset_name', className: 'ds'},
-                { data : 'ipt_resource_id',
+                { data : null,
                   render : function ( data, type, row ) {
-                      return '<a href="'+iptBaseUrl+'/resource?r='+data+'" target="_blank">'+data+'</a>';
+                        return '<a href="'+iptBaseUrl+'/resource?r='+data.ipt_resource_id+'" target="_blank">'+data.dataset_name+'</a>';
+                  },
+                  className: 'ds'
+                },
+                { data : null,
+                  render : function ( data, type, row ) {
+                      return '<a href="'+data.ipt_download_url+'" target="_blank">'+data.ipt_resource_id+'</a>';
                   }
-                }
+                 }
             ];
             // Make dataset download table
             var dTbl = makeDownloadTbl('/list_datasets', columns);
@@ -427,6 +432,7 @@ function makeDownloadTbl(url, columns) {
             dTbl.buttons().disable();
         })
         .DataTable({
+        //pageLength: 100,
         deferRender: true, // Process one page at a time
         autoWidth : false, // Respect CSS settings
         ajax: {
