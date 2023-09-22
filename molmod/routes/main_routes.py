@@ -152,9 +152,9 @@ def files(filename):
         return send_from_directory(dir, filename, as_attachment=True)
     except FileNotFoundError:
         abort(404)
-        
 
-@main_bp.route("/download", methods=['GET','POST'])
+
+@main_bp.route("/download", methods=['GET'])
 @login_required
 def download():
     """Lists available datasets"""
@@ -168,7 +168,9 @@ def download():
 @main_bp.route('/list_datasets', methods=['GET'])
 @login_required
 def list_datasets() -> dict:
-    """Makes API request for dataset list, and returns dict."""
+    """Composes API request for available datasets, based on data
+       received in (DataTable) AJAX request, and returns dict
+       with DataTable-specific format"""
 
     url = f"{CONFIG.POSTGREST}/app_dataset_list"
 
@@ -176,9 +178,9 @@ def list_datasets() -> dict:
         response = requests.get(url)
         response.raise_for_status()
     except (requests.ConnectionError, requests.exceptions.HTTPError) as e:
-        APP.logger.error(f'API request for filtered occurences returned: {e}')
+        APP.logger.error(f'API request for dataset list returned: {e}')
     else:
         results = json.loads(response.text)
         APP.logger.debug(type(results))
         # APP.logger.debug(results)
-        return {"data": results}
+        return {"data": results}  # returns dict
