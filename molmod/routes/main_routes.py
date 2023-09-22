@@ -180,7 +180,13 @@ def list_datasets() -> dict:
     except (requests.ConnectionError, requests.exceptions.HTTPError) as e:
         APP.logger.error(f'API request for dataset list returned: {e}')
     else:
-        results = json.loads(response.text)
-        APP.logger.debug(type(results))
+        results = json.loads(response.text)  # -> list of dicts
+        # Iterate through the results and add the "ipt_download_link" key
+        for dataset in results:
+            dataset['ipt_download_url'] = (
+                CONFIG.IPT_BASE_URL + '/archive.do?r=' +
+                dataset['ipt_resource_id']
+            )
+
         # APP.logger.debug(results)
         return {"data": results}  # returns dict
