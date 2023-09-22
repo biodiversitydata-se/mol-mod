@@ -87,7 +87,7 @@ $(document).ready(function() {
                 },
                 { data : null,
                   render : function ( data, type, row ) {
-                      return '<a href="'+data.ipt_download_url+'" target="_blank">'+data.ipt_resource_id+'</a>';
+                      return '<a href="'+data.ipt_download_url+'" target="_top">'+data.ipt_resource_id+'</a>';
                   },
                   className: 'iptLink'
                  }
