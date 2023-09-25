@@ -361,7 +361,8 @@ AS
  SELECT DISTINCT ds.dataset_id,
     ds.dataset_name,
     ds.ipt_resource_id,
-    ta.annotation_target
+    ta.annotation_target,
+	se.institution_code
    FROM :data_schema.dataset ds,
     :data_schema.sampling_event se,
     :data_schema.occurrence oc,
