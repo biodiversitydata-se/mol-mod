@@ -33,8 +33,9 @@ target_criteria <- 'Assigned kingdom OR barrnap-positive'
 
 dataset_id <- 'SBDI-ASV-1'
 
-# Bioatlas resource ID if this is an update of dataset already imported into Bioatlas:
+# Include as this is may be an update of dataset already imported into Bioatlas:
 bioatlas_resource_uid <- NA
+ipt_resource_id <- NA
 
 ################################################################################
 # 2. Get required packages etc.
@@ -115,7 +116,7 @@ dts <- lapply(dts, function(dt) setnames(dt, "event_id_alias", "eventID",
 
 # Add new cols, if missing
 event_new <- c('datasetID', 'collectionCode', 'fieldNumber', 'catalogNumber',
-               'references', 'institutionCode', 'institutionID')
+               'references', 'institutionCode', 'institutionID', 'dataGeneralizations')
 event[, (event_new[!event_new %in% names(event)]) := NA_character_]
 dna_new <- c('seq_meth', 'denoising_appr')
 dna[, (dna_new[!dna_new %in% names(dna)]) := NA_character_]
@@ -162,9 +163,13 @@ event[, recordedBy := gsub(', ', ' | ', recordedBy)]
 # 6. Add dataset metadata
 ################################################################################
 
-dataset <- data.frame(datasetID = dataset_id, filename = basename(uploaded_file), bioatlas_resource_uid)
-# And remove datasetID from event tab/file
-event[,datasetID := NULL]
+dataset <- data.frame(datasetID = dataset_id,
+                      datasetName = event[1, datasetName],
+                      filename = basename(uploaded_file),
+                      bioatlas_resource_uid,
+                      ipt_resource_id)
+# And remove datasetID & datasetName from event tab/file
+event[, c("datasetName", "datasetID") := NULL]
 
 ################################################################################
 # 7. Handle emof data
