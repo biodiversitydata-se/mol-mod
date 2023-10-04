@@ -7,25 +7,14 @@ CREATE SCHEMA IF NOT EXISTS public;
 
 CREATE TABLE IF NOT EXISTS public.dataset (
     pid BIGSERIAL PRIMARY KEY,
-    dataset_id character varying NOT NULL,
+    dataset_id character varying NOT NULL UNIQUE,
     filename character varying UNIQUE,
     insertion_time timestamp without time zone NOT NULL DEFAULT now(),
     in_bioatlas boolean default FALSE,
     bioatlas_resource_uid character varying,
-    dataset_name character varying COLLATE pg_catalog."default",
-    ipt_resource_id character varying COLLATE pg_catalog."default"
+    dataset_name character varying UNIQUE,
+    ipt_resource_id character varying UNIQUE
 );
-
---- Only a single version of a dataset is allowed in the Bioatlas at any
---- point in time, i.e. multiple dataset rows can only have same dataset_id
---- and/or bioatlas_resource_uid if all but one has in_bioatlas status = FALSE
-CREATE UNIQUE INDEX IF NOT EXISTS datasetid_status
-ON public.dataset(dataset_id, in_bioatlas)
-WHERE in_bioatlas = TRUE;
-
-CREATE UNIQUE INDEX IF NOT EXISTS ruid_status
-ON public.dataset(bioatlas_resource_uid, in_bioatlas)
-WHERE in_bioatlas = TRUE;
 
 CREATE TABLE IF NOT EXISTS public.sampling_event (
     pid BIGSERIAL PRIMARY KEY,

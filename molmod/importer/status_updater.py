@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
 """
-This script updates 'in_bioatlas status' and 'bioatlas_resource_uid' for a
-dataset and/or updates the materialized view used for summary stats in the
-About page. It is executed inside a running asv-main container using the
+This script updates 'in_bioatlas status', 'bioatlas_resource_uid',
+'dataset_name' and 'ipt_resource_is' for a dataset and/or updates the
+materialized view used for summary stats in the About page.
+It is executed inside a running asv-main container using the
 update_bas_status.py wrapper.
 
-Note that we save data with a new 'dataset_id' if users provide a
-corrected version of their dataset. Old and new datasets will then have
-identical 'bioatlas_resource_uid' in our db, but only one of them should
-have 'in_bioatlas' status = True at any point in time.
-
-In contrast, we will not set a new 'dataset_id' when we perform a
+We do not set a new 'dataset_id' when we perform a
 regular re-annotation of data, but instead save all annotations and
 flag them as having 'status' old or valid.
 """
