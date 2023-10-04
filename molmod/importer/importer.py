@@ -189,7 +189,7 @@ def insert_dataset(data: pd.DataFrame, mapping: dict,
     dataset_id = None
     try:
         logging.debug("query: %s", query)
-        ids = psycopg2.extras.execute_values (
+        ids = psycopg2.extras.execute_values(
             db_cursor, query, values, fetch=True
         )
         dataset_id = ids[0][0]
