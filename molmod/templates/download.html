@@ -11,13 +11,14 @@ Download data
         <p>Select relevant datasets and click <i>Download</i> to fetch complete ASV occurrence datasets, in Darwin Core (DwC) format, from the
             <a href="{{ ipt_base_url }}" rel="noreferrer noopener" target="_blank"> Integrated Publishing Toolkit (IPT)</a> website.
             In addition to occurrence data, that is also available in the Bioatlas,
-            these datasets also include contextual metadata that is, as of now, absent from Bioatlas record downloads.
+            these datasets also include contextual metadata that is, as of now, absent from Bioatlas <i>record</i> downloads.
             You can also inspect or download individual datasets via direct links,
             or retrieve lists of datasets in <i>Excel</i> or <i>CSV</i> format.
         </p>
         <p>
             Note that different browsers handle downloads differently, and that you may have to actively allow downloads from our site in your browser preferences.
-            Alternatively, you can access a JSON object containing all the links through the <a href={{ url_for('main_bp.list_datasets') }} target="_blank">/list_datasets</a> endpoint.
+            Alternatively, you can access a JSON object containing all the links through the <a href={{ url_for('main_bp.list_datasets') }}
+            target="_blank">/list_datasets</a> endpoint, and fetch resources via command line or script.
             <br>Please contact <a href="{{ sbdi_contact_page }}">SBDI support</a> if you have any questions or suggestions.
         </p>
 
