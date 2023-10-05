@@ -36,7 +36,6 @@ def run_update(pid: int = 0, status: int = None, ruid: str = None,
 
         if update_columns:
             update_columns_str = ', '.join(update_columns)
-            print(update_columns)
             sql = f"UPDATE dataset SET {update_columns_str} WHERE pid = {pid};"
             # print(cursor.mogrify(sql))
             try:
