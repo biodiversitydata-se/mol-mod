@@ -12,11 +12,11 @@ import psycopg2
 from importer import connect_db
 
 
-def run_update(pid: int = 0, status: int = 1, ruid: str = '',
-               ipt: str = '', dry_run: bool = False):
+def run_update(pid: int = 0, status: int = None, ruid: str = None,
+               ipt: str = None, dry_run: bool = False):
     """Updates dataset metadata and/or materialized db view that summarizes
        data for datasets that are currently used in the Bioatlas.
-       """
+    """
 
     logging.info("Connecting to database")
     connection, cursor = connect_db()
@@ -25,23 +25,20 @@ def run_update(pid: int = 0, status: int = 1, ruid: str = '',
     if pid > 0:
         update_columns = []
 
-        # Check if 'in_bioatlas' status needs to be updated
         if status is not None:
             update_columns.append(f"in_bioatlas = {bool(status)}")
 
-        # Check if 'bioatlas_resource_uid' needs to be updated
-        if ruid:
+        if ruid is not None:
             update_columns.append(f"bioatlas_resource_uid = '{ruid}'")
 
-        # Check if 'ipt_resource_id' needs to be updated
-        if ipt:
+        if ipt is not None:
             update_columns.append(f"ipt_resource_id = '{ipt}'")
 
-        # Construct the SQL query to update the specified columns
         if update_columns:
             update_columns_str = ', '.join(update_columns)
+            print(update_columns)
             sql = f"UPDATE dataset SET {update_columns_str} WHERE pid = {pid};"
-
+            # print(cursor.mogrify(sql))
             try:
                 logging.info("Updating Bioatlas metadata")
                 cursor.execute(sql)
@@ -101,12 +98,12 @@ if __name__ == '__main__':
     PARSER.add_argument('--pid', type=int, default=0,
                         help="pid of dataset to be status-updated,"
                              " or 0 for no dataset (i.e. view-update only)")
-    PARSER.add_argument('--status', type=int, default=1,
+    PARSER.add_argument('--status', nargs='?', type=int,
                         help="in_bioatlas value to be set: 0=False, 1=True")
-    PARSER.add_argument('--ruid', type=str, default="",
+    PARSER.add_argument('--ruid', nargs='?', type=str,
                         help="bioatlas_resource_uid value to be set, "
                              "e.g. 'dr10'")
-    PARSER.add_argument('--ipt', type=str, default="",
+    PARSER.add_argument('--ipt', nargs='?', type=str,
                         help="ipt_resource_id value to be set, "
                              "e.g. 'kth-2013-baltic-18s'")
     PARSER.add_argument('--dry-run', action='store_true',
@@ -125,4 +122,4 @@ if __name__ == '__main__':
     # E.g: --v means log level = 10(3-2) = 10
     logging.basicConfig(level=(10*(ARGS.quiet - ARGS.verbose)))
 
-    run_update(ARGS.pid, ARGS.status, ARGS.ruid, ARGS.dry_run)
+    run_update(ARGS.pid, ARGS.status, ARGS.ruid, ARGS.ipt, ARGS.dry_run)
