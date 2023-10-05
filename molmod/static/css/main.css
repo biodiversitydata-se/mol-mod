@@ -134,9 +134,11 @@ easier to style - see upload.html & main.js) */
 #filter_asvs,
 #show_occurrences,
 #submit,
+#download,
 #blast_link,
 #filter_link,
 #submit_link,
+#download_link,
 #file_label {
     border-radius: 4px;
     padding: 0px 18.2px;
