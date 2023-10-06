@@ -69,7 +69,7 @@ def to_list(raw: str) -> list:
 
 class Config:
     SECRET_KEY = secrets.token_hex()
-    POSTGREST = get_env_variable('POSTGREST_HOST') or 'http://localhost:3000'
+    POSTGREST = get_env_variable('POSTGREST_HOST')
     BLAST_DB = get_env_variable('BLAST_DB')
     TESTING = False
     SBDI_START_PAGE = get_env_variable('SBDI_START_PAGE')
@@ -77,6 +77,7 @@ class Config:
     TAXONOMY_PAGE = get_env_variable('TAXONOMY_PAGE')
     ENA_GUIDE_PAGE = get_env_variable('ENA_GUIDE_PAGE')
     AMPLISEQ_PAGE = get_env_variable('AMPLISEQ_PAGE')
+    IPT_BASE_URL = get_env_variable('IPT_BASE_URL')
     CAS_SERVER = get_env_variable('CAS_SERVER')
     CAS_AFTER_LOGIN = get_env_variable('CAS_AFTER_LOGIN')
     UPLOAD_PATH = get_env_variable('UPLOAD_PATH')

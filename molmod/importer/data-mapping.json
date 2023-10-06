@@ -2,6 +2,8 @@
   "dataset": {
     "targetTable": "dataset",
     "datasetID": {"validation": "(?!nan).*"},
+    "datasetName": {"validation": "(?!nan).*"},
+    "ipt_resource_id": {},
     "filename": {"validation": "[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+_[0-9]{6}-[0-9]{6}_[a-zA-Z0-9_.+-]+\\.(xlsx(.zip)?|tar.(gz|bz2|lz))"},
     "bioatlas_resource_uid": {"validation": "((dr)[0-9]*|nan)" }
   },
@@ -28,6 +30,7 @@
     "decimalLongitude": {"validation": "[-+]?(180(\\.0+)?|((1[0-7][0-9])|([1-9]?[0-9]))(\\.[0-9]+)?)"},
     "geodeticDatum": {"validation": "(?!nan).*"},
     "coordinateUncertaintyInMeters": {"validation": "[0-9]+(\\.[0-9]+)?|nan"},
+    "dataGeneralizations": {},
     "recordedBy": {},
     "verbatimLocality": {},
     "municipality": {},

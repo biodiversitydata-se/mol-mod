@@ -39,6 +39,7 @@ def blast():
 
 
 @blast_bp.route('/blast_run', methods=['POST'])
+@login_required
 def blast_run():
     """
     Sends blast run request to one of the available blast workers, and then

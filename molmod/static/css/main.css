@@ -58,6 +58,8 @@ td.details-control {
 tr.shown td.details-control {
     background: url('../img/details_close.png') no-repeat top 13px right 10px !important;
 }
+
+/* ALL (DataTable) TABLES */
 /* Restore lost arrow for 'Show x entries' */
 select.form-control.input-sm {
     -webkit-appearance: menulist !important;
@@ -76,6 +78,14 @@ select.form-control.input-sm {
 .table tr.selected td {
     color: black !important;
     box-shadow:inset 0 0 0 9999px rgba(190, 217, 229, 0.5) !important;
+}
+
+/* DOWNLOAD TABLE */
+/* Adjust name column to better fit table on page */
+.ds {
+    word-wrap: break-word;
+    max-width: 500px;
+    min-width: 500px;
 }
 
 /* STATS TABLE */
@@ -102,7 +112,6 @@ select.form-control.input-sm {
 .visHlpDiv, .visHlpDiv a {
     text-align: left;
     color: #c44d34;
-    visibility: visible;
     font-size: 16px !important;
 }
 
@@ -125,9 +134,11 @@ easier to style - see upload.html & main.js) */
 #filter_asvs,
 #show_occurrences,
 #submit,
+#download,
 #blast_link,
 #filter_link,
 #submit_link,
+#download_link,
 #file_label {
     border-radius: 4px;
     padding: 0px 18.2px;

@@ -1,8 +1,6 @@
 /* Changes may require cache bypass, in Chrome/Mac: shift + cmd + r */
 $(document).ready(function() {
 
-    var hlpDiv = $('#sel_err_container'); // For displaying no-selection warning
-
     switch(page) {
 
         // BLAST PAGE
@@ -31,7 +29,7 @@ $(document).ready(function() {
                 { data: 'asv_sequence', visible: false }
             ];
             // Make BLAST search result table
-            var dTbl = makeDataTbl('blast_run', columns);
+            var dTbl = makeResultTbl('blast_run', columns);
             break;
 
         // FILTER PAGE
@@ -72,7 +70,30 @@ $(document).ready(function() {
                 { data: 'rv_sequence', visible: false }
             ];
             // Make FILTER search result table
-            var dTbl = makeDataTbl('/filter_run', columns);
+            var dTbl = makeResultTbl('/filter_run', columns);
+            break;
+
+        case '/download':
+            // Define columns for download table
+            var columns = [
+                { data: null, orderable: false, defaultContent: '', className: 'select-checkbox' },
+                { data: 'annotation_target'},
+                { data: 'institution_code'},
+                { data : null,
+                  render : function ( data, type, row ) {
+                        return '<a href="'+iptBaseUrl+'/resource?r='+data.ipt_resource_id+'" target="_blank">'+data.dataset_name+'</a>';
+                  },
+                  className: 'ds'
+                },
+                { data : null,
+                  render : function ( data, type, row ) {
+                      return '<a href="'+data.ipt_download_url+'" target="_top">'+data.ipt_resource_id+'</a>';
+                  },
+                  className: 'iptLink'
+                 }
+            ];
+            // Make dataset download table
+            var dTbl = makeDownloadTbl('/list_datasets', columns);
             break;
 
         case '/upload':
@@ -152,13 +173,13 @@ $(document).ready(function() {
     // to avoid Flash of unstyled content
     $('#rform, #sform').css("visibility", "visible");
 
-    // If we have a (FILTER or BLAST search) result table
+    // If we have a DataTable
     if(typeof dTbl !== "undefined") {
 
         // Add Select/Deselect-all function to checkbox in table header
         dTbl.on('click', '#select_all', function () {
-            if ($('#select_all:checked').val() === 'on')
-                dTbl.rows().select();
+            if ($('#select_all:checked').val()  === 'on')
+                dTbl.rows({search: 'applied'}).select(); // Only select filtered records, if filter is applied
             else
                 dTbl.rows().deselect();
         });
@@ -172,57 +193,122 @@ $(document).ready(function() {
 
         // Remove no-selection warnings when any row is selected
         dTbl.on( 'select', function () {
-            if($('#sel_err_container').hasClass('visHlpDiv')){
-                $('#sel_err_container').removeClass('visHlpDiv');
-                $('.table tr td:first-child').removeClass('visHlpElem');
-            }
+            $('#dtbl_err_container').addClass('hiddenElem');
+            $('.table tr td:first-child').removeClass('visHlpElem');
         });
 
-        // Toggle show/hide of ASV sequence as child row
-        // when +/- button (or whole cell, actually) is clicked
-        dTbl.on('click', 'td.details-control', function () {
-            var tr = $(this).closest('tr');
-            var row = dTbl.row(tr);
-            var data = row.data().asv_sequence;
-            // Set no. of empty cells to show before data
-            // BLAST
-            if (dTbl.table().node().id === 'blast_result_table'){
-                var tds = '<tr><td></td><td></td><td class="child" colspan="4">';
-            }
-            // SEARCH
-            else { var tds = '<tr><td></td><td class="child" colspan="5">'; }
-            var childRow = $(tds+data+'</td></tr>');
-            // Toggle show/hide
-            if(row.child.isShown()) {
-                row.child.hide();
-                tr.removeClass("shown");
-            }
-            else {
-                row.child(childRow).show();
-                tr.addClass("shown");
-            }
-        });
-
-        // Prepare ASV id:s for POST to Bioatlas
-        $('#rform').on('submit', function() {
-            // Get selected ASV IDs from table
-            var ids = $.map(dTbl.rows({selected: true}).data(), function (item) {
-                return item['asv_id']
+        if (page === '/blast' || page === '/filter') {
+            // Toggle show/hide of ASV sequence as child row
+            // when +/- button (or whole cell, actually) is clicked
+            dTbl.on('click', 'td.details-control', function () {
+                var tr = $(this).closest('tr');
+                var row = dTbl.row(tr);
+                var data = row.data().asv_sequence;
+                // Set no. of empty cells to show before data
+                // BLAST
+                if (dTbl.table().node().id === 'blast_result_table'){
+                    var tds = '<tr><td></td><td></td><td class="child" colspan="4">';
+                }
+                // SEARCH
+                else { var tds = '<tr><td></td><td class="child" colspan="5">'; }
+                var childRow = $(tds+data+'</td></tr>');
+                // Toggle show/hide
+                if(row.child.isShown()) {
+                    row.child.hide();
+                    tr.removeClass("shown");
+                }
+                else {
+                    row.child(childRow).show();
+                    tr.addClass("shown");
+                }
             });
-            // Remove duplicates
-            ids = ids.filter(function(item, i, ids) {
-                return i == ids.indexOf(item);
-            });
-            // Add IDs to hidden textarea, one row per ID
-            $('#raw_names').val(ids.join('\n'));
 
-            // Warn and abort if no selection has been made in table
-            if (!$('#raw_names').val()) {
-                $('#sel_err_container').addClass('visHlpDiv');
-                $('.table tr td:first-child').addClass('visHlpElem');
+            // Prepare ASV id:s for POST to Bioatlas
+            $('#rform').on('submit', function() {
+                // Get selected ASV IDs from table
+                var ids = $.map(dTbl.rows({selected: true}).data(), function (item) {
+                    return item['asv_id']
+                });
+                // Remove duplicates
+                ids = ids.filter(function(item, i, ids) {
+                    return i == ids.indexOf(item);
+                });
+                // Add IDs to hidden textarea, one row per ID
+                $('#raw_names').val(ids.join('\n'));
+
+                // Warn and abort if no selection has been made in table
+                if (!$('#raw_names').val()) {
+                    $('#dtbl_err_container').removeClass('hiddenElem');
+                    $('#dtbl_err_container').html('Please, select at least one row. ');
+                    $('.table tr td:first-child').addClass('visHlpElem');
+                    return false;
+                }
+            });
+        }
+
+        else if (page === '/download') {
+            $('#rform').on('submit', function() {
+
+                // Get selected IPT resource links from table
+                var anchors = $.map(dTbl.rows({selected: true}).nodes(), function (row) {
+                    return $(row).find('td.iptLink a');
+                });
+
+                // Warn and abort if no selection has been made in table
+                if (anchors.length == 0) {
+                    $('#dtbl_err_container').removeClass('hiddenElem');
+                    $('#dtbl_err_container').html('Please, select at least one row. ');
+                    $('.table tr td:first-child').addClass('visHlpElem');
+                    return false;
+                }
+
+                var invalidIDs = [];
+
+                function downloadWithDelay(index) {
+                // Downloads selected datasets
+
+                    if (index >= anchors.length) {
+                        if (invalidIDs.length > 0) {
+                            $('#dtbl_err_container').removeClass('hiddenElem');
+                            $('#dtbl_err_container').html('The following datasets could not be downloaded: ' + invalidIDs.join(', ') + '. '
+                            + 'Please <a href="' + sbdiContactPage + '">contact SBDI support</a> if this error persists.');
+                        }
+                        return;
+                    }
+
+                    var anchor = anchors[index];
+                    var link = anchor.attr('href');
+
+                    // Check if the link is valid (by making a HEAD request to check for a 404 response)
+                    $.ajax({
+                        url: link,
+                        type: 'HEAD',
+                        error: function (xhr) {
+                            if (xhr.status !== 200) {
+                                invalidIDs.push(link.split('=')[1]);
+                            }
+                            downloadWithDelay(index + 1);
+                        },
+                        success: function () {
+                            // Trigger a click on the existing <a> element to download
+                            anchor[0].click();
+
+                            // Delay before starting the next download
+                            // (to allow multiple downloads in Chrome)
+                            setTimeout(function () {
+                                downloadWithDelay(index + 1);
+                            }, 1000); // Adjust the delay duration (in milliseconds) as needed
+                        }
+                    });
+                }
+
+                // Start the download process from the first link
+                downloadWithDelay(0);
+
                 return false;
-            }
-        });
+
+            });
+        }
     }
 
 });
@@ -281,8 +367,9 @@ function makeSel2drop(drop){
                     console.log('Select2.js fast type-ahead error condition encountered and handled properly');
                 } else {
                     //Process proper errors
+                    $('#filt_err_container').removeClass('hiddenElem');
                     $('#filt_err_container').html('Sorry, something unexpected happened during page load. '
-                    + 'Please <a href="' + sbdiContactPage + '">contact SBDI support</a> if this error persists.');
+                    + 'Please, <a href="' + sbdiContactPage + '">contact SBDI support</a> if this error persists.');
 
                     $('.btn').prop('disabled',true);
                     return { results: [] };
@@ -292,7 +379,7 @@ function makeSel2drop(drop){
     });
 }
 
-function makeDataTbl(url, columns) {
+function makeResultTbl(url, columns) {
     // Makes DataTables-table of (FILTER or BLAST search) results
     // received in AJAX request to Flask endpoint
     // Pagination handled by client
@@ -302,7 +389,8 @@ function makeDataTbl(url, columns) {
         // to be empty string instead of JSON
         .on('error.dt', function (e, settings, techNote, message) {
             // console.log( 'An error has been reported by DataTables: ', message );
-            $('#search_err_container').html('Sorry, something unexpected happened during the search. '
+            $('#dtbl_err_container').removeClass('hiddenElem');
+            $('#dtbl_err_container').html('Sorry, something unexpected happened during the search. '
             + 'Please <a href="' + sbdiContactPage + '">contact SBDI support</a> if this error persists.');
 
             // Disable Bioatlas POST option and data export
@@ -324,7 +412,8 @@ function makeDataTbl(url, columns) {
                     dTbl.buttons().disable();
                 }
                 if (json.data.length > 999) {
-                    $('#search_err_container').html('Please note that only the first 1000 hits are returned. '
+                    $('#dtbl_err_container').removeClass('hiddenElem');
+                    $('#dtbl_err_container').html('Please note that only the first 1000 hits are returned. '
                       + 'Refine your search to make sure results are not truncated.');
                 }
                 return json.data;
@@ -335,6 +424,49 @@ function makeDataTbl(url, columns) {
         columns : columns,
         processing: true, // Show 'Loading' indicator
         order: [[2, 'asc']], // Required for non-orderable col 0
+        select: { style: 'multi', selector: 'td:nth-child(1)' }, // Checkbox selection
+        // Layout: l=Show.., f=Search, tr=table, i=Showing.., p=pagination
+        dom: "<'row'<'col-md-5'l><'col-md-7'f>>" +
+        "<'row'<'col-md-12't>>" +
+        "<'row'<'col-md-2'B><'col-md-5'i><'col-md-5'p>>",
+        buttons: [ 'excel', 'csv' ]
+    });
+    return dTbl;
+}
+
+function makeDownloadTbl(url, columns) {
+    $.fn.dataTable.ext.errMode = 'none';
+    var dTbl = $('.table')
+        // Handle errors causing response to be empty string instead of JSON
+        .on('error.dt', function (e, settings, techNote, message) {
+            // console.log( 'An error has been reported by DataTables: ', message );
+            $('#dtbl_err_container').removeClass('hiddenElem');
+            $('#dtbl_err_container').html('Sorry, something unexpected happened during the search. '
+            + 'Please <a href="' + sbdiContactPage + '">contact SBDI support</a> if this error persists.');
+
+            // Disable dataset download and list export options
+            $("#show_occurrences").prop("disabled",true);
+            dTbl.buttons().disable();
+        })
+        .DataTable({
+        deferRender: true, // Process one page at a time
+        autoWidth : false, // Respect CSS settings
+        ajax: {
+            url: url,
+            type: 'GET',
+            dataSrc: function ( json ) {
+                // If (no errors but) no results were found
+                if (json.data.length < 1) {
+                    // Disable dataset download and list export options
+                    $("#download").prop("disabled",true);
+                    dTbl.buttons().disable();
+                }
+                return json.data;
+            }
+        },
+        columns : columns,
+        processing: true, // Show 'Loading' indicator
+        order: [], // Required for non-orderable col 0
         select: { style: 'multi', selector: 'td:nth-child(1)' }, // Checkbox selection
         // Layout: l=Show.., f=Search, tr=table, i=Showing.., p=pagination
         dom: "<'row'<'col-md-5'l><'col-md-7'f>>" +

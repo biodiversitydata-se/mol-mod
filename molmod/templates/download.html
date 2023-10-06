@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Download data
+{% endblock title %}
+
+{% block body %}
+<div class='container'>
+    <div>
+        <h1>Download data</h1>
+        <p>Select and download complete ASV occurrence datasets, in Darwin Core (DwC) format, from the GBIF-Sweden
+            <a href="{{ ipt_base_url }}" rel="noreferrer noopener" target="_blank"> Integrated Publishing Toolkit (IPT)</a> website.
+            In addition to occurrence data, these datasets include contextual metadata that are not yet available from Bioatlas <i>record</i> downloads.
+            You can also inspect or download individual datasets via direct links,
+            or retrieve lists of datasets in <i>Excel</i> or <i>CSV</i> format.
+            You may have to actively allow downloads from our site in your browser preferences.
+            Alternatively, you can access a <a href={{ url_for('main_bp.list_datasets') }}
+            target="_blank">JSON object</a> containing all the links, and fetch resources via command line or script.
+            Please contact <a href="{{ sbdi_contact_page }}">SBDI support</a> if you have any questions or suggestions.
+        </p>
+
+    {% if rform %}
+        <form action='' method='post' id='rform' name='rform'>
+            {{ rform.csrf_token }}
+            <div class='row'>
+                <div class='col-md-12'>
+                    <hr>
+                    <table id='dataset_table' class='table'>
+                        <thead>
+                            <tr>
+                                <th style="text-align: center"><input type="checkbox" id="select_all" /></th>
+                                <th>Target gene</th>
+                                <th>Institution</th>
+                                <th>Dataset name</th>
+                                <th>IPT resource ID</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-md-12 visHlpDiv hiddenElem' id='dtbl_err_container'>Dummy</div>
+            </div>
+            <div class='row'>
+                <div class='col-md-12'>
+                     {{ rform.download(class='btn btn-primary', value='Download') }}
+                </div>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    {% endblock body %}

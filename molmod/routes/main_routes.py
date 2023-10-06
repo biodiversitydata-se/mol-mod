@@ -9,6 +9,7 @@ from flask import render_template, request, send_from_directory, session
 from flask_cas import login_required
 from flask_mail import Message
 from forms import UploadForm
+from forms import DownloadForm
 from werkzeug.utils import secure_filename
 
 from config import get_config
@@ -32,7 +33,6 @@ def about():
     return render_template('about.html', rows=stats)
 
 
-@main_bp.route('/stats', methods=['GET'])
 def get_stats() -> dict:
     """Makes API request for db stats, and returns dict."""
 
@@ -152,3 +152,47 @@ def files(filename):
         return send_from_directory(dir, filename, as_attachment=True)
     except FileNotFoundError:
         abort(404)
+
+
+@main_bp.route("/download", methods=['GET'])
+@login_required
+def download():
+    """Lists available datasets"""
+
+    # Create forms from classes in forms.py
+    rform = DownloadForm()
+
+    return render_template('download.html', rform=rform)
+
+
+@main_bp.route('/list_datasets', methods=['GET'])
+@login_required
+def list_datasets() -> dict:
+    """Composes API request for available datasets, based on data
+       received in (DataTable) AJAX request, and returns dict
+       with DataTable-specific format"""
+
+    url = f"{CONFIG.POSTGREST}/app_dataset_list"
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+    except (requests.ConnectionError, requests.exceptions.HTTPError) as e:
+        APP.logger.error(f'API request for dataset list returned: {e}')
+    else:
+        results = json.loads(response.text)  # -> list of dicts
+        # Construct download link
+        for ds in results:
+            try:
+                ds['ipt_download_url'] = (
+                    CONFIG.IPT_BASE_URL + '/archive.do?r=' +
+                    ds['ipt_resource_id']
+                )
+            # Make sure we notice if some dataset is missing IPT details
+            except (TypeError) as e:
+                APP.logger.error(f'Adding IPT resource ID returned: {e}' +
+                                 f', for dataset ID = {ds["dataset_id"]}')
+                abort(500)
+
+        # APP.logger.debug(results)
+        return {"data": results}  # returns dict

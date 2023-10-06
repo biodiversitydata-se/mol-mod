@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-Script to generate the secrets needed for deployment. These secrets are:
- - postgres database password (in .secret.postgres_pass)
- - postgres anon password (in .secret.anon_pass)
+Script to generate the secrets needed for deployment:
+ - postgres superuser password (in .secret.postgres_pass)
+ - postgres(t) auth password (in .secret.auth_pass)
  - postgrest config file (in .secret.postgrest_config)
+ - email config file (in .secret.email_config)
 """
 
 import logging
@@ -106,8 +107,8 @@ if __name__ == '__main__':
     # E.g. -vv -> (30-10*2=10) debug, -q -> (30+10*1=40) error
 
     PG_PASS = generate_secret('.secret.postgres_pass', ARGS.skip_existing)
-    PG_ANON = generate_secret('.secret.anon_pass', ARGS.skip_existing)
     PG_IPT = generate_secret('.secret.ipt_pass', ARGS.skip_existing)
+    PG_AUTH = generate_secret('.secret.auth_pass', ARGS.skip_existing)
 
     # read template file
     for row in open(ARGS.env):
@@ -118,8 +119,8 @@ if __name__ == '__main__':
             os.environ[var.strip()] = value.strip()
 
     # create dict of variables for the template
-    VARS = {'user': os.getenv('POSTGRES_USER', 'postgres'),
-            'passwd': PG_PASS,
+    VARS = {'user': os.getenv('PGRST_DB_AUTH_ROLE', 'auth'),
+            'passwd': PG_AUTH,
             'host': os.getenv('POSTGRES_HOST', 'localhost'),
             'port': os.getenv('POSTGRES_PORT', '5432'),
             'name': os.getenv('POSTGRES_DB', 'db')

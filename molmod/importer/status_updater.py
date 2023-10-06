@@ -1,18 +1,8 @@
 #!/usr/bin/env python3
 """
-This script updates 'in_bioatlas status' and 'bioatlas_resource_uid' for a
-dataset and/or updates the materialized view used for summary stats in the
-About page. It is executed inside a running asv-main container using the
-update_bas_status.py wrapper.
-
-Note that we save data with a new 'dataset_id' if users provide a
-corrected version of their dataset. Old and new datasets will then have
-identical 'bioatlas_resource_uid' in our db, but only one of them should
-have 'in_bioatlas' status = True at any point in time.
-
-In contrast, we will not set a new 'dataset_id' when we perform a
-regular re-annotation of data, but instead save all annotations and
-flag them as having 'status' old or valid.
+This script updates dataset metadata and/or the materialized view used for
+summary stats in the About page. It is executed inside a running asv-main
+container using the update_bas_status.py wrapper.
 """
 
 import logging
@@ -22,33 +12,39 @@ import psycopg2
 from importer import connect_db
 
 
-def run_update(pid: int = 0, status: int = 1, ruid: str = '',
-               dry_run: bool = False):
-    """Updates 'in_bioatlas status' and 'bioatlas_resource_uid' for a dataset,
-       and/or updates the materialized db view that summarizes data for
-       datasets that are currently used in the Bioatlas.
-       """
+def run_update(pid: int = 0, status: int = None, ruid: str = None,
+               ipt: str = None, dry_run: bool = False):
+    """Updates dataset metadata and/or materialized db view that summarizes
+       data for datasets that are currently used in the Bioatlas.
+    """
 
     logging.info("Connecting to database")
     connection, cursor = connect_db()
 
     # Update Bioatlas metadata for the referenced dataset, if any
     if pid > 0:
-        # Update ruid if it has been supplied, otherwise keep it
-        if ruid:
-            sql = f"UPDATE dataset SET in_bioatlas = {bool(status)}, \
-                   bioatlas_resource_uid = '{ruid}' \
-                   WHERE pid = {pid};"
-        else:
-            sql = f"UPDATE dataset SET in_bioatlas = {bool(status)} \
-                   WHERE pid = {pid};"
-        try:
-            logging.info("Updating Bioatlas status")
-            cursor.execute(sql)
-        except psycopg2.OperationalError as err:
-            logging.error("Could not update Bioatlas status")
-            logging.error(err)
-            sys.exit(1)
+        update_columns = []
+
+        if status is not None:
+            update_columns.append(f"in_bioatlas = {bool(status)}")
+
+        if ruid is not None:
+            update_columns.append(f"bioatlas_resource_uid = '{ruid}'")
+
+        if ipt is not None:
+            update_columns.append(f"ipt_resource_id = '{ipt}'")
+
+        if update_columns:
+            update_columns_str = ', '.join(update_columns)
+            sql = f"UPDATE dataset SET {update_columns_str} WHERE pid = {pid};"
+            # print(cursor.mogrify(sql))
+            try:
+                logging.info("Updating Bioatlas metadata")
+                cursor.execute(sql)
+            except psycopg2.OperationalError as err:
+                logging.error("Could not update Bioatlas metadata")
+                logging.error(err)
+                sys.exit(1)
 
     # Update materialized views
     # About stats
@@ -69,6 +65,13 @@ def run_update(pid: int = 0, status: int = 1, ruid: str = '',
     try:
         logging.info("Updating data for filter dropdown options")
         cursor.execute("REFRESH MATERIALIZED VIEW api.app_filter_mixs_tax;")
+    except psycopg2.OperationalError as err:
+        logging.error(err)
+        sys.exit(1)
+    # Dataset table
+    try:
+        logging.info("Updating dataset table in Download data")
+        cursor.execute("REFRESH MATERIALIZED VIEW api.app_dataset_list;")
     except psycopg2.OperationalError as err:
         logging.error(err)
         sys.exit(1)
@@ -94,11 +97,14 @@ if __name__ == '__main__':
     PARSER.add_argument('--pid', type=int, default=0,
                         help="pid of dataset to be status-updated,"
                              " or 0 for no dataset (i.e. view-update only)")
-    PARSER.add_argument('--status', type=int, default=1,
+    PARSER.add_argument('--status', nargs='?', type=int,
                         help="in_bioatlas value to be set: 0=False, 1=True")
-    PARSER.add_argument('--ruid', type=str, default="",
+    PARSER.add_argument('--ruid', nargs='?', type=str,
                         help="bioatlas_resource_uid value to be set, "
                              "e.g. 'dr10'")
+    PARSER.add_argument('--ipt', nargs='?', type=str,
+                        help="ipt_resource_id value to be set, "
+                             "e.g. 'kth-2013-baltic-18s'")
     PARSER.add_argument('--dry-run', action='store_true',
                         help="Performs all transactions, but then issues a "
                              "rollback to the database so that it remains "
@@ -115,4 +121,4 @@ if __name__ == '__main__':
     # E.g: --v means log level = 10(3-2) = 10
     logging.basicConfig(level=(10*(ARGS.quiet - ARGS.verbose)))
 
-    run_update(ARGS.pid, ARGS.status, ARGS.ruid, ARGS.dry_run)
+    run_update(ARGS.pid, ARGS.status, ARGS.ruid, ARGS.ipt, ARGS.dry_run)

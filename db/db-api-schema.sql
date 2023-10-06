@@ -72,6 +72,7 @@ WHERE ta.status::text = 'valid'
 CREATE OR REPLACE VIEW api.dwc_oc_occurrence AS
 SELECT ds.pid AS dataset_pid,
     ds.dataset_id AS "datasetID",
+    ds.dataset_name AS "datasetName",
     (ds.dataset_id || ':' || se.event_id)  AS "eventID",
     (ds.dataset_id || ':' || se.event_id || ':' || oc.asv_id_alias) AS "occurrenceID",
     'MaterialSample'::text AS "basisOfRecord",
@@ -88,6 +89,7 @@ SELECT ds.pid AS dataset_pid,
     se.decimal_longitude AS "decimalLongitude",
     se.geodetic_datum AS "geodeticDatum",
     se.coordinate_uncertainty_in_meters AS "coordinateUncertaintyInMeters",
+    se.data_generalizations AS "dataGeneralizations",
     concat_ws(' | ', se.associated_sequences, oc.associated_sequences) AS "associatedSequences",
     se.recorded_by AS "recordedBy",
     se.material_sample_id AS "materialSampleID",
@@ -351,6 +353,24 @@ SELECT sub.gene,
                AND ta.annotation_target = mixs.target_gene) sub
  GROUP BY sub.gene
  ORDER BY sub.gene
+WITH DATA;
+
+-- View used for populating dataset table in Download data page
+-- Materialized (see above), and updated with 'make status' / 'make stats'
+CREATE MATERIALIZED VIEW IF NOT EXISTS api.app_dataset_list
+TABLESPACE pg_default
+AS
+ SELECT DISTINCT ds.dataset_id,
+    ds.dataset_name,
+    ds.ipt_resource_id,
+    ta.annotation_target,
+	se.institution_code
+   FROM :data_schema.dataset ds,
+    :data_schema.sampling_event se,
+    :data_schema.occurrence oc,
+    :data_schema.taxon_annotation ta
+  WHERE ds.in_bioatlas = true AND ds.pid = se.dataset_pid AND se.pid = oc.event_pid AND oc.asv_pid = ta.asv_pid AND ta.status::text = 'valid'::text
+  ORDER BY ta.annotation_target, ds.dataset_name
 WITH DATA;
 
 

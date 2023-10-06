@@ -157,3 +157,8 @@ class FilterResultForm(FlaskForm):
 class UploadForm(FlaskForm):
     file = FileField('file', [file_check])
     submit = SubmitField('Submit')
+
+
+class DownloadForm(FlaskForm):
+    ipt_resource_id = BooleanField(u'ipt_resource_id')
+    download = SubmitField(u'Download')
