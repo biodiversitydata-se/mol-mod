@@ -16,7 +16,10 @@ import sys
 def generate_secret(filename, skip_existing: bool = False):
     """
     Generates single secret value (using 'secrets.token_hex()') and saves it
-    as given 'filename'. The permissions of the filename will be set to 400.
+    as given 'filename'. The permissions of the file will be set to 444,
+    as the postgres system user otherwise is unable to read it.
+    (except for postgres master pwd which is set automatically,
+    see https://hub.docker.com/_/postgres).
 
     If 'skip_existing' is set, the function will just return the content of the
     currently existing file.
@@ -40,7 +43,10 @@ def generate_secret(filename, skip_existing: bool = False):
     else:
         logging.info("writing secret token to %s", filename)
         logging.info("setting permissions to 0400 for %s", filename)
-        os.chmod(filename, 0o400)
+        if filename == '.secret.postgres_pass':
+            os.chmod(filename, 0o400)
+        else:
+            os.chmod(filename, 0o444)
 
         return secret
 
