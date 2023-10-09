@@ -58,10 +58,10 @@ services:
     environment:
     # This will directly set POSTGRES_PASSWORD during db initialization
     # as explained here: https://hub.docker.com/_/postgres
-      - POSTGRES_PASSWORD_FILE=./run/secrets/postgres_pass
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_pass
     # ... but these need to be explicitly read - see db-roles.sql
-      - POSTGRES_IPT_PASS_FILE=./run/secrets/ipt_pass
-      - POSTGRES_AUTH_PASS_FILE=./run/secrets/auth_pass
+      - POSTGRES_IPT_PASS_FILE=/run/secrets/ipt_pass
+      - POSTGRES_AUTH_PASS_FILE=/run/secrets/auth_pass
 
 
     # Avoid permission issues on Mac by setting container dir for db stats
@@ -79,8 +79,6 @@ services:
       - .env
     secrets:
       - postgrest_config
-    environment:
-      - POSTGREST_CONFIG_FILE=./run/secrets/postgrest_config
     depends_on:
       - postgres
 
@@ -116,7 +114,6 @@ services:
       - postgres_pass
       - email_config
     environment:
-      - POSTGRES_PASSWORD_FILE=./run/secrets/postgres_pass
       - PYTHONPATH=/app/molmod
       - FLASK_DEBUG=1
       - CAS_AFTER_LOGOUT=${HOST_URL:-${CAS_AFTER_LOGOUT}}
