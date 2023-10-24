@@ -115,7 +115,7 @@ dts <- lapply(dts, function(dt) setnames(dt, "event_id_alias", "eventID",
                                          skip_absent=TRUE))
 
 # Add new cols, if missing
-event_new <- c('datasetID', 'collectionCode', 'fieldNumber', 'catalogNumber',
+event_new <- c('datasetID', 'datasetName', 'collectionCode', 'fieldNumber', 'catalogNumber',
                'references', 'institutionCode', 'institutionID', 'dataGeneralizations')
 event[, (event_new[!event_new %in% names(event)]) := NA_character_]
 dna_new <- c('seq_meth', 'denoising_appr')
