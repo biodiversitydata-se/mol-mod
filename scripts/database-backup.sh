@@ -11,7 +11,7 @@
 
 topdir=$( readlink -f "$( dirname "$0" )/.." )
 
-DIR='db-backup'
+DIR='backups/db'
 BASE='db-dump'
 TIMESTAMP="$(date +'%Y-%m-%d_%H%M')"
 CONTAINER='asv-db'
@@ -58,7 +58,7 @@ fi
 FILE="$topdir/$DIR/${BASE}_$TIMESTAMP.sql"
 FLAGS=( -h localhost -U "$POSTGRES_USER" -d "$POSTGRES_DB" )
 
-mkdir -p "$topdir/db-backup"
+mkdir -p "$topdir/backups/db"
 
 #
 # RESTORE DB
@@ -107,7 +107,7 @@ else
     FLAGS+=( -n public --data-only )
   fi
 
-  printf 'Creating database dump file "%s.%s"\n' "$FILE" "$FORMAT"
+  printf 'Adding database dump "%s.%s"\n' "$BASE-data_$TIMESTAMP.sql" "$FORMAT"
   docker exec "$CONTAINER" \
     pg_dump "${FLAGS[@]}" --format="$FORMAT" \
       -n "$PGRST_DB_SCHEMA" >"$FILE.$FORMAT"

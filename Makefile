@@ -128,7 +128,7 @@ uplist:
 cpfile := $(if $(file),$(file),.)
 # Example: make upcopy file=some-file.xlsx
 upcopy:
-	mkdir -p uploads && docker cp asv-main:/uploads/$(cpfile) uploads
+	mkdir -p backups/uploads && docker cp asv-main:/uploads/$(cpfile) backups/uploads
 
 # Delete files in container
 delfile := $(if $(file),$(file),*)

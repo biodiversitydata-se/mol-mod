@@ -3,37 +3,23 @@
 #-----------------------------------------------------------------------
 # This script will:
 #
-#	1.  Perform a database dump using the
+#	1.  Write a compressed database dump to "$backup_dir/db" using
 #	    "$topdir/scripts/database-backup.sh" script, unless given
-#	    the "-n" command line option.  This writes a compressed dump
-#	    file to the "$topdir/db-backup" directory.
+#	    the "-n" command line option.
 #
 #	2.  Pull data from Docker container logs and store these in
-#	    "$topdir/log-backup". Only the logging data produced since
+#	    "$backup_dir/logs". Only the logging data produced since
 #	    the last time this script ran will be pulled (empty log
-#	    backups are removed). The timestamp on the symbolic link
-#	    "$topdir/backups/latest" (which is re-created at the end of
-#	    this script) is used to determine from when logs are to be
-#	    stored.
+#	    backups are removed). The timestamp on the (empty) latest_backups_*
+#	    file (which is re-created at the end of this script) is used to
+#	    determine from when logs are to be stored.
 #
-#	3.  Perform an incremental backup of the following directories
-#	    using rsync:
-#
-#		* "$topdir"/db-backup"	(the database backups)
-#		* "$topdir/log-backup"	(the log backups)
-#		* "asv-main:/uploads"	(the in-container upload directory)
+#	3.  Copy newly uploaded dataset files from Docker container to host
+#	    directory "$backup_dir/uploads".
 #
 #	The "$topdir" directory is the directory into which the mol-mod
-#	Github reposiory has been cloned.  This will be found via this
+#	Github reposiory has been cloned. This will be found via this
 #	script's location.
-#
-#	Backups are written to "$topdir/backups/backup-{timestamp}",
-#	where "{timestamp}" is a timestamp on the "YYYYMMDD-HHMMSS"
-#	format.	 There will also be a symbolic link at "backups/latest",
-#	which will point to the most recent backup directory.
-#
-#	Backups are incremental.  Unchanged files are hard-linked in
-#	older backups and will not consume extra space.
 #
 #	This script is suitable to be run from crontab.	 Suggested
 #	crontab entry for twice-daily backups as 9 AM and 9 PM:
@@ -97,12 +83,6 @@ then
 	exit 1
 fi >&2
 
-if ! command -v rsync >/dev/null 2>&1
-then
-	echo 'rsync is not available, or not in PATH' >&2
-	exit 1
-fi >&2
-
 topdir=$( readlink -f "$( dirname "$0" )/.." )
 backup_dir=$topdir/backups
 
@@ -114,19 +94,28 @@ case $backup_dir in
 esac >&2
 
 if [ ! -d "$backup_dir" ]; then
-	printf 'Creating missing backup directory "%s"...\n' "$backup_dir"
-	if ! mkdir "$backup_dir"; then
-		echo 'Failed'
+    printf 'Creating missing backup directory "%s"\n' "$backup_dir"
+    if ! mkdir -p "$backup_dir"; then
+        exit 1
+    fi
+fi >&2
+
+if [ ! -d "$backup_dir" ]; then
+	printf 'Creating missing backup directory "%s"\n' "$backup_dir"
+	if ! mkdir -p "$backup_dir"; then
 		exit 1
 	fi
 fi >&2
 
+for dir in db logs uploads; do
+	if ! mkdir -p backups/"$dir"; then
+		exit 1
+	fi
+done
+
 #-----------------------------------------------------------------------
 # 1.  Do database dump.
 #-----------------------------------------------------------------------
-
-now=$(date +%Y%m%d-%H%M%S)
-target_dir=$backup_dir/backup-$now
 
 if "$do_db_dump"; then
 	FORMAT=custom "$topdir"/scripts/database-backup.sh data |
@@ -141,61 +130,46 @@ fi
 # 2.  Do Docker log dump.
 #-----------------------------------------------------------------------
 
-# Default options for "docker logs".
+now=$(date +%Y%m%d-%H%M%S)
+
 set -- --timestamps --details
 
-if [ -d "$backup_dir/latest" ]; then
-	set -- "$@" --since "$(stat --format %Z "$backup_dir/latest")"
-fi
+latest=$(find "$backup_dir" -maxdepth 1 -type f -name 'latest_backup*' -print -quit)
 
-mkdir -p "$topdir/log-backup"
+if [ -n "$latest" ]; then
+    latest_timestamp=$(stat --format %Z "$latest")
+    set -- "$@" --since "$latest_timestamp"
+fi
 
 containers=$(docker compose ps | awk 'NR>1 { print $1 }')
 for container in $containers; do
-	backup_file=$topdir/log-backup/$container.log.$now
+	backup_file=$backup_dir/logs/$container.log.$now
 
 	docker logs "$@" "$container" >"$backup_file" 2>&1
 
 	# e.g. 'docker logs --timestamps --details --since 1692955416 asv-main > ...'
-	# which pulls entries since 2023-08-25T09:23:36.399165925Z (in UTC time)
-	# and adds UTC timestamp to each log entry (in addition local time added via log_config)
+	# which pulls entries since 2023-08-25T09:23:36.399165925Z (in UTC time;
+	# log entries also have local time added via log_config)
 
 	# Remove log if nothing was logged since last backup.
 	if [ ! -s "$backup_file" ]; then
 		rm -f "$backup_file"
+	else
+		printf 'Adding log increment %s\n' "$container.log.$now"
 	fi
+
 done
 
 #-----------------------------------------------------------------------
-# 3.  Do incremental backup of database dumps, log dumps, and the
-#     "uploads" directory in the asv-main container.
+# 3.  Copy new uploads.
 #-----------------------------------------------------------------------
 
-# Default rsync options.
-set -- --archive --omit-dir-times --rsh='docker exec -i'
+docker cp asv-main:/uploads/. "$backup_dir/uploads"
 
-# Be quiet if we're running non-interatively
-if [ -t 1 ] || "$be_verbose"; then
-	set -- "$@" --itemize-changes
-else
-	set -- "$@" --quiet
-fi
+#-----------------------------------------------------------------------
+# Finish up
+#-----------------------------------------------------------------------
 
-if "$be_verbose"; then
-	set -- "$@" --verbose
-fi
-
-# Add --link-dest option if "$backup_dir/latest" exists.
-if [ -d "$backup_dir/latest" ]; then
-	set -- "$@" --link-dest="$backup_dir/latest/"
-fi
-
-# Note: No slash at the end of pathnames here.
-for source_dir in "$topdir/db-backup" asv-main:/uploads "$topdir/log-backup"
-do
-	rsync "$@" "$source_dir" "$target_dir"
-done
-
-# (Re-)create "$backup_dir/latest" symbolic link.
-rm -f "$backup_dir/latest"
-ln -s "$(basename "$target_dir")" "$backup_dir/latest"
+# Replace empty file used for timestamp and quick backup check
+rm -f "$backup_dir/latest_backup"*
+touch "$backup_dir/latest_backup_$now"
