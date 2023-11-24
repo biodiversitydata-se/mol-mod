@@ -36,6 +36,12 @@ h2 {
 }
 
 /* RESULT TABLES */
+/* Avoid colliding 'Showing x to y of z' with pagination box*/
+.dataTables_paginate {
+    float: right;
+    margin: 0;
+}
+
 /* Adjust Query sequence ID column to better fit table on page */
 .qacc {
     word-wrap: break-word;
