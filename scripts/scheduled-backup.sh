@@ -164,7 +164,13 @@ done
 # 3.  Copy new uploads.
 #-----------------------------------------------------------------------
 
-docker cp asv-main:/uploads/. "$backup_dir/uploads"
+# Copy new uploads
+for file in $(docker exec asv-main ls /uploads); do
+    if [ ! -e "$backup_dir/uploads/$file" ]; then
+        echo "* Adding new upload: $file"
+        docker cp "asv-main:/uploads/$file" "$backup_dir/uploads"
+    fi
+done
 
 #-----------------------------------------------------------------------
 # Finish up
