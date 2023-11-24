@@ -144,9 +144,9 @@ Alternatively, use a Makefile rule, e.g.:
 
 Import includes some rudimentary validation (see e.g. regular expressions in *./molmod/importer/data-mapping.json*), but this should be improved in the future.
 
-After importing, and publishing a dataset in the Bioatlas, you need change the *in_bioatlas* property to *true*, for data to be included in BLAST, filter search and About stats:
+After importing, and publishing a dataset in the Bioatlas, you need change the *in_bioatlas* property to *true*, for data to be included in BLAST, filter search and About stats. You also need to add Bioatlas and IPT resource IDs, for the Download page to work.
 ```
-  $ make status pid=17 status=1 ruid=dr15
+  $ make status pid=11 status=1 ruid=dr188 ipt=kth-2013-baltic-18s
 ```
 Also rebuild the BLAST database (See *BLAST-database generation* below).
 
