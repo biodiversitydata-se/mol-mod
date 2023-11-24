@@ -107,7 +107,7 @@ else
     FLAGS+=( -n public --data-only )
   fi
 
-  printf 'Adding database dump "%s.%s"\n' "$BASE-data_$TIMESTAMP.sql" "$FORMAT"
+  printf '* Adding database dump: "%s.%s"\n' "$BASE-data_$TIMESTAMP.sql" "$FORMAT"
   docker exec "$CONTAINER" \
     pg_dump "${FLAGS[@]}" --format="$FORMAT" \
       -n "$PGRST_DB_SCHEMA" >"$FILE.$FORMAT"

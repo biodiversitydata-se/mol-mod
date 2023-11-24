@@ -155,7 +155,7 @@ for container in $containers; do
 	if [ ! -s "$backup_file" ]; then
 		rm -f "$backup_file"
 	else
-		printf 'Adding log increment %s\n' "$container.log.$now"
+		printf '* Adding log increment: %s\n' "$container.log.$now"
 	fi
 
 done
