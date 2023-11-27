@@ -10,8 +10,5 @@ WORKDIR /app
 
 RUN pip3 install -r requirements.txt
 
-RUN apt-get update
-RUN apt-get -y install rsync # Used in backup script
-
 ENV RUN_ENV="development"
 CMD ["python3", "wsgi.py"]

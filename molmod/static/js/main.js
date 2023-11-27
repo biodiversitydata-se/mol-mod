@@ -421,6 +421,7 @@ function makeResultTbl(url, columns) {
             // Include CSRF-token in POST
             data: function () { return $("#sform").serialize(); }
         },
+        pagingType: 'numbers',
         columns : columns,
         processing: true, // Show 'Loading' indicator
         order: [[2, 'asc']], // Required for non-orderable col 0
