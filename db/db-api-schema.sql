@@ -121,23 +121,7 @@ SELECT ds.pid AS dataset_pid,
     ta.identification_references AS "identificationReferences",
     concat_ws(' '::text, ta.annotation_algorithm, 'annotation against', ta.reference_db::text || ';'::text, 'confidence at lowest specified (ASV portal) taxon:', ta.annotation_confidence) AS "identificationRemarks",
     (('By data provider: '::text || oc.previous_identifications::text) || '; By ASV portal: '::text) || concat_ws('|'::text, ta.kingdom, ta.phylum, ta.oorder, ta.class, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS "previousIdentifications",
-    row_to_json(( SELECT d.*::record AS d
-           FROM ( SELECT calc.size AS "sampleSizeValue",
-                oc.organism_quantity AS "organismQuantity",
-                mixs.sop || ' ' AS sop,
-                mixs.seq_meth,
-                mixs.pcr_primer_name_forward,
-                mixs.pcr_primer_forward,
-                mixs.pcr_primer_name_reverse,
-                mixs.pcr_primer_reverse,
-                mixs.target_gene,
-                mixs.target_subfragment,
-                mixs.denoising_appr,
-                mixs.lib_layout,
-                asv.asv_sequence AS "DNA_sequence",
-                mixs.env_broad_scale,
-                mixs.env_local_scale,
-                mixs.env_medium) d)) AS "dynamicProperties"
+    '' AS "dynamicProperties"
 FROM :data_schema.sampling_event se
     JOIN :data_schema.occurrence oc ON oc.event_pid = se.pid
     JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid
