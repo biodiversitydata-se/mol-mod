@@ -9,7 +9,7 @@ import re
 from flask import current_app as APP
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField
-from wtforms import (BooleanField, IntegerField, SelectMultipleField,
+from wtforms import (IntegerField, SelectMultipleField,
                      SubmitField, TextAreaField, ValidationError)
 
 DEFAULT_BLAST_GENE = """>test-seq-1
@@ -128,7 +128,6 @@ class BlastSearchForm(FlaskForm):
 
 
 class BlastResultForm(FlaskForm):
-    asv_id = BooleanField(u'asv_id')
     batch_url = APP.config['BATCH_SEARCH_URL']
     redirect_url = APP.config['REDIRECT_URL']
 
@@ -149,7 +148,6 @@ class FilterSearchForm(FlaskForm):
 
 
 class FilterResultForm(FlaskForm):
-    asv_id = BooleanField(u'asv_id')
     batch_url = APP.config['BATCH_SEARCH_URL']
     redirect_url = APP.config['REDIRECT_URL']
 
@@ -160,5 +158,4 @@ class UploadForm(FlaskForm):
 
 
 class DownloadForm(FlaskForm):
-    ipt_resource_id = BooleanField(u'ipt_resource_id')
     download = SubmitField(u'Download')
