@@ -159,7 +159,7 @@ def insert_common(data: pd.DataFrame, mapping: dict, db_cursor: DictCursor,
 
         try:
             logging.debug("query: %s", query)
-            psycopg2.extras.execute_values (
+            psycopg2.extras.execute_values(
                 db_cursor, query, values
             )
         except psycopg2.Error as err:
