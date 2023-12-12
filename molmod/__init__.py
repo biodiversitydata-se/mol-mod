@@ -63,7 +63,8 @@ def create_app():
         else:
             user = None
             firstname = None
-
+        # Pass global variables (used by multiple pages)
+        # See forms.py for page-specific variables
         return dict(
             sbdi_contact_page=CONFIG.SBDI_CONTACT_PAGE,
             sbdi_start_page=CONFIG.SBDI_START_PAGE,
