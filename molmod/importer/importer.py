@@ -812,8 +812,8 @@ if __name__ == '__main__':
 
     ARGS = PARSER.parse_args()
 
-    # Set log level based on ./scripts/import_excel argument
-    # E.g: --v means log level = 10(3-2) = 10
+    # Set log level based on ./scripts/import_excel argument (see Makefile)
+    # E.g: -v means log level = 10(3-1) = 20 (Info); -vv -> 10 (Debug)
     logging.basicConfig(level=(10*(ARGS.quiet - ARGS.verbose)))
 
     # Check if there is streaming data available from stdin
