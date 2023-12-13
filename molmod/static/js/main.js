@@ -77,7 +77,7 @@ $(document).ready(function() {
             // Define columns for download table
             var columns = [
                 { data: null, orderable: false, defaultContent: '', className: 'select-checkbox' },
-                { data: 'annotation_target'},
+                { data: 'annotation_target', className: 'gene'},
                 { data: 'institution_code'},
                 { data : null,
                   render : function ( data, type, row ) {
