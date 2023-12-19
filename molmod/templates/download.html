@@ -47,14 +47,14 @@ Download data
                             <td>{{ row.institution_code }}</td>
                             <td class="ds">
                             {% if row.ipt_resource_id %}
-                                <a href="{{ ipt_base_url }}/resource?r={{ row.ipt_resource_id }}" target="_blank">{{ row.dataset_name }}</a>
+                                <a href="{{ row.ipt_link }}" target="_blank">{{ row.dataset_name }}</a>
                             {% else %}
                                 {{ row.dataset_name }}
                             {% endif %}
                             </td>
                             <td class="dl-link">
-                            {% if row.zip_exported %}
-                                <a href="{{ url_for('main_bp.files', sub='ds', filename=row.dataset_id+'.zip') }}">{{ row.dataset_id }}</a>
+                            {% if row.zip_link %}
+                                <a href="{{ row.zip_link }}">{{ row.dataset_id }}</a>
                             {% else %}
                                 {{ row.dataset_id }}
                             {% endif %}

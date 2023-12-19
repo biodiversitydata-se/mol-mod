@@ -3,12 +3,10 @@ import os
 from datetime import datetime as dt
 
 import requests
-from flask import Blueprint, abort
-from flask import current_app as APP
-from flask import render_template, request, send_from_directory, session
+from flask import Blueprint, abort, current_app as APP, render_template
+from flask import request, send_from_directory, session, url_for
 from flask_mail import Message
-from forms import UploadForm
-from forms import DownloadForm
+from forms import DownloadForm, UploadForm
 from werkzeug.utils import secure_filename
 
 from config import get_config
@@ -197,13 +195,14 @@ def list_datasets() -> dict:
                 msg = f'Dataset {ds["dataset_id"]} has no IPT resource ID'
                 APP.logger.error(msg)
             # Only add Download link if zip exists
-            zip_path = os.path.join('molmod', 'static', 'downloads', 'ds',
+            zip_path = os.path.join('molmod/static/downloads/ds',
                                     f'{ds["dataset_id"]}.zip')
             if os.path.isfile(zip_path):
-                ds['zip_exported'] = True
+                ds['zip_link'] = url_for('main_bp.files', sub='ds',
+                                         filename=f"{ds['dataset_id']}.zip",
+                                         _external=True)
             else:
                 APP.logger.error(f'Zip file does not exist: {zip_path}')
-                ds['zip_exported'] = False
 
         # APP.logger.debug(results)
         return results
