@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 """
+The data exporter reads data from event-core-like views in the database,
+saves these as tsv files in dataset folders, which are then zipped up and
+compressed. The script is executed inside a running asv-main container, using
+the export_archive.py wrapper.
 """
 
 import logging
@@ -45,6 +49,9 @@ def connect_db(pass_file: str = '/run/secrets/postgres_pass'):
 
 
 def get_dataset_id(cursor, pid):
+    """
+    Retrieves dataset_id corresponding to any provided dataset.pid argument.
+    """
     sql = f"SELECT dataset_id FROM dataset WHERE dataset.pid = {pid}"
     cursor.execute(sql)
     result = cursor.fetchone()
@@ -55,6 +62,10 @@ def get_dataset_id(cursor, pid):
 
 
 def export_datasets(pids: str):
+    """
+    Saves tsv data from a set of db views in database folders, which are then
+    zipped up and ccompressed.
+    """
     _, cursor = connect_db()
 
     if pids:
@@ -72,8 +83,7 @@ def export_datasets(pids: str):
             continue
         logging.info("Exporting dataset: %s", id)
 
-        dl_dir = os.path.join('molmod', 'static', 'downloads', 'ds')
-        dir = os.path.join(dl_dir, id)
+        dir = os.path.join('molmod/static/downloads/ds', id)
         os.makedirs(dir, exist_ok=True)
 
         try:
@@ -87,6 +97,7 @@ def export_datasets(pids: str):
                     cursor.copy_expert(cp, tsv)
 
             shutil.make_archive(dir, 'zip', dir)
+            # Drop source folder
             shutil.rmtree(dir)
 
             elapsed_time = time.time() - start_time
