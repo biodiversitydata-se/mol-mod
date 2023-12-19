@@ -193,7 +193,7 @@ def list_datasets() -> dict:
                                   + ds['ipt_resource_id'])
             else:
                 msg = f'Dataset {ds["dataset_id"]} has no IPT resource ID'
-                APP.logger.error(msg)
+                APP.logger.warning(msg)
             # Only add Download link if zip exists
             zip_path = os.path.join('molmod/static/downloads/ds',
                                     f'{ds["dataset_id"]}.zip')
@@ -202,7 +202,7 @@ def list_datasets() -> dict:
                                          filename=f"{ds['dataset_id']}.zip",
                                          _external=True)
             else:
-                APP.logger.error(f'Zip file does not exist: {zip_path}')
+                APP.logger.warning(f'Zip file does not exist: {zip_path}')
 
         # APP.logger.debug(results)
         return results
