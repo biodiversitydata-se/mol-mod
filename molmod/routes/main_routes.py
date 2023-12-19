@@ -142,12 +142,18 @@ def submit():
     return render_template('submit.html')
 
 
-@main_bp.route("/files/<filename>")
-def files(filename):
+@main_bp.route("/files/<sub>/<filename>")
+@main_bp.route("/files/<filename>", defaults={'sub': None})
+def files(sub, filename):
     """Downloads a file"""
-    dir = os.path.join('.', 'static', 'downloads')
+    if sub is not None:
+        dir = os.path.join('.', 'static', 'downloads', sub)
+    else:
+        dir = os.path.join('.', 'static', 'downloads')
+
     if not os.path.exists(dir):
         os.makedirs(dir)
+
     try:
         return send_from_directory(dir, filename, as_attachment=True)
     except FileNotFoundError:
@@ -158,11 +164,12 @@ def files(filename):
 @custom_login_required
 def download():
     """Lists available datasets"""
+    ds = list_datasets()
 
     # Create forms from classes in forms.py
-    rform = DownloadForm()
+    dlform = DownloadForm()
 
-    return render_template('download.html', rform=rform)
+    return render_template('download.html', dlform=dlform, rows=ds)
 
 
 @main_bp.route('/list_datasets', methods=['GET'])
@@ -181,18 +188,22 @@ def list_datasets() -> dict:
         APP.logger.error(f'API request for dataset list returned: {e}')
     else:
         results = json.loads(response.text)  # -> list of dicts
-        # Construct download link
         for ds in results:
-            try:
-                ds['ipt_download_url'] = (
-                    CONFIG.IPT_BASE_URL + '/archive.do?r=' +
-                    ds['ipt_resource_id']
-                )
-            # Make sure we notice if some dataset is missing IPT details
-            except (TypeError) as e:
-                APP.logger.error(f'Adding IPT resource ID returned: {e}' +
-                                 f', for dataset ID = {ds["dataset_id"]}')
-                abort(500)
+            # Only add IPT link if ID was provided
+            if ds['ipt_resource_id']:
+                ds['ipt_link'] = (CONFIG.IPT_BASE_URL + '/resource?r='
+                                  + ds['ipt_resource_id'])
+            else:
+                msg = f'Dataset {ds["dataset_id"]} has no IPT resource ID'
+                APP.logger.error(msg)
+            # Only add Download link if zip exists
+            zip_path = os.path.join('molmod', 'static', 'downloads', 'ds',
+                                    f'{ds["dataset_id"]}.zip')
+            if os.path.isfile(zip_path):
+                ds['zip_exported'] = True
+            else:
+                APP.logger.error(f'Zip file does not exist: {zip_path}')
+                ds['zip_exported'] = False
 
         # APP.logger.debug(results)
-        return {"data": results}  # returns dict
+        return results
