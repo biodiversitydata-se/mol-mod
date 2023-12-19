@@ -30,6 +30,9 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(get_config())
 
+    # Show e.g. Kungsängen correctly in JSON
+    app.json.ensure_ascii = False
+
     # Add separate handler for werkzeug request/traffic info,
     # but set log level to same as for flask log
     werkzeug_log = logging.getLogger('werkzeug')
