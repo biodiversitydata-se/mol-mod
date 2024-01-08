@@ -15,6 +15,7 @@ import json  # If getting usr/pwd from file
 import sys
 import requests
 # import getpass  # If typing usr/pwd at prompt
+import re
 
 # Load credentials
 with open('.ipt.cred') as json_file:
@@ -53,8 +54,7 @@ session.post(login_url, data=payload)
 # Unsure how to check success, as login failure also returns 200 here
 
 login_check = 0
-published = []
-failed = []
+pub_info = []
 
 for r in resources:
     # Send publish request (assuming login was successful)
@@ -79,19 +79,31 @@ for r in resources:
             print(f'Login to {host_url} failed\n')
             sys.exit()
 
-    if 'success' in response.text:
-        published.append(r)
+    pattern = r'Publishing version #([\d.]+) of resource \S+ started'
+    match = re.search(pattern, response.text)
+    if match:
+        version = match.group(1)
+        pub_info.append({'resource_id': r['id'],
+                         'version': version,
+                         'status': 'Started'})
+        print(f'Starting republication of version {version} ' +
+              f"of resource {r['id']}")
     else:
-        failed.append(r)
+        epattern = r'<h1 class="pb-2 mb-0 pt-2 text-gbif-header.*?">(.*?)</h1>'
+        error = re.search(epattern, response.text, re.DOTALL).group(1).strip()
+        if (error == 'Publication'):
+            error = 'Already busy'
+        pub_info.append({'resource_id': r['id'],
+                         'version': None,
+                         'status': error})
+        print(f"Failed to start republication of resource {r['id']} " +
+              f'due to {error}')
 
-if len(published) > 0:
-    print('The following resources were successfully republished:')
-    for p in published:
-        print(p)
-    print()
+with open('pub_info.tsv', mode='w', newline='') as tsv_file:
+    cols = ['resource_id', 'version', 'status']
+    tsv_writer = csv.DictWriter(tsv_file, fieldnames=cols, delimiter='\t')
+    tsv_writer.writeheader()
+    tsv_writer.writerows(pub_info)
 
-if len(failed) > 0:
-    print('The following resources could not be republished:')
-    for f in failed:
-        print(f)
-    print()
+if len(pub_info) > 0:
+    print("Publication information written to 'pub_info.tsv'")
