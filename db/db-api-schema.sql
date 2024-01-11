@@ -474,16 +474,18 @@ CREATE OR REPLACE VIEW api.dl_asv
 AS
 WITH ds_asv AS (
     SELECT DISTINCT se.dataset_pid,
-        oc.asv_pid
+        oc.asv_pid, oc.asv_id_alias, oc.associated_sequences, oc.previous_identifications
     FROM occurrence oc
         JOIN sampling_event se ON oc.event_pid = se.pid
         JOIN taxon_annotation ta_1 ON oc.asv_pid = ta_1.asv_pid
         JOIN mixs ON se.pid = mixs.pid
-    WHERE ta_1.status::text = 'valid'::text AND ta_1.target_prediction = true
+    WHERE ta_1.status::text = 'valid'::text
+        AND ta_1.target_prediction = true
         AND ta_1.annotation_target::text = mixs.target_gene::text
 )
 SELECT ds_asv.dataset_pid,
     asv.asv_id AS "taxonID",
+    ds_asv.asv_id_alias AS asv_alias,
     asv.asv_sequence,
     ta.scientific_name AS "scientificName",
     ta.taxon_rank AS "taxonRank",
@@ -498,6 +500,8 @@ SELECT ds_asv.dataset_pid,
     ta.otu,
     ta.date_identified AS "dateIdentified",
     ta.identification_references AS "identificationReferences",
+    ds_asv.associated_sequences AS "associatedSequences",
+    ds_asv.previous_identifications::text AS "previousIdentifications",
     concat_ws(' '::text, ta.annotation_algorithm, 'annotation against', ta.reference_db::text || ';'::text, 'confidence at lowest specified (ASV portal) taxon:', ta.annotation_confidence) AS "identificationRemarks"
 FROM asv
     JOIN ds_asv ON asv.pid = ds_asv.asv_pid
@@ -510,15 +514,13 @@ AS
 SELECT se.dataset_pid,
     (ds.dataset_id::text || ':'::text) || se.event_id::text AS "eventID",
     asv.asv_id AS "taxonID",
-    oc.asv_id_alias::text AS "asv_alias",
-    oc.organism_quantity AS "organismQuantity",
-    oc.associated_sequences AS "associatedSequences",
-    oc.previous_identifications::text AS "previousIdentifications"
+    oc.organism_quantity AS "organismQuantity"
 FROM sampling_event se
     JOIN occurrence oc ON oc.event_pid = se.pid
     JOIN dataset ds ON ds.pid = se.dataset_pid
     JOIN asv ON asv.pid = oc.asv_pid
     JOIN mixs ON mixs.pid = se.pid
     JOIN taxon_annotation ta ON asv.pid = ta.asv_pid
-WHERE ta.status::text = 'valid'::text AND ta.target_prediction = true
-AND ta.annotation_target::text = mixs.target_gene::text;
+WHERE ta.status::text = 'valid'::text
+    AND ta.target_prediction = true
+    AND ta.annotation_target::text = mixs.target_gene::text;
