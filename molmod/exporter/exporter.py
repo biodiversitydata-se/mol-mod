@@ -8,6 +8,7 @@ the export_archive.py wrapper.
 
 import logging
 import os
+import requests
 import shutil
 import sys
 import time
@@ -48,17 +49,46 @@ def connect_db(pass_file: str = '/run/secrets/postgres_pass'):
     return connection, cursor
 
 
-def get_dataset_id(cursor, pid):
+def get_ds_meta(cursor, pid):
     """
     Retrieves dataset_id corresponding to any provided dataset.pid argument.
     """
-    sql = f"SELECT dataset_id FROM dataset WHERE dataset.pid = {pid}"
+    sql = ("SELECT dataset_id, ipt_resource_id FROM dataset "
+           f"WHERE dataset.pid = {pid}")
     cursor.execute(sql)
     result = cursor.fetchone()
     if result is None:
         logging.error(f"No dataset found for pid {pid}")
-        return None
-    return result[0]
+        return None, None
+    else:
+        dataset_id, ipt_resource_id = result
+        if ipt_resource_id is None:
+            logging.error(f"No ipt_resource_id found for pid {pid}")
+            return None, None
+        return dataset_id, ipt_resource_id
+
+
+def get_eml_file(ipt_resource_id, dir):
+    """
+    Downloads dataset metadata (eml.xlm file) from a given IPT resource,
+    and saves this to a given directory.
+    """
+    ipt_base_url = os.getenv('IPT_BASE_URL')
+    url = f'{ipt_base_url}/eml.do?r={ipt_resource_id}'
+    destination_path = os.path.join(dir, 'eml.xml')
+
+    # Simulate failure
+    # url = "https://httpbin.org/status/404"
+    # url = "https://httpbin.org/status/503"
+    response = requests.get(url)
+    if response.status_code == 200:
+        with open(destination_path, 'wb') as file:
+            file.write(response.content)
+        return True
+    else:
+        logging.error("Failed to download eml file. Status code: "
+                      f"{response.status_code}")
+        return False
 
 
 def export_datasets(pids: str):
@@ -78,14 +108,18 @@ def export_datasets(pids: str):
 
     for pid in pid_lst:
         start_time = time.time()
-        id = get_dataset_id(cursor, pid)
+        id, ipt_resource_id = get_ds_meta(cursor, pid)
         if id is None:
             continue
         logging.info("Exporting dataset: %s", id)
-
         dir = os.path.join('/app/exports', id)
         os.makedirs(dir, exist_ok=True)
 
+        # Get metadata file from IPT
+        if not get_eml_file(ipt_resource_id, dir):
+            shutil.rmtree(dir, ignore_errors=True)
+            continue
+        # Get data from db
         try:
             for view in ['event', 'emof', 'occurrence', 'asv']:
                 tsv_path = os.path.join(dir, f"{view}.tsv")
@@ -95,9 +129,7 @@ def export_datasets(pids: str):
                     cp = (f"COPY ({sql}) TO STDOUT "
                           f"WITH CSV DELIMITER E'\t' HEADER")
                     cursor.copy_expert(cp, tsv)
-
             shutil.make_archive(dir, 'zip', dir)
-            # Drop source folder
             shutil.rmtree(dir)
 
             elapsed_time = time.time() - start_time
