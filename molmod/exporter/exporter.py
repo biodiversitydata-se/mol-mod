@@ -49,23 +49,27 @@ def connect_db(pass_file: str = '/run/secrets/postgres_pass'):
     return connection, cursor
 
 
-def get_ds_meta(cursor, pid):
+def get_dataset_ids(cursor, pid):
     """
-    Retrieves dataset_id corresponding to any provided dataset.pid argument.
+    Retrieves dataset ID values (i.e. datasetID, drXXX and IPT resource)
+    corresponding to a provided pid (pk, integer) value.
     """
-    sql = ("SELECT dataset_id, ipt_resource_id FROM dataset "
-           f"WHERE dataset.pid = {pid}")
+    sql = ("SELECT dataset_id, ipt_resource_id, bioatlas_resource_uid "
+           f"FROM dataset WHERE dataset.pid = {pid}")
     cursor.execute(sql)
     result = cursor.fetchone()
     if result is None:
         logging.error(f"No dataset found for pid {pid}")
-        return None, None
+        return None, None, None
     else:
-        dataset_id, ipt_resource_id = result
-        if ipt_resource_id is None:
+        dataset_id, ipt_id, bioatlas_id = result
+        if ipt_id is None:
             logging.error(f"No ipt_resource_id found for pid {pid}")
-            return None, None
-        return dataset_id, ipt_resource_id
+            return None, None, None
+        if bioatlas_id is None:
+            logging.error(f"No bioatlas_resource_uid found for pid {pid}")
+            return None, None, None
+    return result
 
 
 def get_eml_file(ipt_resource_id, dir):
@@ -91,10 +95,51 @@ def get_eml_file(ipt_resource_id, dir):
         return False
 
 
+def make_readme(bioatlas_id, dir):
+    """
+    Requests key metadata values from Bioatlas API and adds these to template
+    to create README in provided directory.
+    """
+    url = 'https://collections.biodiversitydata.se/ws/citations'
+    headers = {
+        'accept': 'application/json',
+        'Content-Type': 'application/json'
+    }
+    response = requests.post(url, headers=headers, json=[bioatlas_id])
+    destination_path = os.path.join(dir, 'README.txt')
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    template_path = os.path.join(script_dir, 'readme-template.txt')
+
+    if response.status_code == 200:
+        data = response.json()[0]
+        if data is not None:
+            with open(template_path, 'r', encoding='utf-8') as readme:
+                template = readme.read()
+            # Replace [API data] with metadata
+            replacement = (
+                f"Dataset name: {data['name']}\n"
+                f"Citation: {data['citation']}\n"
+                f"Rights: {data['rights']}\n"
+                f"DOI: {data.get('DOI', '')}"
+            )
+            readme = template.replace('[API data]', replacement)
+            with open(destination_path, 'w', encoding='utf-8') as file:
+                file.write(readme)
+            return True
+        else:
+            logging.error(f"No metadata found for {bioatlas_id}")
+            return False
+    else:
+        logging.error(f"Bioatlas API request failed: {response.status_code}")
+        return False
+
+
 def export_datasets(pids: str):
     """
-    Saves tsv data from a set of db views in database folders, which are then
-    zipped up and ccompressed.
+    Exports data and metadata for a list of / all datasets to compressed files.
+    For each dataset, calls functions to get eml file from IPT, key metadata
+    from Bioatlas API, and data from DB.
     """
     _, cursor = connect_db()
 
@@ -108,18 +153,28 @@ def export_datasets(pids: str):
 
     for pid in pid_lst:
         start_time = time.time()
-        id, ipt_resource_id = get_ds_meta(cursor, pid)
-        if id is None:
+        dataset_id, ipt_id, bioatlas_id = get_dataset_ids(cursor, pid)
+        if dataset_id is None:
             continue
-        logging.info("Exporting dataset: %s", id)
-        dir = os.path.join('/app/exports', id)
+        logging.info("Exporting dataset: %s", dataset_id)
+
+        # Make clean dataset dir
+        dir = os.path.join('/app/exports', dataset_id)
+        if os.path.exists(dir):
+            shutil.rmtree(dir, ignore_errors=True)
         os.makedirs(dir, exist_ok=True)
 
-        # Get metadata file from IPT
-        if not get_eml_file(ipt_resource_id, dir):
+        # Get eml file from IPT
+        if not get_eml_file(ipt_id, dir):
             shutil.rmtree(dir, ignore_errors=True)
             continue
-        # Get data from db
+
+        # Add key metadata from Bioatlas to readme
+        if not make_readme(bioatlas_id, dir):
+            shutil.rmtree(dir, ignore_errors=True)
+            continue
+
+        # Get data files from DB
         try:
             for view in ['event', 'emof', 'occurrence', 'asv']:
                 tsv_path = os.path.join(dir, f"{view}.tsv")
@@ -135,7 +190,7 @@ def export_datasets(pids: str):
             elapsed_time = time.time() - start_time
             logging.info("Time required: %.2f seconds", elapsed_time)
         except Exception as e:
-            logging.error(f"Error exporting dataset {id}: {e}")
+            logging.error(f"Error exporting dataset {dataset_id}: {e}")
 
     cursor.close()
 
