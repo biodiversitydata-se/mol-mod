@@ -41,7 +41,8 @@ def custom_login_required(route_function):
             Sorry, we can't forward you to login, because the SBDI
             authentication service is not working at the moment.'''
             return render_template('error_generic.html',
-                                   name=hdr, description=msg)
+                                   name=hdr, description=msg,
+                                   drop_contact=True)
     return wrapper
 
 
