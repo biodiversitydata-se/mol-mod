@@ -68,7 +68,7 @@ def to_list(raw: str) -> list:
 
 
 class Config:
-    SECRET_KEY = secrets.token_hex()
+    SECRET_KEY = secrets.token_hex()  # Used e.g. in CSRF and session handling
     POSTGREST = get_env_variable('POSTGREST_HOST')
     BLAST_DB = get_env_variable('BLAST_DB')
     TESTING = False
