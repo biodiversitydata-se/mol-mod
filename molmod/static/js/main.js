@@ -504,6 +504,9 @@ function updateSeqLength() {
 }
 
 function checkExternalPage(url, callback) {
+// Returns true only if url service is available
+    // Simulate Service Unavailable
+    // url = "https://httpbin.org/status/503"
     $.ajax({
         type: 'HEAD',
         url: url,

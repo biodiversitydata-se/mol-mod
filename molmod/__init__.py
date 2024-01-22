@@ -31,6 +31,9 @@ def cas_server_available():
 
 
 def custom_login_required(route_function):
+    '''Adds CAS server status check to original Flask-CAS decorator, so that
+       users are only sent to CAS login if server is working properly.
+       Otherwise sends custom error message'''
     @wraps(route_function)
     def wrapper(*args, **kwargs):
         if cas_server_available():
