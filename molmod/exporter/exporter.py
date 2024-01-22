@@ -83,7 +83,7 @@ def export_datasets(pids: str):
             continue
         logging.info("Exporting dataset: %s", id)
 
-        dir = os.path.join('molmod/static/downloads/ds', id)
+        dir = os.path.join('/app/exports', id)
         os.makedirs(dir, exist_ok=True)
 
         try:

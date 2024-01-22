@@ -140,18 +140,24 @@ def submit():
     return render_template('submit.html')
 
 
-@main_bp.route("/files/<sub>/<filename>")
-@main_bp.route("/files/<filename>", defaults={'sub': None})
-def files(sub, filename):
-    """Downloads a file"""
-    if sub is not None:
-        dir = os.path.join('.', 'static', 'downloads', sub)
-    else:
-        dir = os.path.join('.', 'static', 'downloads')
+@main_bp.route("/files/<filename>")
+def files(filename):
+    """Downloads a file without requiring log-in"""
 
+    dir = os.path.join('.', 'static', 'downloads')
+    try:
+        return send_from_directory(dir, filename, as_attachment=True)
+    except FileNotFoundError:
+        abort(404)
+
+
+@main_bp.route("/datasets/<filename>")
+@custom_login_required
+def datasets(filename):
+    """Downloads a (log-in protected) dataset file"""
+    dir = '/app/exports'
     if not os.path.exists(dir):
         os.makedirs(dir)
-
     try:
         return send_from_directory(dir, filename, as_attachment=True)
     except FileNotFoundError:
@@ -195,10 +201,11 @@ def list_datasets() -> dict:
                 msg = f'Dataset {ds["dataset_id"]} has no IPT resource ID'
                 APP.logger.warning(msg)
             # Only add Download link if zip exists
-            zip_path = os.path.join('molmod/static/downloads/ds',
+            zip_path = os.path.join('/app/exports',
                                     f'{ds["dataset_id"]}.zip')
+
             if os.path.isfile(zip_path):
-                ds['zip_link'] = url_for('main_bp.files', sub='ds',
+                ds['zip_link'] = url_for('main_bp.datasets',
                                          filename=f"{ds['dataset_id']}.zip",
                                          _external=True)
             else:
