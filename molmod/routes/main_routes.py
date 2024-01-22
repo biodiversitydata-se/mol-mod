@@ -95,12 +95,12 @@ def upload():
     upload_time = dt.now().strftime("%y%m%d-%H%M%S")
     ext_filename = email + '_' + upload_time + '_' + filename
 
-    # Save file
     try:
-        f.save(os.path.join(CONFIG.UPLOAD_PATH, ext_filename))
+        dir = 'uploads'
+        os.makedirs(dir, exist_ok=True)
+        f.save(os.path.join(dir, ext_filename))
     except Exception as ex:
-        APP.logger.error(
-            f'File {ext_filename} could not be saved due to {ex}')
+        APP.logger.error(f'File {ext_filename} could not be saved due to {ex}')
     else:
         APP.logger.info(f'Successfully uploaded file {ext_filename}')
 

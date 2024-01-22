@@ -121,16 +121,29 @@ reannot:
 
 # List uploaded files
 uplist:
-	docker exec asv-main ls /uploads
+	docker exec asv-main ls /app/uploads
 
 # Copy file(s) to host folder
 # Apply to single file, if specified, or all files in dir
 cpfile := $(if $(file),$(file),.)
 # Example: make upcopy file=some-file.xlsx
 upcopy:
-	mkdir -p backups/uploads && docker cp asv-main:/uploads/$(cpfile) backups/uploads
+	mkdir -p backups/uploads && docker cp asv-main:/app/uploads/$(cpfile) backups/uploads
 
 # Delete files in container
 delfile := $(if $(file),$(file),*)
 updel:
-	docker exec asv-main sh -c 'rm -rf /uploads/$(delfile)'
+	docker exec asv-main sh -c 'rm -rf /app/uploads/$(delfile)'
+
+#
+# EXPORTS
+#
+
+# Export dataset(s) for download
+# Apply to specified dataset_pid(s), or to all datasets if argument is omitted
+# Or read dataset_pid(s) from file
+# Examples: make export ds="1 4"
+# Example: export ds=$(cat datasets.txt | tr '\n' ' ' | xargs)
+#          make export ds="$ds"
+export:
+	python3 ./scripts/export_archive.py -v $(if $(ds),--ds "$(ds)",)

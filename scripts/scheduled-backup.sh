@@ -165,10 +165,10 @@ done
 #-----------------------------------------------------------------------
 
 # Copy new uploads
-for file in $(docker exec asv-main ls /uploads); do
+for file in $(docker exec asv-main ls /app/uploads); do
     if [ ! -e "$backup_dir/uploads/$file" ]; then
         echo "* Adding new upload: $file"
-        docker cp "asv-main:/uploads/$file" "$backup_dir/uploads"
+        docker cp "asv-main:/app/uploads/$file" "$backup_dir/uploads"
     fi
 done
 

@@ -3,15 +3,13 @@ FROM python:3.10-bullseye
 RUN mkdir -p /app
 RUN mkdir -p /app/molmod
 RUN mkdir -p /app/log
+RUN mkdir -p /app/uploads
 
 COPY molmod/ /app/molmod/
 COPY log/ /app/log/
 COPY wsgi.py /app/
 COPY config/uwsgi-config.ini /app/
 RUN chown -R www-data:www-data /app/
-
-RUN mkdir -p /uploads
-RUN chown www-data:www-data /uploads
 
 WORKDIR /app
 

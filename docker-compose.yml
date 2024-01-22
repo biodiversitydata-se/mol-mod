@@ -107,7 +107,6 @@ services:
     volumes:
       # To make changes take immediate effect (using Flask reload in DEBUG mode)
       - ./:/app
-      - uploads:/uploads
     env_file:
       - .env
     secrets:
@@ -121,6 +120,3 @@ services:
       - 5000:5000
     depends_on:
       - postgrest
-
-volumes:
-  uploads:

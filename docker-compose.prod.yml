@@ -98,7 +98,7 @@ services:
     container_name: asv-main
     logging: *default-logging
     volumes:
-      - uploads:/uploads
+      - uploads:/app/uploads
     env_file:
       - .env
     secrets:
