@@ -1,17 +1,48 @@
 #!/usr/bin/env python3
 
 import json
-import logging
 import os
-from logging.config import dictConfig
+from functools import wraps
 
-from flask import Flask
-from flask_cas import CAS
+import logging
+from logging.config import dictConfig
+import requests
+from flask import Flask, render_template
+from flask_cas import CAS, login_required
 from flask_mail import Mail
 from flask_wtf.csrf import CSRFProtect
 
-import errors
 from config import get_config
+import errors
+
+CONFIG = get_config()
+
+
+def cas_server_available():
+    url = CONFIG.CAS_SERVER
+    # Simulate Service Unavailable
+    # url = "https://httpbin.org/status/503"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return True
+    else:
+        logging.error(f"CAS server not working: {response.status_code}")
+        return False
+
+
+def custom_login_required(route_function):
+    @wraps(route_function)
+    def wrapper(*args, **kwargs):
+        if cas_server_available():
+            return login_required(route_function)(*args, **kwargs)
+        else:
+            hdr = 'Authentication problem'
+            msg = '''
+            Sorry, we can't forward you to login, because the SBDI
+            authentication service is not working at the moment.'''
+            return render_template('error_generic.html',
+                                   name=hdr, description=msg)
+    return wrapper
 
 
 def create_app():
@@ -58,7 +89,6 @@ def create_app():
     # for dynamic display of menu items and email links
     @app.context_processor
     def inject_into_templates():
-        CONFIG = get_config()
         if cas.attributes:
             user = cas.username
             # To show in menu when user is logged in
