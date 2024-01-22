@@ -231,6 +231,14 @@ WHERE ta.status::text = 'valid'
 ```
 See */db/db-api-schema.sql*.
 
+### Maintenance mode
+To show/hide a 'Site Maintenance' message while keeping app running,
+toggle MAINTENANCE_MODE and restart app, using Makefile rule(s):
+```
+  $ make main [routes="blast filter"]
+  $ make nomain
+```
+
 ### Scaling of BLAST functionality
 If needed, the system could be scaled to have more blast instances, by modifying the compose command, e.g. like this:
 ```

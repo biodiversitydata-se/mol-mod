@@ -147,3 +147,18 @@ updel:
 #          make export ds="$ds"
 export:
 	python3 ./scripts/export_archive.py -v $(if $(ds),--ds "$(ds)",)
+
+#
+# Maintenance
+#
+
+# Toggle maintenance message.
+# (setting var directly in container (docker exec...), not useful as
+# change is reversed during container restart)
+# Example: make main routes="blast filter"
+main:
+	export MAINTENANCE_MODE=1 && \
+	$(if $(routes), export MAINTENANCE_ROUTES="$(routes)" && ) \
+	make up
+nomain:
+	export MAINTENANCE_MODE=0 && make up

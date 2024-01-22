@@ -5,9 +5,9 @@ import os
 from functools import wraps
 
 import logging
-from logging.config import dictConfig
 import requests
-from flask import Flask, render_template
+from logging.config import dictConfig
+from flask import Flask, render_template, request
 from flask_cas import CAS, login_required
 from flask_mail import Mail
 from flask_wtf.csrf import CSRFProtect
@@ -90,7 +90,7 @@ def create_app():
     app.mail = Mail(app)
 
     # Make some variables available in all templates,
-    # for dynamic display of menu items and email links
+    # e.g. for dynamic display of menu items and email links
     @app.context_processor
     def inject_into_templates():
         if cas.attributes:
@@ -114,6 +114,31 @@ def create_app():
             max_file_size=CONFIG.MAX_CONTENT_LENGTH,
             valid_extensions=', '.join(CONFIG.VALID_EXTENSIONS)
         )
+
+    @app.before_request
+    def flag_maintenance():
+        '''Determines whether requested route is affected by maintenance,
+           by checking two environment variables set using Makefile rules.'''
+        if CONFIG.MAINTENANCE_MODE == 1:
+            hdr = 'Site Maintenance'
+            route_str = CONFIG.MAINTENANCE_ROUTES
+            # If no routes have been specified, apply to all
+            if route_str == 'All':
+                msg = '''Sorry, the ASV portal is currently undergoing maintenance.
+                         Please come back later.'''
+                return render_template('error_generic.html',
+                                       name=hdr, description=msg,
+                                       drop_start=True)
+            # Otherwise limit to specified routes,
+            # e.g. when archives are being exported, or blast database is
+            # being rebuilt
+            else:
+                routes = ['/' + r for r in route_str.split()]
+                if request.path in routes:
+                    msg = '''Sorry, this page is currently undergoing maintenance.
+                             Please come back later.'''
+                    return render_template('error_generic.html',
+                                           name=hdr, description=msg)
 
     with app.app_context():
         from routes import blast_routes, filter_routes, main_routes
