@@ -8,20 +8,20 @@ Download data
 <div class='container'>
     <div>
         <h1>Download data</h1>
-        <p>Select and download complete ASV occurrence datasets, in Darwin Core (DwC) format, from the GBIF-Sweden
-            <a href="{{ ipt_base_url }}" rel="noreferrer noopener" target="_blank"> Integrated Publishing Toolkit (IPT)</a> website.
-            In addition to occurrence data, these datasets include contextual metadata that are not yet available from Bioatlas <i>record</i> downloads.
-            You can also inspect or download individual datasets via direct links,
-            or retrieve lists of datasets in <i>Excel</i> or <i>CSV</i> format.
+        <p>Select and download complete ASV occurrence datasets in a modified Darwin Core (DwC) format.
+            These files contain the same data as corresponding DwC archives served from the GBIF-Sweden
+            <a href="{{ ipt_base_url }}" rel="noreferrer noopener" target="_blank"> Integrated Publishing Toolkit (IPT)</a> website,
+            but in a more condensed format.
+            You can also inspect or download individual datasets via direct links, or retrieve lists of datasets in Excel or CSV format.
             You may have to actively allow downloads from our site in your browser preferences.
             Alternatively, you can access a <a href={{ url_for('main_bp.list_datasets') }}
-            target="_blank">JSON object</a> containing all the links, and fetch resources via command line or script.
-            Please contact <a href="{{ sbdi_contact_page }}">SBDI support</a> if you have any questions or suggestions.
+            target="_blank">list of datasets in JSON format</a> containing all the links, and fetch resources via command line or script.
+            <br>Please contact <a href="{{ sbdi_contact_page }}">SBDI support</a> if you have any questions or suggestions.
         </p>
 
-    {% if rform %}
-        <form action='' method='post' id='rform' name='rform'>
-            {{ rform.csrf_token }}
+    {% if dlform %}
+        <form action='' method='post' id='dlform' name='dlform'>
+            {{ dlform.csrf_token }}
             <div class='row'>
                 <div class='col-md-12'>
                     <hr>
@@ -31,10 +31,38 @@ Download data
                                 <th style="text-align: center"><input type="checkbox" id="select_all" /></th>
                                 <th>Target gene</th>
                                 <th>Institution</th>
-                                <th>Dataset name / IPT resource link</th>
+                                <th>Dataset name / IPT link</th>
                                 <th>Download link</th>
                             </tr>
                         </thead>
+
+                        {% if rows %}
+                        {% for row in rows %}
+
+                        <tr>
+                            <td></td>
+                            <td>{{ row.annotation_target }}</td>
+                            <td>{{ row.institution_code }}</td>
+                            <td class="ds">
+                            {% if row.ipt_resource_id %}
+                                <a href="{{ row.ipt_link }}" target="_blank">{{ row.dataset_name }}</a>
+                            {% else %}
+                                {{ row.dataset_name }}
+                            {% endif %}
+                            </td>
+                            <td class="dl-link">
+                            {% if row.zip_link %}
+                                <a href="{{ row.zip_link }}">{{ row.dataset_id }}</a>
+                            {% else %}
+                                {{ row.dataset_id }}
+                            {% endif %}
+                            </td>
+                        </tr>
+
+
+                        {% endfor %}
+                        {% endif %}
+
                     </table>
                 </div>
             </div>
@@ -43,7 +71,7 @@ Download data
             </div>
             <div class='row'>
                 <div class='col-md-12'>
-                     {{ rform.download(class='btn btn-primary', value='Download') }}
+                     {{ dlform.download(class='btn btn-primary', value='Download') }}
                 </div>
             </div>
         </form>

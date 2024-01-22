@@ -384,3 +384,143 @@ WHERE dataset_id IN (
     GROUP BY dataset_id
     HAVING COUNT(DISTINCT db) > 1 OR COUNT(DISTINCT algo) > 1
 );
+
+
+--
+-- Views for generating event-core-like dataset files,
+-- intended for download (after some processing)
+--
+
+CREATE OR REPLACE VIEW api.dl_event
+AS
+SELECT se.dataset_pid,
+    ds.ipt_resource_id,
+    (ds.dataset_id::text || ':'::text) || se.event_id::text AS "eventID",
+    ds.dataset_name AS "datasetName",
+    se.event_date AS "eventDate",
+    se.location_id AS "locationID",
+    se.verbatim_locality AS "verbatimLocality",
+    se.municipality,
+    se.country,
+    se.minimum_elevation_in_meters AS "minimumElevationInMeters",
+    se.maximum_elevation_in_meters AS "maximumElevationInMeters",
+    se.minimum_depth_in_meters AS "minimumDepthInMeters",
+    se.maximum_depth_in_meters AS "maximumDepthInMeters",
+    se.decimal_latitude AS "decimalLatitude",
+    se.decimal_longitude AS "decimalLongitude",
+    se.geodetic_datum AS "geodeticDatum",
+    se.coordinate_uncertainty_in_meters AS "coordinateUncertaintyInMeters",
+    se.data_generalizations AS "dataGeneralizations",
+    se.associated_sequences AS "associatedSequences",
+    se.recorded_by AS "recordedBy",
+    se.material_sample_id AS "materialSampleID",
+    se.institution_code AS "institutionCode",
+    se.institution_id AS "institutionID",
+    se.collection_code AS "collectionCode",
+    se.field_number AS "fieldNumber",
+    se.catalog_number AS "catalogNumber",
+    se.references_ AS "references",
+    calc.size AS "sampleSizeValue",
+    'DNA sequence reads'::text AS "sampleSizeUnit",
+    se.sampling_protocol AS "samplingProtocol",
+    mixs.sop,
+    mixs.pcr_primer_name_forward,
+    mixs.pcr_primer_name_reverse,
+    mixs.pcr_primer_forward,
+    mixs.pcr_primer_reverse,
+    mixs.target_gene,
+    mixs.target_subfragment,
+    mixs.lib_layout,
+    mixs.seq_meth,
+    mixs.denoising_appr,
+    mixs.env_broad_scale,
+    mixs.env_local_scale,
+    mixs.env_medium
+    FROM sampling_event se
+        JOIN dataset ds ON se.dataset_pid = ds.pid
+        JOIN mixs ON se.pid = mixs.pid
+        JOIN ( SELECT sum(oc_1.organism_quantity) AS size,
+            se_1.pid
+            FROM sampling_event se_1
+                JOIN occurrence oc_1 ON oc_1.event_pid = se_1.pid
+                JOIN asv asv_1 ON asv_1.pid = oc_1.asv_pid
+                JOIN mixs mixs_1 ON mixs_1.pid = se_1.pid
+                JOIN taxon_annotation ta_1 ON asv_1.pid = ta_1.asv_pid
+            WHERE ta_1.target_prediction = true AND ta_1.annotation_target::text = mixs_1.target_gene::text
+            GROUP BY se_1.pid) calc ON se.pid = calc.pid;
+
+
+CREATE OR REPLACE VIEW api.dl_emof
+AS
+SELECT se.dataset_pid,
+    (ds.dataset_id::text || ':'::text) || se.event_id::text AS "eventID",
+    emof.measurement_type AS "measurementType",
+    emof.measurement_type_id AS "measurementTypeID",
+    emof.measurement_unit AS "measurementUnit",
+    emof.measurement_unit_id AS "measurementUnitID",
+    emof.measurement_value AS "measurementValue",
+    emof.measurement_value_id AS "measurementValueID",
+    emof.measurement_accuracy AS "measurementAccuracy",
+    emof.measurement_determined_date AS "measurementDeterminedDate",
+    emof.measurement_determined_by AS "measurementDeterminedBy",
+    emof.measurement_method AS "measurementMethod",
+    emof.measurement_remarks AS "measurementRemarks"
+FROM sampling_event se
+    JOIN emof ON emof.event_pid = se.pid
+    JOIN dataset ds ON ds.pid = se.dataset_pid;
+
+
+CREATE OR REPLACE VIEW api.dl_asv
+AS
+WITH ds_asv AS (
+    SELECT DISTINCT se.dataset_pid,
+        oc.asv_pid, oc.asv_id_alias, oc.associated_sequences, oc.previous_identifications
+    FROM occurrence oc
+        JOIN sampling_event se ON oc.event_pid = se.pid
+        JOIN taxon_annotation ta_1 ON oc.asv_pid = ta_1.asv_pid
+        JOIN mixs ON se.pid = mixs.pid
+    WHERE ta_1.status::text = 'valid'::text
+        AND ta_1.target_prediction = true
+        AND ta_1.annotation_target::text = mixs.target_gene::text
+)
+SELECT ds_asv.dataset_pid,
+    asv.asv_id AS "taxonID",
+    ds_asv.asv_id_alias AS asv_alias,
+    asv.asv_sequence,
+    ta.scientific_name AS "scientificName",
+    ta.taxon_rank AS "taxonRank",
+    ta.kingdom,
+    ta.phylum,
+    ta.oorder AS "order",
+    ta.class,
+    ta.family,
+    ta.genus,
+    ta.specific_epithet AS "specificEpithet",
+    ta.infraspecific_epithet AS "infraspecificEpithet",
+    ta.otu,
+    ta.date_identified AS "dateIdentified",
+    ta.identification_references AS "identificationReferences",
+    ds_asv.associated_sequences AS "associatedSequences",
+    ds_asv.previous_identifications::text AS "previousIdentifications",
+    concat_ws(' '::text, ta.annotation_algorithm, 'annotation against', ta.reference_db::text || ';'::text, 'confidence at lowest specified (ASV portal) taxon:', ta.annotation_confidence) AS "identificationRemarks"
+FROM asv
+    JOIN ds_asv ON asv.pid = ds_asv.asv_pid
+    JOIN taxon_annotation ta ON asv.pid = ta.asv_pid
+WHERE ta.status::text = 'valid'::text;
+
+
+CREATE OR REPLACE VIEW api.dl_occurrence
+AS
+SELECT se.dataset_pid,
+    (ds.dataset_id::text || ':'::text) || se.event_id::text AS "eventID",
+    asv.asv_id AS "taxonID",
+    oc.organism_quantity AS "organismQuantity"
+FROM sampling_event se
+    JOIN occurrence oc ON oc.event_pid = se.pid
+    JOIN dataset ds ON ds.pid = se.dataset_pid
+    JOIN asv ON asv.pid = oc.asv_pid
+    JOIN mixs ON mixs.pid = se.pid
+    JOIN taxon_annotation ta ON asv.pid = ta.asv_pid
+WHERE ta.status::text = 'valid'::text
+    AND ta.target_prediction = true
+    AND ta.annotation_target::text = mixs.target_gene::text;
