@@ -116,6 +116,8 @@ services:
       - PYTHONPATH=/app/molmod
       - FLASK_DEBUG=1
       - CAS_AFTER_LOGOUT=${HOST_URL:-${CAS_AFTER_LOGOUT}}
+      - MAINTENANCE_MODE=${MAINTENANCE_MODE:-0}
+      - MAINTENANCE_ROUTES=${MAINTENANCE_ROUTES:-All}
     ports:
       - 5000:5000
     depends_on:

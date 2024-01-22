@@ -9,14 +9,13 @@ Error
     <div>
         <br>
         <h2>{{name}}</h2>
-        <p>{{description}}
-        <!-- The administrator has been notified. Sorry for the inconvenience!-->
-        </p>
-        <p><a href="{{ url_for('main_bp.index') }}">Go to Start page</a></p>
+        <p>{{description}}</p>
+        {% if not drop_start %}
+            <p><a href="{{ url_for('main_bp.index') }}">Go to Start page</a></p>
+        {% endif %}
         {% if not drop_contact %}
             <p><a href="{{ sbdi_contact_page }}">Contact SBDI support</a></p>
         {% endif %}
-
     </div>
 </div>
 {% endblock body %}
