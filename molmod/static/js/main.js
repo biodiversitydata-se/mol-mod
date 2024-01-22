@@ -223,8 +223,10 @@ $(document).ready(function() {
                 }
             });
 
-            // Prepare ASV id:s for POST to Bioatlas
-            $('#rform').on('submit', function() {
+            // Prepare ASV id:s and POST to Bioatlas
+            $('#rform').on('submit', function(e) {
+                e.preventDefault();
+
                 // Get selected ASV IDs from table
                 var ids = $.map(dTbl.rows({selected: true}).data(), function (item) {
                     return item['asv_id']
@@ -238,11 +240,27 @@ $(document).ready(function() {
 
                 // Warn and abort if no selection has been made in table
                 if (!$('#raw_names').val()) {
-                    $('#dtbl_err_container').removeClass('hiddenElem');
                     $('#dtbl_err_container').html('Please, select at least one row. ');
+                    $('#dtbl_err_container').removeClass('hiddenElem');
                     $('.table tr td:first-child').addClass('visHlpElem');
                     return false;
                 }
+
+                // Simulate Bioatlas 503: Service Unavailable
+                // (batchUrl otherwise passed via <script> in template)
+                // batchUrl = 'https://httpbin.org/status/503';
+
+                // Check Bioatlas status before submission
+                checkExternalPage(batchUrl, function (isAvailable) {
+                    if (!isAvailable) {
+                        msg = 'Sorry, but the Bioatlas server is not responding right now. ' +
+                              'Please, try again later.'
+                        $('#dtbl_err_container').html(msg);
+                        $('#dtbl_err_container').removeClass('hiddenElem');
+                    } else {
+                        e.currentTarget.submit();
+                    }
+                });
             });
         }
 
@@ -483,4 +501,20 @@ function updateSeqLength() {
     // and shows this number above textarea
     var seqLength = $('#sequence_textarea').val().length;
     $('#sequence_count').text(seqLength + '/50000 characters');
+}
+
+function checkExternalPage(url, callback) {
+// Returns true only if url service is available
+    // Simulate Service Unavailable
+    // url = "https://httpbin.org/status/503"
+    $.ajax({
+        type: 'HEAD',
+        url: url,
+        success: function () {
+            callback(true);
+        },
+        error: function () {
+            callback(false);
+        }
+    });
 }

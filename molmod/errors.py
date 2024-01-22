@@ -18,7 +18,7 @@ def error_handler(error):
     # For other Exceptions, use general Server error info
     else:
         code = 500
-        description = ("<p>We encountered an error"
+        description = ("<p>We encountered an error "
                        "while trying to fulfill your request</p>")
         name = 'Internal Server Error'
 

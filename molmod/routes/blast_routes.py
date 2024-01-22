@@ -9,10 +9,10 @@ import requests
 from flask import Blueprint
 from flask import current_app as APP
 from flask import jsonify, render_template, request
-from flask_cas import login_required
 from forms import BlastResultForm, BlastSearchForm
 
 from config import get_config
+from molmod import custom_login_required
 
 CONFIG = get_config()
 
@@ -21,7 +21,7 @@ blast_bp = Blueprint('blast_bp', __name__,
 
 
 @blast_bp.route('/blast', methods=['GET', 'POST'])
-@login_required
+@custom_login_required
 def blast():
     """Displays both blast search and result forms. The result table is
        populated on submit via (DataTables) AJAX call to '/blast_run',
@@ -39,7 +39,7 @@ def blast():
 
 
 @blast_bp.route('/blast_run', methods=['POST'])
-@login_required
+@custom_login_required
 def blast_run():
     """
     Sends blast run request to one of the available blast workers, and then

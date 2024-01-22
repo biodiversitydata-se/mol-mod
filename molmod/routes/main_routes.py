@@ -6,13 +6,13 @@ import requests
 from flask import Blueprint, abort
 from flask import current_app as APP
 from flask import render_template, request, send_from_directory, session
-from flask_cas import login_required
 from flask_mail import Message
 from forms import UploadForm
 from forms import DownloadForm
 from werkzeug.utils import secure_filename
 
 from config import get_config
+from molmod import custom_login_required
 
 CONFIG = get_config()
 
@@ -51,7 +51,7 @@ def get_stats() -> dict:
 
 @main_bp.route('/upload', methods=['GET', 'POST'])
 # Redirect user to Bioatlas CAS login
-@login_required
+@custom_login_required
 def upload():
     """Checks whether logged-in user has required role (UPLOAD_ROLE) for file
        upload. Authorized users are sent to upload page; unauthorized users to
@@ -155,7 +155,7 @@ def files(filename):
 
 
 @main_bp.route("/download", methods=['GET'])
-@login_required
+@custom_login_required
 def download():
     """Lists available datasets"""
 
@@ -166,7 +166,7 @@ def download():
 
 
 @main_bp.route('/list_datasets', methods=['GET'])
-@login_required
+@custom_login_required
 def list_datasets() -> dict:
     """Composes API request for available datasets, based on data
        received in (DataTable) AJAX request, and returns dict
