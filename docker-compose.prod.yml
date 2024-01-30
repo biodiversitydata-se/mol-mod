@@ -1,4 +1,8 @@
 version: "3.8"
+# Container logging - saves logs of running/stopped (but not removed) containers!
+# (includes application logs - see /log/log_config_{environment}.json -
+# but also docker events & system information)
+# View with: docker logs <container_id_or_name>
 x-logging:
   &default-logging
   driver: "json-file"
