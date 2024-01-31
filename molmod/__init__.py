@@ -59,6 +59,10 @@ def create_app():
 
     # Load log config, and create log before flask app
     log_config = json.load(open(f'log/log_config_{environment}.json'))
+    # Write to bind mount in asv-main (keep dummy log in worker)
+    log_config["handlers"]["downloads"]["filename"] = "downloads/downloads.log"
+    # Don't forward to wsgi stream
+    log_config["loggers"]["downloads"]["propagate"] = False
     dictConfig(log_config)
 
     # Create flask app
@@ -73,10 +77,10 @@ def create_app():
     werkzeug_log = logging.getLogger('werkzeug')
     werkzeug_log.setLevel(logging.root.level)
 
-    # Note that if FLASK_DEBUG=1 (see compose file), Flask automatically sets
-    # log-level to DEBUG. To override this with level set in log config:
+    # # If FLASK_DEBUG=1 (see compose file), Flask automatically sets
+    # # log-level to DEBUG. To override this with level set in log config:
     # app.logger.setLevel(logging.root.level)
-    # To check actual level:
+    # # To check actual level:
     # actual = logging.getLevelName(app.logger.getEffectiveLevel())
     # print(f"Logger's actual level: {actual}")
 

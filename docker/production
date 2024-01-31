@@ -5,6 +5,7 @@ RUN mkdir -p /app/molmod
 RUN mkdir -p /app/log
 RUN mkdir -p /app/uploads
 RUN mkdir -p /app/exports
+RUN mkdir -p /app/downloads
 
 COPY molmod/ /app/molmod/
 COPY log/ /app/log/

@@ -6,6 +6,7 @@ the future.
 """
 
 import json
+# import logging  # See FLASK_DEBUG overriding below
 import os
 import subprocess
 from logging.config import dictConfig
@@ -21,13 +22,15 @@ environment = os.getenv('RUN_ENV')
 if environment != 'production':
     environment = 'development'
 
-# Load log config, and create log before flask app
-# See note on log_config vs FLASK_DEBUG setting in __init__.py
+# Create log before app!
 log_config = json.load(open(f'log/log_config_{environment}.json'))
 dictConfig(log_config)
 
 APP = Flask(__name__)
 APP.jobs = 0
+
+# # See note on log_config vs FLASK_DEBUG setting in __init__.py
+# APP.logger.setLevel(logging.root.level)
 
 
 def unlist(value):

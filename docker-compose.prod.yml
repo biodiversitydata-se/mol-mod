@@ -105,6 +105,7 @@ services:
     volumes:
       - uploads:/app/uploads
       - exports:/app/exports
+      - ./downloads:/app/downloads  # Used in logging only
     env_file:
       - .env
     secrets:

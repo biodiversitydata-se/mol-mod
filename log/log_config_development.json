@@ -9,10 +9,21 @@
           "class": "logging.StreamHandler",
           "stream": "ext://flask.logging.wsgi_errors_stream",
           "formatter": "default"
+      },
+      "downloads": {
+          "class": "logging.FileHandler",
+          "filename": "dummy.log",
+          "formatter": "default"
       }
   },
   "root": {
       "level": "DEBUG",
       "handlers": ["wsgi"]
+  },
+  "loggers": {
+      "downloads": {
+          "level": "INFO",
+          "handlers": ["downloads"]
+      }
   }
 }
