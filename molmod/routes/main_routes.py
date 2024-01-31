@@ -1,10 +1,12 @@
 import json
+import logging
 import os
 from datetime import datetime as dt
 
 import requests
-from flask import Blueprint, abort, current_app as APP, render_template
-from flask import request, send_from_directory, session, url_for
+from flask import (
+    Blueprint, abort, current_app as APP, render_template,
+    request, send_from_directory, session, url_for)
 from flask_mail import Message
 from forms import DownloadForm, UploadForm
 from werkzeug.utils import secure_filename
@@ -155,6 +157,8 @@ def files(filename):
 @custom_login_required
 def datasets(filename):
     """Downloads a (log-in protected) dataset file"""
+    downloads_logger = logging.getLogger('downloads')
+    downloads_logger.info(f"Requested download of {filename}")
     dir = '/app/exports'
     if not os.path.exists(dir):
         os.makedirs(dir)
