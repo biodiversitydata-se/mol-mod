@@ -24,6 +24,8 @@ if environment != 'production':
 
 # Create log before app!
 log_config = json.load(open(f'log/log_config_{environment}.json'))
+# Avoid duplicated entries
+log_config["loggers"]["werkzeug"]["propagate"] = False
 dictConfig(log_config)
 
 APP = Flask(__name__)

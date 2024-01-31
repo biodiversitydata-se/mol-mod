@@ -24,6 +24,10 @@
       "downloads": {
           "level": "INFO",
           "handlers": ["downloads"]
+      },
+      "werkzeug": {
+          "level": "DEBUG",
+          "handlers": ["wsgi"]
       }
   }
 }
