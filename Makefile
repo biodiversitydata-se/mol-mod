@@ -40,6 +40,9 @@ logs:
 ps:
 	docker compose -f $(compose) ps
 
+psa:
+	docker compose -f $(compose) ps -a
+
 #
 # SECRETS
 #
@@ -51,12 +54,15 @@ secrets:
 # BACKUP & RESTORE
 #
 
-# Just make a dabase dump
-db-backup:
-	./scripts/database-backup.sh data
-# Make a full backup (db, logs & uploads)
+# Make full backup (db, logs & uploads)
 backup:
 	./scripts/scheduled-backup.sh
+# Just make db dump
+db-backup:
+	./scripts/database-backup.sh data
+# Make backup without db dump
+nbackup:
+	./scripts/scheduled-backup.sh -n
 
 # Restore from latest (or specified) db dump
 # Example: make restore (OR make restore file=some-db-dump.sql.tar)
