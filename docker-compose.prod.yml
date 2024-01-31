@@ -92,7 +92,7 @@ services:
       - BLAST_USAGE_REPORT=false
     volumes:
       - blast-db:/blastdbs
-      - ./fasta-exports:/worker/fasta-exports
+      - ./fasta-exports:/worker/fasta-exports  # Used in utility scripts only
 
   asv-main:
     restart: always
