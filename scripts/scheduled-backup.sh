@@ -161,20 +161,13 @@ done
 # 3.  Copy (overwrite) Downloads log
 #-----------------------------------------------------------------------
 
-# Copy full Downloads log from bind mount
-downloads_file="./downloads/downloads.log"
-if [ -f $downloads_file ]; then
-    cp "$downloads_file" "$backup_dir/downloads/downloads.log" && \
-	printf '* Adding downloads.log\n'
-else
-    printf 'Error: Download log file %s not found\n' "$downloads_file"
-fi
+printf '* Adding downloads.log\n'
+docker cp "asv-main:/app/downloads/downloads.log" "$backup_dir/downloads"
 
 #-----------------------------------------------------------------------
 # 4.  Copy new uploads.
 #-----------------------------------------------------------------------
 
-# Copy new uploads
 for file in $(docker exec asv-main ls /app/uploads); do
     if [ ! -e "$backup_dir/uploads/$file" ]; then
         echo "* Adding new upload: $file"
