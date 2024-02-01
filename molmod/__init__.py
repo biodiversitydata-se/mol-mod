@@ -59,11 +59,11 @@ def create_app():
 
     # Create log before flask app
     log_config = json.load(open(f'log/log_config_{environment}.json'))
-    # Write to bind mount in asv-main (keep dummy log in worker)
+    # Write to named volume in asv-main (keep dummy log in worker)
     log_config["handlers"]["downloads"]["filename"] = "downloads/downloads.log"
-    # Don't forward to wsgi stream
+    # Don't forward log entries to wsgi stream
     log_config["loggers"]["downloads"]["propagate"] = False
-    # Avoid duplicated entries
+    # Avoid duplicated entries from werkzeug
     log_config["loggers"]["werkzeug"]["propagate"] = False
     dictConfig(log_config)
 

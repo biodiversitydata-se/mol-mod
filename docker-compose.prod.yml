@@ -16,6 +16,7 @@ volumes:
   blast-db:
   uploads:
   exports:
+  downloads:
 
 secrets:
   postgres_pass:
@@ -105,7 +106,7 @@ services:
     volumes:
       - uploads:/app/uploads
       - exports:/app/exports
-      - ./downloads:/app/downloads  # Used in logging only
+      - downloads:/app/downloads
     env_file:
       - .env
     secrets:
