@@ -1,19 +1,22 @@
+__pycache__/
+~$*.xls*
 .DS_Store
 .Rhistory
+
 .env
-__pycache__/
 .secret.*
-~$*.xls*
-backups/db/*
-backups/db/db-dump-kth.sql.custom
-backups/imports
-backups/latest_backup*
-backups/logs
-backups/uploads
-downloads/
-exports/
-fasta-exports/
-postgres-data/
 scripts/ipt-update/.ipt.cred
 scripts/ipt-update/resources.tsv
+
+# Folders replaced by named volumes in prod
+downloads/
+exports/
+postgres-data/
 uploads/
+# Bind mount (also in prod)
+fasta-exports/
+
+backups/*
+backups/db/*
+!backups/db
+!backups/db/db-dump-kth.sql.custom  # Example data
