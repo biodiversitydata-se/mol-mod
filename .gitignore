@@ -13,7 +13,6 @@ downloads/
 exports/
 postgres-data/
 uploads/
-# Bind mount (also in prod)
 fasta-exports/
 
 backups/*

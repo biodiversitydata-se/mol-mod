@@ -17,6 +17,7 @@ volumes:
   uploads:
   exports:
   downloads:
+  fasta-exports:
 
 secrets:
   postgres_pass:
@@ -93,7 +94,6 @@ services:
       - BLAST_USAGE_REPORT=false
     volumes:
       - blast-db:/blastdbs
-      - ./fasta-exports:/worker/fasta-exports  # Used in utility scripts only
 
   asv-main:
     restart: always
@@ -107,6 +107,7 @@ services:
       - uploads:/app/uploads
       - exports:/app/exports
       - downloads:/app/downloads
+      - fasta-exports:/app/fasta-exports
     env_file:
       - .env
     secrets:
