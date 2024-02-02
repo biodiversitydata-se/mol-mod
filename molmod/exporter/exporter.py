@@ -210,8 +210,10 @@ if __name__ == '__main__':
 
     ARGS = PARSER.parse_args()
 
-    # Set log level based on ./scripts/import_excel argument (se also Makefile)
-    # E.g: -vv means log level = 10(3-2) = 10
+    # Set log level based on the -v and -q args added to the wrapper command
+    # E.g: -v means log level = 10(3-1) = 20 = INFO
+    # E.g: -vv means log level = 10(3-2) = 10 = DEBUG
+    # E.g: -qqvv means log level = 10(5-2) = 30 = WARNING
     logging.basicConfig(level=(10*(ARGS.quiet - ARGS.verbose)))
 
     export_datasets(ARGS.ds)
