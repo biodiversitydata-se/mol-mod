@@ -70,6 +70,8 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(get_config())
 
+    app.downloads_logger = logging.getLogger('downloads')
+
     # Show e.g. Kungsängen correctly in JSON
     app.json.ensure_ascii = False
 

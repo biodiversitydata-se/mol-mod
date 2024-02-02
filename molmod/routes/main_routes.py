@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 from datetime import datetime as dt
 
@@ -157,9 +156,8 @@ def files(filename):
 @custom_login_required
 def datasets(filename):
     """Downloads a (log-in protected) dataset file"""
-    downloads_logger = logging.getLogger('downloads')
-    downloads_logger.info(f"Requested download of {filename}")
     dir = '/app/exports'
+    APP.downloads_logger.info(f"Requested download of {filename}")
     try:
         return send_from_directory(dir, filename, as_attachment=True)
     except FileNotFoundError:
