@@ -160,8 +160,6 @@ def datasets(filename):
     downloads_logger = logging.getLogger('downloads')
     downloads_logger.info(f"Requested download of {filename}")
     dir = '/app/exports'
-    if not os.path.exists(dir):
-        os.makedirs(dir)
     try:
         return send_from_directory(dir, filename, as_attachment=True)
     except FileNotFoundError:
