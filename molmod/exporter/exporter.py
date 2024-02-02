@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-The data exporter reads data from event-core-like views in the database,
-saves these as tsv files in dataset folders, which are then zipped up and
-compressed. The script is executed inside a running asv-main container, using
-the export_archive.py wrapper.
+This script is executed inside a running asv-main container, using the
+export_data.py wrapper. Depending on arguments added to the wrapper,
+the exporter either reads data from event-core-like DwC views and produces
+condensed dataset archives, or exports fasta files to be used in taxonomic
+reannotation.
 """
 
 import logging
@@ -12,6 +13,7 @@ import requests
 import shutil
 import sys
 import time
+from datetime import datetime as dt
 
 import psycopg2
 from psycopg2.extras import DictCursor
@@ -195,6 +197,34 @@ def export_datasets(pids: str):
     cursor.close()
 
 
+def create_output_fasta(ref: str = '', target: str = ''):
+    """
+    Creates a fasta file of all ASVs currently annotated with a specific
+    (version of a) reference database, e.g. 'UNITE:8.0'.
+    """
+
+    _, cursor = connect_db()
+
+    filename = 'export-' + dt.now().strftime("%y%m%d-%H%M%S")
+
+    # Create the fasta file
+    logging.info("Exporting fasta file: %s.fasta", filename)
+
+    sql = f"SELECT DISTINCT(a.asv_id), a.asv_sequence \
+           FROM public.taxon_annotation ta, public.asv a \
+           WHERE a.pid = ta.asv_pid \
+           AND split_part(reference_db, ' (', 1) = '{ref}' \
+           AND split_part(annotation_target, ' (', 1) = '{target}';"
+
+    dir = '/app/fasta-exports'
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    with open(f'{dir}/{filename}.fasta', 'w') as fasta:
+        cursor.execute(sql)
+        for asv_id, sequence in cursor.fetchall():
+            fasta.write('>%s\n%s\n' % (asv_id, sequence))
+
+
 if __name__ == '__main__':
 
     import argparse
@@ -203,6 +233,14 @@ if __name__ == '__main__':
 
     PARSER.add_argument('--ds', default='', type=str,
                         help="List of datasets to export, space-separated.")
+    PARSER.add_argument('--ref', default="",
+                        help="Reference database for filtering of ASVs in"
+                             "fasta export. Use to return all ASVs currently "
+                             "annotated with a specific db.")
+    PARSER.add_argument('--target', default="",
+                        help="Target gene for filtering of ASVs in"
+                             "fasta export. Use to return all ASVs derived "
+                             "from a specific target gene.")
     PARSER.add_argument('-v', '--verbose', action="count", default=0,
                         help="Increase logging verbosity (default: warning).")
     PARSER.add_argument('-q', '--quiet', action="count", default=3,
@@ -215,5 +253,8 @@ if __name__ == '__main__':
     # E.g: -vv means log level = 10(3-2) = 10 = DEBUG
     # E.g: -qqvv means log level = 10(5-2) = 30 = WARNING
     logging.basicConfig(level=(10*(ARGS.quiet - ARGS.verbose)))
-
-    export_datasets(ARGS.ds)
+    # If a reference database is given, just export a fasta file
+    if ARGS.ref or ARGS.target:
+        create_output_fasta(ARGS.ref, ARGS.target)
+    else:
+        export_datasets(ARGS.ds)
