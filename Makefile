@@ -70,7 +70,7 @@ restore:
 	./scripts/database-backup.sh restore $(file)
 
 #
-# BLAST & FASTA
+# BLAST
 #
 
 # Build blastdb from datasets with in_bioatlas = true
@@ -81,14 +81,6 @@ restore:
 blastdb:
 	$(eval worker=$(shell docker ps --format '{{.Names}}' | grep -E blast.*1))
 	python3 ./scripts/build_blast_db.py --container ${worker} -v
-
-# Export a fasta file to use in annotation update, filtering ASVs on target
-# gene and (acronym part of) reference db.
-# Example: make fasta ref="SBDI-GTDB-R07-RS207-1" target="16S rRNA"
-fasta:
-	$(eval worker=$(shell docker ps --format '{{.Names}}' | grep -E blast.*1))
-	python3 ./scripts/build_blast_db.py --ref '$(ref)' --target '$(target)' --container ${worker} -v
-
 
 #
 # DATA MANIPULATION
@@ -122,27 +114,53 @@ reannot:
 	./scripts/update-annotation.sh $(file) && make stats
 
 #
+# VOLUME FILE MANAGEMENT - GENERAL
+#
+
+# Manage files in named volumes
+# Set vol=[uploads|exports|fasta-exports] or see lazy options further down
+
+# List files
+# Example: make flist vol=uploads
+flist:
+	docker exec asv-main ls /app/$(vol)
+
+# Copy file(s) to host
+# Apply to single file, if specified, or all files in dir
+cpfile := $(if $(file),$(file),.)
+# Example: make fcopy vol=uploads [file=some-file.xlsx]
+fcopy:
+	mkdir -p $(vol) && docker cp asv-main:/app/$(vol)/$(cpfile) $(vol)
+
+# Delete file(s) in container
+delfile := $(if $(file),$(file),*)
+# Example: make fdel vol=uploads [file=some-file.xlsx]
+fdel:
+	docker exec asv-main sh -c 'rm -rf /app/$(vol)/$(delfile)'
+
+#
 # UPLOADS
 #
 
-# List uploaded files
+# List files
 uplist:
-	docker exec asv-main ls /app/uploads
+	export vol=uploads && make flist
 
-# Copy file(s) to host folder
+# Copy file(s) to host
 # Apply to single file, if specified, or all files in dir
 cpfile := $(if $(file),$(file),.)
-# Example: make upcopy file=some-file.xlsx
+# Example: make facopy [file=export-240202-114802.fasta]
 upcopy:
-	mkdir -p backups/uploads && docker cp asv-main:/app/uploads/$(cpfile) backups/uploads
+	export vol=uploads file=$(cpfile) && make fcopy
 
-# Delete files in container
+# Delete file(s) in container
 delfile := $(if $(file),$(file),*)
+# Example: make exdel [file=export-240202-114802.fasta]
 updel:
-	docker exec asv-main sh -c 'rm -rf /app/uploads/$(delfile)'
+	export vol=uploads file=$(delfile) && make fdel
 
 #
-# EXPORTS
+# DATASET-EXPORTS
 #
 
 # Export dataset(s) for download
@@ -152,10 +170,54 @@ updel:
 # Example: export ds=$(cat datasets.txt | tr '\n' ' ' | xargs)
 #          make export ds="$ds"
 export:
-	python3 ./scripts/export_archive.py -v $(if $(ds),--ds "$(ds)",)
+	python3 ./scripts/export_data.py -v $(if $(ds),--ds "$(ds)",)
+
+# List files
+exlist:
+	export vol=exports && make flist
+
+# Copy file(s) to host
+# Apply to single file, if specified, or all files in dir
+cpfile := $(if $(file),$(file),.)
+# Example: make excopy [file=GU-2022-Wallhamn-18S.zip]
+excopy:
+	export vol=exports file=$(cpfile) && make fcopy
+
+# Delete file(s) in container
+delfile := $(if $(file),$(file),*)
+# Example: make exdel [file=GU-2022-Wallhamn-18S.zip]
+exdel:
+	export vol=exports file=$(delfile) && make fdel
 
 #
-# Maintenance
+# FASTA-EXPORTS
+#
+
+# Export a fasta file to use in annotation update, filtering ASVs on target
+# gene and (acronym part of) reference db.
+# Example: make fasta ref="SBDI-GTDB-R07-RS207-1" target="16S rRNA"
+fasta:
+	python3 ./scripts/export_data.py -v --ref '$(ref)' --target '$(target)'
+
+# List files
+falist:
+	export vol=fasta-exports && make flist
+
+# Copy file(s) to host
+# Apply to single file, if specified, or all files in dir
+cpfile := $(if $(file),$(file),.)
+# Example: make facopy [file=export-240202-114802.fasta]
+facopy:
+	export vol=fasta-exports file=$(cpfile) && make fcopy
+
+# Delete file(s) in container
+delfile := $(if $(file),$(file),*)
+# Example: make exdel [file=export-240202-114802.fasta]
+fadel:
+	export vol=fasta-exports file=$(delfile) && make fdel
+
+#
+# MAINTENANCE
 #
 
 # Toggle maintenance message.
