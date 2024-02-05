@@ -95,7 +95,7 @@ dry-import:
 	python3 ./scripts/import_excel.py $(file) -v --dry-run
 
 # Update dataset status
-# Example: make status pid=11 status=1 ruid=dr188 ipt=kth-2013-baltic-18s
+# Example: make status pid=3 status=1 ruid=dr963 ipt=kth-2013-baltic-18s
 status:
 	python3 ./scripts/update_bas_status.py --pid $(pid) --status $(status) \
 		--ruid $(ruid) --ipt $(ipt) -v
