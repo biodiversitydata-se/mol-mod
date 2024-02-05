@@ -152,15 +152,16 @@ def files(filename):
         abort(404)
 
 
-@main_bp.route("/datasets/<filename>")
+@main_bp.route("/datasets/<filename>", methods=['GET'])
 @custom_login_required
 def datasets(filename):
     """Downloads a (log-in protected) dataset file"""
-    dir = '/app/exports'
     APP.downloads_logger.info(f"Requested download of {filename}")
+    dir = '/app/exports'
     try:
         return send_from_directory(dir, filename, as_attachment=True)
-    except FileNotFoundError:
+    except Exception as e:
+        APP.downloads_logger.error(f"Failed download of {filename} due to {e}")
         abort(404)
 
 
