@@ -198,6 +198,13 @@ exdel:
 # Example: make fasta ref="SBDI-GTDB-R07-RS207-1" target="16S rRNA"
 fasta:
 	python3 ./scripts/export_data.py -v --ref '$(ref)' --target '$(target)'
+# Handle 'make fasta export' typo:
+ifeq (fasta,$(filter fasta,$(MAKECMDGOALS)))
+  ifeq (export,$(filter export,$(MAKECMDGOALS)))
+    $(error "Don't mix 'make fasta' and 'make export', please")
+  endif
+endif
+
 
 # List files
 falist:
