@@ -237,3 +237,12 @@ main:
 	make up
 nomain:
 	export MAINTENANCE_MODE=0 && make up
+
+# In development
+dmain:
+	export MAINTENANCE_MODE=1 && \
+	$(if $(routes), export MAINTENANCE_ROUTES="$(routes)" && ) \
+	docker compose -f docker-compose.yml up -d
+dnomain:
+	export MAINTENANCE_MODE=0 && \
+	docker compose -f docker-compose.yml up -d
