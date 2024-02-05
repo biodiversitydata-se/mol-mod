@@ -6,10 +6,12 @@ __pycache__/
 .env
 .secret.*
 scripts/ipt-update/.ipt.cred
+scripts/ipt-update/pub_info.tsv
 scripts/ipt-update/resources.tsv
 
 # Folders replaced by named volumes in prod
 downloads/
+!molmod/static/downloads
 exports/
 postgres-data/
 uploads/

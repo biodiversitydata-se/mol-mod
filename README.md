@@ -37,7 +37,7 @@ If no secrets exist before, this will copy *config/email.conf.template* into *.s
 
 Then, start up services:
 ```
-  $ docker-compose up
+  $ docker compose up
 ```
 The development site should now be available at http://localhost:5000.
 
@@ -49,7 +49,7 @@ be used as such.
 
 To stop and remove containers as well as remove network and volumes:
 ```
-  $ docker-compose down -v
+  $ docker compose down -v
 ```
 You may also want to get rid of dangling images and associated volumes:
 ```
@@ -124,12 +124,12 @@ You can list uploaded files in the running asv-main container using a Makefile r
 It is also possible to copy a specific file, or the whole directory, to the host, using either of these commands:
 ```
   $ make upcopy
-  $ make upcopy file=some-file.xlsx
+  $ make upcopy [file=some-file.xlsx]
 ```
 Analogously, to delete a single/all uploaded file(s) in a running container:
 ```
   $ make updel
-  $ make updel file=some-file.xlsx
+  $ make updel [file=some-file.xlsx]
 ```
 ### Data import
 Before uploaded files can be imported into the postgres database, you need to do some preprocessing, including adding *dataset* and *annotation* tabs/files, and possibly cleaning data. Use the standalone R script *./scripts/processing/asv-input-processing.R*, which can be customised and stored together with each uploaded file, for reproducibility. You can use the dummy data in *./scripts/processing/input* to test the R script. The (*.tar.gz*) output can then be imported into postgres, using a separate python script that executes *importer.py* inside the main container. Note that the importer accepts *.xlsx* files as well, but that the *.xlsx* output from our R script currently only works if you open and save it in Excel first. Check the *PARSER.add_argument* section in the importer for available arguments, which can be added to main function call like so:
@@ -146,7 +146,7 @@ Import includes some rudimentary validation (see e.g. regular expressions in *./
 
 After importing, and publishing a dataset in the Bioatlas, you need change the *in_bioatlas* property to *true*, for data to be included in BLAST, filter search and About stats. You also need to add Bioatlas and IPT resource IDs, for the Download page to work.
 ```
-  $ make status pid=11 status=1 ruid=dr188 ipt=kth-2013-baltic-18s
+  $ make status pid=3 status=1 ruid=dr963 ipt=kth-2013-baltic-18s
 ```
 Also rebuild the BLAST database (See *BLAST-database generation* below).
 
@@ -161,18 +161,19 @@ Generate a new BLAST database (including ASVs from datasets that have been impor
 ```
 
 ### Backups
-You can use a script to make a database dump and incremental backups of the container logs and uploaded files to host folders *db_backup*, *log_backup* and *uploads*, respectively:
+You can use a script to make a database dump and incremental backups of the container logs and uploaded files to a backup directory on the host:
 ```
   $ ./scripts/scheduled-backup.sh
 ```
-The script also copies files to a joint backup folder that defaults to *[repos-path]/backups* (see script for details), and can be used to run from crontab (time-based job scheduler). Suggested crontab entry for twice-daily backups as 9 AM and 9 PM:
+The script can be used to run from crontab (time-based job scheduler). Suggested crontab entry for twice-daily backups as 9 AM and 9 PM:
 ```
-  0 9,21 * * * /opt/mol-mod/scripts/scheduled-backup.sh
+  0 9,21 * * * /some-path/mol-mod/scripts/scheduled-backup.sh
 ```
-There are two Makefile rules available to simplify backup:
+There are Makefile rules available to simplify backup:
 ```
-  make db-backup    # Database dump only
-  make backup       # Db, logs & uploads
+  make backup       # Full backup (db, logs & uploads)
+  make db-backup    # Just database
+  make nbackup      # Exclude database (scheduled-backup.sh -n)
 ```
 
 ### Data deletions
@@ -187,11 +188,13 @@ or:
 Both commands will bring up a menu with instructions for how to proceed with deletions. Remember to update status accordingly (see above).
 
 ### Taxonomic (re)annotation
-During the final step of data import, we automatically add a record in table taxon_annotation for every new(!) ASV in the dataset. This is the standard SBDI annotation that we also plan to update as reference databases and/or annotation algorithms develop. To *update* the annotation of all ASV:s currently annotated against a specific reference database, you should first export a fasta file with those ASVs, using e.g.:
+During the final step of data import, we automatically add a record in table taxon_annotation for every new(!) ASV in the dataset. This is the standard SBDI annotation that we also plan to update as reference databases and/or annotation algorithms develop. To *update* the annotation of all ASV:s from a target gene, currently annotated against a specific reference database, you should first export a fasta file with those ASVs, using e.g.:
 ```
-  $ make fasta ref=UNITE:8.0
+  $ make fasta ref="SBDI-GTDB-R07-RS207-1" target="16S rRNA"
 ```
-This can then be used as input to the [ampliseq pipeline](https://nf-co.re/ampliseq), and the output (saved as *.xlsx* or *.csv*) can then be fed into the database like so:
+List, copy, and delete FASTA files using commands similar to those used for file uploads. See Makefile for details.
+
+Fasta files can then be used as input to the [ampliseq pipeline](https://nf-co.re/ampliseq), and the output (saved as *.xlsx* or *.csv*) can then be fed into the database like so:
 ```
   $ make reannot file=/path/to/reannotation.xlsx
 ```
@@ -231,9 +234,17 @@ WHERE ta.status::text = 'valid'
 ```
 See */db/db-api-schema.sql*.
 
+### Dataset exports
+To export condensed DwC-like dataset archives (zips) and make these available in the Download page, use the following Makefile rule:
+```
+  $ make export             # All datasets
+  $ make export ds="1 4"    # Specific dataset (pid:s)
+```
+List, copy, and delete dataset export files using commands similar to those used for file uploads. See Makefile for details.
+
 ### Maintenance mode
 To show/hide a 'Site Maintenance' message while keeping app running,
-toggle MAINTENANCE_MODE and restart app, using Makefile rule(s):
+toggle MAINTENANCE_MODE and restart app, using Makefile rule(s; in production!):
 ```
   $ make main [routes="blast filter"]
   $ make nomain

@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """
+This is a wrapper script to run exporter.py inside a docker container.
+To see arguments that can be passed on to the exporter, run:
+docker exec -i asv-main molmod/exporter/exporter.py -h
 """
 
 if __name__ == '__main__':

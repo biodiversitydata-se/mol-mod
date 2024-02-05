@@ -41,9 +41,11 @@ def run_update(pid: int = 0, status: int = None, ruid: str = None,
             try:
                 logging.info("Updating Bioatlas metadata")
                 cursor.execute(sql)
-            except psycopg2.OperationalError as err:
-                logging.error("Could not update Bioatlas metadata")
-                logging.error(err)
+            except psycopg2.Error as err:
+                logging.error(f"Database error: {err}")
+                msg = "Rolling back changes. Please check data and try again"
+                logging.error(f"{msg}")
+                connection.rollback()
                 sys.exit(1)
 
     # Update materialized views

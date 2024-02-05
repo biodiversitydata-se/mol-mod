@@ -95,7 +95,7 @@ dry-import:
 	python3 ./scripts/import_excel.py $(file) -v --dry-run
 
 # Update dataset status
-# Example: make status pid=11 status=1 ruid=dr188 ipt=kth-2013-baltic-18s
+# Example: make status pid=3 status=1 ruid=dr963 ipt=kth-2013-baltic-18s
 status:
 	python3 ./scripts/update_bas_status.py --pid $(pid) --status $(status) \
 		--ruid $(ruid) --ipt $(ipt) -v
@@ -198,6 +198,13 @@ exdel:
 # Example: make fasta ref="SBDI-GTDB-R07-RS207-1" target="16S rRNA"
 fasta:
 	python3 ./scripts/export_data.py -v --ref '$(ref)' --target '$(target)'
+# Handle 'make fasta export' typo:
+ifeq (fasta,$(filter fasta,$(MAKECMDGOALS)))
+  ifeq (export,$(filter export,$(MAKECMDGOALS)))
+    $(error "Don't mix 'make fasta' and 'make export', please")
+  endif
+endif
+
 
 # List files
 falist:
@@ -230,3 +237,12 @@ main:
 	make up
 nomain:
 	export MAINTENANCE_MODE=0 && make up
+
+# In development
+dmain:
+	export MAINTENANCE_MODE=1 && \
+	$(if $(routes), export MAINTENANCE_ROUTES="$(routes)" && ) \
+	docker compose -f docker-compose.yml up -d
+dnomain:
+	export MAINTENANCE_MODE=0 && \
+	docker compose -f docker-compose.yml up -d
