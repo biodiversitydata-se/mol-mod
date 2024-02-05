@@ -7,6 +7,7 @@ __pycache__/
 .secret.*
 scripts/ipt-update/.ipt.cred
 scripts/ipt-update/resources.tsv
+scripts/ipt-update/pub_info.tsv
 
 backups/
 db/
