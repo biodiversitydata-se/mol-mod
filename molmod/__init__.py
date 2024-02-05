@@ -60,6 +60,9 @@ def create_app():
     # Create log before flask app
     log_config = json.load(open(f'log/log_config_{environment}.json'))
     # Write to named volume in asv-main (keep dummy log in worker)
+    dir = '/app/downloads'
+    if not os.path.exists(dir):
+        os.makedirs(dir)
     log_config["handlers"]["downloads"]["filename"] = "downloads/downloads.log"
     # Don't forward log entries to wsgi stream
     log_config["loggers"]["downloads"]["propagate"] = False
