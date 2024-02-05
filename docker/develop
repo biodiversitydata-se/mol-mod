@@ -3,9 +3,6 @@ FROM python:3.10-slim-bullseye
 RUN mkdir /app
 COPY /molmod/requirements.txt /app
 
-RUN mkdir -p /uploads
-RUN chown www-data:www-data /uploads
-
 WORKDIR /app
 
 RUN pip3 install -r requirements.txt

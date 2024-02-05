@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 """
 This file contains functions for building a blast database from ASVs in
-the postgres database, and for exporting fasta files for annotation updates.
-The script is executed inside a running blast-worker container using the
-build_blast_db.py wrapper.
+the postgres database. The script is executed inside a running blast-worker
+container using the build_blast_db.py wrapper.
 """
 
 import logging
 import os
 import subprocess
 import sys
-from datetime import datetime as dt
 
 import psycopg2
 from psycopg2.extras import DictCursor
@@ -133,33 +131,6 @@ def create_blast_db(filename: str, db_dir: str = '.'):
     connection.commit()
 
 
-def create_output_fasta(ref: str = '', target: str = ''):
-    """
-    Creates a fasta file of all ASVs currently annotated with a specific
-    (version of a) reference database, e.g. 'UNITE:8.0'. The file is saved to
-    bind-mounted directory 'fasta-exports' and can then be used as input to
-    the Ampliseq pipeline, as part of taxonomic reannotation procedures.
-    """
-
-    _, cursor = connect_db()
-
-    filename = 'export-' + dt.now().strftime("%y%m%d-%H%M%S")
-
-    # Create the fasta file
-    logging.info("Exporting fasta file: %s.fasta", filename)
-
-    sql = f"SELECT DISTINCT(a.asv_id), a.asv_sequence \
-           FROM public.taxon_annotation ta, public.asv a \
-           WHERE a.pid = ta.asv_pid \
-           AND split_part(reference_db, ' (', 1) = '{ref}' \
-           AND split_part(annotation_target, ' (', 1) = '{target}';"
-
-    with open(f'/worker/fasta-exports/{filename}.fasta', 'w') as fasta:
-        cursor.execute(sql)
-        for asv_id, sequence in cursor.fetchall():
-            fasta.write('>%s\n%s\n' % (asv_id, sequence))
-
-
 if __name__ == '__main__':
 
     import argparse
@@ -170,14 +141,6 @@ if __name__ == '__main__':
                         help="Directory to store database files in.")
     PARSER.add_argument('--filename', default="asvdb",
                         help="Filename prefix for database files.")
-    PARSER.add_argument('--ref', default="",
-                        help="Reference database for filtering of ASVs in"
-                             "fasta export. Use to return all ASVs currently "
-                             "annotated with a specific db.")
-    PARSER.add_argument('--target', default="",
-                        help="Target gene for filtering of ASVs in"
-                             "fasta export. Use to return all ASVs derived "
-                             "from a specific target gene.")
     PARSER.add_argument('-v', '--verbose', action="count", default=0,
                         help="Increase logging verbosity (default: warning).")
     PARSER.add_argument('-q', '--quiet', action="count", default=3,
@@ -185,14 +148,10 @@ if __name__ == '__main__':
 
     ARGS = PARSER.parse_args()
 
-    # Set log level based on the -v and -q args
+    # Set log level based on the -v and -q args added to the wrapper command
     # E.g: -v means log level = 10(3-1) = 20 = INFO
     # E.g: -vv means log level = 10(3-2) = 10 = DEBUG
     # E.g: -qqvv means log level = 10(5-2) = 30 = WARNING
     logging.basicConfig(level=(10*(ARGS.quiet - ARGS.verbose)))
-    # If a reference database is given, just export a fasta file
-    if ARGS.ref or ARGS.target:
-        create_output_fasta(ARGS.ref, ARGS.target)
     # Build a new blast database
-    else:
-        create_blast_db(ARGS.filename, ARGS.db_dir)
+    create_blast_db(ARGS.filename, ARGS.db_dir)

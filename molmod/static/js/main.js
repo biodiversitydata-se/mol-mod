@@ -75,25 +75,8 @@ $(document).ready(function() {
 
         case '/download':
             // Define columns for download table
-            var columns = [
-                { data: null, orderable: false, defaultContent: '', className: 'select-checkbox' },
-                { data: 'annotation_target'},
-                { data: 'institution_code'},
-                { data : null,
-                  render : function ( data, type, row ) {
-                        return '<a href="'+iptBaseUrl+'/resource?r='+data.ipt_resource_id+'" target="_blank">'+data.dataset_name+'</a>';
-                  },
-                  className: 'ds'
-                },
-                { data : null,
-                  render : function ( data, type, row ) {
-                      return '<a href="'+data.ipt_download_url+'" target="_top">'+data.ipt_resource_id+'</a>';
-                  },
-                  className: 'iptLink'
-                 }
-            ];
             // Make dataset download table
-            var dTbl = makeDownloadTbl('/list_datasets', columns);
+            var dTbl = makeDownloadTbl();
             break;
 
         case '/upload':
@@ -223,8 +206,10 @@ $(document).ready(function() {
                 }
             });
 
-            // Prepare ASV id:s for POST to Bioatlas
-            $('#rform').on('submit', function() {
+            // Prepare ASV id:s and POST to Bioatlas
+            $('#rform').on('submit', function(e) {
+                e.preventDefault();
+
                 // Get selected ASV IDs from table
                 var ids = $.map(dTbl.rows({selected: true}).data(), function (item) {
                     return item['asv_id']
@@ -238,24 +223,44 @@ $(document).ready(function() {
 
                 // Warn and abort if no selection has been made in table
                 if (!$('#raw_names').val()) {
-                    $('#dtbl_err_container').removeClass('hiddenElem');
                     $('#dtbl_err_container').html('Please, select at least one row. ');
+                    $('#dtbl_err_container').removeClass('hiddenElem');
                     $('.table tr td:first-child').addClass('visHlpElem');
                     return false;
                 }
+
+                // Simulate Bioatlas 503: Service Unavailable
+                // (batchUrl otherwise passed via <script> in template)
+                // batchUrl = 'https://httpbin.org/status/503';
+
+                // Check Bioatlas status before submission
+                checkExternalPage(batchUrl, function (isAvailable) {
+                    if (!isAvailable) {
+                        msg = 'Sorry, but the Bioatlas server is not responding right now. ' +
+                              'Please, try again later.'
+                        $('#dtbl_err_container').html(msg);
+                        $('#dtbl_err_container').removeClass('hiddenElem');
+                    } else {
+                        e.currentTarget.submit();
+                    }
+                });
             });
         }
 
         else if (page === '/download') {
-            $('#rform').on('submit', function() {
 
-                // Get selected IPT resource links from table
-                var anchors = $.map(dTbl.rows({selected: true}).nodes(), function (row) {
-                    return $(row).find('td.iptLink a');
+            $('#dlform').on('submit', function() {
+
+                // Get download links from table
+                var dls = $.map(dTbl.rows({selected: true}).nodes(), function (row) {
+                    return {
+                        anchor: $(row).find('td.dl-link a'), //empty items also stored
+                        file: $(row).find('td.dl-link').text()
+                    };
                 });
 
                 // Warn and abort if no selection has been made in table
-                if (anchors.length == 0) {
+                if (dls.length == 0) {
                     $('#dtbl_err_container').removeClass('hiddenElem');
                     $('#dtbl_err_container').html('Please, select at least one row. ');
                     $('.table tr td:first-child').addClass('visHlpElem');
@@ -267,7 +272,7 @@ $(document).ready(function() {
                 function downloadWithDelay(index) {
                 // Downloads selected datasets
 
-                    if (index >= anchors.length) {
+                    if (index >= dls.length) {
                         if (invalidIDs.length > 0) {
                             $('#dtbl_err_container').removeClass('hiddenElem');
                             $('#dtbl_err_container').html('The following datasets could not be downloaded: ' + invalidIDs.join(', ') + '. '
@@ -276,30 +281,28 @@ $(document).ready(function() {
                         return;
                     }
 
-                    var anchor = anchors[index];
+                    var anchor = dls[index].anchor;
+                    var file = dls[index].file;
+
+                    // If link is missing
+                    if (!anchor || !anchor.attr('href')) {
+                        invalidIDs.push(file);
+
+                        // Move on to the next selected row
+                        downloadWithDelay(index + 1);
+                        return;
+                    }
+
                     var link = anchor.attr('href');
+                    // Trigger a click on the existing <a> element to download
+                    anchor[0].click();
 
-                    // Check if the link is valid (by making a HEAD request to check for a 404 response)
-                    $.ajax({
-                        url: link,
-                        type: 'HEAD',
-                        error: function (xhr) {
-                            if (xhr.status !== 200) {
-                                invalidIDs.push(link.split('=')[1]);
-                            }
-                            downloadWithDelay(index + 1);
-                        },
-                        success: function () {
-                            // Trigger a click on the existing <a> element to download
-                            anchor[0].click();
+                    // Delay before starting the next download
+                    // (to allow multiple downloads in Chrome)
+                    setTimeout(function () {
+                        downloadWithDelay(index + 1);
+                    }, 1000); // Adjust the delay duration (in milliseconds) as needed
 
-                            // Delay before starting the next download
-                            // (to allow multiple downloads in Chrome)
-                            setTimeout(function () {
-                                downloadWithDelay(index + 1);
-                            }, 1000); // Adjust the delay duration (in milliseconds) as needed
-                        }
-                    });
                 }
 
                 // Start the download process from the first link
@@ -435,46 +438,29 @@ function makeResultTbl(url, columns) {
     return dTbl;
 }
 
-function makeDownloadTbl(url, columns) {
+function makeDownloadTbl() {
     $.fn.dataTable.ext.errMode = 'none';
-    var dTbl = $('.table')
-        // Handle errors causing response to be empty string instead of JSON
-        .on('error.dt', function (e, settings, techNote, message) {
-            // console.log( 'An error has been reported by DataTables: ', message );
-            $('#dtbl_err_container').removeClass('hiddenElem');
-            $('#dtbl_err_container').html('Sorry, something unexpected happened during the search. '
-            + 'Please <a href="' + sbdiContactPage + '">contact SBDI support</a> if this error persists.');
-
-            // Disable dataset download and list export options
-            $("#show_occurrences").prop("disabled",true);
-            dTbl.buttons().disable();
-        })
+    var dTbl = $('#dataset_table')
         .DataTable({
-        deferRender: true, // Process one page at a time
-        autoWidth : false, // Respect CSS settings
-        ajax: {
-            url: url,
-            type: 'GET',
-            dataSrc: function ( json ) {
-                // If (no errors but) no results were found
-                if (json.data.length < 1) {
-                    // Disable dataset download and list export options
-                    $("#download").prop("disabled",true);
-                    dTbl.buttons().disable();
+            deferRender: true, // Process one page at a time
+            autoWidth : false, // Respect CSS settings
+            processing: true, // Show 'Loading' indicator
+            order: [], // Required for non-orderable col 0
+            select: { style: 'multi', selector: 'td:nth-child(1)' }, // Checkbox selection
+            // Layout: l=Show.., f=Search, tr=table, i=Showing.., p=pagination
+            dom: "<'row'<'col-md-5'l><'col-md-7'f>>" +
+            "<'row'<'col-md-12't>>" +
+            "<'row'<'col-md-2'B><'col-md-5'i><'col-md-5'p>>",
+            buttons: [ 'excel', 'csv' ],
+            // Add the checkbox column definition
+            columnDefs: [
+                {
+                    orderable: false,
+                    className: 'select-checkbox',
+                    targets: 0
                 }
-                return json.data;
-            }
-        },
-        columns : columns,
-        processing: true, // Show 'Loading' indicator
-        order: [], // Required for non-orderable col 0
-        select: { style: 'multi', selector: 'td:nth-child(1)' }, // Checkbox selection
-        // Layout: l=Show.., f=Search, tr=table, i=Showing.., p=pagination
-        dom: "<'row'<'col-md-5'l><'col-md-7'f>>" +
-        "<'row'<'col-md-12't>>" +
-        "<'row'<'col-md-2'B><'col-md-5'i><'col-md-5'p>>",
-        buttons: [ 'excel', 'csv' ]
-    });
+            ]
+        });
     return dTbl;
 }
 
@@ -483,4 +469,20 @@ function updateSeqLength() {
     // and shows this number above textarea
     var seqLength = $('#sequence_textarea').val().length;
     $('#sequence_count').text(seqLength + '/50000 characters');
+}
+
+function checkExternalPage(url, callback) {
+// Returns true only if url service is available
+    // Simulate Service Unavailable
+    // url = "https://httpbin.org/status/503"
+    $.ajax({
+        type: 'HEAD',
+        url: url,
+        success: function () {
+            callback(true);
+        },
+        error: function () {
+            callback(false);
+        }
+    });
 }

@@ -3,16 +3,15 @@ import os
 from datetime import datetime as dt
 
 import requests
-from flask import Blueprint, abort
-from flask import current_app as APP
-from flask import render_template, request, send_from_directory, session
-from flask_cas import login_required
+from flask import (
+    Blueprint, abort, current_app as APP, render_template,
+    request, send_from_directory, session, url_for)
 from flask_mail import Message
-from forms import UploadForm
-from forms import DownloadForm
+from forms import DownloadForm, UploadForm
 from werkzeug.utils import secure_filename
 
 from config import get_config
+from molmod import custom_login_required
 
 CONFIG = get_config()
 
@@ -51,7 +50,7 @@ def get_stats() -> dict:
 
 @main_bp.route('/upload', methods=['GET', 'POST'])
 # Redirect user to Bioatlas CAS login
-@login_required
+@custom_login_required
 def upload():
     """Checks whether logged-in user has required role (UPLOAD_ROLE) for file
        upload. Authorized users are sent to upload page; unauthorized users to
@@ -95,12 +94,12 @@ def upload():
     upload_time = dt.now().strftime("%y%m%d-%H%M%S")
     ext_filename = email + '_' + upload_time + '_' + filename
 
-    # Save file
     try:
-        f.save(os.path.join(CONFIG.UPLOAD_PATH, ext_filename))
+        dir = 'uploads'
+        os.makedirs(dir, exist_ok=True)
+        f.save(os.path.join(dir, ext_filename))
     except Exception as ex:
-        APP.logger.error(
-            f'File {ext_filename} could not be saved due to {ex}')
+        APP.logger.error(f'File {ext_filename} could not be saved due to {ex}')
     else:
         APP.logger.info(f'Successfully uploaded file {ext_filename}')
 
@@ -144,29 +143,42 @@ def submit():
 
 @main_bp.route("/files/<filename>")
 def files(filename):
-    """Downloads a file"""
+    """Downloads a file without requiring log-in"""
+
     dir = os.path.join('.', 'static', 'downloads')
-    if not os.path.exists(dir):
-        os.makedirs(dir)
     try:
         return send_from_directory(dir, filename, as_attachment=True)
     except FileNotFoundError:
         abort(404)
 
 
+@main_bp.route("/datasets/<filename>", methods=['GET'])
+@custom_login_required
+def datasets(filename):
+    """Downloads a (log-in protected) dataset file"""
+    APP.downloads_logger.info(f"Requested download of {filename}")
+    dir = '/app/exports'
+    try:
+        return send_from_directory(dir, filename, as_attachment=True)
+    except Exception as e:
+        APP.downloads_logger.error(f"Failed download of {filename} due to {e}")
+        abort(404)
+
+
 @main_bp.route("/download", methods=['GET'])
-@login_required
+@custom_login_required
 def download():
     """Lists available datasets"""
+    ds = list_datasets()
 
     # Create forms from classes in forms.py
-    rform = DownloadForm()
+    dlform = DownloadForm()
 
-    return render_template('download.html', rform=rform)
+    return render_template('download.html', dlform=dlform, rows=ds)
 
 
 @main_bp.route('/list_datasets', methods=['GET'])
-@login_required
+@custom_login_required
 def list_datasets() -> dict:
     """Composes API request for available datasets, based on data
        received in (DataTable) AJAX request, and returns dict
@@ -181,18 +193,24 @@ def list_datasets() -> dict:
         APP.logger.error(f'API request for dataset list returned: {e}')
     else:
         results = json.loads(response.text)  # -> list of dicts
-        # Construct download link
         for ds in results:
-            try:
-                ds['ipt_download_url'] = (
-                    CONFIG.IPT_BASE_URL + '/archive.do?r=' +
-                    ds['ipt_resource_id']
-                )
-            # Make sure we notice if some dataset is missing IPT details
-            except (TypeError) as e:
-                APP.logger.error(f'Adding IPT resource ID returned: {e}' +
-                                 f', for dataset ID = {ds["dataset_id"]}')
-                abort(500)
+            # Only add IPT link if ID was provided
+            if ds['ipt_resource_id']:
+                ds['ipt_link'] = (CONFIG.IPT_BASE_URL + '/resource?r='
+                                  + ds['ipt_resource_id'])
+            else:
+                msg = f'Dataset {ds["dataset_id"]} has no IPT resource ID'
+                APP.logger.warning(msg)
+            # Only add Download link if zip exists
+            zip_path = os.path.join('/app/exports',
+                                    f'{ds["dataset_id"]}.zip')
+
+            if os.path.isfile(zip_path):
+                ds['zip_link'] = url_for('main_bp.datasets',
+                                         filename=f"{ds['dataset_id']}.zip",
+                                         _external=True)
+            else:
+                APP.logger.warning(f'Zip file does not exist: {zip_path}')
 
         # APP.logger.debug(results)
-        return {"data": results}  # returns dict
+        return results

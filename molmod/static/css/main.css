@@ -92,6 +92,12 @@ select.form-control.input-sm {
     max-width: 500px;
     min-width: 500px;
 }
+.gene {
+    word-wrap: break-word;
+    max-width: 100px;
+    min-width: 100px;
+}
+
 
 /* STATS TABLE */
 /* Adjust columns to better fit table on page */

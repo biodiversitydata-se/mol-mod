@@ -7,10 +7,10 @@ import requests
 from flask import Blueprint
 from flask import current_app as APP
 from flask import render_template, request
-from flask_cas import login_required
 from forms import FilterResultForm, FilterSearchForm
 
 from config import get_config
+from molmod import custom_login_required
 
 CONFIG = get_config()
 
@@ -19,7 +19,7 @@ filter_bp = Blueprint('filter_bp', __name__,
 
 
 @filter_bp.route('/filter', methods=['GET', 'POST'])
-@login_required
+@custom_login_required
 def filter():
     """Displays both filter search and result forms. Search form dropdowns
        are populates via (Select2) AJAX call to '/request_drop_options/';
@@ -45,7 +45,7 @@ def filter():
 
 
 @filter_bp.route('/request_drop_options/<field>', methods=['POST'])
-@login_required
+@custom_login_required
 def request_drop_options(field) -> dict:
     """Forwards (Select2) AJAX request for filtered dropdown options
     (see main.js) to API, and returns paginated data in dict with Select2
@@ -102,7 +102,7 @@ def request_drop_options(field) -> dict:
 
 
 @filter_bp.route('/filter_run', methods=['POST'])
-@login_required
+@custom_login_required
 def filter_run() -> dict:
     """Composes API request for filtered ASV occurrences, based on data
        received in (DataTable) AJAX request, and returns dict

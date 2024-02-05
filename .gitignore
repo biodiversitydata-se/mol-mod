@@ -1,15 +1,21 @@
-.DS_Store
 __pycache__/
-postgres-data/
-fasta-exports/
+~$*.xls*
+.DS_Store
+.Rhistory
+
 .env
 .secret.*
-.Rhistory
-.DS_Store
-~$*.xls*
-backups/latest_backup*
+scripts/ipt-update/.ipt.cred
+scripts/ipt-update/resources.tsv
+
+# Folders replaced by named volumes in prod
+downloads/
+exports/
+postgres-data/
+uploads/
+fasta-exports/
+
+backups/*
 backups/db/*
-!backups/db/db-dump-kth.sql.custom
-backups/logs
-backups/uploads
-backups/imports
+!backups/db
+!backups/db/db-dump-kth.sql.custom  # Example data

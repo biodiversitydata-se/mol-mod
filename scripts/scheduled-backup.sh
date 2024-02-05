@@ -14,7 +14,10 @@
 #	    file (which is re-created at the end of this script) is used to
 #	    determine from when logs are to be stored.
 #
-#	3.  Copy newly uploaded dataset files from Docker container to host
+#	3.  Copy Downloads log in full from bind mounted volume (in case we need
+#       it for stats later).
+#
+#	4.  Copy newly uploaded dataset files from Docker container to host
 #	    directory "$backup_dir/uploads".
 #
 #	The "$topdir" directory is the directory into which the mol-mod
@@ -80,7 +83,7 @@ shift "$(( OPTIND - 1 ))"
 if [ "$( docker container inspect -f '{{ .State.Running }}' asv-main )" != 'true' ]
 then
 	echo 'Container "asv-main" not available'
-	exit 1
+	exit 1 # Used in crontab job to send email about failure
 fi >&2
 
 topdir=$( readlink -f "$( dirname "$0" )/.." )
@@ -100,14 +103,7 @@ if [ ! -d "$backup_dir" ]; then
     fi
 fi >&2
 
-if [ ! -d "$backup_dir" ]; then
-	printf 'Creating missing backup directory "%s"\n' "$backup_dir"
-	if ! mkdir -p "$backup_dir"; then
-		exit 1
-	fi
-fi >&2
-
-for dir in db logs uploads; do
+for dir in db logs uploads downloads; do
 	if ! mkdir -p backups/"$dir"; then
 		exit 1
 	fi
@@ -141,6 +137,7 @@ if [ -n "$latest" ]; then
     set -- "$@" --since "$latest_timestamp"
 fi
 
+# We could pull logs from stopped containers (with -a) but see Sanity check above
 containers=$(docker compose ps | awk 'NR>1 { print $1 }')
 for container in $containers; do
 	backup_file=$backup_dir/logs/$container.log.$now
@@ -161,14 +158,20 @@ for container in $containers; do
 done
 
 #-----------------------------------------------------------------------
-# 3.  Copy new uploads.
+# 3.  Copy (overwrite) Downloads log
 #-----------------------------------------------------------------------
 
-# Copy new uploads
-for file in $(docker exec asv-main ls /uploads); do
+printf '* Adding downloads.log\n'
+docker cp "asv-main:/app/downloads/downloads.log" "$backup_dir/downloads"
+
+#-----------------------------------------------------------------------
+# 4.  Copy new uploads.
+#-----------------------------------------------------------------------
+
+for file in $(docker exec asv-main ls /app/uploads); do
     if [ ! -e "$backup_dir/uploads/$file" ]; then
         echo "* Adding new upload: $file"
-        docker cp "asv-main:/uploads/$file" "$backup_dir/uploads"
+        docker cp "asv-main:/app/uploads/$file" "$backup_dir/uploads"
     fi
 done
 
