@@ -12,6 +12,7 @@ backups/
 db/
 docker/
 downloads/
+!molmod/static/downloads
 exports/
 fasta-exports/
 postgres-data/

@@ -10,6 +10,7 @@ scripts/ipt-update/resources.tsv
 
 # Folders replaced by named volumes in prod
 downloads/
+!molmod/static/downloads
 exports/
 postgres-data/
 uploads/
