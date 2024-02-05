@@ -284,6 +284,7 @@ $(document).ready(function() {
                     var anchor = dls[index].anchor;
                     var file = dls[index].file;
 
+                    // If link is missing
                     if (!anchor || !anchor.attr('href')) {
                         invalidIDs.push(file);
 
@@ -291,29 +292,17 @@ $(document).ready(function() {
                         downloadWithDelay(index + 1);
                         return;
                     }
+
                     var link = anchor.attr('href');
+                    // Trigger a click on the existing <a> element to download
+                    anchor[0].click();
 
-                    // Check if the link is valid
-                    $.ajax({
-                        url: link,
-                        type: 'HEAD',
-                        error: function (xhr) {
-                            if (xhr.status !== 200) {
-                                invalidIDs.push(link.split('ds/')[1]);
-                            }
-                            downloadWithDelay(index + 1);
-                        },
-                        success: function () {
-                            // Trigger a click on the existing <a> element to download
-                            anchor[0].click();
+                    // Delay before starting the next download
+                    // (to allow multiple downloads in Chrome)
+                    setTimeout(function () {
+                        downloadWithDelay(index + 1);
+                    }, 1000); // Adjust the delay duration (in milliseconds) as needed
 
-                            // Delay before starting the next download
-                            // (to allow multiple downloads in Chrome)
-                            setTimeout(function () {
-                                downloadWithDelay(index + 1);
-                            }, 1000); // Adjust the delay duration (in milliseconds) as needed
-                        }
-                    });
                 }
 
                 // Start the download process from the first link
