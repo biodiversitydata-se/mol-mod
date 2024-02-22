@@ -111,7 +111,7 @@ delete:
 # Reannotate ASVs
 reannot:
 	# Example: make reannot file=/some/path/to/file.xlsx
-	./scripts/update-annotation.sh $(file) && make stats
+	./scripts/update-annotation.sh "$(file)" && make stats
 
 #
 # VOLUME FILE MANAGEMENT - GENERAL
