@@ -34,6 +34,9 @@ annotation[, asv_id_alias := NULL]
 annotation[, annotation_target := marker]
 annotation[, target_criteria := target_criteria]
 
+# Replace double spaces in ampliseq output
+annotation[, annotation_algorithm := gsub("\\s{2,}", " ", annotation_algorithm)]
+
 ################################################################################
 # Evaluate
 ################################################################################
