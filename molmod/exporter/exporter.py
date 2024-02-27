@@ -7,16 +7,17 @@ condensed dataset archives, or exports fasta files to be used in taxonomic
 reannotation.
 """
 
+from datetime import datetime as dt
 import logging
 import os
-import requests
 import shutil
 import sys
 import time
-from datetime import datetime as dt
 
 import psycopg2
 from psycopg2.extras import DictCursor
+import requests
+from bs4 import BeautifulSoup
 
 
 def connect_db(pass_file: str = '/run/secrets/postgres_pass'):
@@ -56,21 +57,18 @@ def get_dataset_ids(cursor, pid):
     Retrieves dataset ID values (i.e. datasetID, drXXX and IPT resource)
     corresponding to a provided pid (pk, integer) value.
     """
-    sql = ("SELECT dataset_id, ipt_resource_id, bioatlas_resource_uid "
+    sql = ("SELECT dataset_id, ipt_resource_id "
            f"FROM dataset WHERE dataset.pid = {pid}")
     cursor.execute(sql)
     result = cursor.fetchone()
     if result is None:
         logging.error(f"No dataset found for pid {pid}")
-        return None, None, None
+        return None, None
     else:
-        dataset_id, ipt_id, bioatlas_id = result
+        dataset_id, ipt_id = result
         if ipt_id is None:
             logging.error(f"No ipt_resource_id found for pid {pid}")
-            return None, None, None
-        if bioatlas_id is None:
-            logging.error(f"No bioatlas_resource_uid found for pid {pid}")
-            return None, None, None
+            return None, None
     return result
 
 
@@ -97,51 +95,86 @@ def get_eml_file(ipt_resource_id, dir):
         return False
 
 
-def make_readme(bioatlas_id, dir):
+def fetch_ds_uuid(ipt_resource_id):
     """
-    Requests key metadata values from Bioatlas API and adds these to template
-    to create README in provided directory.
+    Fetches dataset uuid from IPT
     """
-    url = 'https://collections.biodiversitydata.se/ws/citations'
-    headers = {
-        'accept': 'application/json',
-        'Content-Type': 'application/json'
-    }
-    response = requests.post(url, headers=headers, json=[bioatlas_id])
-    destination_path = os.path.join(dir, 'README.txt')
+    url = f'https://www.gbif.se/ipt/resource?r={ipt_resource_id}'
+    response = requests.get(url)
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+        uuid_tag = soup.find('dt', string='GBIF UUID:')
+        if uuid_tag:
+            uuid = uuid_tag.find_next_sibling('dd').find('a').text.strip()
+            return uuid
+    return None
 
+
+def get_ds_meta(uuid):
+    """
+    Requests main metadata items for a dataset from GBIF API.
+    Some of it is also included in the eml file, but DOI, for instance, is not.
+    """
+    url = f'https://api.gbif.org/v1/dataset/{uuid}'
+    response = requests.get(url)
+    if response.status_code == 200:
+        dataset_info = response.json()
+        return dataset_info
+    return None
+
+
+def make_readme(ipt_resource_id, dir):
+    """
+    Creates a Readme file in the supplied directory, by adding dataset-specific
+    metadata to a template file.
+    """
+
+    destination_path = os.path.join(dir, 'README.txt')
     script_dir = os.path.dirname(os.path.abspath(__file__))
     template_path = os.path.join(script_dir, 'readme-template.txt')
 
-    if response.status_code == 200:
-        data = response.json()[0]
-        if data is not None:
-            with open(template_path, 'r', encoding='utf-8') as readme:
-                template = readme.read()
-            # Replace [API data] with metadata
-            replacement = (
-                f"Dataset name: {data['name']}\n"
-                f"Citation: {data['citation']}\n"
-                f"Rights: {data['rights']}\n"
-                f"DOI: {data.get('DOI', '')}"
-            )
-            readme = template.replace('[API data]', replacement)
-            with open(destination_path, 'w', encoding='utf-8') as file:
-                file.write(readme)
-            return True
-        else:
-            logging.error(f"No metadata found for {bioatlas_id}")
-            return False
-    else:
-        logging.error(f"Bioatlas API request failed: {response.status_code}")
+    uuid = fetch_ds_uuid(ipt_resource_id)
+    if not uuid:
+        logging.error("Failed to fetch dataset UUID.")
         return False
+
+    data = get_ds_meta(uuid)
+    if not data:
+        logging.error(f"No metadata found for {ipt_resource_id}")
+        return False
+
+    with open(template_path, 'r', encoding='utf-8') as readme:
+        template = readme.read()
+
+    # Replace [API data] with dataset-specific metadata
+    dataset_name = data.get('title', 'N/A')
+    citation = data.get('citation', {}).get('text', 'N/A')
+    citation = citation.replace(
+        'via GBIF.org',
+        'in condensed format via https://asv-portal.biodiversitydata.se/')
+    bibl_citations = data.get('bibliographicCitations', [])
+    bibl_citation = bibl_citations[0]['text'] if bibl_citations else 'N/A'
+    license = data.get('license', 'N/A')
+    doi = data.get('doi', 'N/A')
+
+    replacement = (
+        f"Dataset name: {dataset_name}\n\n"
+        f"Citation: {citation}\n\n"
+        f"Bibliographic citation: {bibl_citation}\n\n"
+        f"License: {license}\n\n"
+        f"DOI: {doi}\n"
+    )
+    readme = template.replace('[API data]', replacement)
+    with open(destination_path, 'w', encoding='utf-8') as file:
+        file.write(readme)
+    return True
 
 
 def export_datasets(pids: str):
     """
     Exports data and metadata for a list of / all datasets to compressed files.
     For each dataset, calls functions to get eml file from IPT, key metadata
-    from Bioatlas API, and data from DB.
+    from GBIF API, and data from DB.
     """
     _, cursor = connect_db()
 
@@ -155,7 +188,7 @@ def export_datasets(pids: str):
 
     for pid in pid_lst:
         start_time = time.time()
-        dataset_id, ipt_id, bioatlas_id = get_dataset_ids(cursor, pid)
+        dataset_id, ipt_id = get_dataset_ids(cursor, pid)
         if dataset_id is None:
             continue
         logging.info("Exporting dataset: %s", dataset_id)
@@ -172,7 +205,7 @@ def export_datasets(pids: str):
             continue
 
         # Add key metadata from Bioatlas to readme
-        if not make_readme(bioatlas_id, dir):
+        if not make_readme(ipt_id, dir):
             shutil.rmtree(dir, ignore_errors=True)
             continue
 

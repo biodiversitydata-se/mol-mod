@@ -8,7 +8,7 @@ DATASET METADATA
 
 [API data]
 
-Please see the included eml.xml file for full metadata, including bibliographic citation(s), and attribute the original authors when using this dataset.
+Please see the included eml.xml file for full metadata, and attribute the original authors when using this dataset.
 
 
 BACKGROUND
