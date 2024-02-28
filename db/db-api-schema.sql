@@ -365,7 +365,8 @@ WITH DATA;
 -- View listing reference database and algorithm used for annotaton of each dataset
 CREATE OR REPLACE VIEW api.annotation_overview
 AS
-SELECT DISTINCT ds.pid, dataset_id, in_bioatlas, annotation_target, split_part(reference_db, ' (', 1) AS db,
+SELECT DISTINCT ds.pid, ds.ipt_resource_id, dataset_id, in_bioatlas,
+annotation_target, split_part(reference_db, ' (', 1) AS db,
 split_part(annotation_algorithm, ' (', 1) AS algo
 FROM dataset ds, sampling_event se, occurrence oc, taxon_annotation ta
 WHERE ds.pid = se.dataset_pid
