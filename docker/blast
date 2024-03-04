@@ -6,6 +6,8 @@ ADD log/ /worker/log
 
 WORKDIR /worker
 
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C0BA5CE6DC6315A3
+
 RUN apt-get update
 RUN apt-get -y install libpq-dev # Avoid pg_config error
 
