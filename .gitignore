@@ -9,6 +9,7 @@ scripts/ipt-update/.ipt.cred
 scripts/download/.cas.cred
 scripts/ipt-update/pub_info.tsv
 scripts/ipt-update/resources.tsv
+scripts/download/.cas.cred
 
 # Folders replaced by named volumes in prod
 downloads/
