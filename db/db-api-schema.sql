@@ -347,14 +347,16 @@ AS
  SELECT DISTINCT ds.dataset_id,
     ds.dataset_name,
     ds.ipt_resource_id,
-    ta.annotation_target,
-	se.institution_code
-   FROM :data_schema.dataset ds,
-    :data_schema.sampling_event se,
-    :data_schema.occurrence oc,
-    :data_schema.taxon_annotation ta
-  WHERE ds.in_bioatlas = true AND ds.pid = se.dataset_pid AND se.pid = oc.event_pid AND oc.asv_pid = ta.asv_pid AND ta.status::text = 'valid'::text
-  ORDER BY ta.annotation_target, ds.dataset_name
+    mixs.target_gene,
+    mixs.target_subfragment,
+    mixs.pcr_primer_name_forward,
+    mixs.pcr_primer_name_reverse,
+    se.institution_code
+   FROM dataset ds,
+    sampling_event se,
+    mixs
+  WHERE ds.in_bioatlas = true AND ds.pid = se.dataset_pid AND se.pid = mixs.pid
+  ORDER BY mixs.target_gene, ds.dataset_name
 WITH DATA;
 
 
