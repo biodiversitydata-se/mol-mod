@@ -112,7 +112,6 @@ load_data <- function() {
 #'
 #' @return
 #' A list containing merged ASV tables, EMOF tables, and ASV metadata.
-#' A list of sublists containing data.table:s.
 #' ```
 #' ├──  (list)
 #'    ├── asv_table (data.table)
