@@ -5,11 +5,14 @@ build_emof_table <- function(zip) {
   emof <- fread(cmd = paste('unzip -p', zip, 'emof.tsv'))
   if (nrow(emof) == 0) {
     message("Adding empty emof table for ", gsub(".zip", "", zip))
-    return(data.table())
+    return(data.table("measurementType (measurementUnit)" = character()))
   }
+  # Convert all cols to char, to not add decimals during dcast
+  emof[, names(emof) := lapply(.SD, as.character)]
   emof_table <- dcast(emof, paste0(measurementType, " (", measurementUnit, ")")
                       ~ eventID, value.var = "measurementValue")
   setnames(emof_table, "measurementType", "measurementType (measurementUnit)")
+
   return(emof_table)
 }
 
@@ -32,6 +35,7 @@ setwd(paste0(script_dir, '/datasets'))
 zip_files <- list.files(pattern = "\\.zip$")
 dirs <- gsub(".zip", "", zip_files)
 
+# Save tsv data to data.table:s in lists
 emof_tables <- setNames(lapply(zip_files, build_emof_table), dirs)
 asv_tables <- setNames(lapply(zip_files, build_asv_table), dirs)
 asvs <- setNames(lapply(zip_files, get_asvs), dirs)
@@ -50,15 +54,10 @@ merged_asvs <- Reduce(function(x, y) {
         by = merge_cols, all = TRUE)
 }, asvs)
 
-# Drop intermediaries
+# Drop intermediary objects
 keep <- c('emof_tables', 'asv_tables', 'asvs', grep("^merged", ls(), value = TRUE))
 rm(list=setdiff(ls(), keep))
 
 # Inspect with:
 # View(asv_tables$`GU-2022-Wallhamn-18S`)
-# Or:
 # View(emof_tables[['PRJEB55296-18S-sub1']])
-# View(asvs[['PRJEB55296-18S-sub2']])
-
-View(asvs[[1]])
-View(asvs[[2]])
