@@ -481,8 +481,12 @@ function checkExternalPage(url, callback) {
         success: function () {
             callback(true);
         },
-        error: function () {
-            callback(false);
+        error: function (xhr) {
+            if (xhr.status === 503) {
+                callback(false);
+            } else {
+                callback(true);
+            }
         }
     });
 }
