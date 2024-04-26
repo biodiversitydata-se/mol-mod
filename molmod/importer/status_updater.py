@@ -48,7 +48,8 @@ def run_update(pid: int = 0, status: int = None, ruid: str = None,
                 connection.rollback()
                 sys.exit(1)
 
-    # Update materialized views
+    # Update materialized views, excluding api.app_asvs_for_blastdb,
+    # but this is always updated before BLAST build
     # About stats
     try:
         logging.info("Updating stats for About page")

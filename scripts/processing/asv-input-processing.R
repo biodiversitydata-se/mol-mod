@@ -223,8 +223,10 @@ annotation[, target_criteria := target_criteria]
 
 scores <- c('euk_eval','bac_eval', 'mito_eval', 'arc_eval')
 
-if (target_criteria == 'None applied') {
+if (target_criteria == 'None applied') {  # E.g. COI
   annotation[, target_prediction := TRUE]
+} else if (target_criteria == 'Kingdom = Fungi') {
+  annotation[, target_prediction := kingdom == 'Fungi']
   # Use Barrnap cols (but skip for older files that use list instead)
 } else if (!exists('non_target') & !exists('target_list')) {
   annotation[, prob_domain := substr(apply(.SD, 1, which.min),3,5),

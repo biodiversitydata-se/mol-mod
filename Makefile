@@ -111,7 +111,7 @@ delete:
 # Reannotate ASVs
 reannot:
 	# Example: make reannot file=/some/path/to/file.xlsx
-	./scripts/update-annotation.sh $(file) && make stats
+	./scripts/update-annotation.sh "$(file)" && make stats && make blastdb
 
 #
 # VOLUME FILE MANAGEMENT - GENERAL
@@ -149,13 +149,13 @@ uplist:
 # Copy file(s) to host
 # Apply to single file, if specified, or all files in dir
 cpfile := $(if $(file),$(file),.)
-# Example: make facopy [file=export-240202-114802.fasta]
+# Example: make upcopy [file=jane.doe@univ.se_210902-212121_ampliseq.xlsx]
 upcopy:
 	export vol=uploads file=$(cpfile) && make fcopy
 
 # Delete file(s) in container
 delfile := $(if $(file),$(file),*)
-# Example: make exdel [file=export-240202-114802.fasta]
+# Example: make updel [file=jane.doe@univ.se_210902-212121_ampliseq.xlsx]
 updel:
 	export vol=uploads file=$(delfile) && make fdel
 
