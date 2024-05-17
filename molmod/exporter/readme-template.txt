@@ -28,7 +28,7 @@ eml.xml: Dataset-level metadata, copied unchanged from the original IPT resource
 
 Rows in event.tsv, emof.tsv, and occurrence.tsv are linked via shared 'eventID' fields, while occurrence.tsv and asv.tsv are linked via 'taxonID'.
 
-Some fields have been excluded or replaced to reduce file size: All ASV datasets share 'basisOfRecord' = 'materialSample', and 'organismQuantityType' = 'DNA sequence reads', so these fields have been omitted. We also exclude 'datasetID' as this is also part of the composite 'eventID', which is included as the central key in these restructured datasets. Instead of including the full 'occurrenceID', we just include the 'asv_id_alias' part, which can be combined with 'eventID', to recreate 'occurrenceID' if needed.
+Some fields have been excluded or split up to reduce file size: All ASV datasets share 'basisOfRecord' = 'materialSample', and 'organismQuantityType' = 'DNA sequence reads', so these fields have been omitted. We also exclude 'datasetID' as this is also part of the composite 'eventID', which is included as the central key in these restructured datasets. Instead of including the full, composite 'occurrenceID' in occurrence.tsv, we report 'eventID' plus 'taxonID' there. Note that 'occurrenceID' can easily be recreated by combining 'eventID' with 'asv_id_alias' from asv.tsv, via shared field 'taxonID', if needed.
 
 
 The SBDI Molecular Data Team
