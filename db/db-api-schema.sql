@@ -516,7 +516,6 @@ CREATE OR REPLACE VIEW api.dl_occurrence
 AS
 SELECT se.dataset_pid,
     (ds.dataset_id::text || ':'::text) || se.event_id::text AS "eventID",
-    oc.asv_id_alias,
     asv.asv_id AS "taxonID",
     oc.organism_quantity AS "organismQuantity"
 FROM sampling_event se
