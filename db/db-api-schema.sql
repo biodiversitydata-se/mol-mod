@@ -488,8 +488,8 @@ WITH ds_asv AS (
 )
 SELECT ds_asv.dataset_pid,
     asv.asv_id AS "taxonID",
-    ds_asv.asv_id_alias AS asv_alias,
-    asv.asv_sequence,
+    ds_asv.asv_id_alias AS asv_id_alias,
+    asv.asv_sequence AS "DNA_sequence",
     ta.scientific_name AS "scientificName",
     ta.taxon_rank AS "taxonRank",
     ta.kingdom,
