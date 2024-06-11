@@ -151,8 +151,8 @@ dna[, (env_cols) := lapply(.SD, function(x) {
   x <- sub("(.)", "\\L\\1", perl = TRUE, x)
   # Replace (...) with [...]
   x <- gsub("[(]", "[", gsub("[)]", "]", x))
-  # Replace : with _
-  x <- gsub("[:]", "_", x)
+  # Replace _ with :  # To comply with GBIF recommendations
+  x <- gsub("_", "[:]", x)
   x
 }), .SDcols = env_cols]
 
