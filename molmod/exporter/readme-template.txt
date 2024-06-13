@@ -30,6 +30,7 @@ Rows in event.tsv, emof.tsv, and occurrence.tsv are linked via shared 'eventID' 
 
 Some fields have been excluded or split up to reduce file size: All ASV datasets share 'basisOfRecord' = 'materialSample', and 'organismQuantityType' = 'DNA sequence reads', so these fields have been omitted. We also exclude 'datasetID' as this is also part of the composite 'eventID', which is included as the central key in these restructured datasets. Instead of including the full, composite 'occurrenceID' in occurrence.tsv, we report 'eventID' plus 'taxonID' there. Note that 'occurrenceID' can easily be recreated by combining 'eventID' with 'asv_id_alias' from asv.tsv, via shared field 'taxonID', if needed.
 
+Finally, restructured datasets will always include data on 'kingdom' and 'phylum' when assigned. Currently, these fields are not mapped in the IPT for 18S rRNA data because the higher taxonomy in PR2 differs significantly from the GBIF taxonomy backbone, disrupting name-matching during import to GBIF/Bioatlas platforms.
 
 The SBDI Molecular Data Team
 Contact form: https://docs.biodiversitydata.se/support/
