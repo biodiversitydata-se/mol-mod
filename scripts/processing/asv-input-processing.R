@@ -58,29 +58,29 @@ fasta_out <- paste0('output/', dataset_id, '.fasta')
 ################################################################################
 
 # Import Excel file
-if(grepl('xlsx', uploaded_file, fixed = TRUE)){
+if (grepl('xlsx', uploaded_file, fixed = TRUE)) {
   sheets <- getSheetNames(uploaded_file)
   for (sheet_name in sheets[sheets != 'guide']) {
     # Read the Excel sheet into a data.table using read.xlsx()
     assign(
       # Make asv-table & emof-simple R-friendly
       gsub("-", "_", sheet_name),
-      data.table(read.xlsx(uploaded_file, sheet=sheet_name, detectDates = TRUE))
+      data.table(read.xlsx(uploaded_file, sheet = sheet_name, detectDates = TRUE))
     )
   }
 
   # Or, import archived txt
 } else {
-  untar(uploaded_file, exdir='unpacked')
-  for (xsv in list.files('unpacked', pattern="*.[ct]sv")) {
-    name_parts <- strsplit(xsv, split="\\.")[[1]]
+  untar(uploaded_file, exdir = 'unpacked')
+  for (xsv in list.files('unpacked', pattern = "*.[ct]sv")) {
+    name_parts <- strsplit(xsv, split = "\\.")[[1]]
     if (name_parts[2] == 'tsv') sep = '\t' else sep = ','
     # Skip annotation that user may have submitted
     if (name_parts[1] != 'annotation')
       assign(
         # Make asv-table & emof-simple R-friendly
         gsub("-", "_", name_parts[1]),
-        fread(paste0('unpacked/', xsv), sep = sep, dec=".", na.strings=""))
+        fread(paste0('unpacked/', xsv), sep = sep, dec = ".", na.strings = ""))
   }
   # Delete intermediary dir
   unlink(paste0(getwd(),'/unpacked'), recursive = TRUE)
@@ -91,13 +91,13 @@ if(grepl('xlsx', uploaded_file, fixed = TRUE)){
 ################################################################################
 
 # Rename dt
-if (exists('mixs')){
+if (exists('mixs')) {
   dna <- mixs
   rm(mixs)
 }
 
 # Add new dt
-if (!exists('emof_simple')){ emof_simple <- data.table() }
+if (!exists('emof_simple')) { emof_simple <- data.table() }
 
 # Recreate emof, if missing (as data providers sometimes delete it)
 if (!exists('emof')) {
@@ -109,10 +109,10 @@ if (!exists('emof')) {
 }
 
 # Rename cols
-setnames(event, 'catalogueNumber', 'catalogNumber', skip_absent=TRUE)
+setnames(event, 'catalogueNumber', 'catalogNumber', skip_absent = TRUE)
 dts <- list(event, dna, emof, emof_simple)
 dts <- lapply(dts, function(dt) setnames(dt, "event_id_alias", "eventID",
-                                         skip_absent=TRUE))
+                                         skip_absent = TRUE))
 
 # Add new cols, if missing
 event_new <- c('datasetID', 'datasetName', 'collectionCode', 'fieldNumber', 'catalogNumber',
@@ -174,7 +174,7 @@ event[, c("datasetName", "datasetID") := NULL]
 ################################################################################
 
 # If emof-simple is used, transfer data to regular emof
-if (nrow(emof) == 0 & nrow(emof_simple) > 0){
+if (nrow(emof) == 0 & nrow(emof_simple) > 0) {
   # Convert all cols to char, to not add decimals during melt
   # (melting coerces all values to same data type)
   emof_simple[, names(emof_simple) := lapply(.SD, as.character)]
@@ -185,7 +185,7 @@ if (nrow(emof) == 0 & nrow(emof_simple) > 0){
   # Restore any spaces in parameter names
   emof[, measurementType := gsub("\\.", " ", measurementType)]
   # Separate parameter and unit
-  emof[, c("measurementType", "measurementUnit"):=
+  emof[, c("measurementType", "measurementUnit") :=
          tstrsplit(measurementType, '[.]?[()]', "")]
   # Add remaining cols
   more_emof <- c('measurementTypeID', 'measurementUnitID', 'measurementValueID',
@@ -209,7 +209,7 @@ asv_table[,fasta := NULL]
 
 # Import Ampliseq output
 annotation = fread(file = annotation_file, sep = '\t', header = TRUE,
-                   dec = '.', na.strings="")
+                   dec = '.', na.strings = "")
 # Add 'Unassigned' to kingdom until fixed in ampliseq SBDI-export
 annotation[is.na(kingdom) | kingdom == "", kingdom := 'Unassigned']
 
@@ -231,10 +231,10 @@ if (target_criteria == 'None applied') {  # E.g. COI
 } else if (!exists('non_target') & !exists('target_list')) {
   annotation[, prob_domain := substr(apply(.SD, 1, which.min),3,5),
              .SDcols = scores]
-  if (marker == '18S rRNA'){
+  if (marker == '18S rRNA') {
     # 'Barrnap positive'
     annotation[, target_prediction := prob_domain == 'euk']
-  } else if (marker == '16S rRNA'){
+  } else if (marker == '16S rRNA') {
     annotation[, target_prediction :=
                  # 'Assigned kingdom OR barrnap-positive'
                  (kingdom != 'Unassigned' | prob_domain %in% c('arc', 'bac'))]
@@ -252,7 +252,7 @@ annotation[, c(scores, 'eval_method') := NULL]
 ################################################################################
 
 # Taxonomy from data provider
-prv_tax<- c("kingdom", "phylum", "class", "order", "family", "genus",
+prv_tax <- c("kingdom", "phylum", "class", "order", "family", "genus",
             "specificEpithet", "infraspecificEpithet", "otu")
 asv_table[, previous_identifications :=
             do.call(paste, c(lapply(.SD, function(x) ifelse(is.na(x), '', x)),
@@ -294,15 +294,15 @@ for (sheet in final_sheets)
   writeData(wb, sheet_name, get(sheet), startRow = 1, startCol = 1)
 
   # and write same data to csv:s
-  fwrite(get(sheet), paste0('output/', sheet_name, ".csv"), sep=",",
-         row.names=FALSE)}
+  fwrite(get(sheet), paste0('output/', sheet_name, ".csv"), sep = ",",
+         row.names = FALSE)}
 # Export [dataset_id]-adm.xlsx
 saveWorkbook(wb, file = excel_out, overwrite = TRUE, )
 
 # Also pack csv:s into [dataset_id]-adm.tar.gz
-tfiles <- paste0('output/', list.files('output', pattern="*.csv"))
-tar(tar_out, files = tfiles, compression = "gzip", tar='tar')
+tfiles <- paste0('output/', list.files('output', pattern = "*.csv"))
+tar(tar_out, files = tfiles, compression = "gzip", tar = 'tar')
 # Delete csv:s
 unlink(tfiles)
 
-rm(list=setdiff(ls(), final_sheets))
+rm(list = setdiff(ls(), final_sheets))
