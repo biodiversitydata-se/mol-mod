@@ -184,6 +184,8 @@ if (nrow(emof) == 0 & nrow(emof_simple) > 0){
   emof <- melt(emof_simple, id.vars = c("eventID"), na.rm = T,
                value.name = "measurementValue",
                variable.name = c("measurementType"))
+  # Restore any spaces in parameter names
+  emof[, measurementType := gsub("\\.", " ", measurementType)]
   # Separate parameter and unit
   emof[, c("measurementType", "measurementUnit"):=
          tstrsplit(measurementType, '[.]?[()]', "")]
