@@ -129,18 +129,16 @@ event[, (obsolete[obsolete %in% names(event)]) := NULL]
 # 5. Clean up data
 ################################################################################
 
-dt_names <- list('event', 'dna', 'emof', 'emof_simple', 'asv_table')
-for (nm in dt_names) {
+for (nm in list('event', 'dna', 'emof', 'emof_simple', 'asv_table')) {
   dt <- get(nm)
-  # Remove whitespace
-  dt[, names(dt) := lapply(.SD, trimws, whitespace="[\\h\\v]")]
-
-  # Make cols numeric, if possible
-  dt[, names(dt) := lapply(.SD, function(col) tryCatch(as.numeric(col), warning=function(w) col))]
-
-  # Drop empty rows (all NA:s)
+  dt[, names(dt) := lapply(.SD, trimws, whitespace = "[\\h\\v]")]
+  # Replace commas with dots & convert to numeric where possible
+  dt[, names(dt) :=
+       lapply(.SD, function(col)
+         tryCatch(as.numeric(gsub(",", ".", col)),
+                  warning = function(w) col))]
+  # Drop rows where all columns are NA
   if (ncol(dt) > 1) { dt <- dt[rowSums(is.na(dt)) != ncol(dt)] }
-
   assign(nm, dt)
 }
 
