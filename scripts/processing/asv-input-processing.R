@@ -241,7 +241,7 @@ if (target_criteria == 'None applied') {  # E.g. COI
   }
   annotation[, prob_domain := NULL]
 }
-annotation[, c(scores, 'eval_method') := NULL]
+annotation[, c(intersect(names(annotation), c(scores, 'eval_method'))) := NULL]
 
 ################################################################################
 # 10. Fix dataset-specific problems, if any  - EDIT HERE, PLEASE!
