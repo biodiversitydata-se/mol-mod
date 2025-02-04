@@ -212,6 +212,8 @@ annotation = fread(file = annotation_file, sep = '\t', header = TRUE,
                    dec = '.', na.strings = "")
 # Add 'Unassigned' to kingdom until fixed in ampliseq SBDI-export
 annotation[is.na(kingdom) | kingdom == "", kingdom := 'Unassigned']
+# Clean up extra whitespace added at least for ITS output
+annotation[, annotation_algorithm := gsub("\\s+", " ", annotation_algorithm)]
 
 ################################################################################
 # 9. Flag ASV:s based on target prediction outcome (Barrnap)
