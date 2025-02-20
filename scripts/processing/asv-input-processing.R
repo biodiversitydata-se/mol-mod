@@ -156,12 +156,14 @@ dna[, (env_cols) := lapply(.SD, function(x) {
 event[, recordedBy := gsub(', ', ' | ', recordedBy)]
 
 # Drop ASVs that have 0 count in all samples in dataset
+orig_asv_no <- length(asv_table$asv_id_alias)
 tax_cols <- c("asv_id_alias", "DNA_sequence", "associatedSequences",
               "kingdom", "phylum", "class", "order", "family",
               "genus", "specificEpithet", "infraspecificEpithet", "otu")
 event_cols <- setdiff(names(asv_table), tax_cols)
 asv_table <- asv_table[
   rowSums(asv_table[, ..event_cols] != 0) > 0, ]
+del_asv_no <- orig_asv_no - length(asv_table$asv_id_alias)
 
 ################################################################################
 # 6. Add dataset metadata
@@ -312,5 +314,7 @@ tfiles <- paste0('output/', list.files('output', pattern = "*.csv"))
 tar(tar_out, files = tfiles, compression = "gzip", tar = 'tar')
 # Delete csv:s
 unlink(tfiles)
+
+print(paste('Deleted ASV wo occurrences: ', del_asv_no))
 
 rm(list = setdiff(ls(), final_sheets))
