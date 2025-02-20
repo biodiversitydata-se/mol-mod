@@ -155,6 +155,14 @@ dna[, (env_cols) := lapply(.SD, function(x) {
 # Use pipe '|' to separate multiple values
 event[, recordedBy := gsub(', ', ' | ', recordedBy)]
 
+# Drop ASVs that have 0 count in all samples in dataset
+tax_cols <- c("asv_id_alias", "DNA_sequence", "associatedSequences",
+              "kingdom", "phylum", "class", "order", "family",
+              "genus", "specificEpithet", "infraspecificEpithet", "otu")
+event_cols <- setdiff(names(asv_table), tax_cols)
+asv_table <- asv_table[
+  rowSums(asv_table[, ..event_cols] != 0) > 0, ]
+
 ################################################################################
 # 6. Add dataset metadata
 ################################################################################
