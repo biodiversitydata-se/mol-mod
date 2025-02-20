@@ -72,17 +72,15 @@ if (grepl('xlsx', uploaded_file, fixed = TRUE)) {
   # Or, import archived txt
 } else {
   untar(uploaded_file, exdir = 'unpacked')
-  for (xsv in list.files('unpacked', pattern = "*.[ct]sv")) {
-    name_parts <- strsplit(xsv, split = "\\.")[[1]]
-    if (name_parts[2] == 'tsv') sep = '\t' else sep = ','
-    # Skip annotation that user may have submitted
-    if (name_parts[1] != 'annotation')
-      assign(
-        # Make asv-table & emof-simple R-friendly
-        gsub("-", "_", name_parts[1]),
-        fread(paste0('unpacked/', xsv), sep = sep, dec = ".", na.strings = ""))
+  for (xsv in list.files('unpacked', pattern = "\\.(tsv|csv)$",
+                         recursive = TRUE, full.names = TRUE)) {
+    file_name <- tools::file_path_sans_ext(basename(xsv))
+    sep <- if (grepl("\\.tsv$", xsv)) '\t' else ','
+    if (file_name != 'annotation') {
+      assign(gsub("-", "_", file_name),
+             fread(xsv, sep = sep, dec = ".", na.strings = ""))
+    }
   }
-  # Delete intermediary dir
   unlink(paste0(getwd(),'/unpacked'), recursive = TRUE)
 }
 
