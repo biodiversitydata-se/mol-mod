@@ -136,6 +136,7 @@ FROM :data_schema.sampling_event se
             JOIN :data_schema.mixs ON mixs.pid = se.pid
             JOIN :data_schema.taxon_annotation ta ON asv.pid = ta.asv_pid
         WHERE ta.target_prediction = TRUE AND ta.annotation_target::text = mixs.target_gene::text
+        AND ta.status::text = 'valid'::text
         GROUP BY se.pid) calc ON se.pid = calc.pid
 WHERE ta.status::text = 'valid'
     AND ta.target_prediction = TRUE
@@ -450,6 +451,7 @@ SELECT se.dataset_pid,
                 JOIN mixs mixs_1 ON mixs_1.pid = se_1.pid
                 JOIN taxon_annotation ta_1 ON asv_1.pid = ta_1.asv_pid
             WHERE ta_1.target_prediction = true AND ta_1.annotation_target::text = mixs_1.target_gene::text
+            AND ta_1.status::text = 'valid'::text
             GROUP BY se_1.pid) calc ON se.pid = calc.pid;
 
 
