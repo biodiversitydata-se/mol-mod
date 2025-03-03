@@ -94,11 +94,16 @@ def request_drop_options(field) -> dict:
         APP.logger.error(f'API request for select options resulted in: {e}')
     else:
         # Repackage data into custom format for Select2 boxes
-        # Set more = TRUE if there are additional records to retrieve from db
         results = json.loads(response.text)[0]['data']['results']
         count = json.loads(response.text)[0]['data']['count']
+        if count > limit:
+            # Remove extra record used for pagination check
+            results = results[:-1]
+        # APP.logger.debug(f"Offset: {offset}, Limit: {limit}, Count: {count}")
+        # APP.logger.debug(f"More results: {count > limit}")
         return {'results': results,
-                'pagination': {'more': (offset + limit) < count}}
+                # Enable scrolling if there are at least one additional record
+                'pagination': {'more': count > limit}}
 
 
 @filter_bp.route('/filter_run', methods=['POST'])
