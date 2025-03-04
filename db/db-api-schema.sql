@@ -244,7 +244,8 @@ BEGIN
          	AND ($12 = ''{}'' OR rv_prim = ANY($12))
          	ORDER BY %I
          	OFFSET $13
-         	LIMIT $14)
+            -- Fetch one extra record to check if more results exist for pagination
+         	LIMIT $14 + 1)
 		-- Format & paginate according to select2 requirements
 		SELECT json_build_object(
             ''count'', (SELECT COUNT(*) FROM filtered),
