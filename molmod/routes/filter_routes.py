@@ -122,11 +122,13 @@ def filter_run() -> dict:
 
     filters = [f for f in request.form if f != 'csrf_token']
     selections = {f: ','.join(
-        map(str, request.form.getlist(f))) for f in filters}
-    if selections:
-        url += '?'
-        for filter, value in selections.items():
-            url += f'&{filter}=in.({value})'
+        map(str,request.form.getlist(f))) for f in filters}
+    query_parts = []
+    for filter, value in selections.items():
+        query_parts.append(f'{filter}=in.({value})')
+    query_parts.append('limit=1000')
+
+    url += '?' + '&'.join(query_parts)
     # APP.logger.debug(f'URL for API request: {url}')
 
     #
@@ -139,6 +141,6 @@ def filter_run() -> dict:
     except (requests.ConnectionError, requests.exceptions.HTTPError) as e:
         APP.logger.error(f'API request for filtered occurences returned: {e}')
     else:
-        results = json.loads(response.text)[0:1000]
+        results = json.loads(response.text)
         # APP.logger.debug(results)
         return {"data": results}
