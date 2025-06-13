@@ -12,11 +12,41 @@ x-logging:
 
 volumes:
   postgres-db:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "/data/docker-volumes/postgres-db"
   blast-db:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "/data/docker-volumes/blast-db"
   uploads:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "/data/docker-volumes/uploads"
   exports:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "/data/docker-volumes/exports"
   downloads:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "/data/docker-volumes/downloads"
   fasta-exports:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "/data/docker-volumes/fasta-exports"
 
 secrets:
   postgres_pass:
