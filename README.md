@@ -68,7 +68,7 @@ Also, see *Development environment* (above) on how to set up email and database 
 
 Then, to pull images and start up services:
 ```
-  $ make run
+  $ make up
 ```
 
 Once the system is running, you can insert the default data into the database:
