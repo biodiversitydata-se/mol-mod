@@ -4,19 +4,61 @@
 # View with: docker logs [-f / --follow] <container_id_or_name>
 x-logging:
   &default-logging
-  driver: "json-file"
+  driver: loki
   options:
+    loki-url: "http://10.65.2.251:3100/loki/api/v1/push"
+    loki-timeout: 5s
+    loki-max-backoff: 2m
+    loki-relabel-config: |
+      - action: replace
+        source_labels: [compose_project, compose_service]
+        separator: "_"
+        target_label: service
+      - action: labelmap
+        regex: "compose_project"
+        replacement: "stack"
+      - action: labeldrop
+        regex: "filename|container_name|compose_project|compose_service"
     max-size: '20m'
     max-file: '5'
-    compress: 'true'
 
 volumes:
   postgres-db:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "/data/docker-volumes/postgres-db"
   blast-db:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "/data/docker-volumes/blast-db"
   uploads:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "/data/docker-volumes/uploads"
   exports:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "/data/docker-volumes/exports"
   downloads:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "/data/docker-volumes/downloads"
   fasta-exports:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "/data/docker-volumes/fasta-exports"
 
 secrets:
   postgres_pass:
@@ -76,6 +118,7 @@ services:
       - postgres
 
   blast-worker:
+    restart: always
     # Can not have container-name set
     image: bioatlas/molmod-blast:${TAG:-latest}
     init: true
