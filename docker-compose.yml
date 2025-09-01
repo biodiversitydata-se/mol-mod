@@ -111,9 +111,10 @@ services:
     environment:
       - PYTHONPATH=/app/molmod
       - FLASK_DEBUG=1
-      - CAS_AFTER_LOGOUT=${HOST_URL:-${CAS_AFTER_LOGOUT}}
+      - CAS_AFTER_LOGOUT=${CAS_AFTER_LOGOUT_LOCAL}
       - MAINTENANCE_MODE=${MAINTENANCE_MODE:-0}
       - MAINTENANCE_ROUTES=${MAINTENANCE_ROUTES:-All}
+      - UPLOAD_EMAIL=${UPLOAD_EMAIL_TEST}
     ports:
       - 5000:5000
     depends_on:
