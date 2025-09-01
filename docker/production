@@ -3,10 +3,10 @@ FROM python:3.10-bullseye
 RUN mkdir -p /app
 RUN mkdir -p /app/molmod
 RUN mkdir -p /app/log
-RUN mkdir -p /app/uploads
-RUN mkdir -p /app/exports
-RUN mkdir -p /app/downloads
-RUN mkdir -p /app/fasta-exports
+RUN mkdir -p /app/data-volumes/uploads
+RUN mkdir -p /app/data-volumes/exports
+RUN mkdir -p /app/data-volumes/downloads
+RUN mkdir -p /app/data-volumes/fasta-exports
 
 COPY molmod/ /app/molmod/
 COPY log/ /app/log/

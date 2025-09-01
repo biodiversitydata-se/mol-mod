@@ -10,13 +10,8 @@ scripts/download/.cas.cred
 scripts/ipt-update/pub_info.tsv
 scripts/ipt-update/resources.tsv
 
-# Folders replaced by named volumes in prod
-downloads/
-!molmod/static/downloads
-exports/
-postgres-data/
-uploads/
-fasta-exports/
+# Bind-mounted data volumes
+data-volumes/
 
 backups/*
 backups/db/*

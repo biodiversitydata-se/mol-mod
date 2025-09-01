@@ -1,8 +1,11 @@
-#
-# This makefile is intended to be used for creating, publishing,
-# and running (primarily in the) the molmod production environment
+# Shortcuts for building, running, and maintaining the project
+# Targets that use Docker Compose (e.g., build/up/down) default to production compose files
+# Other targets also work in development
 
-compose = docker-compose.prod.yml
+ifeq ($(PLATFORM),mac)
+  compose := docker-compose.prod.local.yml
+endif
+compose ?= docker-compose.prod.yml
 SHELL = bash
 
 #
@@ -114,52 +117,6 @@ reannot:
 	./scripts/update-annotation.sh "$(file)" && make stats && make blastdb
 
 #
-# VOLUME FILE MANAGEMENT - GENERAL
-#
-
-# Manage files in named volumes
-# Set vol=[uploads|exports|fasta-exports] or see lazy options further down
-
-# List files
-# Example: make flist vol=uploads
-flist:
-	docker exec asv-main ls /app/$(vol)
-
-# Copy file(s) to host
-# Apply to single file, if specified, or all files in dir
-cpfile := $(if $(file),$(file),.)
-# Example: make fcopy vol=uploads [file=some-file.xlsx]
-fcopy:
-	mkdir -p $(vol) && docker cp asv-main:/app/$(vol)/$(cpfile) $(vol)
-
-# Delete file(s) in container
-delfile := $(if $(file),$(file),*)
-# Example: make fdel vol=uploads [file=some-file.xlsx]
-fdel:
-	docker exec asv-main sh -c 'rm -rf /app/$(vol)/$(delfile)'
-
-#
-# UPLOADS
-#
-
-# List files
-uplist:
-	export vol=uploads && make flist
-
-# Copy file(s) to host
-# Apply to single file, if specified, or all files in dir
-cpfile := $(if $(file),$(file),.)
-# Example: make upcopy [file=jane.doe@univ.se_210902-212121_ampliseq.xlsx]
-upcopy:
-	export vol=uploads file=$(cpfile) && make fcopy
-
-# Delete file(s) in container
-delfile := $(if $(file),$(file),*)
-# Example: make updel [file=jane.doe@univ.se_210902-212121_ampliseq.xlsx]
-updel:
-	export vol=uploads file=$(delfile) && make fdel
-
-#
 # DATASET-EXPORTS
 #
 
@@ -171,23 +128,6 @@ updel:
 #          make export ds="$ds"
 export:
 	python3 ./scripts/export_data.py -v $(if $(ds),--ds "$(ds)",)
-
-# List files
-exlist:
-	export vol=exports && make flist
-
-# Copy file(s) to host
-# Apply to single file, if specified, or all files in dir
-cpfile := $(if $(file),$(file),.)
-# Example: make excopy [file=GU-2022-Wallhamn-18S.zip]
-excopy:
-	export vol=exports file=$(cpfile) && make fcopy
-
-# Delete file(s) in container
-delfile := $(if $(file),$(file),*)
-# Example: make exdel [file=GU-2022-Wallhamn-18S.zip]
-exdel:
-	export vol=exports file=$(delfile) && make fdel
 
 #
 # FASTA-EXPORTS
@@ -204,24 +144,6 @@ ifeq (fasta,$(filter fasta,$(MAKECMDGOALS)))
     $(error "Don't mix 'make fasta' and 'make export', please")
   endif
 endif
-
-
-# List files
-falist:
-	export vol=fasta-exports && make flist
-
-# Copy file(s) to host
-# Apply to single file, if specified, or all files in dir
-cpfile := $(if $(file),$(file),.)
-# Example: make facopy [file=export-240202-114802.fasta]
-facopy:
-	export vol=fasta-exports file=$(cpfile) && make fcopy
-
-# Delete file(s) in container
-delfile := $(if $(file),$(file),*)
-# Example: make exdel [file=export-240202-114802.fasta]
-fadel:
-	export vol=fasta-exports file=$(delfile) && make fdel
 
 #
 # MAINTENANCE

@@ -56,14 +56,14 @@ def create_app():
     environment = os.getenv('RUN_ENV')
     if environment != 'production':
         environment = 'development'
-
     # Create log before flask app
     log_config = json.load(open(f'log/log_config_{environment}.json'))
-    # Write to named volume in asv-main (keep dummy log in worker)
-    dir = '/app/downloads'
+    # Write to bind-mounted volume
+    dir = '/app/data-volumes/downloads'
     if not os.path.exists(dir):
         os.makedirs(dir)
-    log_config["handlers"]["downloads"]["filename"] = "downloads/downloads.log"
+    log_config["handlers"]["downloads"]["filename"] = os.path.join(dir,
+        "downloads.log")
     # Don't forward log entries to wsgi stream
     log_config["loggers"]["downloads"]["propagate"] = False
     # Avoid duplicated entries from werkzeug

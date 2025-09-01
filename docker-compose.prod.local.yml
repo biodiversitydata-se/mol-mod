@@ -4,61 +4,11 @@
 # View with: docker logs [-f / --follow] <container_id_or_name>
 x-logging:
   &default-logging
-  driver: loki
+  driver: "json-file"
   options:
-    loki-url: "http://10.65.2.251:3100/loki/api/v1/push"
-    loki-timeout: 5s
-    loki-max-backoff: 2m
-    loki-relabel-config: |
-      - action: replace
-        source_labels: [compose_project, compose_service]
-        separator: "_"
-        target_label: service
-      - action: labelmap
-        regex: "compose_project"
-        replacement: "stack"
-      - action: labeldrop
-        regex: "filename|container_name|compose_project|compose_service"
     max-size: '20m'
     max-file: '5'
-
-volumes:
-  postgres-db:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "${DATA_PATH}/postgres-db"
-  blast-db:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "${DATA_PATH}/blast-db"
-  uploads:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "${DATA_PATH}/uploads"
-  exports:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "${DATA_PATH}/exports"
-  downloads:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "${DATA_PATH}/downloads"
-  fasta-exports:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "${DATA_PATH}/fasta-exports"
+    compress: 'true'
 
 secrets:
   postgres_pass:
@@ -84,7 +34,7 @@ services:
       - ./db/db-api-schema.sql:/docker-entrypoint-initdb.d/02-api-schema.sql
       - ./db/db-roles.sql:/docker-entrypoint-initdb.d/03-roles.sql
       - ./db/restrict_db_access.sh:/docker-entrypoint-initdb.d/04-restrict-db.sh
-      - postgres-db:/var/lib/postgresql/data
+      - ${DATA_PATH_LOCAL}/postgres-db:/var/lib/postgresql/data
     env_file:
       - .env
     # Connect ports (HOST:CONTAINER) for IPT and pgAdmin (SSH)
@@ -135,7 +85,7 @@ services:
       - FLASK_DEBUG=0
       - BLAST_USAGE_REPORT=false
     volumes:
-      - blast-db:/blastdbs
+      - ${DATA_PATH_LOCAL}/blast-db:/blastdbs
 
   asv-main:
     restart: always
@@ -146,10 +96,10 @@ services:
     container_name: asv-main
     logging: *default-logging
     volumes:
-      - uploads:/app/data-volumes/uploads
-      - exports:/app/data-volumes/exports
-      - downloads:/app/data-volumes/downloads
-      - fasta-exports:/app/data-volumes/fasta-exports
+      - ${DATA_PATH_LOCAL}/uploads:/app/data-volumes/uploads
+      - ${DATA_PATH_LOCAL}/exports:/app/data-volumes/exports
+      - ${DATA_PATH_LOCAL}/downloads:/app/data-volumes/downloads
+      - ${DATA_PATH_LOCAL}/fasta-exports:/app/data-volumes/fasta-exports
     env_file:
       - .env
     secrets:

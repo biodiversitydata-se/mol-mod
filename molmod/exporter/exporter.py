@@ -194,7 +194,7 @@ def export_datasets(pids: str):
         logging.info("Exporting dataset: %s", dataset_id)
 
         # Make clean dataset dir
-        dir = os.path.join('/app/exports', dataset_id)
+        dir = os.path.join('/app/data-volumes/exports', dataset_id)
         if os.path.exists(dir):
             shutil.rmtree(dir, ignore_errors=True)
         os.makedirs(dir, exist_ok=True)
@@ -249,7 +249,7 @@ def create_output_fasta(ref: str = '', target: str = ''):
            AND split_part(reference_db, ' (', 1) = '{ref}' \
            AND split_part(annotation_target, ' (', 1) = '{target}';"
 
-    dir = '/app/fasta-exports'
+    dir = '/app/data-volumes/fasta-exports'
     if not os.path.exists(dir):
         os.makedirs(dir)
     with open(f'{dir}/{filename}.fasta', 'w') as fasta:
