@@ -57,15 +57,9 @@ secrets:
 # BACKUP & RESTORE
 #
 
-# Make full backup (db, logs & uploads)
+# Make db dump
 backup:
-	./scripts/scheduled-backup.sh
-# Just make db dump
-db-backup:
 	./scripts/database-backup.sh data
-# Make backup without db dump
-nbackup:
-	./scripts/scheduled-backup.sh -n
 
 # Restore from latest (or specified) db dump
 # Example: make restore (OR make restore file=some-db-dump.sql.tar)
