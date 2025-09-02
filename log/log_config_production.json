@@ -9,11 +9,6 @@
           "class": "logging.StreamHandler",
           "stream": "ext://flask.logging.wsgi_errors_stream",
           "formatter": "default"
-      },
-      "downloads": {
-          "class": "logging.FileHandler",
-          "filename": "dummy.log",
-          "formatter": "default"
       }
   },
   "root": {
@@ -21,10 +16,6 @@
       "handlers": ["wsgi"]
   },
   "loggers": {
-      "downloads": {
-          "level": "INFO",
-          "handlers": ["downloads"]
-      },
       "werkzeug": {
           "level": "WARNING",
           "handlers": ["wsgi"]

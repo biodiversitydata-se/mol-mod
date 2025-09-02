@@ -47,12 +47,6 @@ volumes:
       type: none
       o: bind
       device: "${DATA_PATH}/exports"
-  downloads:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "${DATA_PATH}/downloads"
   fasta-exports:
     driver: local
     driver_opts:
@@ -148,7 +142,6 @@ services:
     volumes:
       - uploads:/app/data-volumes/uploads
       - exports:/app/data-volumes/exports
-      - downloads:/app/data-volumes/downloads
       - fasta-exports:/app/data-volumes/fasta-exports
     env_file:
       - .env

@@ -157,12 +157,12 @@ def files(filename):
 @custom_login_required
 def datasets(filename):
     """Downloads a (log-in protected) dataset file"""
-    APP.downloads_logger.info(f"Requested download of {filename}")
+    APP.logger.info(f"Requested download of {filename}")
     dir = '/app/data-volumes/exports'
     try:
         return send_from_directory(dir, filename, as_attachment=True)
     except Exception as e:
-        APP.downloads_logger.error(f"Failed download of {filename} due to {e}")
+        APP.logger.error(f"Failed download of {filename} due to {e}")
         abort(404)
 
 

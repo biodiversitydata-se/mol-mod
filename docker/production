@@ -5,7 +5,6 @@ RUN mkdir -p /app/molmod
 RUN mkdir -p /app/log
 RUN mkdir -p /app/data-volumes/uploads
 RUN mkdir -p /app/data-volumes/exports
-RUN mkdir -p /app/data-volumes/downloads
 RUN mkdir -p /app/data-volumes/fasta-exports
 
 COPY molmod/ /app/molmod/

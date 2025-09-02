@@ -98,7 +98,6 @@ services:
     volumes:
       - ${DATA_PATH_LOCAL}/uploads:/app/data-volumes/uploads
       - ${DATA_PATH_LOCAL}/exports:/app/data-volumes/exports
-      - ${DATA_PATH_LOCAL}/downloads:/app/data-volumes/downloads
       - ${DATA_PATH_LOCAL}/fasta-exports:/app/data-volumes/fasta-exports
     env_file:
       - .env
