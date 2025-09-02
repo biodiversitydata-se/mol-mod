@@ -89,11 +89,11 @@ services:
     volumes:
       - ${DATA_PATH_LOCAL}/blast-db:/blastdbs
 
-  develop:
+  main-dev:
     container_name: asv-main
     build:
       context: ./
-      dockerfile: docker/develop
+      dockerfile: docker/main-dev
     logging: *default-logging
     volumes:
       # To make changes take immediate effect (using Flask reload in DEBUG mode)

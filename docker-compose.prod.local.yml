@@ -92,7 +92,7 @@ services:
     image: bioatlas/molmod:${TAG:-latest}
     build:
       context: ./
-      dockerfile: docker/production
+      dockerfile: docker/main-prod
     container_name: asv-main
     logging: *default-logging
     volumes:
