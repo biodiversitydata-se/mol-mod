@@ -166,16 +166,22 @@ or:
 Both commands will bring up a menu with instructions for how to proceed with deletions. Remember to update stats accordingly (see above).
 
 ### Taxonomic (re)annotation
-During the final step of data import, we automatically add a record in table `taxon_annotation` for every new(!) ASV in the dataset. This is the standard SBDI annotation that we also plan to update as reference databases and/or annotation algorithms develop. To *update* the annotation of all ASV:s from a target gene, currently annotated against a specific reference database, you should first export a fasta file with those ASVs, using e.g.:
-```
-  $ make fasta ref="SBDI-GTDB-R07-RS207-1" target="16S rRNA"
-```
+On import, each **new** ASV gets a row in table `taxon_annotation` (standard SBDI annotation, updated as reference DBs/algorithms evolve).
 
-Fasta files can then be used as input to the [ampliseq pipeline](https://nf-co.re/ampliseq), and the output (saved as `.xlsx` or `.csv`) can then be fed into the database like so:
-```
-  $ make reannot file=/path/to/reannotation.xlsx
-```
-At the moment (220218), Ampliseq output is not yet adapted to include target-prediction fields, but you can use `reannotation.xlsx` for reannotation of the dummy data set in `./scripts/processing/input`, or as a template for editing your own file. Any previous annotations of ASVs will be given `status='old'`, whereas the new rows will have `status='valid'`.
+To re-annotate ASVs for a given target gene currently tied to a specific reference DB:
+  1) Export FASTA:
+     ```
+     make fasta ref="SBDI-GTDB-R07-RS207-1" target="16S rRNA"
+     ```
+  2) Run the FASTA with [nf-core/ampliseq](https://nf-co.re/ampliseq).
+  3) Since Ampliseq output doesn’t yet include fields from `Target prediction filtering` (as of 250904), either:
+     - add them via `./scripts/processing/reannotation.processing.R`, or  
+     - use `./scripts/processing/output/reannotation.xlsx` as a template and edit your own file.
+  4) Import:
+     ```
+     make reannot file=/path/to/reannotation.xlsx
+     ```
+Previous annotations are marked `status='old'`; new rows get `status='valid'`.
 
 ### Target prediction filtering
 In version 2.0.0, we make it possible to import all denoised sequences from a dataset, and then dynamically filter out any ASVs that we do not (currently) predict to derive from the targeted gene, thereby excluding these from BLAST and filter searches, result displays and IPT views. ASVs are thus only imported once, but their status can change, e.g. at taxonomic re-annotation. Criteria used for ASV exclusion may vary between genes / groups of organisms, but could e.g. combine the output from the *BAsic Rapid Ribosomal RNA Predictor (barrnap)* with the taxonomic annotation itself. For example, we may decide that only ASVs that are annotated at least at kingdom level OR get positive barrnap prediction should be considered as TRUE 16S rRNA sequences.
