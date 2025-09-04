@@ -5,19 +5,9 @@ __pycache__/
 
 .env
 .secret.*
-scripts/ipt-update/.ipt.cred
-scripts/download/.cas.cred
-scripts/ipt-update/resources.tsv
-scripts/ipt-update/pub_info.tsv
 
 backups/
 db/
 docker/
-downloads/
-!molmod/static/downloads
-exports/
-fasta-exports/
-postgres-data/
 scripts/
-uploads/
-venv/
+docker-volumes/

@@ -11,15 +11,15 @@
 
 topdir=$( readlink -f "$( dirname "$0" )/.." )
 
-DIR='backups/db'
+DIR='backups'
 BASE='db-dump'
 TIMESTAMP="$(date +'%Y-%m-%d_%H%M')"
 CONTAINER='asv-db'
 
 # Use the "$FORMAT" environment variable if it's available, but
-# otherwise default to "tar" format.  The formats supported by pg_dump
+# otherwise default to "custom" format.  The formats supported by pg_dump
 # are plain, custom, directory, and tar.  See the pg_dump manual.
-FORMAT=${FORMAT:-tar}
+FORMAT=${FORMAT:-custom}
 
 #
 # CREATE HELP (access with './scripts/database-backup.sh -h' in molmod folder)
@@ -58,7 +58,7 @@ fi
 FILE="$topdir/$DIR/${BASE}_$TIMESTAMP.sql"
 FLAGS=( -h localhost -U "$POSTGRES_USER" -d "$POSTGRES_DB" )
 
-mkdir -p "$topdir/backups/db"
+mkdir -p "$topdir/backups"
 
 #
 # RESTORE DB
