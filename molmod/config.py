@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 """
-Collects environment variables set in .env(.template) to create distinct
-configuration classes for running the main app in different contexts.
-Also provides a function to select the corrrect class, based on the value of
-RUN_ENV, which in turn is supplied in the dockerfile.
-Finally, handles config of email used to send notification of uploaded files
+Loads environment variables from .env/.env.template and merges in values
+from a secrets file (e.g. email_config). Provides a Config object used
+throughout the application.
 """
 
 import os
@@ -73,15 +71,21 @@ class Config:
     MAINTENANCE_ROUTES = get_env_variable('MAINTENANCE_ROUTES')
     POSTGREST = get_env_variable('POSTGREST_HOST')
     BLAST_DB = get_env_variable('BLAST_DB')
-    TESTING = False
+
     SBDI_START_PAGE = get_env_variable('SBDI_START_PAGE')
     SBDI_CONTACT_PAGE = get_env_variable('SBDI_CONTACT_PAGE')
     TAXONOMY_PAGE = get_env_variable('TAXONOMY_PAGE')
     ENA_GUIDE_PAGE = get_env_variable('ENA_GUIDE_PAGE')
     AMPLISEQ_PAGE = get_env_variable('AMPLISEQ_PAGE')
     IPT_BASE_URL = get_env_variable('IPT_BASE_URL')
+
+    BATCH_SEARCH_URL = get_env_variable('BATCH_SEARCH_URL')
+    REDIRECT_URL = get_env_variable('REDIRECT_URL')
+
     CAS_SERVER = get_env_variable('CAS_SERVER')
     CAS_AFTER_LOGIN = get_env_variable('CAS_AFTER_LOGIN')
+    CAS_AFTER_LOGOUT = get_env_variable('CAS_AFTER_LOGOUT')
+
     UPLOAD_ROLE = get_env_variable('UPLOAD_ROLE')
     MAX_CONTENT_LENGTH = int(get_env_variable('MAX_CONTENT_LENGTH'))
     VALID_EXTENSIONS = get_env_variable('VALID_EXTENSIONS').split(' ')
@@ -89,6 +93,8 @@ class Config:
         'SEND_FILE_MAX_AGE_DEFAULT'))
     SQLALCHEMY_SILENCE_UBER_WARNING = int(get_env_variable(
         'SQLALCHEMY_SILENCE_UBER_WARNING'))
+    UPLOAD_EMAIL = get_env_variable('UPLOAD_EMAIL')
+
 
     def __init__(self, config_file: str = "/run/secrets/email_config"):
         """
@@ -101,24 +107,6 @@ class Config:
         self.UPLOAD_EMAIL = to_list(self.UPLOAD_EMAIL)
 
 
-class ProductionConfig(Config):
-    BATCH_SEARCH_URL = get_env_variable('BATCH_SEARCH_URL')
-    REDIRECT_URL = get_env_variable('REDIRECT_URL')
-    CAS_AFTER_LOGOUT = get_env_variable('CAS_AFTER_LOGOUT')
-    UPLOAD_EMAIL = get_env_variable('UPLOAD_EMAIL')
-
-
-class DevelopmentConfig(Config):
-    BATCH_SEARCH_URL = get_env_variable('TEST_BATCH_SEARCH_URL')
-    REDIRECT_URL = get_env_variable('TEST_REDIRECT_URL')
-    CAS_AFTER_LOGOUT = get_env_variable('CAS_AFTER_LOGOUT')
-    UPLOAD_EMAIL = get_env_variable('DEV_UPLOAD_EMAIL')
-
-
-class TestConfig(Config):
-    TESTING = True
-
-
 def get_config():
     """
     Uses RUN_ENV (set in dockerfile) to determine app environment.
@@ -129,9 +117,4 @@ def get_config():
         env = 'production'
         print('RUN_ENV is not set, using RUN_ENV:', env)
 
-    if env == 'production':
-        return ProductionConfig()
-    elif env == 'test':
-        return TestConfig()
-
-    return DevelopmentConfig()
+    return Config()

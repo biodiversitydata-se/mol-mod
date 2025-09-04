@@ -94,9 +94,10 @@ def upload():
     upload_time = dt.now().strftime("%y%m%d-%H%M%S")
     ext_filename = email + '_' + upload_time + '_' + filename
 
+    dir = '/app/data-volumes/uploads'
+    if not os.path.exists(dir):
+        os.makedirs(dir)
     try:
-        dir = 'uploads'
-        os.makedirs(dir, exist_ok=True)
         f.save(os.path.join(dir, ext_filename))
     except Exception as ex:
         APP.logger.error(f'File {ext_filename} could not be saved due to {ex}')
@@ -156,12 +157,12 @@ def files(filename):
 @custom_login_required
 def datasets(filename):
     """Downloads a (log-in protected) dataset file"""
-    APP.downloads_logger.info(f"Requested download of {filename}")
-    dir = '/app/exports'
+    APP.logger.info(f"Requested download of {filename}")
+    dir = '/app/data-volumes/exports'
     try:
         return send_from_directory(dir, filename, as_attachment=True)
     except Exception as e:
-        APP.downloads_logger.error(f"Failed download of {filename} due to {e}")
+        APP.logger.error(f"Failed download of {filename} due to {e}")
         abort(404)
 
 
@@ -202,7 +203,7 @@ def list_datasets() -> dict:
                 msg = f'Dataset {ds["dataset_id"]} has no IPT resource ID'
                 APP.logger.warning(msg)
             # Only add Download link if zip exists
-            zip_path = os.path.join('/app/exports',
+            zip_path = os.path.join('/app/data-volumes/exports',
                                     f'{ds["dataset_id"]}.zip')
 
             if os.path.isfile(zip_path):

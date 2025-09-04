@@ -36,8 +36,7 @@ services:
       - ./db/db-api-schema.sql:/docker-entrypoint-initdb.d/02-api-schema.sql
       - ./db/db-roles.sql:/docker-entrypoint-initdb.d/03-roles.sql
       - ./db/restrict_db_access.sh:/docker-entrypoint-initdb.d/04-restrict-db.sh
-      # Database files stored in an easily cleared local directory
-      - ./postgres-data:/var/lib/postgresql/data
+      - ${DATA_PATH_LOCAL}/postgres-db:/var/lib/postgresql/data
     # User and password information
     env_file:
       - .env
@@ -88,18 +87,21 @@ services:
     secrets:
       - postgres_pass
     volumes:
-      - ./blast-databases:/blastdbs
-      - ./fasta-exports:/worker/fasta-exports
+      - ${DATA_PATH_LOCAL}/blast-db:/blastdbs
 
-  develop:
+  main-dev:
     container_name: asv-main
     build:
       context: ./
-      dockerfile: docker/develop
+      dockerfile: docker/main-dev
     logging: *default-logging
     volumes:
       # To make changes take immediate effect (using Flask reload in DEBUG mode)
       - ./:/app
+      # To recreate if missing on host
+      - ${DATA_PATH_LOCAL}/uploads:/app/data-volumes/uploads
+      - ${DATA_PATH_LOCAL}/exports:/app/data-volumes/exports
+      - ${DATA_PATH_LOCAL}/fasta-exports:/app/data-volumes/fasta-exports
     env_file:
       - .env
     secrets:
@@ -108,9 +110,10 @@ services:
     environment:
       - PYTHONPATH=/app/molmod
       - FLASK_DEBUG=1
-      - CAS_AFTER_LOGOUT=${HOST_URL:-${CAS_AFTER_LOGOUT}}
+      - CAS_AFTER_LOGOUT=${CAS_AFTER_LOGOUT_LOCAL}
       - MAINTENANCE_MODE=${MAINTENANCE_MODE:-0}
       - MAINTENANCE_ROUTES=${MAINTENANCE_ROUTES:-All}
+      - UPLOAD_EMAIL=${UPLOAD_EMAIL_TEST}
     ports:
       - 5000:5000
     depends_on:
