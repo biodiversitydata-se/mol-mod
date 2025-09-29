@@ -115,6 +115,7 @@ CREATE TABLE IF NOT EXISTS public.taxon_annotation (
     annotation_confidence numeric NOT NULL,
     taxon_remarks character varying,
     scientific_name character varying NOT NULL,
+    scientific_name_id character varying,
     taxon_rank character varying NOT NULL,
     annotation_target character varying NOT NULL,
     target_prediction boolean NOT NULL,

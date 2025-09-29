@@ -113,6 +113,7 @@
     "identification_references": {"validation": "(?!nan).*"},
     "taxon_remarks": {},
     "scientificName": {"validation": "(?!nan).*"},
+    "scientificNameID": {},
     "taxonRank": {"validation": "(?!nan).*"},
     "annotation_target": {"validation": "(?!nan).*"},
     "target_prediction": {"validation": "(True|False)"},
