@@ -1,140 +1,56 @@
-<header id="masthead" class="site-header header-v1">
-  <div id="masthead-inner" class="site-header-inner">
-    <div class="header-main header--row layout-full-contained" id="cb-row--header-main" data-row-id="main"
-      data-show-on="desktop mobile">
-      <div class="header--row-inner header-main-inner light-mode">
-        <div class="customify-container">
-          <div class="customify-grid cb-row--desktop hide-on-mobile hide-on-tablet customify-grid-middle">
-            <div class="customify-col-6_md-6_sm-6 builder-item builder-first--logo builder-item--group"
-              data-push-left="">
-              <div class="item--inner builder-item--logo" data-section="title_tagline" data-item-id="logo">
-                <div class="site-branding logo-bottom">
-                  <a href="https://static.biodiversitydata.se" class="logo-link" rel="home" itemprop="url">
-                    <img class="site-img-logo" src="https://static.biodiversitydata.se/images/sbdi-logo-orginal-large.png"
-                      alt="Swedish Biodiversity Data Infrastructure">
-                  </a>
-                </div><!-- .site-branding -->
-              </div>
-              <div class="item--inner builder-item--html " data-section="header_html" data-item-id="html">
-                <div class="builder-header-html-item item--html">
-                  <p data-i18n="general.orgfullname"></p>
-                </div>
-              </div>
-            </div>
-            <div class="customify-col-6_md-6_sm-6 builder-item builder-first--search_box builder-item--group"
-              data-push-left="">
-              <div id="header-search-box" class="item--inner builder-item--search_box" data-section="search_box"
-                data-item-id="search_box">
-                <div class="header-search_box-item item--search_box">
-                  <form method="get" action="https://species.biodiversitydata.se/search"
-                    class="search-form navbar-form navbar-right">
-                    <!-- Hide instead of delete to avoid js error -->
-                    <div class="form-group hide-on-mobile hide-on-tablet hide-on-desktop">
-                      <input name="q" id="autocompleteHeader" type="text" class="form-control"
-                        data-i18n="[placeholder]nav.searchbox">
-                    </div>
-                  </form>
-                </div>
-              </div>
-              <div id="auth-header-buttons"
-                class="item--inner builder-item--button hide-on-mobile hide-on-tablet ::loginStatus::"
-                data-section="header_button" data-item-id="button">
-                <a target="_new" href="https://biodiversitydata.se"
-                  class="item--button customify-btn customify-builder-btn is-icon-before">
-                  <i class="fas fa-external-link-alt"></i>&nbsp; <span data-i18n="nav.link-to-sbdi"></span></a>
-                <a target="_new" href="https://docs.biodiversitydata.se/support"
-                  class="item--button customify-btn customify-builder-btn is-icon-before">
-                  <i class="fas fa-external-link-alt"></i>&nbsp; <span data-i18n="nav.link-to-support"></span></a>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="cb-row--mobile hide-on-desktop customify-grid customify-grid-middle">
-          <div class="customify-col-12_md-12_sm-12 builder-item builder-first--logo" data-push-left="">
-            <div class="item--inner builder-item--logo" data-section="title_tagline" data-item-id="logo">
-              <div class="site-branding logo-bottom">
-                <a href="https://biodiversitydata.se" class="logo-link" rel="home" itemprop="url">
-                  <img class="site-img-logo" src="https://static.biodiversitydata.se/images/sbdi-logo-orginal-large.png"
-                    alt="Swedish Biodiversity Data Infrastructure">
+<header>
+
+    <!-- Banner-->
+    <div class="container">
+        <div class="banner">
+            <a href="https://biodiversitydata.se/" title="Swedish Biodiversity Data Infrastructure">
+                <img src="https://bioatlas.biodiversitydata.se/app/themes/sbdi/assets/images/SBDI-rgb.svg" alt="Swedish Biodiversity Data Infrastructure">
+            </a>
+            <p>Swedish Biodiversity Data Infrastructure</p>
+            <div>
+                <a class="hidden-xs" href="https://biodiversitydata.se/explore-data/">
+                    <i class="fas fa-arrow-circle-right"></i>&nbsp;All SBDI tools
                 </a>
-              </div><!-- .site-branding -->
+                <br>
+                <a class="hidden-xs" href="https://docs.biodiversitydata.se/support/">
+                    <i class="fas fa-arrow-circle-right"></i>&nbsp;Support form
+                </a>
             </div>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
-  <div class="header-bottom header--row layout-full-contained hide-on-mobile hide-on-tablet" id="cb-row--header-bottom"
-    data-row-id="bottom" data-show-on="desktop mobile">
-    <div class="header--row-inner header-bottom-inner">
-      <div class="customify-container">
-        <div class="customify-grid cb-row--desktop hide-on-mobile hide-on-tablet customify-grid-middle">
-          <div class="customify-col-12_md-12_sm-12 builder-item builder-first--primary-menu" data-push-left="">
-            <div class="item--inner builder-item--primary-menu has_menu" data-section="header_menu_primary"
-              data-item-id="primary-menu">
-              <nav id="site-navigation-bottom-desktop"
-                class="site-navigation primary-menu primary-menu-bottom nav-menu-desktop primary-menu-desktop style-plain">
-                <ul id="menu-nested-pages-main-menu" class="primary-menu-ul menu nav-menu">
-                    <li><a href="{{ url_for('main_bp.index') }}">Swedish ASV portal</a> </li>
-                    <li><a href="{{ url_for('blast_bp.blast') }}">BLAST search</a></li>
-                    <li><a href="{{ url_for('filter_bp.filter') }}">Filter search</a></li>
-                    <li><a href="{{ url_for('main_bp.submit') }}">Submit data</a></li>
-                    <li><a href="{{ url_for('main_bp.download') }}">Download data</a></li>
-                    <li><a href="{{ url_for('main_bp.about') }}">About</a></li>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-default">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div id="navbar-collapse" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li class="nav"><a class="nav" href="{{ url_for('main_bp.index') }}">Swedish ASV portal</a></li>
+                    <li class="nav"><a class="nav" href="{{ url_for('blast_bp.blast') }}">BLAST search</a></li>
+                    <li class="nav"><a class="nav" href="{{ url_for('filter_bp.filter') }}">Filter search</a></li>
+                    <li class="nav"><a class="nav" href="{{ url_for('main_bp.submit') }}">Submit data</a></li>
+                    <li class="nav"><a class="nav" href="{{ url_for('main_bp.download') }}">Download data</a></li>
+                    <li class="nav"><a class="nav" href="{{ url_for('main_bp.about') }}">About</a></li>
+                    <li class="nav visible-xs-inline">
+                        <a class="nav" href="https://biodiversitydata.se/explore-data/">All SBDI tools</a>
+                    </li>
+                    <li class="nav visible-xs-inline">
+                        <a class="nav" href="https://docs.biodiversitydata.se/support/">Support form</a>
+                    </li>
                     {% if firstname %}
-                        <li><a href="/logout">Log out {{firstname}}</a></li>
+                        <li class="nav"><a class="nav" href="/logout">Log out {{firstname}}</a></li>
                     {% else %}
-                        <li><a href="/login">Login</a></li>
+                        <li class="nav"><a class="nav" href="/login">Login</a></li>
                     {% endif %}
                 </ul>
-              </nav>
             </div>
-          </div>
         </div>
-      </div>
-    </div>
-  </div>
+    </nav>
 </header>
-
-<!-- Mobile Navbar  -->
-
-<nav class="navbar navbar-default hide-on-desktop">
-  <div class="container-fluid">
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-        data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand hide-on-desktop" href="https://static.biodiversitydata.se" data-i18n="general.orgfullname"></a>
-    </div>
-
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav navbar-right">
-        <li class=" hide-on-desktop hide-on-tablet"><a target="_blank" href="https://biodiversitydata.se"><i
-              class="fas fa-external-link-alt"></i>&nbsp; <span data-i18n="nav.link-to-sbdi"></span></a></li>
-        <li class="hide-on-desktop hide-on-tablet"><a target="_blank" href="https://docs.biodiversitydata.se"><i
-              class="fas fa-external-link-alt"></i>&nbsp; <span data-i18n="nav.link-to-docs"></span></a></li>
-        <li><a href="{{ url_for('main_bp.index') }}">Swedish ASV portal</a> </li>
-        <li><a href="{{ url_for('blast_bp.blast') }}">BLAST search</a></li>
-        <li><a href="{{ url_for('filter_bp.filter') }}">Filter search</a></li>
-        <li><a href="{{ url_for('main_bp.submit') }}">Submit data</a></li>
-        <li><a href="{{ url_for('main_bp.download') }}">Download data</a></li>
-        <li><a href="{{ url_for('main_bp.about') }}">About</a></li>
-        {% if firstname %}
-          <li><a href="/logout">Log out {{firstname}}</a></li>
-        {% else %}
-          <li><a href="/login">Login</a></li>
-        {% endif %}
-        <li class="dropdown">
-          <ul id="dropdown-auth-menu" class="dropdown-menu ::loginStatus::">
-          </ul>
-        </li>
-      </ul>
-    </div><!-- /.navbar-collapse -->
-  </div><!-- /.container-fluid -->
-</nav>

@@ -13,7 +13,7 @@ h2 {
     font-size: 22px !important;
 }
 /* Underline links but when not hovered */
-.container a:not(.btn), .visHlpDiv a {
+.container a:not(.btn):not(.nav), .visHlpDiv a {
     text-decoration: underline !important;
 }
 .container a:hover, .visHlpDiv a:hover {
@@ -21,8 +21,12 @@ h2 {
 }
 /* Increase font size */
 .main-content p, th, td, .dataTables_info,
-.help-block, li, #file-shown, figcaption {
+.help-block, li:not(.nav), #file-shown, figcaption {
     font-size: 16px !important;
+}
+/* Footer */
+footer {
+    margin-top: 20px;
 }
 
 /* FORMS */
