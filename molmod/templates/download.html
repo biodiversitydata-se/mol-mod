@@ -8,18 +8,16 @@ Download data
 <div class='container'>
     <div>
         <h1>Download data</h1>
-        <p>Select and download complete ASV occurrence datasets in a modified Darwin Core (DwC) format.
-            These files contain the same data as corresponding DwC archives served from the GBIF-Sweden
-            <a href="{{ ipt_base_url }}" rel="noreferrer noopener" target="_blank"> Integrated Publishing Toolkit (IPT)</a> website,
-            but in a more condensed format.
-            You can also inspect or download individual datasets via direct links, or retrieve lists of datasets in Excel or CSV format.
-            You may have to actively allow downloads from our site in your browser preferences.
-
-            Downloaded archives can be unpacked, merged and processed into ASV table format using the
-            <a href="https://github.com/biodiversitydata-se/asvoccur"
-            rel="noreferrer noopener" target="_blank">asvoccur</a> R package.
-
-            <br>Please contact <a href="{{ sbdi_contact_page }}">SBDI support</a> if you have any questions or suggestions.
+        <p>
+        Download ASV occurrence datasets in a condensed Darwin Core (DwC) format. These contain the same data as archives from the
+        <a href="{{ ipt_base_url }}" rel="noreferrer noopener" target="_blank">Integrated Publishing Toolkit (IPT)</a>,
+        but in a more compact form. You may need to allow downloads in your browser. Use the
+        <a href="https://github.com/biodiversitydata-se/asvoccur" rel="noreferrer noopener" target="_blank">asvoccur</a> R package to unpack,
+        merge, and process the data. See our
+        <a href="https://biodiversitydata-se.github.io/sbdi-days-eDNA/tutorial.html" rel="noreferrer noopener" target="_blank">tutorial</a> for an example workflow.
+        </p>
+        <p>
+        Please contact <a href="{{ sbdi_contact_page }}">SBDI support</a> if you have any questions or suggestions.
         </p>
 
     {% if dlform %}
