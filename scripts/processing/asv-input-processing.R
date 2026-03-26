@@ -197,7 +197,7 @@ if (nrow(emof) == 0 & nrow(emof_simple) > 0) {
   emof[, measurementType := gsub("\\.", " ", measurementType)]
   # Separate parameter and unit
   emof[, c("measurementType", "measurementUnit") :=
-         tstrsplit(measurementType, '[.]?[()]', "")]
+         tstrsplit(measurementType, '[.]?[()]')]
   # Add remaining cols
   more_emof <- c('measurementTypeID', 'measurementUnitID', 'measurementValueID',
                  'measurementMethod', 'measurementDeterminedDate',
