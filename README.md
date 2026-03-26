@@ -239,9 +239,6 @@ If needed, the system could be scaled to have more blast instances, by modifying
 ```
 We have not looked into the details of this, though.
 
-### Coding contributions
-Suggestions and code contributions are always welcome. I aim to follow a Git-Flow branching model, though I occasionally simplify the process.
-
 ### Licenses
 This code (biodiversitydata-se/mol-mod) is released under CC0 (see https://github.com/biodiversitydata-se/mol-mod/blob/master/LICENSE), but uses the following components with MIT licenses:
 
