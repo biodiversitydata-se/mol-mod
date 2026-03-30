@@ -193,11 +193,15 @@ if (nrow(emof) == 0 & nrow(emof_simple) > 0) {
   emof <- melt(emof_simple, id.vars = c("eventID"), na.rm = T,
                value.name = "measurementValue",
                variable.name = c("measurementType"))
-  # Restore any spaces in parameter names
+  # Restore spaces
   emof[, measurementType := gsub("\\.", " ", measurementType)]
-  # Separate parameter and unit
-  emof[, c("measurementType", "measurementUnit") :=
-         tstrsplit(measurementType, '[.]?[()]')]
+  
+  # Only split names that actually end with " (unit)"
+  emof[, measurementUnit := NA_character_]
+  emof[grepl(" \\([^()]+\\)$", measurementType),
+       c("measurementType", "measurementUnit") :=
+         tstrsplit(measurementType, " \\(|\\)$")]
+  
   # Add remaining cols
   more_emof <- c('measurementTypeID', 'measurementUnitID', 'measurementValueID',
                  'measurementMethod', 'measurementDeterminedDate',
