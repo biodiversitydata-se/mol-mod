@@ -4,35 +4,44 @@
 Submit data
 {% endblock title %}
 
-
 {% block body %}
 <div class='container'>
     <div>
         <h1>Submit data</h1>
-        <p>We can help make your Amplicon Sequence Variant (ASV) dataset available to the research community
+        <p>
+            We can help make your Amplicon Sequence Variant (ASV) dataset available to the research community
             via the ASV database and the Bioatlas. Read more about our platform, and the data we currently support,
-            in the <a href="{{ url_for('main_bp.about') }}">About</a> page.
-        <br>
-        <h2>Main steps of the submission process:</h2>
-            <ol>
-                <li>Submit your raw data to ENA (see our
-                    <a href="{{ ena_guide_page }}"
-                       target="_blank">guide<span class='screen-reader-text'>(Link opens in a new tab)</span></a>).
-                </li>
-                <li>Denoise your data to ASVs (you can use the <a href="{{ ampliseq_page }}" target="_blank">ampliseq pipeline
-                <span class='screen-reader-text'>(Link opens in a new tab)</span></a>).</li>
-                <li>
-                    <a href="{{ url_for('main_bp.files', filename='SBDI-ASV-template.xlsx') }}">
-                        Download</a>, fill in and
-                    <a href="{{ url_for('main_bp.upload') }}">upload</a> the data input template,
-                    or a tar.gz with corresponding TSV files
-                    (you need to login and request upload permission).</li>
-                <li>We will contact you to write a data-sharing contract.</li>
-                <li>Your data will be published in the ASV database and bioatlas.</li>
-            </ol>
+            on the <a href="{{ url_for('main_bp.about') }}">About</a> page.
         </p>
+
+        <h2>Main steps of the submission process:</h2>
+        <ol>
+            <li>
+                Submit your raw data to ENA (see our
+                <a href="{{ ena_guide_page }}" target="_blank">guide<span class='screen-reader-text'>(Link opens in a new tab)</span></a>).
+            </li>
+            <li>
+                Denoise your data to ASVs (you can use the
+                <a href="{{ ampliseq_page }}" target="_blank">ampliseq pipeline
+                    <span class='screen-reader-text'>(Link opens in a new tab)</span></a>).
+            </li>
+            <li>
+                <a href="{{ url_for('main_bp.files', filename='SBDI-ASV-template.xlsx') }}">Download</a>,
+                fill in and <a href="{{ url_for('main_bp.upload') }}">upload</a> the data input template,
+                or a tar.gz with corresponding TSV files
+                (you need to login and request upload permission).
+                <br>
+                <em>Note: The input template has recently been updated to align more closely with GBIF’s Metabarcoding Data Toolkit (MDT), simplifying data submission.</em>
+            </li>
+            <li>We will contact you to write a data-sharing contract.</li>
+            <li>Your data will be published in the ASV database and Bioatlas.</li>
+        </ol>
+
         <hr>
-        <p>Contact <a href="{{ sbdi_contact_page }}">SBDI support</a>, if you have any questions about data submission.
+
+        <p>
+            Contact <a href="{{ sbdi_contact_page }}">SBDI support</a> if you have any questions about data submission.
+        </p>
     </div>
 </div>
 {% endblock body %}
