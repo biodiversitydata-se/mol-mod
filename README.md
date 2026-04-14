@@ -1,7 +1,7 @@
 # mol-mod
 Module ([the Swedish ASV portal](http://asv-portal.biodiversitydata.se/)) for sharing and exploring Amplicon Sequence Variants (ASVs) and species occurrences derived from metabarcoding (eDNA) studies in [SBDI](https://biodiversitydata.se/).
 
-[![DOI](https://zenodo.org/badge/220973056.svg)](https://zenodo.org/badge/latestdoi/220973056)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19572089.svg)](https://doi.org/10.5281/zenodo.19572089)
 
 ### Overview
 The ASV portal web application (described in detail [here](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-022-05120-z)) lets users submit metabarcoding (eDNA) datasets to the ASV database and SBDI Bioatlas/GBIF, search for Amplicon Sequence Variants (ASVs) and associated Bioatlas records (via BLAST or taxonomy/sequencing filters), and download occurrence datasets in a condensed Darwin Core–like format that can be unpacked, merged and summarised using the [asvoccur R package](https://github.com/biodiversitydata-se/asvoccur).
