@@ -61,7 +61,7 @@ echo "New release: $VERSION"
 
 run_cmd git checkout master
 run_cmd git pull
-run_cmd make build
+run_cmd docker compose -f docker-compose.prod.yml build --no-cache
 run_cmd gh release create "v${VERSION}" --generate-notes
 
 for img in $IMAGES; do

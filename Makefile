@@ -1,6 +1,11 @@
 # Shortcuts for building, running, and maintaining the project
-# Targets that use Docker Compose (e.g., build/up/down) default to production compose files
-# Other targets also work in development
+# Targets that use Docker Compose runtime (e.g., up/down/logs) default to
+# production compose files. On macOS, PLATFORM=mac selects the local production
+# runtime variant without Loki logging.
+#
+# Build targets are explicit:
+#   - build      = production images
+#   - build-dev  = development images
 
 ifeq ($(PLATFORM),mac)
   compose := docker-compose.prod.local.yml
@@ -12,12 +17,16 @@ SHELL = bash
 # GENERAL DOCKER
 #
 
-# Build service, or rebuild to implement changes in Dockerfile
+# Build production images
 build:
-	docker compose -f $(compose) build --no-cache
+	docker compose -f docker-compose.prod.yml build --no-cache
+
+# Build development images
+build-dev:
+	docker compose -f docker-compose.yml build --no-cache
 
 push:
-	docker compose -f $(compose) push
+	docker compose -f docker-compose.prod.yml push
 
 pull:
 	docker compose -f $(compose) pull
@@ -26,6 +35,16 @@ pull:
 up:
 	docker compose -f $(compose) up -d
 
+# Explicit runtime targets
+up-prod:
+	docker compose -f docker-compose.prod.yml up -d
+
+up-local:
+	docker compose -f docker-compose.prod.local.yml up -d
+
+up-dev:
+	docker compose -f docker-compose.yml up -d
+
 stop:
 	docker compose -f $(compose) stop
 
@@ -33,12 +52,30 @@ stop:
 down:
 	docker compose -f $(compose) down --remove-orphans
 
+down-prod:
+	docker compose -f docker-compose.prod.yml down --remove-orphans
+
+down-local:
+	docker compose -f docker-compose.prod.local.yml down --remove-orphans
+
+down-dev:
+	docker compose -f docker-compose.yml down --remove-orphans
+
 # Stop and remove containers, and remove network and volumes
 clean:
 	docker compose -f $(compose) down -v
 
 logs:
 	docker compose -f $(compose) logs -f
+
+logs-prod:
+	docker compose -f docker-compose.prod.yml logs -f
+
+logs-local:
+	docker compose -f docker-compose.prod.local.yml logs -f
+
+logs-dev:
+	docker compose -f docker-compose.yml logs -f
 
 ps:
 	docker compose -f $(compose) ps
