@@ -31,16 +31,21 @@
 
 rm(list = ls())
 
-uploaded_file <- "input/jane.doe@univ.se_210902-212121_ampliseq.xlsx"
 # uploaded_file <- "input/jane.doe@univ.se_210902-212121_ampliseq.tar.gz"
-annotation_file <- "input/annotation.tsv"
+uploaded_file    <- "input/jane.doe@univ.se_210902-212121_ampliseq.xlsx"
+annotation_file  <- "input/annotation.tsv"
 
-marker <- "16S rRNA"
 # target_criteria <- "None applied"
-target_criteria <- "Assigned kingdom OR barrnap-positive"
+marker           <- "18S rRNA"
+target_criteria  <- "Assigned kingdom OR barrnap-positive"
 
 bioatlas_resource_uid <- NA
 ipt_resource_id <- NA
+# Genus/specificEpithet correction (18S only) ─ set to NA to skip
+lookup_file <- "input/pr2_correction_lookup.tsv"   # NA if not used
+dada2_file  <- "input/ASV_tax.pr2_5_1_0.tsv"       # NA if not used; used only for mismatch warnings
+
+# (COI _X-correction runs automatically when marker == "COI"; no extra files needed)
 
 ################################################################################
 # 2. Packages and output paths
@@ -590,6 +595,86 @@ if (target_criteria == "None applied") {
 }
 
 annotation[, c(intersect(names(annotation), c(scores, "eval_method"))) := NULL]
+
+################################################################################
+# 13b. Correct genus/specificEpithet errors introduced by Ampliseq
+################################################################################
+
+if (marker == "18S rRNA" && !is.na(lookup_file) && file.exists(lookup_file)) {
+
+  lookup <- fread(lookup_file)
+
+  required_lookup_cols <- c(
+    "genus", "species",
+    "correct_genus", "correct_specific_epithet",
+    "correct_infraspecific_epithet", "correct_scientific_name"
+  )
+  missing_lookup_cols <- setdiff(required_lookup_cols, names(lookup))
+  if (length(missing_lookup_cols) > 0) {
+    stop(paste0(
+      "correction_lookup.tsv is missing column(s): ",
+      paste(missing_lookup_cols, collapse = ", ")
+    ))
+  }
+
+  lookup[, scientific_name_key := paste(genus, species)]
+
+  # Apply corrections to annotation via the failed scientificName key
+  annotation[lookup,
+             `:=`(
+               genus                 = i.correct_genus,
+               specific_epithet      = i.correct_specific_epithet,
+               infraspecific_epithet = i.correct_infraspecific_epithet,
+               scientific_name       = i.correct_scientific_name
+             ),
+             on = .(genus, scientific_name = scientific_name_key)
+  ]
+
+  # Warn about mismatches not yet covered by the lookup table
+  if (!is.na(dada2_file) && file.exists(dada2_file)) {
+    dada2 <- fread(dada2_file)
+
+    if (all(c("Genus", "Species") %in% names(dada2))) {
+      dada2[, genus_in_species := sub("_[^_]+$", "", Species)]
+
+      new_mismatches <- dada2[
+        genus_in_species != Genus &
+          Species != "" &
+          !paste(Genus, Species) %in% lookup[, paste(genus, species)],
+        .(Genus, Species)
+      ] |> unique()
+
+      if (nrow(new_mismatches) > 0) {
+        warning(
+          "New genus/species mismatches not in correction_lookup.tsv",
+          " - please add and re-run:\n"
+        )
+        print(new_mismatches)
+      }
+    } else {
+      warning("dada2_file does not contain expected columns 'Genus' and 'Species' - skipping mismatch check.")
+    }
+  }
+
+} else if (marker == "COI") {
+
+  # Ampliseq corrupts rows where taxonomy is unresolved at genus level (_X... suffix):
+  # specific_epithet gets the parent taxon name and infraspecific_epithet gets X's.
+  # Fix: set specific_epithet to "X", clear infraspecific_epithet.
+  # scientific_name is already correct when OTU exists; otherwise extend genus
+  # by one X level (e.g. "Naididae_X" -> "Naididae_XX").
+
+  is_unresolved <- grepl("_X+$", annotation$genus)
+
+  annotation[is_unresolved, specific_epithet      := "X"]
+  annotation[is_unresolved, infraspecific_epithet := ""]
+  annotation[
+    is_unresolved & (is.na(otu) | otu == ""),
+    scientific_name := sub("(X+)$", "\\1X", genus)
+  ]
+
+  cat(sprintf("COI _X-correction: %d rows corrected.\n", sum(is_unresolved)))
+}
 
 ################################################################################
 # 14. Optional dataset-specific fixes

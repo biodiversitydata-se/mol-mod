@@ -73,6 +73,62 @@ if (target_criteria == 'None applied') {  # E.g. COI
 annotation[, c(scores, 'eval_method') := NULL]
 
 ################################################################################
+# Correct genus/specificEpithet errors introduced by Ampliseq
+################################################################################
+
+if (marker == "18S rRNA" && !is.na(lookup_file) && file.exists(lookup_file)) {
+
+  lookup <- fread(lookup_file)
+  lookup[, scientific_name_key := paste(genus, species)]
+
+  annotation[lookup,
+    `:=`(
+      genus                 = i.correct_genus,
+      specific_epithet      = i.correct_specific_epithet,
+      infraspecific_epithet = i.correct_infraspecific_epithet,
+      scientific_name       = i.correct_scientific_name
+    ),
+    on = .(genus, scientific_name = scientific_name_key)
+  ]
+
+  if (!is.na(dada2_file) && file.exists(dada2_file)) {
+    dada2 <- fread(dada2_file)
+
+    if (all(c("Genus", "Species") %in% names(dada2))) {
+      dada2[, genus_in_species := sub("_[^_]+$", "", Species)]
+
+      new_mismatches <- dada2[
+        genus_in_species != Genus &
+          Species != "" &
+          !paste(Genus, Species) %in% lookup[, paste(genus, species)],
+        .(Genus, Species)
+      ] |> unique()
+
+      if (nrow(new_mismatches) > 0) {
+        warning(
+          "New genus/species mismatches not in correction_lookup.tsv",
+          " - please add and re-run:\n"
+        )
+        print(new_mismatches)
+      }
+    }
+  }
+
+} else if (marker == "COI") {
+
+  is_unresolved <- grepl("_X+$", annotation$genus)
+
+  annotation[is_unresolved, specific_epithet      := "X"]
+  annotation[is_unresolved, infraspecific_epithet := ""]
+  annotation[
+    is_unresolved & (is.na(otu) | otu == ""),
+    scientific_name := sub("(X+)$", "\\1X", genus)
+  ]
+
+  cat(sprintf("COI _X-correction: %d rows corrected.\n", sum(is_unresolved)))
+}
+
+################################################################################
 # Output
 ################################################################################
 
