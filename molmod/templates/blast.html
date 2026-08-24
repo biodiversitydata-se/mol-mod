@@ -110,8 +110,7 @@ BLAST search
 
 {% if rform %}
 <div class='container' id='result'>
-    <form action={{ rform.batch_url }} method='post' id='rform' name='rform'>
-        {{ rform.csrf_token }}
+    <form action={{ rform.batch_url }} method='get' id='rform' name='rform'>
         <div class='row'>
             <div class='col-md-12'>
                 <hr>

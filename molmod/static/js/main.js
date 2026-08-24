@@ -218,11 +218,21 @@ $(document).ready(function() {
                 ids = ids.filter(function(item, i, ids) {
                     return i == ids.indexOf(item);
                 });
-                // Add IDs to hidden textarea, one row per ID
-                $('#raw_names').val(ids.join('\n'));
+
+                // Remove any previously added hidden taxonId fields
+                $('#rform').find('input[name="taxonId"]').remove();
+
+                // Add one hidden input named 'taxonId' per selected id
+                ids.forEach(function(id) {
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'taxonId',
+                        value: id
+                    }).appendTo('#rform');
+                });
 
                 // Warn and abort if no selection has been made in table
-                if (!$('#raw_names').val()) {
+                if (ids.length == 0) {
                     $('#dtbl_err_container').html('Please, select at least one row. ');
                     $('#dtbl_err_container').removeClass('hiddenElem');
                     $('.table tr td:first-child').addClass('visHlpElem');
