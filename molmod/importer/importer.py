@@ -18,7 +18,6 @@ from collections import OrderedDict
 from datetime import date
 from io import BytesIO
 from math import isnan
-from pprint import pformat
 from typing import List, Mapping, Optional
 
 import numpy
@@ -289,8 +288,28 @@ def insert_asvs(data: pd.DataFrame, mapping: dict, db_cursor: DictCursor,
     return data.assign(pid=[v[0] for v in pids]), old_max_pid or 0
 
 
+def _format_conflict_table(issues: list) -> str:
+    """Render annotation conflicts as an aligned plain-text table."""
+    rows = [("asv_id", "asv_pid", "db_target", "db_pred",
+             "new_target", "new_pred")]
+    for i in issues:
+        rows.append((
+            str(i["asv_id"]),
+            str(i["db"]["asv_pid"]),
+            str(i["db"]["annotation_target"]),
+            str(i["db"]["target_prediction"]),
+            str(i["new"]["annotation_target"]),
+            str(i["new"]["target_prediction"]),
+        ))
+    widths = [max(len(r[c]) for r in rows) for c in range(len(rows[0]))]
+    return "\n".join(
+        "  ".join(cell.ljust(widths[c]) for c, cell in enumerate(row))
+        for row in rows
+    )
+
+
 def compare_annotations(data: pd.DataFrame, db_cursor: DictCursor,
-                        batch_size: int = 1000):
+                        batch_size: int = 1000, allow_conflicts: bool = False):
     """
     Compares target gene and prediction of incoming ('new') annotations to
     existing, valid ('db') annotations for supplied ASVs (should only include
@@ -380,12 +399,20 @@ def compare_annotations(data: pd.DataFrame, db_cursor: DictCursor,
                       (n['target_prediction'] is True)):
                     # Save for update
                     updates.append(d['asv_pid'])
-        # Quit if any issues need resolution
+        # Report any conflicting target predictions
         if len(issues):
-            logging.error('Annotation issues that need to be resolved:\n %s',
-                          pformat(issues))
-            logging.error("No data were imported.")
-            sys.exit(1)
+            logging.warning(
+                "Conflicting target prediction for %d pre-existing ASV(s):\n%s",
+                len(issues), _format_conflict_table(issues))
+            if not allow_conflicts:
+                logging.error(
+                    "No data were imported. Re-run with --allow-conflicts to "
+                    "import anyway (DB annotation is kept for these ASVs; "
+                    "re-annotate the marker afterwards).")
+                sys.exit(1)
+            logging.warning(
+                "Importing anyway (--allow-conflicts). Re-annotate all "
+                "datasets of this marker before publishing.")
 
         # Return asv_pid:s for any updates to be made
         return updates
@@ -485,7 +512,8 @@ def handle_dates(dates: pd.Series):
 
 
 def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
-               validate: bool = True, dry_run: bool = False):
+               validate: bool = True, dry_run: bool = False,
+               allow_conflicts: bool = False):
     """
     Inserts the data from data_file into the database using the mapping_file.
     """
@@ -606,7 +634,8 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
 
     # Check annotations for existing asvs
     matches = data['annotation'][data['annotation'].asv_pid <= old_max_asv]
-    update_pids = compare_annotations(matches, cursor, batch_size)
+    update_pids = compare_annotations(matches, cursor, batch_size,
+                                      allow_conflicts)
     if (update_pids):
         invalidate_annotations(update_pids, cursor)
 
@@ -805,6 +834,11 @@ if __name__ == '__main__':
                               "mapping and validation."))
     PARSER.add_argument('--no-validation', action="store_true",
                         help="Do NOT validate the data before insertion.")
+    PARSER.add_argument('--allow-conflicts', action="store_true",
+                        help=("Import even if pre-existing ASVs have a "
+                              "conflicting target prediction. Existing DB "
+                              "annotation is kept; a conflict table is printed "
+                              "either way."))
     PARSER.add_argument('-v', '--verbose', action="count", default=0,
                         help="Increase logging verbosity (default: warning).")
     PARSER.add_argument('-q', '--quiet', action="count", default=3,
@@ -831,4 +865,4 @@ if __name__ == '__main__':
 
         run_import(temp.name, ARGS.mapping_file, ARGS.batch_size,
                    # --no_validation -> not True = False
-                   not ARGS.no_validation, ARGS.dry_run)
+                   not ARGS.no_validation, ARGS.dry_run, ARGS.allow_conflicts)
