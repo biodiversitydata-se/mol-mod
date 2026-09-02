@@ -64,7 +64,8 @@ if (grepl("\\.xlsx$", uploaded_file, ignore.case = TRUE)) {
   for (sheet_name in sheets[sheets != "guide"]) {
     assign(
       gsub("-", "_", sheet_name),
-      data.table(read.xlsx(uploaded_file, sheet = sheet_name, detectDates = TRUE))
+      data.table(read.xlsx(uploaded_file, sheet = sheet_name, detectDates = TRUE,
+                           sep.names = " "))
     )
   }
 
