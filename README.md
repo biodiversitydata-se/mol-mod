@@ -210,7 +210,7 @@ new	geneB	TRUE	TRUE	FALSE	FALSE
 --	----	Check	Update	ignore	Ignore
 ```
 
-For example, in the top left case, an ASV in a new dataset comes in with an annotation for geneA, is also predicted to be a TRUE geneA sequence, and this corresponds with what is already noted in the database for that ASV, so we do nothing (the existing annotation remains). If, instead, a new dataset has a TRUE geneB prediction for an ASV that has previously been considered a FALSE geneA, this annotation can be automatically updated. Other conflicts likely require manual inspection and will cancel import with a notice of this. See `/molmod/importer/importer.py` and function `compare_annotations` for details.
+For example, in the top left case, an ASV in a new dataset comes in with an annotation for geneA, is also predicted to be a TRUE geneA sequence, and this corresponds with what is already noted in the database for that ASV, so we do nothing (the existing annotation remains). If, instead, a new dataset has a TRUE geneB prediction for an ASV that has previously been considered a FALSE geneA, this annotation can be automatically updated. Other conflicts (a same-target prediction flip, or two targets both predicted TRUE) cancel the import by default, with a printed table of the affected ASVs. Re-run with `--allow-conflicts` to import anyway — those ASVs keep their existing database annotation, the table is printed as a warning, and the marker should be re-annotated afterwards. See `/molmod/importer/importer.py` and function `compare_annotations` for details.
 
 After import, we filter all database views with an extended WHERE clause:
 ```sql
