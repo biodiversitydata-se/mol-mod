@@ -10,14 +10,15 @@ reannotation.
 from datetime import datetime as dt
 import logging
 import os
+import re
 import shutil
 import sys
 import time
+import xml.etree.ElementTree as ET
 
 import psycopg2
 from psycopg2.extras import DictCursor
 import requests
-from bs4 import BeautifulSoup
 
 
 def connect_db(pass_file: str = '/run/secrets/postgres_pass'):
@@ -95,25 +96,11 @@ def get_eml_file(ipt_resource_id, dir):
         return False
 
 
-def fetch_ds_uuid(ipt_resource_id):
-    """
-    Fetches dataset uuid from IPT
-    """
-    url = f'https://www.gbif.se/ipt/resource?r={ipt_resource_id}'
-    response = requests.get(url)
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.text, 'html.parser')
-        uuid_tag = soup.find('dt', string='GBIF UUID:')
-        if uuid_tag:
-            uuid = uuid_tag.find_next_sibling('dd').find('a').text.strip()
-            return uuid
-    return None
-
-
 def get_ds_meta(uuid):
     """
-    Requests main metadata items for a dataset from GBIF API.
-    Some of it is also included in the eml file, but DOI, for instance, is not.
+    Requests main metadata items for a dataset from the GBIF API. Most of it
+    is also in the eml file, but the dataset DOI is not, so that is all we
+    still use this for.
     """
     url = f'https://api.gbif.org/v1/dataset/{uuid}'
     response = requests.get(url)
@@ -123,45 +110,150 @@ def get_ds_meta(uuid):
     return None
 
 
+UUID_RE = re.compile(
+    r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
+VERSION_RE = re.compile(r'\bVersion\s+([0-9]+(?:\.[0-9]+)+)')
+
+
+def parse_eml_metadata(eml: str) -> dict:
+    """
+    Extracts the fields the README needs from an IPT EML string: dataset
+    title, resource citation, first bibliographic citation, license name and
+    the dataset UUID.
+
+    The resource citation is the <citation> element without an identifier=
+    attribute; its version is forced to match the packageId, which is the
+    authoritative published version (the auto-generated citation string is
+    occasionally one step ahead).
+    """
+    root = ET.fromstring(eml)
+    # Drop namespace prefixes so plain tag names work regardless of EML flavour
+    for el in root.iter():
+        if isinstance(el.tag, str) and '}' in el.tag:
+            el.tag = el.tag.split('}', 1)[1]
+
+    def collapse(el):
+        if el is None:
+            return ''
+        return re.sub(r'\s+', ' ', ''.join(el.itertext())).strip()
+
+    dataset = root.find('dataset')
+
+    title = collapse(dataset.find('title')) if dataset is not None else ''
+
+    pkg = root.get('packageId', '')
+    m = re.search(r'/v([0-9]+(?:\.[0-9]+)+)$', pkg)
+    pkg_version = m.group(1) if m else None
+    m = UUID_RE.search(pkg)
+    uuid = m.group(0) if m else None
+    if not uuid and dataset is not None:
+        for alt in dataset.findall('alternateIdentifier'):
+            m = UUID_RE.search(alt.text or '')
+            if m:
+                uuid = m.group(0)
+                break
+
+    resource_citation, bibl_citation, bibl_id = '', '', ''
+    for cit in root.iter('citation'):
+        body = collapse(cit)
+        if not body:
+            continue
+        if cit.get('identifier'):
+            if not bibl_citation:
+                bibl_citation = body
+                bibl_id = (cit.get('identifier') or '').strip()
+        elif not resource_citation:
+            resource_citation = body
+
+    # Append the bibliographic citation's identifier (DOI or URL) when present
+    if bibl_citation and bibl_id:
+        link = bibl_id
+        if re.match(r'^10\.\d{4,}/\S+$', bibl_id):
+            link = f'https://doi.org/{bibl_id}'
+        if link not in bibl_citation:
+            bibl_citation = f'{bibl_citation} {link}'
+
+    if resource_citation and pkg_version:
+        cm = VERSION_RE.search(resource_citation)
+        if cm and cm.group(1) != pkg_version:
+            old = re.escape(cm.group(1))
+            resource_citation = re.sub(
+                rf'\bVersion {old}\b', f'Version {pkg_version}',
+                resource_citation)
+            resource_citation = re.sub(
+                rf'([?&]v=){old}\b', rf'\g<1>{pkg_version}', resource_citation)
+            logging.warning("EML citation version %s != packageId %s; using %s",
+                            cm.group(1), pkg_version, pkg_version)
+
+    license_name = ''
+    if dataset is not None:
+        licensed = dataset.find('licensed')
+        if licensed is not None:
+            license_name = (collapse(licensed.find('licenseName'))
+                            or collapse(licensed.find('url')))
+        if not license_name:
+            rights = dataset.find('intellectualRights')
+            if rights is not None:
+                license_name = (collapse(rights.find('.//citetitle'))
+                                or collapse(rights))
+
+    return {
+        'title': title or 'N/A',
+        'citation': resource_citation,
+        'bibl_citation': bibl_citation or 'N/A',
+        'license': license_name or 'N/A',
+        'uuid': uuid,
+    }
+
+
 def make_readme(ipt_resource_id, dir):
     """
-    Creates a Readme file in the supplied directory, by adding dataset-specific
-    metadata to a template file.
-    """
+    Creates a README.txt in 'dir' from the dataset's eml.xml (already
+    downloaded there by get_eml_file), filling the template's [API data]
+    placeholder.
 
+    Title, citation, version and license all come from the EML, so the README
+    always matches the exported IPT version. Only the dataset DOI is fetched
+    from the GBIF API, since it is not part of the IPT EML; a failure there
+    (e.g. GBIF maintenance) leaves DOI as 'N/A' rather than aborting export.
+    """
     destination_path = os.path.join(dir, 'README.txt')
+    eml_path = os.path.join(dir, 'eml.xml')
     script_dir = os.path.dirname(os.path.abspath(__file__))
     template_path = os.path.join(script_dir, 'readme-template.txt')
 
-    uuid = fetch_ds_uuid(ipt_resource_id)
-    if not uuid:
-        logging.error("Failed to fetch dataset UUID.")
+    try:
+        with open(eml_path, 'r', encoding='utf-8') as eml_file:
+            eml = eml_file.read()
+        meta = parse_eml_metadata(eml)
+    except (OSError, ET.ParseError) as err:
+        logging.error("Could not read metadata from %s: %s", eml_path, err)
         return False
 
-    data = get_ds_meta(uuid)
-    if not data:
-        logging.error(f"No metadata found for {ipt_resource_id}")
+    if not meta['citation']:
+        logging.error("No resource citation found in %s", eml_path)
         return False
+
+    doi = 'N/A'
+    if meta['uuid']:
+        data = get_ds_meta(meta['uuid'])
+        if data and data.get('doi'):
+            doi = data['doi']
+        else:
+            logging.warning("Could not fetch DOI from GBIF for %s",
+                            ipt_resource_id)
+    else:
+        logging.warning("No UUID in EML for %s; DOI left as N/A",
+                        ipt_resource_id)
 
     with open(template_path, 'r', encoding='utf-8') as readme:
         template = readme.read()
 
-    # Replace [API data] with dataset-specific metadata
-    dataset_name = data.get('title', 'N/A')
-    citation = data.get('citation', {}).get('text', 'N/A')
-    citation = citation.replace(
-        'via GBIF.org',
-        'in condensed format via https://asv-portal.biodiversitydata.se/')
-    bibl_citations = data.get('bibliographicCitations', [])
-    bibl_citation = bibl_citations[0]['text'] if bibl_citations else 'N/A'
-    license = data.get('license', 'N/A')
-    doi = data.get('doi', 'N/A')
-
     replacement = (
-        f"Dataset name: {dataset_name}\n\n"
-        f"Citation: {citation}\n\n"
-        f"Bibliographic citation: {bibl_citation}\n\n"
-        f"License: {license}\n\n"
+        f"Dataset name: {meta['title']}\n\n"
+        f"Citation: {meta['citation']}\n\n"
+        f"Bibliographic citation: {meta['bibl_citation']}\n\n"
+        f"License: {meta['license']}\n\n"
         f"DOI: {doi}\n"
     )
     readme = template.replace('[API data]', replacement)
