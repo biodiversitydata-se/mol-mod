@@ -24,6 +24,11 @@
 # Then run the script down to 'Create fasta for annotation workflow',
 # run the ampliseq pipeline separately, place annotation.tsv in input/,
 # and finish the script.
+#
+# Helper scripts are sourced from mol-mod/scripts/processing (see section 2).
+# Required environment variables (e.g. in ~/.Renviron): MOLMOD_DIR and
+# NAISS_PROJECT; optional: AMPLISEQ_CLUSTER, AMPLISEQ_REMOTE_BASE, and
+# MOLMOD_SENDER_NAME / MOLMOD_SENDER_EMAIL for the provider email draft.
 
 ################################################################################
 # 1. Set dataset-specific variables - EDIT HERE
@@ -53,6 +58,10 @@ library(openxlsx)
 library(data.table)
 
 dir.create("output", showWarnings = FALSE)
+
+# Helper scripts in mol-mod/scripts/processing, located via environment
+# variable MOLMOD_DIR (path to the mol-mod repo, e.g. set in ~/.Renviron)
+helper_dir <- file.path(Sys.getenv("MOLMOD_DIR"), "scripts", "processing")
 
 ################################################################################
 # 3. Import uploaded data
@@ -521,6 +530,9 @@ fwrite(
   col.names = FALSE
 )
 
+# Write nf-core/ampliseq config files (params.yaml, proj_env)
+source(file.path(helper_dir, "ampliseq-config-generator.R"))
+
 ################################################################################
 # 12. Import and filter annotation
 ################################################################################
@@ -629,4 +641,15 @@ unlink(tfiles)
 print(paste("Deleted ASV without occurrences:", del_asv_no))
 
 # Keep only objects that correspond to exported sheets
-rm(list = setdiff(ls(), final_sheets))
+rm(list = setdiff(ls(), c(final_sheets, "helper_dir")))
+
+################################################################################
+# 16. Check output and draft provider email
+################################################################################
+
+# Compare event and ASV counts across output tables
+source(file.path(helper_dir, "output-checks.R"))
+check_output(dataset$datasetID)
+
+# Draft the provider email once the IPT resource has been created
+# source(file.path(helper_dir, "email-generator.R"))
