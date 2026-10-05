@@ -1,65 +1,207 @@
-# Script for generating nf-core/ampliseq config files (params.yaml, proj_env)
-# for taxonomic annotation of a dataset's fasta on the HPC cluster.
+# Script for generating the nf-core/ampliseq params.yaml for taxonomic annotation
+# of a dataset's fasta on the HPC cluster.
 # Expects objects dataset, dna and marker from asv-input-processing.R (run
 # through section 11), and is sourced from the dataset folder, e.g.:
 #   source("<path-to-mol-mod>/scripts/processing/ampliseq-config-generator.R")
-# Files are written to <cluster>/ in the dataset folder.
+# The file is written to <cluster>/params.yaml in the dataset folder.
+#
+# Reference database and classifier are taken from the
+# annotations currently used for the same marker in the ASV portal database
+# (view api.annotation_overview), so that new datasets are annotated like
+# existing ones. If the database cannot be reached, or has no datasets for the
+# marker, fallback presets are used and a warning is given.
+#
+# The ampliseq version to run is asked for interactively, with the latest
+# release on GitHub as default.
 #
 # Site-specific settings are read from environment variables (e.g. set in
-# ~/.Renviron), so that no project IDs or paths are stored in the repo:
-#   NAISS_PROJECT         NAISS compute project (required)
-#   AMPLISEQ_CLUSTER      cluster name, used as output folder (default: dardel)
-#   AMPLISEQ_REMOTE_BASE  project storage directory on the cluster, under which
-#                         one folder per dataset is created (optional; if
-#                         unset, proj_env is not written)
+# ~/.Renviron), so that no project IDs or host names are stored in the repo:
+#   NAISS_PROJECT     NAISS compute project, billed for the run (required)
+#   AMPLISEQ_CLUSTER  cluster name, used as output folder (default: dardel)
+#   ASV_DB_SSH_HOST   ssh host (alias) of the ASV portal server, or 'local' to
+#                     query a local asv-db container (optional; if unset,
+#                     fallback presets are used)
+
+library(data.table)
 
 cluster <- Sys.getenv("AMPLISEQ_CLUSTER", "dardel")
 naiss_project <- Sys.getenv("NAISS_PROJECT")
-remote_base <- Sys.getenv("AMPLISEQ_REMOTE_BASE", NA)
+db_host <- Sys.getenv("ASV_DB_SSH_HOST")
 if (naiss_project == "") {
   stop("Set environment variable NAISS_PROJECT (e.g. in ~/.Renviron)")
 }
 
-# Reference databases and options per marker. The pattern is matched
-# (case-insensitively) against the marker set in section 1 of the R script.
+# Per-marker settings. 'pattern' is matched (case-insensitively) against the
+# marker set in section 1 of the R script. 'options' are always applied, as
+# they cannot be derived from the database (e.g. addsh only shows up there if
+# some ASV got an SH hit). 'fallback' is used only when the database gives no
+# answer, and should be kept in line with current practice.
 marker_presets <- list(
   list(
     pattern = "^16S",
-    params = list(dada_ref_taxonomy = "sbdi-gtdb=R09-RS220-1")
+    options = list(),
+    fallback = list(db = "SBDI-GTDB-R11-RS232-1", classifier = "DADA2:assignTaxonomy",
+                    options = NA, algo = "Ampliseq v2.18.0")
   ),
   list(
     pattern = "^18S",
-    params = list(dada_ref_taxonomy = "pr2=5.0.0")
+    options = list(),
+    fallback = list(db = "PR2 v5.1.0", classifier = "DADA2:assignTaxonomy",
+                    options = NA, algo = "Ampliseq v2.14.0")
   ),
   list(
     pattern = "^ITS",
-    params = list(
-      dada_ref_taxonomy = "unite-alleuk=10.0",
-      skip_barrnap = TRUE,
-      addsh = TRUE,
-      cut_its = "its2"
-    )
+    options = list(addsh = TRUE, skip_barrnap = TRUE),
+    fallback = list(db = "UNITE-alleuk v10.0", classifier = "DADA2:assignTaxonomy",
+                    options = "cut_its:its2", algo = "Ampliseq v2.16.1")
   ),
   list(
     pattern = "^CO(I|1)",
-    params = list(
-      sintax_ref_taxonomy = "coidb=221216",
-      skip_dada_taxonomy = TRUE,
-      skip_barrnap = TRUE
-    )
+    options = list(skip_barrnap = TRUE),
+    fallback = list(db = "COIDB 221216", classifier = "VSEARCH:sintax",
+                    options = NA, algo = "Ampliseq v2.12.0")
   )
 )
 
-get_marker_params <- function(marker) {
+get_marker_preset <- function(marker) {
   for (preset in marker_presets) {
     if (grepl(preset$pattern, marker, ignore.case = TRUE)) {
-      return(preset$params)
+      return(preset)
     }
   }
   stop(
     "No ampliseq preset matches marker '", marker, "'. Known patterns: ",
     paste(sapply(marker_presets, `[[`, "pattern"), collapse = ", ")
   )
+}
+
+# Query api.annotation_overview read-only, via ssh to the server or in a
+# local container. Database credentials are taken from the container's own
+# environment. Returns NULL (with a warning) on failure.
+query_annotation_overview <- function(host) {
+  if (host == "") {
+    warning("ASV_DB_SSH_HOST is not set; using fallback presets")
+    return(NULL)
+  }
+  sql <- paste(
+    "SELECT annotation_target, db, algo, classifier, options, count(*) AS n_datasets",
+    "FROM api.annotation_overview GROUP BY 1, 2, 3, 4, 5;"
+  )
+  psql <- paste(
+    "PGOPTIONS='-c default_transaction_read_only=on'",
+    'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" --csv -v ON_ERROR_STOP=1'
+  )
+  docker_cmd <- paste("docker exec -i asv-db sh -c", shQuote(psql))
+  out <- tryCatch(
+    if (host == "local") {
+      system(docker_cmd, input = sql, intern = TRUE)
+    } else {
+      system2(
+        "ssh",
+        c("-o", "BatchMode=yes", "-o", "ConnectTimeout=15", host, shQuote(docker_cmd)),
+        input = sql, stdout = TRUE
+      )
+    },
+    error = function(e) NULL,
+    warning = function(w) NULL
+  )
+  if (length(out) < 2) {
+    warning("Could not query api.annotation_overview on '", host, "'; using fallback presets")
+    return(NULL)
+  }
+  fread(text = paste(out, collapse = "\n"))
+}
+
+# Latest nf-core/ampliseq release on GitHub, or NA if it cannot be fetched
+latest_ampliseq_release <- function() {
+  old <- options(timeout = 10)
+  on.exit(options(old))
+  json <- tryCatch(
+    suppressWarnings(readLines("https://api.github.com/repos/nf-core/ampliseq/releases/latest")),
+    error = function(e) NULL
+  )
+  tag <- regmatches(json, regexpr('"tag_name": *"[^"]+"', json))
+  if (length(tag) == 0) {
+    return(NA_character_)
+  }
+  sub('.*"([^"]+)"$', "\\1", tag[1])
+}
+
+# Ask for the ampliseq version to run, defaulting to the latest release (or,
+# if GitHub cannot be reached, the version used for existing annotations)
+choose_ampliseq_version <- function(annotation) {
+  default <- latest_ampliseq_release()
+  if (is.na(default)) {
+    default <- sub("^Ampliseq v", "", annotation$algo)
+    warning("Could not fetch the latest ampliseq release; defaulting to ", default)
+  }
+  if (!interactive()) {
+    return(default)
+  }
+  answer <- trimws(readline(paste0(
+    "ampliseq version to run (existing annotations: ", annotation$algo,
+    ") [", default, "]: "
+  )))
+  if (answer == "") default else sub("^v", "", answer)
+}
+
+# Pick the annotation setup used by most datasets with the same marker.
+# Only ampliseq annotations are considered; datasets that keep a provider's
+# own taxonomy (e.g. algo 'custom-IBA', no classifier) are ignored.
+select_annotation <- function(overview, marker, preset) {
+  if (is.null(overview)) {
+    return(preset$fallback)
+  }
+  rows <- overview[annotation_target == marker & grepl("^Ampliseq", algo) &
+                     !is.na(classifier) & classifier != ""]
+  if (nrow(rows) == 0) {
+    warning("No datasets with annotation_target '", marker, "' in the database; using fallback presets")
+    return(preset$fallback)
+  }
+  rows <- rows[order(-n_datasets)]
+  if (nrow(rows) > 1) {
+    warning(
+      "Datasets with marker '", marker, "' are annotated in different ways; using the most common:\n",
+      paste(capture.output(print(rows)), collapse = "\n")
+    )
+  }
+  as.list(rows[1, .(db, classifier, options, algo)])
+}
+
+# Translate a reference database name as stored in asv-db into an ampliseq
+# taxonomy option value, e.g. 'PR2 v5.1.0' -> 'pr2=5.1.0'
+db_to_ampliseq <- function(db) {
+  db_patterns <- c(
+    "^SBDI-GTDB-(.+)$" = "sbdi-gtdb=\\1",
+    "^PR2 v(.+)$" = "pr2=\\1",
+    "^UNITE-(alleuk|fungi) v(.+)$" = "unite-\\1=\\2",
+    "^COIDB (.+)$" = "coidb=\\1"
+  )
+  for (p in names(db_patterns)) {
+    if (grepl(p, db)) {
+      return(sub(p, db_patterns[[p]], db))
+    }
+  }
+  stop("Unknown reference database '", db, "'; add it to db_to_ampliseq()")
+}
+
+# Translate database name, classifier and run options into ampliseq parameters
+annotation_to_params <- function(annotation) {
+  ref <- db_to_ampliseq(annotation$db)
+  classifier <- annotation$classifier
+  params <- if (identical(classifier, "VSEARCH:sintax")) {
+    list(sintax_ref_taxonomy = ref, skip_dada_taxonomy = TRUE)
+  } else if (identical(classifier, "DADA2:assignTaxonomy")) {
+    list(dada_ref_taxonomy = ref)
+  } else {
+    stop("Unknown or mixed classifier '", classifier, "'")
+  }
+  options <- if (is.na(annotation$options)) "" else annotation$options
+  cut_its <- regmatches(options, regexpr("(?<=cut_its:)[a-z0-9]+", options, perl = TRUE))
+  if (length(cut_its) == 1) {
+    params$cut_its <- cut_its
+  }
+  params
 }
 
 get_primer <- function(dna, field) {
@@ -86,8 +228,9 @@ format_yaml_value <- function(value) {
 
 write_ampliseq_config <- function(dataset, dna, marker) {
   dataset_id <- dataset$datasetID
-  out_dir <- cluster
-  dir.create(out_dir, showWarnings = FALSE)
+  preset <- get_marker_preset(marker)
+  annotation <- select_annotation(query_annotation_overview(db_host), marker, preset)
+  ampliseq_version <- choose_ampliseq_version(annotation)
 
   params <- c(
     list(
@@ -97,33 +240,29 @@ write_ampliseq_config <- function(dataset, dna, marker) {
       skip_qiime = TRUE,
       sbdiexport = TRUE
     ),
-    get_marker_params(marker),
+    annotation_to_params(annotation),
+    preset$options,
     list(
       FW_primer = get_primer(dna, "pcr_primer_forward"),
       RV_primer = get_primer(dna, "pcr_primer_reverse")
     )
   )
-  params_lines <- paste0(names(params), ": ", sapply(params, format_yaml_value))
-  writeLines(params_lines, file.path(out_dir, "params.yaml"))
-  message("Wrote ", file.path(out_dir, "params.yaml"))
 
-  if (is.na(remote_base)) {
-    warning("remote_base is not set; skipping proj_env")
-    return(invisible(params))
-  }
-
-  work_dir <- file.path(remote_base, dataset_id)
-  proj_env_lines <- c(
-    "# Source after loading modules, but before running",
-    "# Cap Java memory use",
-    "export NXF_OPTS='-Xms1g -Xmx4g'",
-    "# Keep Nextflow and container caches out of the home directory",
-    sprintf("export NXF_HOME='%s'", work_dir),
-    sprintf("export NXF_SINGULARITY_CACHEDIR='%s/nextflow_files'", work_dir),
-    sprintf("export APPTAINER_CACHEDIR='%s'", remote_base)
+  # The ampliseq version to run is kept as a comment, for use when starting the
+  # run, together with the existing annotation the settings are based on
+  header <- c(
+    paste0("# ampliseq_version: ", ampliseq_version),
+    paste0(
+      "# Based on: ", annotation$db, " / ", annotation$classifier,
+      if (!is.na(annotation$options) && annotation$options != "") paste0(" ", annotation$options),
+      " / ", annotation$algo
+    )
   )
-  writeLines(proj_env_lines, file.path(out_dir, "proj_env"))
-  message("Wrote ", file.path(out_dir, "proj_env"))
+  params_lines <- paste0(names(params), ": ", sapply(params, format_yaml_value))
+  out_dir <- cluster
+  dir.create(out_dir, showWarnings = FALSE)
+  writeLines(c(header, params_lines), file.path(out_dir, "params.yaml"))
+  message("Wrote ", file.path(out_dir, "params.yaml"))
 
   invisible(params)
 }

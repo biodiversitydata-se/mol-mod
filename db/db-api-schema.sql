@@ -366,17 +366,30 @@ WITH DATA;
 -- 'Utility' views used by admin
 --
 
--- View listing reference database and algorithm used for annotaton of each dataset
+-- View listing reference database, ampliseq version, classifier and run
+-- options used for annotation of each dataset. annotation_algorithm is set per
+-- ASV and names the step that gave its final classification (e.g. addsh or
+-- DADA2:assignTaxonomy:addSpecies), so the classifier is derived from the steps
+-- rather than listing them, as these differ between datasets from the same run.
 CREATE OR REPLACE VIEW api.annotation_overview
 AS
-SELECT DISTINCT ds.pid, ds.ipt_resource_id, dataset_id, in_bioatlas,
-annotation_target, split_part(reference_db, ' (', 1) AS db,
-split_part(annotation_algorithm, ' (', 1) AS algo
+SELECT ds.pid, ds.ipt_resource_id, ds.dataset_id, ds.in_bioatlas,
+ta.annotation_target, split_part(ta.reference_db, ' (', 1) AS db,
+split_part(ta.annotation_algorithm, ' (', 1) AS algo,
+-- addsh runs alongside DADA2
+string_agg(DISTINCT CASE
+    WHEN ta.annotation_algorithm ~* 'sintax' THEN 'VSEARCH:sintax'
+    WHEN ta.annotation_algorithm ~ '(DADA2|addsh)' THEN 'DADA2:assignTaxonomy'
+END, ', ') AS classifier,
+-- Run options recorded with each step, e.g. cut_its:its2
+string_agg(DISTINCT substring(ta.annotation_algorithm from 'cut_its:\S+'), ', ') AS options
 FROM dataset ds, sampling_event se, occurrence oc, taxon_annotation ta
 WHERE ds.pid = se.dataset_pid
 AND se.pid = oc.event_pid
 AND oc.asv_pid = ta.asv_pid
 AND ta.status = 'valid'
+GROUP BY ds.pid, ds.ipt_resource_id, ds.dataset_id, ds.in_bioatlas,
+ta.annotation_target, db, algo
 ORDER BY annotation_target, dataset_id;
 
 CREATE OR REPLACE VIEW api.split_annotation_ds

@@ -27,8 +27,9 @@
 #
 # Helper scripts are sourced from mol-mod/scripts/processing (see section 2).
 # Required environment variables (e.g. in ~/.Renviron): MOLMOD_DIR and
-# NAISS_PROJECT; optional: AMPLISEQ_CLUSTER, AMPLISEQ_REMOTE_BASE, and
-# MOLMOD_SENDER_NAME / MOLMOD_SENDER_EMAIL for the provider email draft.
+# NAISS_PROJECT; optional: ASV_DB_SSH_HOST (to take the annotation setup from
+# the ASV portal database), AMPLISEQ_CLUSTER, and MOLMOD_SENDER_NAME /
+# MOLMOD_SENDER_EMAIL for the provider email draft.
 
 ################################################################################
 # 1. Set dataset-specific variables - EDIT HERE
@@ -530,7 +531,7 @@ fwrite(
   col.names = FALSE
 )
 
-# Write nf-core/ampliseq config files (params.yaml, proj_env)
+# Write nf-core/ampliseq params.yaml
 source(file.path(helper_dir, "ampliseq-config-generator.R"))
 
 ################################################################################
