@@ -5,6 +5,7 @@
 # Assumes the following directory structure:
 #   ├── input
 #     ├── reannotation.tsv  # nf-core/ampliseq output file (renamed)
+#     ├── ASV_tax.pr2_*.tsv # optional, from results/dada2/ (PR2 check)
 #   [this-script]
 
 ################################################################################
@@ -71,6 +72,17 @@ if (target_criteria == 'None applied') {  # E.g. COI
   annotation[, prob_domain := NULL]
 }
 annotation[, c(scores, 'eval_method') := NULL]
+
+################################################################################
+# Correct genus/species splitting errors in ampliseq output (PR2 and COIDB)
+################################################################################
+
+# Uses taxonomy-corrections.R and pr2-correction-lookup.tsv in
+# mol-mod/scripts/processing, located via environment variable MOLMOD_DIR
+# (e.g. set in ~/.Renviron). For the PR2 mismatch check, place the run's
+# results/dada2/ASV_tax.pr2_*.tsv in input/.
+source(file.path(Sys.getenv('MOLMOD_DIR'), 'scripts', 'processing',
+                 'taxonomy-corrections.R'))
 
 ################################################################################
 # Output
