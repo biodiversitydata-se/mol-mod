@@ -3,7 +3,7 @@
 # Expects objects dataset, dna and marker from asv-input-processing.R (run
 # through section 11), and is sourced from the dataset folder, e.g.:
 #   source("<path-to-mol-mod>/scripts/processing/ampliseq-config-generator.R")
-# The file is written to <cluster>/params.yaml in the dataset folder.
+# The file is written to ampliseq/params.yaml in the dataset folder.
 #
 # Reference database and classifier are taken from the
 # annotations currently used for the same marker in the ASV portal database
@@ -17,14 +17,14 @@
 # Site-specific settings are read from environment variables (e.g. set in
 # ~/.Renviron), so that no project IDs or host names are stored in the repo:
 #   NAISS_PROJECT     NAISS compute project, billed for the run (required)
-#   AMPLISEQ_CLUSTER  cluster name, used as output folder (default: dardel)
+#   AMPLISEQ_CONFIG_DIR  local folder for params.yaml (default: ampliseq)
 #   ASV_DB_SSH_HOST   ssh host (alias) of the ASV portal server, or 'local' to
 #                     query a local asv-db container (optional; if unset,
 #                     fallback presets are used)
 
 library(data.table)
 
-cluster <- Sys.getenv("AMPLISEQ_CLUSTER", "dardel")
+config_dir <- Sys.getenv("AMPLISEQ_CONFIG_DIR", "ampliseq")
 naiss_project <- Sys.getenv("NAISS_PROJECT")
 db_host <- Sys.getenv("ASV_DB_SSH_HOST")
 if (naiss_project == "") {
@@ -259,7 +259,7 @@ write_ampliseq_config <- function(dataset, dna, marker) {
     )
   )
   params_lines <- paste0(names(params), ": ", sapply(params, format_yaml_value))
-  out_dir <- cluster
+  out_dir <- config_dir
   dir.create(out_dir, showWarnings = FALSE)
   writeLines(c(header, params_lines), file.path(out_dir, "params.yaml"))
   message("Wrote ", file.path(out_dir, "params.yaml"))

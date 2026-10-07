@@ -1,10 +1,10 @@
 #!/bin/bash
 # Run nf-core/ampliseq taxonomic annotation for a dataset on the HPC cluster.
 # Run from the dataset folder, after ampliseq-config-generator.R has written
-# <cluster>/params.yaml and section 11 of asv-input-processing.R has written
+# ampliseq/params.yaml and section 11 of asv-input-processing.R has written
 # output/<datasetID>.fasta.
 #
-# Usage: ampliseq-dardel.sh push|start|status|fetch [-f]
+# Usage: ampliseq-hpc.sh push|start|status|fetch [-f]
 #   push    create the remote dataset folder and copy params.yaml and the fasta
 #   start   start ampliseq in a detached screen session on the login node
 #           (log in run.log; always with -resume, so it also continues a
@@ -17,9 +17,9 @@
 #           the PR2 genus/species corrections). ampliseq writes these when
 #           classifying with DADA2, so there are none for SINTAX (COI) runs.
 #
-# Settings can be overridden with environment variables; paths on the cluster
-# are relative to the remote home directory:
-#   AMPLISEQ_CLUSTER        local config folder name (default: dardel)
+# Defaults are for Dardel (PDC). Settings can be overridden with environment
+# variables; paths on the cluster are relative to the remote home directory:
+#   AMPLISEQ_CONFIG_DIR     local folder with params.yaml (default: ampliseq)
 #   AMPLISEQ_SSH_HOST       ssh host for commands (default: dardel)
 #   AMPLISEQ_TRANSFER_HOST  ssh host for file transfer (default: dardel-ft)
 #   AMPLISEQ_REMOTE_DIR     parent folder of dataset folders
@@ -31,7 +31,7 @@
 #   AMPLISEQ_PROFILE        Nextflow profile (default: pdc_kth)
 set -euo pipefail
 
-cluster="${AMPLISEQ_CLUSTER:-dardel}"
+config_dir="${AMPLISEQ_CONFIG_DIR:-ampliseq}"
 ssh_host="${AMPLISEQ_SSH_HOST:-dardel}"
 transfer_host="${AMPLISEQ_TRANSFER_HOST:-dardel-ft}"
 remote_parent="${AMPLISEQ_REMOTE_DIR:-SBDI/asv-portal/initial-annotations}"
@@ -48,7 +48,7 @@ usage() {
 cmd="$1"
 force="${2:-}"
 
-params="$cluster/params.yaml"
+params="$config_dir/params.yaml"
 [[ -f "$params" ]] || { echo "Error: $params not found. Run from the dataset folder, after ampliseq-config-generator.R." >&2; exit 1; }
 
 # Dataset ID and ampliseq version, as written by ampliseq-config-generator.R
@@ -92,7 +92,7 @@ screen -ls | grep '[.]$dataset_id[[:space:]]' || { echo "Error: screen session d
 # Screen sessions only exist on the login node they were started on
 hostname > .ampliseq_login_node
 echo "Started ampliseq $version for $dataset_id in screen session '$dataset_id' on \$(hostname)."
-echo "Follow with: ampliseq-dardel.sh status   (or on \$(hostname): screen -r $dataset_id)"
+echo "Follow with: ampliseq-hpc.sh status   (or on \$(hostname): screen -r $dataset_id)"
 EOF
     ;;
 

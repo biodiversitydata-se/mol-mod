@@ -24,13 +24,13 @@
 # twice:
 #   1. Without input/annotation.tsv, the script stops after section 11, having
 #      written the fasta and the ampliseq params.yaml. Review the output, then
-#      run the annotation with ampliseq-dardel.sh (push, start, status, fetch).
+#      run the annotation with ampliseq-hpc.sh (push, start, status, fetch).
 #   2. With input/annotation.tsv in place, the script runs to the end.
 #
 # Helper scripts are sourced from mol-mod/scripts/processing (see section 2).
 # Required environment variables (e.g. in ~/.Renviron): MOLMOD_DIR and
 # NAISS_PROJECT; optional: ASV_DB_SSH_HOST (to take the annotation setup from
-# the ASV portal database), AMPLISEQ_CLUSTER, and MOLMOD_SENDER_NAME /
+# the ASV portal database), AMPLISEQ_CONFIG_DIR, and MOLMOD_SENDER_NAME /
 # MOLMOD_SENDER_EMAIL for the provider email draft.
 
 ################################################################################
@@ -539,7 +539,7 @@ if (!file.exists(annotation_file)) {
   source(file.path(helper_dir, "ampliseq-config-generator.R"))
   message(
     "\nNo ", annotation_file, " yet: stopped after section 11.\n",
-    "Review the output, then run ampliseq-dardel.sh push, start, status and ",
+    "Review the output, then run ampliseq-hpc.sh push, start, status and ",
     "fetch from this folder, and run this script again."
   )
   if (interactive()) invokeRestart("abort") else quit(save = "no", status = 0)
