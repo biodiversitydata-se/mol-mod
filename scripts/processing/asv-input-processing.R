@@ -616,6 +616,9 @@ if (target_criteria == "None applied") {
 
 annotation[, c(intersect(names(annotation), c(scores, "eval_method"))) := NULL]
 
+# Correct genus/species splitting errors in ampliseq's export for PR2 and COIDB
+source(file.path(helper_dir, "taxonomy-corrections.R"))
+
 ################################################################################
 # 14. Optional dataset-specific fixes
 ################################################################################

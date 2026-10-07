@@ -12,8 +12,19 @@
 # IPT instance used for resource and metadata links
 ipt_base_url <- "https://www.gbif.se/ipt"
 
-# Template location: next to this script when sourced, else the working directory
-script_dir <- tryCatch(dirname(sys.frame(1)$ofile), error = function(e) ".")
+# Folder of this script (and of the template) when sourced (innermost
+# source() call), else the working directory
+script_dir <- local({
+  dir <- "."
+  for (i in rev(seq_len(sys.nframe()))) {
+    f <- sys.frame(i)$ofile
+    if (!is.null(f)) {
+      dir <- dirname(f)
+      break
+    }
+  }
+  dir
+})
 
 generate_email <- function(dataset, template_file = file.path(script_dir, "email-template.html")) {
   sender_name <- Sys.getenv("MOLMOD_SENDER_NAME")

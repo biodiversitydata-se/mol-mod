@@ -12,7 +12,9 @@
 #   status  show the screen session, the end of run.log and whether
 #           annotation.tsv exists
 #   fetch   copy results/SBDI/annotation.tsv to input/annotation.tsv
-#           (-f to overwrite an existing file)
+#           (-f to overwrite an existing file), plus the DADA2 taxonomy
+#           tables results/dada2/ASV_tax.*.tsv if present (used to check
+#           the PR2 genus/species corrections)
 #
 # Settings can be overridden with environment variables; paths on the cluster
 # are relative to the remote home directory:
@@ -37,7 +39,7 @@ modules="${AMPLISEQ_MODULES:-PDC nextflow/25.10.4 apptainer java/17}"
 profile="${AMPLISEQ_PROFILE:-pdc_kth}"
 
 usage() {
-  sed -n '7,15p' "$0" | sed 's/^# \{0,1\}//' >&2
+  sed -n '7,17p' "$0" | sed 's/^# \{0,1\}//' >&2
   exit 2
 }
 
@@ -125,6 +127,9 @@ EOF
     mkdir -p input
     scp "${ssh_opts[@]}" "$transfer_host:$remote_dir/results/SBDI/annotation.tsv" "$target"
     echo "Fetched $target ($(wc -l < "$target") lines)"
+    if scp -q "${ssh_opts[@]}" "$transfer_host:$remote_dir/results/dada2/ASV_tax.*.tsv" input/ 2>/dev/null; then
+      echo "Fetched DADA2 taxonomy table(s): $(cd input && ls ASV_tax.*.tsv | tr '\n' ' ')"
+    fi
     ;;
 
   *)
