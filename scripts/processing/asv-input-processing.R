@@ -20,10 +20,12 @@
 #   - sample_id -> eventID
 #   - asv_id -> asv_id_alias
 #
-# Edit dataset-specific sections 1 and 14.
-# Then run the script down to 'Create fasta for annotation workflow',
-# run the ampliseq pipeline separately, place annotation.tsv in input/,
-# and finish the script.
+# Edit dataset-specific sections 1 and 14, then run (source) the whole script
+# twice:
+#   1. Without input/annotation.tsv, the script stops after section 11, having
+#      written the fasta and the ampliseq params.yaml. Review the output, then
+#      run the annotation with ampliseq-dardel.sh (push, start, status, fetch).
+#   2. With input/annotation.tsv in place, the script runs to the end.
 #
 # Helper scripts are sourced from mol-mod/scripts/processing (see section 2).
 # Required environment variables (e.g. in ~/.Renviron): MOLMOD_DIR and
@@ -531,8 +533,17 @@ fwrite(
   col.names = FALSE
 )
 
-# Write nf-core/ampliseq params.yaml
-source(file.path(helper_dir, "ampliseq-config-generator.R"))
+# Without an annotation file, write the ampliseq params.yaml and stop here, so
+# that the output can be reviewed before running the annotation
+if (!file.exists(annotation_file)) {
+  source(file.path(helper_dir, "ampliseq-config-generator.R"))
+  message(
+    "\nNo ", annotation_file, " yet: stopped after section 11.\n",
+    "Review the output, then run ampliseq-dardel.sh push, start, status and ",
+    "fetch from this folder, and run this script again."
+  )
+  if (interactive()) invokeRestart("abort") else quit(save = "no", status = 0)
+}
 
 ################################################################################
 # 12. Import and filter annotation
