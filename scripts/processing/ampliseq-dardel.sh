@@ -14,7 +14,8 @@
 #   fetch   copy results/SBDI/annotation.tsv to input/annotation.tsv
 #           (-f to overwrite an existing file), plus the DADA2 taxonomy
 #           tables results/dada2/ASV_tax.*.tsv if present (used to check
-#           the PR2 genus/species corrections)
+#           the PR2 genus/species corrections). ampliseq writes these when
+#           classifying with DADA2, so there are none for SINTAX (COI) runs.
 #
 # Settings can be overridden with environment variables; paths on the cluster
 # are relative to the remote home directory:
@@ -39,7 +40,7 @@ modules="${AMPLISEQ_MODULES:-PDC nextflow/25.10.4 apptainer java/17}"
 profile="${AMPLISEQ_PROFILE:-pdc_kth}"
 
 usage() {
-  sed -n '7,17p' "$0" | sed 's/^# \{0,1\}//' >&2
+  sed -n '7,18p' "$0" | sed 's/^# \{0,1\}//' >&2
   exit 2
 }
 
