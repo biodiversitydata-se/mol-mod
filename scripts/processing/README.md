@@ -122,7 +122,7 @@ or columns, duplicated IDs, ASVs with reads but no sequence).
 
 Correct the data in section 14 with
 `change_value(table, field, old, new, reason)`, e.g.
-`change_value(dna, "pcr_primer_name_reverse", "805r", "806r", "Name did not match the primer sequence")`.
+`change_value(dna, "pcr_primer_reverse", "GGACTACHVGGGTWTCTAAT", "GACTACHVGGGTATCTAATCC", "Primer sequence did not match the primer name (805R)")`.
 Each change is listed in `output/changes.txt` and in the email draft, by the
 provider's sheet names.
 

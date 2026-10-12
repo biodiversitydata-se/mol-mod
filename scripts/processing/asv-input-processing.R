@@ -62,6 +62,11 @@ ipt_resource_id <- NA
 # 2. Packages and output paths
 ################################################################################
 
+# Progress messages while the script runs
+progress <- function(text) message(format(Sys.time(), "%H:%M:%S"), "  ", text)
+
+progress("2. Loading packages")
+
 # install.packages("openxlsx")
 # install.packages("data.table")
 
@@ -80,6 +85,8 @@ source(file.path(helper_dir, "change-log.R"))
 ################################################################################
 # 3. Import uploaded data
 ################################################################################
+
+progress("3. Importing uploaded data")
 
 if (grepl("\\.xlsx$", uploaded_file, ignore.case = TRUE)) {
   sheets <- getSheetNames(uploaded_file)
@@ -144,6 +151,8 @@ if (length(missing_tables) > 0) {
 # 4. Parse Study sheet
 ################################################################################
 
+progress("4. Reading Study")
+
 study_raw <- copy(Study)
 
 if (ncol(study_raw) < 2) {
@@ -188,6 +197,8 @@ fasta_out <- paste0("output/", dataset_id, ".fasta")
 ################################################################################
 # 5. Clean input tables and normalize user-facing ID columns
 ################################################################################
+
+progress("5. Cleaning input tables")
 
 clean_character_dt <- function(dt, exclude_cols = character()) {
   char_cols <- names(dt)[vapply(dt, is.character, logical(1))]
@@ -310,6 +321,8 @@ for (id_set in names(id_sets)) {
 # 6. Build event from Samples + Study
 ################################################################################
 
+progress("6. Building event")
+
 event_std <- c(
   "eventID", "materialSampleID", "associatedSequences", "eventDate",
   "samplingProtocol", "locationID", "decimalLatitude", "decimalLongitude",
@@ -353,6 +366,8 @@ event <- event[, ..event_order]
 # 7. Build dna from Study
 ################################################################################
 
+progress("7. Building dna (mixs)")
+
 dna_fields <- c(
   "sop", "target_gene", "target_subfragment", "lib_layout", "seq_meth",
   "pcr_primer_name_forward", "pcr_primer_name_reverse", "pcr_primer_forward",
@@ -380,6 +395,8 @@ if (length(env_cols) > 0) {
 ################################################################################
 # 8. Build emof from non-standard Sample columns
 ################################################################################
+
+progress("8. Building emof")
 
 extra_cols <- setdiff(names(Samples), event_std)
 
@@ -438,6 +455,8 @@ if (length(extra_cols) > 0) {
 ################################################################################
 # 9. Build asv and occurrence from Taxonomy + ASV-table
 ################################################################################
+
+progress("9. Building asv and occurrence")
 
 taxonomy_dt <- copy(Taxonomy)
 asv_table_dt <- copy(ASV_table)
@@ -543,6 +562,8 @@ asv <- asv[asv_id_alias %in% used_asvs]
 # 10. Dataset metadata
 ################################################################################
 
+progress("10. Dataset metadata")
+
 dataset <- data.frame(
   datasetID = dataset_id,
   datasetName = get_study_value("datasetName"),
@@ -556,6 +577,8 @@ event[, c("datasetName", "datasetID") := NULL]
 ################################################################################
 # 11. Create fasta for annotation workflow
 ################################################################################
+
+progress("11. Writing fasta")
 
 fasta_dt <- unique(taxonomy_dt[asv_id_alias %in% used_asvs, .(asv_id_alias, DNA_sequence)])
 fasta_dt[, fasta := paste0(">", asv_id_alias, "\n", DNA_sequence)]
@@ -586,6 +609,8 @@ if (!file.exists(annotation_file)) {
 # 12. Import and filter annotation
 ################################################################################
 
+progress("12. Reading annotation")
+
 annotation <- fread(
   file = annotation_file,
   sep = "\t",
@@ -611,6 +636,8 @@ if ("annotation_algorithm" %in% names(annotation)) {
 ################################################################################
 # 13. Flag ASVs based on target prediction outcome
 ################################################################################
+
+progress("13. Target prediction and taxonomy corrections")
 
 annotation[, annotation_target := marker]
 annotation[, target_criteria := target_criteria]
@@ -660,15 +687,20 @@ source(file.path(helper_dir, "taxonomy-corrections.R"))
 # 14. Optional dataset-specific fixes
 ################################################################################
 
+progress("14. Dataset-specific fixes")
+
 # Add dataset-specific fixes here if needed. Change the provider's values with
 # change_value() (or log other changes with record_change()), so that they are
 # listed in output/changes.txt and in the email to the provider, e.g.:
-# change_value(dna, "pcr_primer_name_reverse", "805r", "806r",
-#              "Name did not match the primer sequence")
+# change_value(dna, "pcr_primer_reverse", "GGACTACHVGGGTWTCTAAT",
+#              "GACTACHVGGGTATCTAATCC",
+#              "Primer sequence did not match the primer name (805R)")
 
 ################################################################################
 # 15. Export final files
 ################################################################################
+
+progress("15. Exporting import files")
 
 wb <- createWorkbook()
 
@@ -698,13 +730,15 @@ print(paste("Deleted ASV without occurrences:", del_asv_no))
 
 # Keep only objects that correspond to exported sheets, plus what section 16
 # needs
-rm(list = setdiff(ls(), c(final_sheets, "helper_dir", "marker", "changes",
+rm(list = setdiff(ls(), c(final_sheets, "helper_dir", "marker", "changes", "progress",
                           "write_changes", "change_sheet", "change_rows",
                           "from_study", "study_fields")))
 
 ################################################################################
 # 16. Check output and draft provider email
 ################################################################################
+
+progress("16. Checks and change log")
 
 # Compare event and ASV counts across output tables
 source(file.path(helper_dir, "output-checks.R"))

@@ -35,14 +35,23 @@ iupac_regex <- function(primer) {
   paste0("^", paste(ifelse(chars %in% names(codes), codes[chars], chars), collapse = ""))
 }
 
+# Suggested correction for section 14 of the dated script
+fix_line <- function(table, field, old, new, reason) {
+  sprintf('change_value(%s, "%s", "%s", "%s", "%s")', table, field, old, new, reason)
+}
+
 # Compare a pair of submitted values (e.g. primer name and sequence) with the
 # pairs already in the database (ignoring upper/lower case in names)
-check_pair <- function(in_name, in_value, known, label, name_label, value_label) {
+check_pair <- function(in_name, in_value, known, label, name_label, value_label,
+                       table, reasons) {
+  finding <- function(level, message, fix = "") {
+    data.table(level = level, check = label, message = message, fix = fix)
+  }
   if (is.na(in_name) && is.na(in_value)) {
     return(NULL)
   }
   if (is.null(known)) {
-    return(data.table(level = "REVIEW", check = label, message = sprintf(
+    return(finding("REVIEW", sprintf(
       "%s '%s' / %s '%s' not compared with the database (no connection)",
       name_label, in_name, value_label, in_value
     )))
@@ -52,28 +61,37 @@ check_pair <- function(in_name, in_value, known, label, name_label, value_label)
   same_pair <- known[same_name_rows & same_value_rows]
   if (nrow(same_pair) > 0) {
     if (!in_name %in% same_pair$name) {
-      return(data.table(level = "REVIEW", check = label, message = sprintf(
-        "%s '%s' is spelled '%s' in the database", name_label, in_name,
-        paste(unique(same_pair$name), collapse = "', '")
-      )))
+      db_name <- same_pair$name[1]
+      return(finding("REVIEW", sprintf(
+        "%s '%s' is spelled '%s' in the database", name_label, in_name, db_name
+      ), fix_line(table, name_label, in_name, db_name,
+                  "Spelling harmonised with existing datasets")))
     }
     return(NULL)
   }
-  if (any(same_name_rows)) {
-    return(data.table(level = "WARN", check = label, message = sprintf(
-      "%s '%s' has %s '%s', but in the database it has '%s'",
-      name_label, in_name, value_label, in_value,
-      paste(unique(known$value[same_name_rows]), collapse = "', '")
-    )))
-  }
   if (any(same_value_rows)) {
-    return(data.table(level = "WARN", check = label, message = sprintf(
-      "%s '%s' is named '%s', but in the database it is named '%s'",
-      value_label, in_value, in_name,
-      paste(unique(known$name[same_value_rows]), collapse = "', '")
+    # The value is known under another name: suggest that name
+    db_name <- known$name[same_value_rows][1]
+    msg <- if (any(same_name_rows)) {
+      sprintf("%s '%s' has %s '%s', which in the database is named '%s'",
+              name_label, in_name, value_label, in_value, db_name)
+    } else {
+      sprintf("%s '%s' is named '%s', but in the database it is named '%s'",
+              value_label, in_value, in_name, db_name)
+    }
+    return(finding("WARN", msg, fix_line(table, name_label, in_name, db_name, reasons[1])))
+  }
+  if (any(same_name_rows)) {
+    db_value <- known$value[same_name_rows][1]
+    return(finding("WARN", sprintf(
+      "%s '%s' has %s '%s', but in the database it has '%s'",
+      name_label, in_name, value_label, in_value, db_value
+    ), paste0(
+      "# Either the name or the value is wrong; check with the provider, e.g.:\n",
+      fix_line(table, value_label, in_value, db_value, reasons[2])
     )))
   }
-  data.table(level = "REVIEW", check = label, message = sprintf(
+  finding("REVIEW", sprintf(
     "New %s '%s' / %s '%s' (not in the database)", name_label, in_name, value_label, in_value
   ))
 }
@@ -99,7 +117,8 @@ ror_name <- function(ror_id) {
 check_sheet_ids <- function(Samples, Taxonomy, ASV_table) {
   out <- list()
   add <- function(level, message) {
-    out[[length(out) + 1]] <<- data.table(level = level, check = "sheet IDs", message = message)
+    out[[length(out) + 1]] <<- data.table(level = level, check = "sheet IDs", message = message,
+                                          fix = "")
   }
   show <- function(x) paste0(paste(head(x, 5), collapse = ", "), if (length(x) > 5) ", ...")
 
@@ -141,8 +160,9 @@ run_submission_checks <- function(event, dna, asv, occurrence, marker,
                                 Samples = NULL, Taxonomy = NULL, ASV_table = NULL,
                                 file = "output/submission-checks.txt") {
   findings <- list()
-  add <- function(level, check, message) {
-    findings[[length(findings) + 1]] <<- data.table(level = level, check = check, message = message)
+  add <- function(level, check, message, fix = "") {
+    findings[[length(findings) + 1]] <<- data.table(level = level, check = check,
+                                                    message = message, fix = fix)
   }
   first <- function(x) {
     x <- unique(na.omit(as.character(x)))
@@ -173,24 +193,29 @@ run_submission_checks <- function(event, dna, asv, occurrence, marker,
   if (!is.na(target_gene) && target_gene != marker) {
     add("WARN", "marker", sprintf(
       "target_gene '%s' (Study) differs from marker '%s' (section 1)", target_gene, marker
-    ))
+    ), paste0("# Correct marker in section 1, or: ", fix_line(
+      "dna", "target_gene", target_gene, marker, "Harmonised with the dataset's marker")))
   }
 
+  primer_reasons <- c("Primer name did not match the primer sequence",
+                      "Primer sequence did not match the primer name")
   pairs <- list(
     list("target gene", target_gene, first(dna$target_subfragment),
-         "target_gene", "target_subfragment", c("target_gene", "target_subfragment")),
+         "target_gene", "target_subfragment", c("target_gene", "target_subfragment"),
+         c("Harmonised with existing datasets", "Harmonised with existing datasets")),
     list("forward primer", first(dna$pcr_primer_name_forward), toupper(first(dna$pcr_primer_forward)),
          "pcr_primer_name_forward", "pcr_primer_forward",
-         c("pcr_primer_name_forward", "pcr_primer_forward")),
+         c("pcr_primer_name_forward", "pcr_primer_forward"), primer_reasons),
     list("reverse primer", first(dna$pcr_primer_name_reverse), toupper(first(dna$pcr_primer_reverse)),
          "pcr_primer_name_reverse", "pcr_primer_reverse",
-         c("pcr_primer_name_reverse", "pcr_primer_reverse"))
+         c("pcr_primer_name_reverse", "pcr_primer_reverse"), primer_reasons)
   )
   for (p in pairs) {
     known <- if (is.null(mixs_db)) NULL else
       setnames(unique(mixs_db[, p[[6]], with = FALSE]), c("name", "value"))
     if (!is.null(known)) known[, value := toupper(value)]
-    findings[[length(findings) + 1]] <- check_pair(p[[2]], p[[3]], known, p[[1]], p[[4]], p[[5]])
+    findings[[length(findings) + 1]] <- check_pair(p[[2]], p[[3]], known, p[[1]], p[[4]], p[[5]],
+                                                   table = "dna", reasons = p[[7]])
   }
 
   inst_code <- first(event$institutionCode)
@@ -198,7 +223,9 @@ run_submission_checks <- function(event, dna, asv, occurrence, marker,
   known_inst <- if (is.null(inst_db)) NULL else
     setnames(copy(inst_db), c("name", "value"))
   inst_finding <- check_pair(inst_code, inst_id, known_inst, "institution",
-                             "institutionCode", "institutionID")
+                             "institutionCode", "institutionID", table = "event",
+                             reasons = c("Institution code did not match the institution ID",
+                                         "Institution ID did not match the institution code"))
   findings[[length(findings) + 1]] <- inst_finding
   if (!is.null(inst_finding) && !is.na(inst_id) && grepl("ror.org", inst_id)) {
     add("REVIEW", "institution", sprintf("ROR %s is '%s'", inst_id, ror_name(inst_id)))
@@ -212,7 +239,7 @@ run_submission_checks <- function(event, dna, asv, occurrence, marker,
       add("REVIEW", "samples", sprintf(
         "%s has %d different values (possible Excel autofill?): %s", col, length(vals),
         paste(head(vals, 5), collapse = " | ")
-      ))
+      ), sprintf('# If wrong: change_value(event, "%s", <old>, <new>, <reason>)', col))
     }
   }
   for (col in c("materialSampleID", "associatedSequences")) {
@@ -221,13 +248,14 @@ run_submission_checks <- function(event, dna, asv, occurrence, marker,
     if (length(dups) > 0) {
       add("WARN", "samples", sprintf(
         "%s has %d duplicated value(s), e.g. %s", col, length(dups), dups[1]
-      ))
+      ), sprintf('# change_value(event, "%s", "%s", <new>, <reason>, rows = event$eventID == <sample>)', col, dups[1]))
     }
   }
 
   dates <- as.character(event$eventDate)
   if (any(grepl("^[0-9]{5}$", dates))) {
-    add("WARN", "eventDate", "Five-digit eventDate values (Excel date serial numbers?)")
+    add("WARN", "eventDate", "Five-digit eventDate values (Excel date serial numbers?)",
+        '# change_value(event, "eventDate", <old>, <YYYY-MM-DD>, "Date converted from Excel format")')
   }
   years <- suppressWarnings(as.integer(substr(dates, 1, 4)))
   if (any(years > as.integer(format(Sys.Date(), "%Y")), na.rm = TRUE)) {
@@ -244,6 +272,12 @@ run_submission_checks <- function(event, dna, asv, occurrence, marker,
     add("WARN", "coordinates", sprintf(
       "%d Swedish sample(s) with latitude < longitude (swapped coordinates?)",
       sum(in_sweden & lat < lon, na.rm = TRUE)
+    ), paste0(
+      "# Swap and log, e.g.: swap <- event$country %in% c(\"Sweden\", \"SE\") & ",
+      "as.numeric(event$decimalLatitude) < as.numeric(event$decimalLongitude); ",
+      "event[swap, c(\"decimalLatitude\", \"decimalLongitude\") := .(decimalLongitude, decimalLatitude)]; ",
+      "record_change(\"event\", \"decimalLatitude/decimalLongitude\", \"swapped\", \"corrected\", ",
+      "\"Latitude and longitude were swapped\", sum(swap))"
     ))
   }
 
@@ -272,6 +306,10 @@ run_submission_checks <- function(event, dna, asv, occurrence, marker,
   }
   report <- report[order(match(level, c("WARN", "REVIEW")))]
   lines <- report[, sprintf("%-6s %-15s %s", level, check, message)]
+  fixes <- report[fix != "", fix]
+  if (length(fixes) > 0) {
+    lines <- c(lines, "", "Suggested fixes for section 14 (check before use):", fixes)
+  }
   writeLines(lines, file)
   message(
     "\nSubmission checks (", nrow(report), " finding(s), also in ", file, "):\n",
