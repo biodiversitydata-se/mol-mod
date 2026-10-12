@@ -1,7 +1,8 @@
 # Drafts an email (draft_changes_email.eml) listing the changes made to the
 # provider's data, for them to confirm before import. Run at the end of
 # asv-input-processing.R; nothing is drafted if no change was logged.
-# Open the draft in Mac Mail, move it to Drafts, check it and send.
+# To send: open the draft in Mac Mail, choose Message > Send Again (shift-cmd-D),
+# check the editable copy and send it.
 #
 # Sender details are read from environment variables (e.g. set in ~/.Renviron):
 #   MOLMOD_SENDER_NAME   name used in the signature (required)

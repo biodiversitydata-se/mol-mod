@@ -101,7 +101,9 @@ Work in a folder per dataset, outside the repository:
 5. **Second pass:** source the script again; it now runs to the end and
    writes `output/<datasetID>-adm.tar.gz`, `output/changes.txt` and, if
    anything was changed, `draft_changes_email.eml`.
-6. Send the changes email and wait for the provider's confirmation.
+6. Send the changes email and wait for the provider's confirmation. To send
+   a draft (`.eml`), open it in Mac Mail and choose *Message → Send Again*
+   (⇧⌘D), which gives an editable copy.
 7. Import (main README), archive with `zip-ds.sh`, and draft the provider
    email with `email-generator.R` once the IPT resource exists.
 

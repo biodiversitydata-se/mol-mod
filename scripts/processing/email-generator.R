@@ -2,7 +2,8 @@
 # Expects email-template.html in the same folder as this script, and dataset object
 # from asv-input-processing.R. Source it from the dataset folder, e.g.:
 #   source("<path-to-mol-mod>/scripts/processing/email-generator.R")
-# Open in Mac mail and move to Draft to edit pwd and send
+# To send: open the draft in Mac Mail, choose Message > Send Again (shift-cmd-D),
+# fill in the IPT password (%pwd%) in the editable copy and send it.
 #
 # Sender details are read from environment variables (e.g. set in ~/.Renviron),
 # so that no personal data is stored in the repo:
