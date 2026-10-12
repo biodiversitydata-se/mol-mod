@@ -41,19 +41,21 @@ fix_line <- function(table, field, old, new, reason) {
 }
 
 # Compare a pair of submitted values (e.g. primer name and sequence) with the
-# pairs already in the database (ignoring upper/lower case in names)
-check_pair <- function(in_name, in_value, known, label, name_label, value_label,
-                       table, reasons) {
+# pairs already in the database (ignoring upper/lower case in names). 'fields'
+# are the column names in 'table'; 'labels' are readable names for messages
+# and for the reasons shown to the provider, e.g. c("primer name", "primer sequence").
+check_pair <- function(in_name, in_value, known, check, table, fields, labels) {
   finding <- function(level, message, fix = "") {
-    data.table(level = level, check = label, message = message, fix = fix)
+    data.table(level = level, check = check, message = message, fix = fix)
   }
+  cap <- function(x) paste0(toupper(substr(x, 1, 1)), substring(x, 2))
   if (is.na(in_name) && is.na(in_value)) {
     return(NULL)
   }
   if (is.null(known)) {
     return(finding("REVIEW", sprintf(
       "%s '%s' / %s '%s' not compared with the database (no connection)",
-      name_label, in_name, value_label, in_value
+      cap(labels[1]), in_name, labels[2], in_value
     )))
   }
   same_name_rows <- !is.na(known$name) & !is.na(in_name) & toupper(known$name) == toupper(in_name)
@@ -63,8 +65,8 @@ check_pair <- function(in_name, in_value, known, label, name_label, value_label,
     if (!in_name %in% same_pair$name) {
       db_name <- same_pair$name[1]
       return(finding("REVIEW", sprintf(
-        "%s '%s' is spelled '%s' in the database", name_label, in_name, db_name
-      ), fix_line(table, name_label, in_name, db_name,
+        "%s '%s' is spelled '%s' in the database", cap(labels[1]), in_name, db_name
+      ), fix_line(table, fields[1], in_name, db_name,
                   "Spelling harmonised with existing datasets")))
     }
     return(NULL)
@@ -72,27 +74,26 @@ check_pair <- function(in_name, in_value, known, label, name_label, value_label,
   if (any(same_value_rows)) {
     # The value is known under another name: suggest that name
     db_name <- known$name[same_value_rows][1]
-    msg <- if (any(same_name_rows)) {
-      sprintf("%s '%s' has %s '%s', which in the database is named '%s'",
-              name_label, in_name, value_label, in_value, db_name)
-    } else {
-      sprintf("%s '%s' is named '%s', but in the database it is named '%s'",
-              value_label, in_value, in_name, db_name)
-    }
-    return(finding("WARN", msg, fix_line(table, name_label, in_name, db_name, reasons[1])))
+    return(finding("WARN", sprintf(
+      "%s '%s' does not match %s '%s' (in the database, '%s' goes with '%s')",
+      cap(labels[1]), in_name, labels[2], in_value, in_value, db_name
+    ), fix_line(table, fields[1], in_name, db_name,
+                sprintf("%s did not match %s %s", cap(labels[1]), labels[2], in_value))))
   }
   if (any(same_name_rows)) {
     db_value <- known$value[same_name_rows][1]
     return(finding("WARN", sprintf(
-      "%s '%s' has %s '%s', but in the database it has '%s'",
-      name_label, in_name, value_label, in_value, db_value
+      "%s '%s' does not match %s '%s' (in the database, '%s' goes with '%s')",
+      cap(labels[2]), in_value, labels[1], in_name, in_name, db_value
     ), paste0(
-      "# Either the name or the value is wrong; check with the provider, e.g.:\n",
-      fix_line(table, value_label, in_value, db_value, reasons[2])
+      "# Either the ", labels[1], " or the ", labels[2],
+      " is wrong; check with the provider, e.g.:\n",
+      fix_line(table, fields[2], in_value, db_value,
+               sprintf("%s did not match %s %s", cap(labels[2]), labels[1], in_name))
     )))
   }
   finding("REVIEW", sprintf(
-    "New %s '%s' / %s '%s' (not in the database)", name_label, in_name, value_label, in_value
+    "New %s '%s' / %s '%s' (not in the database)", labels[1], in_name, labels[2], in_value
   ))
 }
 
@@ -192,40 +193,39 @@ run_submission_checks <- function(event, dna, asv, occurrence, marker,
   target_gene <- first(dna$target_gene)
   if (!is.na(target_gene) && target_gene != marker) {
     add("WARN", "marker", sprintf(
-      "target_gene '%s' (Study) differs from marker '%s' (section 1)", target_gene, marker
-    ), paste0("# Correct marker in section 1, or: ", fix_line(
-      "dna", "target_gene", target_gene, marker, "Harmonised with the dataset's marker")))
+      "Target gene '%s' (Study) does not match marker '%s' (section 1)", target_gene, marker
+    ), paste0("# Correct marker in section 1, or:\n", fix_line(
+      "dna", "target_gene", target_gene, marker, sprintf("Target gene did not match marker %s", marker))))
   }
 
-  primer_reasons <- c("Primer name did not match the primer sequence",
-                      "Primer sequence did not match the primer name")
   pairs <- list(
-    list("target gene", target_gene, first(dna$target_subfragment),
-         "target_gene", "target_subfragment", c("target_gene", "target_subfragment"),
-         c("Harmonised with existing datasets", "Harmonised with existing datasets")),
-    list("forward primer", first(dna$pcr_primer_name_forward), toupper(first(dna$pcr_primer_forward)),
-         "pcr_primer_name_forward", "pcr_primer_forward",
-         c("pcr_primer_name_forward", "pcr_primer_forward"), primer_reasons),
-    list("reverse primer", first(dna$pcr_primer_name_reverse), toupper(first(dna$pcr_primer_reverse)),
-         "pcr_primer_name_reverse", "pcr_primer_reverse",
-         c("pcr_primer_name_reverse", "pcr_primer_reverse"), primer_reasons)
+    list(check = "target gene", name = target_gene, value = first(dna$target_subfragment),
+         fields = c("target_gene", "target_subfragment"),
+         labels = c("target gene", "target subfragment")),
+    list(check = "forward primer", name = first(dna$pcr_primer_name_forward),
+         value = toupper(first(dna$pcr_primer_forward)),
+         fields = c("pcr_primer_name_forward", "pcr_primer_forward"),
+         labels = c("forward primer name", "forward primer sequence")),
+    list(check = "reverse primer", name = first(dna$pcr_primer_name_reverse),
+         value = toupper(first(dna$pcr_primer_reverse)),
+         fields = c("pcr_primer_name_reverse", "pcr_primer_reverse"),
+         labels = c("reverse primer name", "reverse primer sequence"))
   )
   for (p in pairs) {
     known <- if (is.null(mixs_db)) NULL else
-      setnames(unique(mixs_db[, p[[6]], with = FALSE]), c("name", "value"))
+      setnames(unique(mixs_db[, p$fields, with = FALSE]), c("name", "value"))
     if (!is.null(known)) known[, value := toupper(value)]
-    findings[[length(findings) + 1]] <- check_pair(p[[2]], p[[3]], known, p[[1]], p[[4]], p[[5]],
-                                                   table = "dna", reasons = p[[7]])
+    findings[[length(findings) + 1]] <- check_pair(p$name, p$value, known, p$check,
+                                                   "dna", p$fields, p$labels)
   }
 
   inst_code <- first(event$institutionCode)
   inst_id <- first(event$institutionID)
   known_inst <- if (is.null(inst_db)) NULL else
     setnames(copy(inst_db), c("name", "value"))
-  inst_finding <- check_pair(inst_code, inst_id, known_inst, "institution",
-                             "institutionCode", "institutionID", table = "event",
-                             reasons = c("Institution code did not match the institution ID",
-                                         "Institution ID did not match the institution code"))
+  inst_finding <- check_pair(inst_code, inst_id, known_inst, "institution", "event",
+                             c("institutionCode", "institutionID"),
+                             c("institution code", "institution ID"))
   findings[[length(findings) + 1]] <- inst_finding
   if (!is.null(inst_finding) && !is.na(inst_id) && grepl("ror.org", inst_id)) {
     add("REVIEW", "institution", sprintf("ROR %s is '%s'", inst_id, ror_name(inst_id)))
@@ -272,12 +272,14 @@ run_submission_checks <- function(event, dna, asv, occurrence, marker,
     add("WARN", "coordinates", sprintf(
       "%d Swedish sample(s) with latitude < longitude (swapped coordinates?)",
       sum(in_sweden & lat < lon, na.rm = TRUE)
-    ), paste0(
-      "# Swap and log, e.g.: swap <- event$country %in% c(\"Sweden\", \"SE\") & ",
-      "as.numeric(event$decimalLatitude) < as.numeric(event$decimalLongitude); ",
-      "event[swap, c(\"decimalLatitude\", \"decimalLongitude\") := .(decimalLongitude, decimalLatitude)]; ",
-      "record_change(\"event\", \"decimalLatitude/decimalLongitude\", \"swapped\", \"corrected\", ",
-      "\"Latitude and longitude were swapped\", sum(swap))"
+    ), paste(
+      "# Swap and log, e.g.:",
+      "# swap <- event$country %in% c(\"Sweden\", \"SE\") &",
+      "#   as.numeric(event$decimalLatitude) < as.numeric(event$decimalLongitude)",
+      "# event[swap, c(\"decimalLatitude\", \"decimalLongitude\") := .(decimalLongitude, decimalLatitude)]",
+      "# record_change(\"event\", \"decimalLatitude/decimalLongitude\", \"swapped\", \"corrected\",",
+      "#               \"Latitude and longitude were swapped\", sum(swap))",
+      sep = "\n"
     ))
   }
 
@@ -306,9 +308,17 @@ run_submission_checks <- function(event, dna, asv, occurrence, marker,
   }
   report <- report[order(match(level, c("WARN", "REVIEW")))]
   lines <- report[, sprintf("%-6s %-15s %s", level, check, message)]
+  # Drop repeated suggestions for the same change (same table, field, old, new)
   fixes <- report[fix != "", fix]
+  key_of <- function(f) {
+    m <- regmatches(f, regexpr('change_value\\([^,]+, "[^"]*", "[^"]*", "[^"]*"', f))
+    if (length(m) == 0) f else m
+  }
+  fixes <- fixes[!duplicated(vapply(fixes, key_of, character(1)))]
   if (length(fixes) > 0) {
-    lines <- c(lines, "", "Suggested fixes for section 14 (check before use):", fixes)
+    lines <- c(lines, "", "Fix in section 14 with change_value(), e.g.:", fixes)
+  } else {
+    lines <- c(lines, "", "Fix in section 14 with change_value().")
   }
   writeLines(lines, file)
   message(
