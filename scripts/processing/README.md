@@ -10,6 +10,10 @@ HPC cluster. Importing the archive is described in the main
 | `asv-input-processing.R` | Main script; a dated copy is kept with each dataset |
 | `ampliseq-config-generator.R` | Writes `ampliseq/params.yaml` (sourced by the main script) |
 | `ampliseq-hpc.sh` | Runs ampliseq on the cluster: `push`, `start`, `status`, `fetch` |
+| `submission-checks.R` | Lists likely mistakes in the submitted data for review (sourced) |
+| `change-log.R` | Logs corrections of the provider's data: `change_value()` (sourced) |
+| `changes-email-generator.R`, `changes-email-template.html` | Draft email asking the provider to confirm the changes before import (sourced) |
+| `asv-db-query.R` | Read-only queries to the ASV portal database (sourced) |
 | `taxonomy-corrections.R`, `pr2-correction-lookup.tsv` | Fix genus/species splitting for PR2 and COIDB (sourced) |
 | `output-checks.R` | Compares counts across output tables (sourced) |
 | `email-generator.R`, `email-template.html` | Draft email to the data provider |
@@ -19,7 +23,7 @@ HPC cluster. Importing the archive is described in the main
 
 ## One-time setup
 
-**R** needs `data.table` and `openxlsx`. Personal and site-specific settings
+**R** needs `data.table`, `openxlsx` and `jsonlite`. Personal and site-specific settings
 go in `~/.Renviron` (open with `usethis::edit_r_environ()`, restart R after):
 
 ```
@@ -84,7 +88,9 @@ Work in a folder per dataset, outside the repository:
 2. **First pass:** source the script. Without `input/annotation.tsv` it stops
    after section 11, having written the fasta and `ampliseq/params.yaml`, and
    asks for the ampliseq version (Enter = latest release).
-3. **Review** the output and `params.yaml`.
+3. **Review** the output, `params.yaml` and `output/submission-checks.txt`
+   (see below). Correct the provider's data in section 14 with
+   `change_value()`.
 4. **Annotate**, from the dataset folder:
    ```sh
    ampliseq-hpc.sh push     # copy params.yaml and fasta to the cluster
@@ -93,9 +99,32 @@ Work in a folder per dataset, outside the repository:
    ampliseq-hpc.sh fetch    # copy annotation.tsv (and ASV_tax.*.tsv) to input/
    ```
 5. **Second pass:** source the script again; it now runs to the end and
-   writes `output/<datasetID>-adm.tar.gz`.
-6. Import (main README), archive with `zip-ds.sh`, and draft the provider
+   writes `output/<datasetID>-adm.tar.gz`, `output/changes.txt` and, if
+   anything was changed, `draft_changes_email.eml`.
+6. Send the changes email and wait for the provider's confirmation.
+7. Import (main README), archive with `zip-ds.sh`, and draft the provider
    email with `email-generator.R` once the IPT resource exists.
+
+## Checks and changes
+
+The main script stops on errors that rule out a valid import (missing sheets
+or columns, duplicated IDs, ASVs with reads but no sequence).
+`submission-checks.R` lists likely mistakes that need judgement in
+`output/submission-checks.txt` (in both passes):
+
+- **WARN**: probably wrong, e.g. a primer name that in the database belongs to
+  another sequence, a marker that differs from section 1, duplicated ENA
+  links, swapped coordinates, non-integer counts, samples or ASVs that differ
+  between sheets.
+- **REVIEW**: new or unusual values to check by hand, e.g. primers, markers or
+  institutions not yet in the database (with the organisation name from ROR),
+  or columns that vary between samples where Excel autofill may have been used.
+
+Correct the data in section 14 with
+`change_value(table, field, old, new, reason)`, e.g.
+`change_value(dna, "pcr_primer_name_reverse", "805r", "806r", "Name did not match the primer sequence")`.
+Each change is listed in `output/changes.txt` and in the email draft, by the
+provider's sheet names.
 
 ## Annotation settings
 

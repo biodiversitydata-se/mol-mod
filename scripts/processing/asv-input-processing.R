@@ -27,6 +27,14 @@
 #      run the annotation with ampliseq-hpc.sh (push, start, status, fetch).
 #   2. With input/annotation.tsv in place, the script runs to the end.
 #
+# Checks: this script stops on errors that make a valid import file impossible
+# (missing sheets or required columns, duplicated IDs, ASVs without sequence).
+# Possible mistakes that need judgement (e.g. primer names, new marker or
+# institution values, Excel autofill, IDs dropped between sheets) are only
+# reported, by submission-checks.R, in output/submission-checks.txt. Correct
+# them in section 14 with change_value(), so that the changes are listed in an
+# email for the provider to confirm before import.
+#
 # Helper scripts are sourced from mol-mod/scripts/processing (see section 2).
 # Required environment variables (e.g. in ~/.Renviron): MOLMOD_DIR and
 # NAISS_PROJECT; optional: ASV_DB_SSH_HOST (to take the annotation setup from
@@ -65,6 +73,9 @@ dir.create("output", showWarnings = FALSE)
 # Helper scripts in mol-mod/scripts/processing, located via environment
 # variable MOLMOD_DIR (path to the mol-mod repo, e.g. set in ~/.Renviron)
 helper_dir <- file.path(Sys.getenv("MOLMOD_DIR"), "scripts", "processing")
+
+# Log of changes to the provider's data (change_value(), record_change())
+source(file.path(helper_dir, "change-log.R"))
 
 ################################################################################
 # 3. Import uploaded data
@@ -279,6 +290,20 @@ if (!all(required_tax_cols %in% names(Taxonomy))) {
       paste(setdiff(required_tax_cols, names(Taxonomy)), collapse = ", ")
     )
   )
+}
+
+# Duplicated IDs would make the import invalid
+id_sets <- list(
+  "Samples sample_id" = Samples$eventID,
+  "Taxonomy asv_id" = Taxonomy$asv_id_alias,
+  "ASV-table asv_id" = ASV_table$asv_id_alias,
+  "ASV-table column" = setdiff(names(ASV_table), "asv_id_alias")
+)
+for (id_set in names(id_sets)) {
+  dups <- unique(id_sets[[id_set]][duplicated(id_sets[[id_set]])])
+  if (length(dups) > 0) {
+    stop("Duplicated ", id_set, ": ", paste(head(dups, 5), collapse = ", "))
+  }
 }
 
 ################################################################################
@@ -503,6 +528,15 @@ occurrence <- occurrence[, .(
 )]
 
 used_asvs <- unique(occurrence$asv_id_alias)
+
+# ASVs with reads must have a sequence in Taxonomy
+missing_seq <- setdiff(used_asvs, asv$asv_id_alias)
+if (length(missing_seq) > 0) {
+  stop(
+    length(missing_seq), " ASV(s) with reads in ASV-table are missing in Taxonomy: ",
+    paste(head(missing_seq, 5), collapse = ", ")
+  )
+}
 asv <- asv[asv_id_alias %in% used_asvs]
 
 ################################################################################
@@ -533,9 +567,12 @@ fwrite(
   col.names = FALSE
 )
 
-# Without an annotation file, write the ampliseq params.yaml and stop here, so
-# that the output can be reviewed before running the annotation
+# Without an annotation file, check the submitted data, write the ampliseq
+# params.yaml and stop here, so that the output can be reviewed before running
+# the annotation
 if (!file.exists(annotation_file)) {
+  source(file.path(helper_dir, "submission-checks.R"))
+  run_submission_checks(event, dna, asv, occurrence, marker, Samples, Taxonomy, ASV_table)
   source(file.path(helper_dir, "ampliseq-config-generator.R"))
   message(
     "\nNo ", annotation_file, " yet: stopped after section 11.\n",
@@ -623,7 +660,11 @@ source(file.path(helper_dir, "taxonomy-corrections.R"))
 # 14. Optional dataset-specific fixes
 ################################################################################
 
-# Add dataset-specific fixes here if needed.
+# Add dataset-specific fixes here if needed. Change the provider's values with
+# change_value() (or log other changes with record_change()), so that they are
+# listed in output/changes.txt and in the email to the provider, e.g.:
+# change_value(dna, "pcr_primer_name_reverse", "805r", "806r",
+#              "Name did not match the primer sequence")
 
 ################################################################################
 # 15. Export final files
@@ -655,8 +696,11 @@ unlink(tfiles)
 
 print(paste("Deleted ASV without occurrences:", del_asv_no))
 
-# Keep only objects that correspond to exported sheets
-rm(list = setdiff(ls(), c(final_sheets, "helper_dir")))
+# Keep only objects that correspond to exported sheets, plus what section 16
+# needs
+rm(list = setdiff(ls(), c(final_sheets, "helper_dir", "marker", "changes",
+                          "write_changes", "change_sheet", "change_rows",
+                          "from_study", "study_fields")))
 
 ################################################################################
 # 16. Check output and draft provider email
@@ -665,6 +709,18 @@ rm(list = setdiff(ls(), c(final_sheets, "helper_dir")))
 # Compare event and ASV counts across output tables
 source(file.path(helper_dir, "output-checks.R"))
 check_output(dataset$datasetID)
+
+# Check the final data again, after the fixes in section 14
+source(file.path(helper_dir, "submission-checks.R"))
+run_submission_checks(event, dna, asv, occurrence, marker)
+
+# List the changes made to the provider's data, and draft an email asking the
+# provider to confirm them before import
+write_changes()
+tryCatch(
+  source(file.path(helper_dir, "changes-email-generator.R")),
+  error = function(e) warning("Change email not drafted: ", conditionMessage(e))
+)
 
 # Draft the provider email once the IPT resource has been created
 # source(file.path(helper_dir, "email-generator.R"))

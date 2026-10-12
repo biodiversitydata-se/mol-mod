@@ -24,6 +24,21 @@
 
 library(data.table)
 
+# Folder of this script when sourced (innermost source() call), else the
+# working directory
+config_generator_dir <- local({
+  dir <- "."
+  for (i in rev(seq_len(sys.nframe()))) {
+    f <- sys.frame(i)$ofile
+    if (!is.null(f)) {
+      dir <- dirname(f)
+      break
+    }
+  }
+  dir
+})
+source(file.path(config_generator_dir, "asv-db-query.R"))
+
 config_dir <- Sys.getenv("AMPLISEQ_CONFIG_DIR", "ampliseq")
 naiss_project <- Sys.getenv("NAISS_PROJECT")
 db_host <- Sys.getenv("ASV_DB_SSH_HOST")
@@ -75,41 +90,21 @@ get_marker_preset <- function(marker) {
   )
 }
 
-# Query api.annotation_overview read-only, via ssh to the server or in a
-# local container. Database credentials are taken from the container's own
-# environment. Returns NULL (with a warning) on failure.
+# Current annotation setups per marker from api.annotation_overview, or NULL
+# (with a warning) if the database cannot be reached
 query_annotation_overview <- function(host) {
-  if (host == "") {
-    warning("ASV_DB_SSH_HOST is not set; using fallback presets")
-    return(NULL)
-  }
   sql <- paste(
     "SELECT annotation_target, db, algo, classifier, options, count(*) AS n_datasets",
     "FROM api.annotation_overview GROUP BY 1, 2, 3, 4, 5;"
   )
-  psql <- paste(
-    "PGOPTIONS='-c default_transaction_read_only=on'",
-    'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" --csv -v ON_ERROR_STOP=1'
-  )
-  docker_cmd <- paste("docker exec -i asv-db sh -c", shQuote(psql))
-  out <- tryCatch(
-    if (host == "local") {
-      system(docker_cmd, input = sql, intern = TRUE)
-    } else {
-      system2(
-        "ssh",
-        c("-o", "BatchMode=yes", "-o", "ConnectTimeout=15", host, shQuote(docker_cmd)),
-        input = sql, stdout = TRUE
-      )
-    },
-    error = function(e) NULL,
-    warning = function(w) NULL
-  )
-  if (length(out) < 2) {
-    warning("Could not query api.annotation_overview on '", host, "'; using fallback presets")
+  overview <- query_asv_db(sql, host)
+  if (is.null(overview)) {
+    warning("Using fallback presets for the annotation setup")
     return(NULL)
   }
-  fread(text = paste(out, collapse = "\n"))
+  overview[, n_datasets := as.integer(n_datasets)]
+  overview[options == "", options := NA_character_]
+  overview
 }
 
 # Latest nf-core/ampliseq release on GitHub, or NA if it cannot be fetched
