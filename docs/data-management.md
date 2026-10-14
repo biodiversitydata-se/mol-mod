@@ -83,8 +83,10 @@ These run `importer.py` in the main container; for more options, see its
 2. **Confirm changes:** if `output/changes.txt` lists changes, send
    `draft_changes_email.eml` (in Mac Mail: *Message → Send Again*, ⇧⌘D) and
    wait for the provider's agreement.
-3. **Import** on the server after `make backup`. Use `make conflict-import`
-   to import despite target-prediction conflicts.
+3. **Import** on the server after `make backup`. To import despite
+   target-prediction conflicts, use `make conflict-import`: the affected ASVs
+   keep their existing annotation, so plan a
+   [taxonomic update](#taxonomic-updates) of the marker.
 
 ### Archiving
 
