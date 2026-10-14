@@ -131,9 +131,9 @@ see the [IPT manual](https://ipt.gbif.org/manual/en/ipt/latest/).
    DwC-A), then *Published Versions → Register*. Later publications update
    the registration automatically. Version notes can be edited afterwards in
    the version history on the resource page.
-7. **Bioatlas ingestion:** the Bioatlas picks up new and changed GBIF
-   datasets, but email the Bioatlas team. They return the Bioatlas resource
-   ID (`drXXXX`).
+7. **Bioatlas ingestion:** email the Bioatlas team and check which resource
+   ID (`drXXXX`) the dataset gets. It is stored with `make status` but not
+   otherwise used by the portal.
 
 ### Going public in the ASV portal
 
