@@ -76,8 +76,8 @@ or columns, duplicated IDs, ASVs with reads but no sequence).
 
 - **WARN**: probably wrong, e.g. a primer name that in the database belongs to
   another sequence, a marker that differs from section 1, duplicated ENA
-  links, swapped coordinates, non-integer counts, samples or ASVs that differ
-  between sheets.
+  links, samples without country (required by GBIF), swapped coordinates,
+  non-integer counts, samples or ASVs that differ between sheets.
 - **REVIEW**: new or unusual values to check by hand, e.g. primers, markers or
   institutions not yet in the database (with the organisation name from ROR),
   or columns that vary between samples where Excel autofill may have been used.

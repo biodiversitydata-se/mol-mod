@@ -267,6 +267,20 @@ run_submission_checks <- function(event, dna, asv, occurrence, marker,
   if (any(abs(lat) > 90 | abs(lon) > 180, na.rm = TRUE)) {
     add("WARN", "coordinates", "Latitude or longitude out of range")
   }
+  # GBIF requires at least the country of origin for DNA-derived records
+  no_country <- is.na(event$country) | !nzchar(trimws(as.character(event$country)))
+  if (any(no_country)) {
+    add("WARN", "location", sprintf(
+      "%d sample(s) without country, e.g. %s", sum(no_country),
+      event$eventID[no_country][1]
+    ), paste(
+      "# Ask the provider, then add and log, e.g.:",
+      "# miss <- is.na(event$country) | !nzchar(trimws(event$country))",
+      "# event[miss, country := <country>]",
+      "# record_change(\"event\", \"country\", NA, <country>, <reason>, sum(miss))",
+      sep = "\n"
+    ))
+  }
   in_sweden <- !is.na(event$country) & grepl("^(Sweden|SE)$", event$country)
   if (any(in_sweden & lat < lon, na.rm = TRUE)) {
     add("WARN", "coordinates", sprintf(

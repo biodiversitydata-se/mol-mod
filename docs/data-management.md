@@ -156,6 +156,8 @@ Then check:
 
 The ASV portal, IPT, GBIF and Bioatlas are not synced automatically;
 coordinate with the Bioatlas team before changing public data.
+`scripts/check-event-location.sql` lists events without country or complete
+coordinates, which GBIF requires (run instructions in the file).
 
 ### Edits after import
 
