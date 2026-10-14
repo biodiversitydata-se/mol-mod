@@ -117,7 +117,7 @@ the server backups.
 
 ### Publishing in the IPT and GBIF
 
-Datasets are published through the Swedish IPT (`https://www.gbif.se/ipt/`).
+Datasets are published through the [Swedish IPT](https://www.gbif.se/ipt/).
 Most steps are manual in the IPT interface; see the
 [IPT manual](https://ipt.gbif.org/manual/en/ipt/latest/) for details.
 
