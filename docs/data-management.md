@@ -156,17 +156,20 @@ make export             # all datasets with in_bioatlas = TRUE
 make export ds="1 4"    # specific datasets (pids)
 ```
 The zip holds the database data and the current IPT EML (version, citation,
-description); only the DOI comes from GBIF. Re-run it whenever a public
-dataset changes.
+description); only the DOI comes from GBIF, which has it once the dataset is
+registered. Re-run the export whenever a public dataset changes.
 
-Check that the versions inside each zip agree (read-only):
-```sh
-docker exec -i asv-main python3 - /app/data-volumes/exports < scripts/audit-export-versions.py
-```
-`scripts/fix-export-readme.py` rebuilds a README citation from the IPT EML.
-Also check that GBIF has the IPT version (`version` in
-`https://api.gbif.org/v1/dataset/<uuid>`); after two quick publications it can
-lag one version until the next crawl.
+After exporting, check:
+- that the versions inside each zip agree (read-only):
+  ```sh
+  docker exec -i asv-main python3 - /app/data-volumes/exports < scripts/audit-export-versions.py
+  ```
+  `scripts/fix-export-readme.py` rebuilds a README citation from the IPT EML.
+- that the README has a DOI. `DOI: N/A` means the dataset was not registered
+  or the GBIF API did not respond; re-export.
+- that GBIF has the IPT version (`version` in
+  `https://api.gbif.org/v1/dataset/<uuid>`). After two quick publications it
+  can lag one version until the next crawl.
 
 ## Maintaining imported data
 
