@@ -17,6 +17,7 @@ is described in the main [README](../README.md).
 6. **Make the dataset public** in the portal and rebuild the BLAST database and
    About stats (see [Going public](#going-public)).
 7. **Export** the download archive (see [Dataset exports](#dataset-exports)).
+   Repeat this whenever a public dataset is changed or republished.
 
 ## Preprocessing and annotation
 
@@ -123,6 +124,26 @@ in the `Download` page, use the following `Makefile` target:
   $ make export             # All datasets
   $ make export ds="1 4"    # Specific dataset (pid:s)
 ```
+Without `ds`, all datasets with `in_bioatlas = TRUE` are exported.
+
+The zip is a snapshot of the database and the current IPT metadata (version,
+citation and description from the IPT EML; only the DOI comes from GBIF).
+Re-run the export whenever a public dataset changes: data edits in the
+database, a delete and re-import (new pid, same datasetID, so
+`<datasetID>.zip` is overwritten), or a new IPT version. Otherwise the
+`Download` page keeps serving the old version.
+
+To check that the versions inside each zip agree (EML packageId, EML citation
+and README citation), run the read-only audit script against the exports
+volume on the server:
+```
+  $ docker exec -i asv-main python3 - /app/data-volumes/exports < scripts/audit-export-versions.py
+```
+The audit does not compare with GBIF. After republishing, also check that
+GBIF has picked up the IPT version (`version` in
+`https://api.gbif.org/v1/dataset/<uuid>`). If a resource is published twice
+in quick succession, GBIF may crawl between the two and stay one version
+behind until its next scheduled crawl.
 
 ## Target prediction filtering
 In version 2.0.0, we make it possible to import all denoised sequences from a dataset, and then dynamically filter out any ASVs that we do not (currently) predict to derive from the targeted gene, thereby excluding these from BLAST and filter searches, result displays and IPT views. ASVs are thus only imported once, but their status can change, e.g. at taxonomic re-annotation. Criteria used for ASV exclusion may vary between genes / groups of organisms, but could e.g. combine the output from the *BAsic Rapid Ribosomal RNA Predictor (barrnap)* with the taxonomic annotation itself. For example, we may decide that only ASVs that are annotated at least at kingdom level OR get positive barrnap prediction should be considered as TRUE 16S rRNA sequences.
