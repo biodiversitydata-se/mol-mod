@@ -179,17 +179,19 @@ post-import changes per IPT version.
 
 ### Edits after import
 
-Fix imported data directly in the database; old dataset scripts cannot be
-re-run against a newer template or database. For a public dataset, then
-republish in the IPT with a version note, re-export (`make export ds="<pid>"`,
-plus `make stats` / `make blastdb` if affected), remind the Bioatlas team and
-log the change.
+Edit imported data directly in the database, not via the dataset's R script.
+For a public dataset, then:
+1. Republish in the IPT with a version note.
+2. `make export ds="<pid>"` (and `make stats` / `make blastdb` if affected).
+3. Remind the Bioatlas team.
+4. Log the change.
 
-To **replace** a dataset, delete it first (see
-[Data deletions](#data-deletions)), since the importer keeps existing
-annotations of ASVs already in the database. Keep the datasetID, so that
-occurrence and event IDs stay stable. Then update the IPT data sources to the
-new pid, run `make status`, republish and re-export.
+To **replace** a dataset:
+1. Delete it first (see [Data deletions](#data-deletions)); the importer keeps
+   existing annotations of ASVs already in the database.
+2. Import the new version with the same datasetID.
+3. Update the IPT data sources to the new pid, run `make status`, then
+   republish and re-export as above.
 
 ### Taxonomic updates
 
