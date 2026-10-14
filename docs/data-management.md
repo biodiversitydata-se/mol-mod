@@ -21,15 +21,18 @@ is described in the main [README](../README.md).
 
 **Maintaining imported data**
 
-- [Edits after import](#edits-after-import): fix data in the database,
-  replace a dataset, republish and re-export.
-- [Taxonomic updates](#taxonomic-updates): re-annotation of all ASVs tied to
-  a reference database, and republication of the affected datasets.
-- [Rebuilding the BLAST database](#rebuilding-the-blast-database).
-- [Data deletions](#data-deletions).
+- **Edit** imported data in the database, or replace a dataset, then
+  republish and re-export (see [Edits after import](#edits-after-import)).
+- **Re-annotate** all ASVs tied to a reference database and republish the
+  affected datasets (see [Taxonomic updates](#taxonomic-updates)).
+- **Rebuild** the BLAST database (see
+  [Rebuilding the BLAST database](#rebuilding-the-blast-database)).
+- **Delete** a dataset (see [Data deletions](#data-deletions)).
 
-**Background**, relevant to both new and imported data:
-[Target prediction filtering](#target-prediction-filtering).
+**Background**
+
+- **Filter** ASVs by target prediction, at import and in all views (see
+  [Target prediction filtering](#target-prediction-filtering)).
 
 ## New dataset
 
