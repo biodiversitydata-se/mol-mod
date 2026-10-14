@@ -23,16 +23,11 @@ HPC cluster. Importing the archive is described in the main
 
 ## One-time setup
 
-**R** needs `data.table`, `openxlsx` and `jsonlite`. Personal and site-specific settings
-go in `~/.Renviron` (open with `usethis::edit_r_environ()`, restart R after):
-
-```
-MOLMOD_DIR=/path/to/mol-mod                         # required
-NAISS_PROJECT=naissYYYY-X-XXX                       # required: active compute project
-ASV_DB_SSH_HOST=<ssh alias of ASV portal server>    # optional: current annotation setup
-MOLMOD_SENDER_NAME=<name>                           # for the provider email
-MOLMOD_SENDER_EMAIL=<email>
-```
+**R** needs `data.table`, `openxlsx` and `jsonlite`. Personal and site-specific
+settings go in your `~/.Renviron`: copy the lines from
+[`.Renviron.template`](.Renviron.template), fill in the values (open the file
+with `usethis::edit_r_environ()`) and restart R. Keep comments on their own
+lines; R does not strip comments after a value.
 
 `~/.Renviron` is read only by R. `ampliseq-hpc.sh` reads shell variables
 (`AMPLISEQ_*`, see below), which are only needed to change its defaults.
