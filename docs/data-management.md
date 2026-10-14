@@ -167,9 +167,6 @@ After exporting, check:
   `scripts/fix-export-readme.py` rebuilds a README citation from the IPT EML.
 - that the README has a DOI. `DOI: N/A` means the dataset was not registered
   or the GBIF API did not respond; re-export.
-- that GBIF has the IPT version (`version` in
-  `https://api.gbif.org/v1/dataset/<uuid>`). After two quick publications it
-  can lag one version until the next crawl.
 
 ## Maintaining imported data
 
