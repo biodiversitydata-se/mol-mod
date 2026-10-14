@@ -7,22 +7,29 @@ is described in the main [README](../README.md).
 ## Overview
 
 **New dataset**, in this order:
-- [Preprocessing and annotation](#preprocessing-and-annotation)
-- [Importing](#importing): dry-run, confirm changes with the provider, import
-- [Archiving](#archiving)
-- [Publishing in the IPT and GBIF](#publishing-in-the-ipt-and-gbif),
-  including Bioatlas ingestion
-- [Going public in the ASV portal](#going-public-in-the-asv-portal)
-- [Dataset exports](#dataset-exports)
+- [Preprocessing and annotation](#preprocessing-and-annotation): check and
+  edit the uploaded file in R, annotate with ampliseq
+- [Importing](#importing): dry-run locally, confirm changes with the provider,
+  import on the server
+- [Archiving](#archiving): zip the upload and R scripts for reproducibility
+- [Publishing in the IPT and GBIF](#publishing-in-the-ipt-and-gbif): create
+  the IPT resource, hand over to the provider, publish, register, Bioatlas
+  ingestion
+- [Going public in the ASV portal](#going-public-in-the-asv-portal): make the
+  dataset searchable, update stats and BLAST database
+- [Dataset exports](#dataset-exports): build the archive for the Download page
 
 **Maintaining imported data**
-- [Edits after import](#edits-after-import), including replacing a dataset
-- [Taxonomic updates](#taxonomic-updates)
+- [Edits after import](#edits-after-import): fix or replace a dataset,
+  republish and re-export
+- [Taxonomic updates](#taxonomic-updates): re-annotate ASVs and republish the
+  affected datasets
 - [Rebuilding the BLAST database](#rebuilding-the-blast-database)
 - [Data deletions](#data-deletions)
 
 **Background**
-- [Target prediction filtering](#target-prediction-filtering)
+- [Target prediction filtering](#target-prediction-filtering): how ASVs not
+  from the target gene are excluded
 
 ## New dataset
 
