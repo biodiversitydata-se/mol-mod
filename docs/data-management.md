@@ -119,8 +119,9 @@ see the [IPT manual](https://ipt.gbif.org/manual/en/ipt/latest/).
    endorsed by GBIF Sweden.
 5. **Finish the metadata:** remove yourself from *Associated Parties* and end
    the description with:
-   > This dataset was published via the SBDI ASV portal
-   > (https://asv-portal.biodiversitydata.se/).
+   ```html
+   <p>This dataset was published via the <a href="https://asv-portal.biodiversitydata.se/">SBDI ASV portal</a>.</p>
+   ```
 
    If the IPT description editor strips HTML, edit the EML (DocBook) instead
    and import it, to keep links and lists. Do not save the description in the
