@@ -35,11 +35,10 @@ is described in the main [README](../README.md).
 
 ### Preprocessing and annotation
 
-Uploaded files are turned into an import archive with
-`scripts/processing/asv-input-processing.R`; setup, helper scripts and checks
-are described in [`scripts/processing/README.md`](../scripts/processing/README.md)
-(dummy data for testing in `scripts/processing/input`). Work in a folder per
-dataset, outside the repository:
+Uploaded files are processed with `scripts/processing/asv-input-processing.R`
+(setup, helpers, checks and test data:
+[`scripts/processing/README.md`](../scripts/processing/README.md)). Work in a
+folder per dataset, outside the repository:
 
 ```
 <datasetID>/
@@ -51,13 +50,11 @@ dataset, outside the repository:
 
 1. Copy the script into the folder as `asv-input-processing-<YYMMDD>.R` and
    edit section 1.
-2. **First pass:** source the script. Without `input/annotation.tsv` it stops
-   after section 11, writing the fasta, `ampliseq/params.yaml` and
-   `output/submission-checks.txt`, and asks for the ampliseq version.
-3. **Review** the output and checks; correct the provider's data in section
-   14 with `change_value()`.
-4. **Annotate** with nf-core/ampliseq on the HPC cluster, from the dataset
-   folder:
+2. **First pass:** source the script. It stops after section 11 and writes
+   the fasta, `ampliseq/params.yaml` and `output/submission-checks.txt`.
+3. **Review** the output and checks; correct data in section 14 with
+   `change_value()`.
+4. **Annotate** on the HPC cluster, from the dataset folder:
    ```sh
    ampliseq-hpc.sh push     # copy params.yaml and fasta to the cluster
    ampliseq-hpc.sh start    # run ampliseq in a detached screen session
@@ -65,7 +62,7 @@ dataset, outside the repository:
    ampliseq-hpc.sh fetch    # copy annotation.tsv (and ASV_tax.*.tsv) to input/
    ```
 5. **Second pass:** source the script again. It writes
-   `output/<datasetID>-adm.tar.gz`, `output/changes.txt` and, if anything was
+   `output/<datasetID>-adm.tar.gz`, `output/changes.txt` and, if data were
    changed, `draft_changes_email.eml`.
 
 ### Importing
@@ -74,19 +71,15 @@ dataset, outside the repository:
 make dry-import file=/path/to/<datasetID>-adm.tar.gz
 make import file=/path/to/<datasetID>-adm.tar.gz
 ```
-These run `importer.py` in the main container; for more options, see its
-`PARSER.add_argument` section or run e.g.
-`./scripts/import_excel.py FILE --dry-run -vv`.
+More options: `PARSER.add_argument` in `molmod/importer/importer.py`.
 
-1. **Dry-run** locally and resolve validation errors and target-prediction
-   conflicts (see [Target prediction filtering](#target-prediction-filtering)).
-2. **Confirm changes:** if `output/changes.txt` lists changes, send
-   `draft_changes_email.eml` (in Mac Mail: *Message → Send Again*, ⇧⌘D) and
-   wait for the provider's agreement.
-3. **Import** on the server after `make backup`. To import despite
-   target-prediction conflicts, use `make conflict-import`: the affected ASVs
-   keep their existing annotation, so plan a
-   [taxonomic update](#taxonomic-updates) of the marker.
+1. **Dry-run** locally; fix validation errors and
+   [target-prediction conflicts](#target-prediction-filtering).
+2. **Confirm changes:** send `draft_changes_email.eml` (Mac Mail: *Message →
+   Send Again*) and wait for the provider's agreement.
+3. **Import** on the server after `make backup`. `make conflict-import`
+   imports despite conflicts; the affected ASVs keep their existing
+   annotation until a [taxonomic update](#taxonomic-updates).
 
 ### Archiving
 
@@ -98,8 +91,8 @@ Copy the zip to the archive folder on the server.
 
 ### Publishing in the IPT and GBIF
 
-Datasets are published through the [IPT](https://www.gbif.se/ipt/);
-see the [IPT manual](https://ipt.gbif.org/manual/en/ipt/latest/).
+In the [IPT](https://www.gbif.se/ipt/) (see the
+[manual](https://ipt.gbif.org/manual/en/ipt/latest/)):
 
 1. **Create three SQL data sources** (occurrence, emof, mixs) from the views
    `api.dwc_oc_occurrence`, `api.dwc_oc_emof` and `api.dwc_oc_mixs`:
@@ -107,46 +100,38 @@ see the [IPT manual](https://ipt.gbif.org/manual/en/ipt/latest/).
    SELECT * FROM api.dwc_oc_occurrence
    WHERE dataset_pid = <pid> AND "datasetID" = '<datasetID>'
    ```
-   A re-imported dataset gets a new pid: update the sources.
-2. **Create the resource**, with the lowercase datasetID as short name
-   (`ipt_resource_id`).
+2. **Create the resource**; short name = lowercase datasetID.
 3. **Map the fields.** For 18S, do **not** map `kingdom` and `phylum`
-   (worse GBIF/Bioatlas name matching).
+   (worse name matching).
 4. **Hand over to the provider:** add them as IPT user (*Manager without
-   registration rights*) and email them; `scripts/processing/email-generator.R`
-   drafts the email. The provider fills in the metadata and signs the
-   data-sharing agreement. Their organisation must be a GBIF publisher,
-   endorsed by GBIF Sweden.
+   registration rights*) and email them (draft from
+   `scripts/processing/email-generator.R`). They fill in the metadata and sign
+   the agreement; their organisation must be a GBIF publisher.
 5. **Finish the metadata:** remove yourself from *Associated Parties* and end
    the description with:
    ```html
    <p>This dataset was published via the <a href="https://asv-portal.biodiversitydata.se/">SBDI ASV portal</a>.</p>
    ```
 
-   If the IPT description editor strips HTML, edit the EML (DocBook) instead
-   and import it, to keep links and lists. Do not save the description in the
-   editor afterwards.
-6. **Publish and register** from the resource overview: *Visibility → Public*,
-   *Published Versions → Publish* (with a version note; review the report and
-   DwC-A), then *Published Versions → Register*. Later publications update
-   the registration automatically. Version notes can be edited afterwards in
-   the version history on the resource page.
-7. **Bioatlas ingestion:** email the Bioatlas team and check which resource
-   ID (`drXXXX`) the dataset gets. It is stored with `make status` but not
-   otherwise used by the portal.
+   If the description editor strips HTML, edit the EML (DocBook) and import it
+   instead; do not save the description in the editor afterwards.
+6. **Publish and register:** *Visibility → Public*, *Published Versions →
+   Publish* (with a version note; review the report and DwC-A), then
+   *Register*. Version notes can be edited later in the version history.
+7. **Bioatlas ingestion:** email the Bioatlas team and note the resource ID
+   (`drXXXX`) the dataset gets.
 
 ### Going public in the ASV portal
 
-Once the dataset is in the Bioatlas, set `in_bioatlas` and the Bioatlas and
-IPT IDs. This includes it in BLAST, filter search, About stats and the
-Download page:
+Once the dataset is in the Bioatlas, include it in BLAST, filter search,
+About stats and the Download page:
 ```sh
 make status pid=3 status=1 ruid=dr963 ipt=kth-2013-baltic-18s
 make stats
 make blastdb
 ```
-The pid is listed in the `make delete` menu (quit without deleting) and in
-`api.annotation_overview`. Then tell the provider the data are published.
+Find the pid in `api.annotation_overview` or the `make delete` menu (quit
+without deleting). Then tell the provider.
 
 ### Dataset exports
 
@@ -155,47 +140,44 @@ Build the DwC-like zips for the Download page:
 make export             # all datasets with in_bioatlas = TRUE
 make export ds="1 4"    # specific datasets (pids)
 ```
-The zip holds the database data and the current IPT EML (version, citation,
-description); only the DOI comes from GBIF, which has it once the dataset is
-registered. Re-run the export whenever a public dataset changes.
+The zip holds the database data and the current IPT EML; only the DOI comes
+from GBIF. Re-export whenever a public dataset changes.
 
-After exporting, check:
-- that the versions inside each zip agree (read-only):
+Then check:
+- that the versions in each zip agree:
   ```sh
   docker exec -i asv-main python3 - /app/data-volumes/exports < scripts/audit-export-versions.py
   ```
   `scripts/fix-export-readme.py` rebuilds a README citation from the IPT EML.
-- that the README has a DOI. `DOI: N/A` means the dataset was not registered
-  or the GBIF API did not respond; re-export.
+- that the README has a DOI. `DOI: N/A` means the dataset was not yet
+  registered or GBIF did not respond; re-export.
 
 ## Maintaining imported data
 
-The ASV portal, IPT, GBIF and Bioatlas are not synced automatically.
-Coordinate with the Bioatlas team before changing public data, and log
-post-import changes per IPT version.
+The ASV portal, IPT, GBIF and Bioatlas are not synced automatically;
+coordinate with the Bioatlas team before changing public data.
 
 ### Edits after import
 
-Edit imported data directly in the database, not via the dataset's R script.
-For a public dataset, then:
+Edit data directly in the database, not via the dataset's R script. For a
+public dataset, then:
 1. Republish in the IPT with a version note.
 2. `make export ds="<pid>"` (and `make stats` / `make blastdb` if affected).
 3. Remind the Bioatlas team.
-4. Log the change.
+4. Log the change (one entry per IPT version).
 
 To **replace** a dataset:
-1. Delete it first (see [Data deletions](#data-deletions)); the importer keeps
-   existing annotations of ASVs already in the database.
+1. [Delete](#data-deletions) it first; the importer keeps existing
+   annotations of ASVs already in the database.
 2. Import the new version with the same datasetID.
-3. Update the IPT data sources to the new pid, run `make status`, then
-   republish and re-export as above.
+3. Update the IPT data sources to the new pid, run `make status`, republish
+   and re-export.
 
 ### Taxonomic updates
 
-Each new ASV gets a valid annotation in `taxon_annotation`;
 `api.annotation_overview` shows reference database, ampliseq version and
-classifier per dataset. Agree on the timing with the Bioatlas team first. To
-re-annotate the ASVs of a target gene tied to a reference database:
+classifier per dataset. To re-annotate the ASVs of a target gene tied to a
+reference database:
 
 1. **Export** the sequences:
    ```sh
@@ -203,10 +185,9 @@ re-annotate the ASVs of a target gene tied to a reference database:
    ```
 2. **Annotate** with [nf-core/ampliseq](https://nf-co.re/ampliseq).
 3. **Add target prediction fields** with
-   `scripts/processing/reannotation-processing.R` (also applies the PR2/COIDB
-   genus/species corrections), or by hand from the template
-   `scripts/processing/output/reannotation.xlsx`.
-4. **Import** in maintenance mode; old annotations get `status='old'`:
+   `scripts/processing/reannotation-processing.R` (also applies PR2/COIDB
+   corrections) or by hand from `scripts/processing/output/reannotation.xlsx`.
+4. **Import** in maintenance mode (old annotations get `status='old'`):
    ```sh
    make backup
    make main
@@ -214,9 +195,8 @@ re-annotate the ASVs of a target gene tied to a reference database:
    ```
    Check the result in `api.annotation_overview`.
 5. **Republish** with `scripts/ipt-update/batch-update-ipt.py` (resource IDs
-   and version notes in `resources.tsv`, see `resources.template`;
-   credentials in `.ipt.cred`). It only starts the publications: check its
-   output and `pub_info.tsv`, and wait until all have finished.
+   and version notes in `resources.tsv`; credentials in `.ipt.cred`). It only
+   starts the publications: check `pub_info.tsv` and wait until all finish.
 6. **Re-export** and finish:
    ```sh
    make export ds="<pids>"
@@ -231,36 +211,30 @@ re-annotate the ASVs of a target gene tied to a reference database:
 ```sh
 make blastdb
 ```
-Includes ASVs from datasets with `in_bioatlas = TRUE` only. Runs
-`blast_builder.py` in a blast-worker container via
-`scripts/build_blast_db.py` (options in its `PARSER.add_argument` section).
+Includes datasets with `in_bioatlas = TRUE` only. More options:
+`PARSER.add_argument` in `blast-worker/blast_builder/blast_builder.py`.
 
 ### Data deletions
 
 ```sh
 make delete      # or scripts/delete-dataset.sh
 ```
-Interactive menu listing datasets by pid. Afterwards run `make stats`, and
-`make blastdb` if the dataset was public.
+Then `make stats`, and `make blastdb` if the dataset was public.
 
 ## Background
 
 ### Target prediction filtering
 
-All denoised sequences are imported, and ASVs not predicted to derive from the
-target gene are filtered out of BLAST, filter search, result displays and IPT
-views. An ASV's status can change, e.g. at re-annotation. Criteria vary by
-gene, e.g. "annotated at least to kingdom OR barrnap-positive" for 16S rRNA.
-
-Before import, each ASV gets:
+All denoised sequences are imported; ASVs not predicted to derive from the
+target gene are hidden from searches, results and IPT views. The prediction
+can change at re-annotation. Before import, each ASV gets:
 - `annotation_target`: target gene of the reference database (e.g.
-  `16S rRNA`), initially the dataset's `target_gene`.
-- `target_prediction`: whether the ASV is predicted to derive from
-  `annotation_target` (`TRUE`/`FALSE`).
-- `target_criteria`: criteria for `TRUE` (e.g.
-  `'Assigned kingdom OR Barrnap-positive'`, `'None: defaults to TRUE'`).
+  `16S rRNA`).
+- `target_prediction`: `TRUE`/`FALSE`.
+- `target_criteria`: e.g. `'Assigned kingdom OR Barrnap-positive'` or
+  `'None: defaults to TRUE'`.
 
-At import, these are compared with existing annotations:
+At import, they are compared with existing annotations:
 
 ```
 --	target	pred	pred	pred	pred
@@ -273,13 +247,11 @@ new	geneB	TRUE	TRUE	FALSE	FALSE
 --	----	Check	Update	ignore	Ignore
 ```
 
-A TRUE prediction for a new target, where the existing annotation is FALSE, is
-updated automatically. Other conflicts ("Check") stop the import with a table
-of the affected ASVs; `--allow-conflicts` (`make conflict-import`) imports
-anyway, keeping the existing annotation, and the marker should then be
-re-annotated. Otherwise, incoming annotations of existing ASVs are never
-stored, so they need not be edited to match the database. See
-`compare_annotations` in `molmod/importer/importer.py`.
+"Update" is applied automatically. "Check" stops the import with a table of
+affected ASVs (see [Importing](#importing) for `make conflict-import`).
+Otherwise, incoming annotations of existing ASVs are ignored, so they need not
+match the database. See `compare_annotations` in
+`molmod/importer/importer.py`.
 
 All views filter on:
 ```sql
