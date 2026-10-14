@@ -1,9 +1,11 @@
-# Data processing for ASV portal imports
+# Data processing scripts
 
 Scripts for turning an uploaded file into an import archive, including
 taxonomic annotation with [nf-core/ampliseq](https://nf-co.re/ampliseq) on an
-HPC cluster. Importing the archive is described in the main
-[README](../../README.md#data-import).
+HPC cluster. The step-by-step workflow, from uploaded file to published
+dataset, is described in
+[`docs/data-management.md`](../../docs/data-management.md); this file
+describes the scripts, their setup and their checks.
 
 | File | Purpose |
 | --- | --- |
@@ -64,43 +66,6 @@ export SINGULARITY_TMPDIR="$TMPDIR"
 
 Optional: `alias ampliseq-hpc=/path/to/mol-mod/scripts/processing/ampliseq-hpc.sh`
 in `~/.bash_profile`.
-
-## Processing a dataset
-
-Work in a folder per dataset, outside the repository:
-
-```
-<datasetID>/
-├── asv-input-processing-<YYMMDD>.R
-├── input/      # uploaded file (name unchanged); later annotation.tsv, ASV_tax.*.tsv
-├── ampliseq/   # params.yaml
-└── output/     # <datasetID>.fasta, <datasetID>-adm.xlsx, <datasetID>-adm.tar.gz
-```
-
-1. Copy `asv-input-processing.R` into the folder as
-   `asv-input-processing-<YYMMDD>.R`; edit section 1 and, if needed,
-   section 14 (dataset-specific fixes).
-2. **First pass:** source the script. Without `input/annotation.tsv` it stops
-   after section 11, having written the fasta and `ampliseq/params.yaml`, and
-   asks for the ampliseq version (Enter = latest release).
-3. **Review** the output, `params.yaml` and `output/submission-checks.txt`
-   (see below). Correct the provider's data in section 14 with
-   `change_value()`.
-4. **Annotate**, from the dataset folder:
-   ```sh
-   ampliseq-hpc.sh push     # copy params.yaml and fasta to the cluster
-   ampliseq-hpc.sh start    # run ampliseq in a detached screen session
-   ampliseq-hpc.sh status   # repeat until annotation.tsv is present
-   ampliseq-hpc.sh fetch    # copy annotation.tsv (and ASV_tax.*.tsv) to input/
-   ```
-5. **Second pass:** source the script again; it now runs to the end and
-   writes `output/<datasetID>-adm.tar.gz`, `output/changes.txt` and, if
-   anything was changed, `draft_changes_email.eml`.
-6. Send the changes email and wait for the provider's confirmation. To send
-   a draft (`.eml`), open it in Mac Mail and choose *Message → Send Again*
-   (⇧⌘D), which gives an editable copy.
-7. Import (main README), archive with `zip-ds.sh`, and draft the provider
-   email with `email-generator.R` once the IPT resource exists.
 
 ## Checks and changes
 
