@@ -35,8 +35,8 @@ with open('resources.tsv', mode='r', newline='') as tsv_file:
         resources.append({'id': row['id'], 'summary': row['summary']})
 
 # Construct URLs
-ipt_server = 'ipt.gbif.org'  # Demo IPT
-# ipt_server = 'www.gbif.se/ipt/'  # Swedish IPT instance
+ipt_server = 'www.gbif.se/ipt'  # Swedish IPT instance
+# ipt_server = 'ipt.gbif.org'  # Demo IPT
 host_url = f'https://{ipt_server}/'
 login_form_url = host_url + 'login.do'
 login_url = host_url + 'login.do'
