@@ -163,8 +163,8 @@ Edit data directly in the database, not via the dataset's R script. For a
 public dataset, then:
 1. Republish in the IPT with a version note.
 2. `make export ds="<pid>"` (and `make stats` / `make blastdb` if affected).
-3. Remind the Bioatlas team.
-4. Log the change (one entry per IPT version).
+3. Remind the Bioatlas team to re-ingest.
+4. Log the change in `Post-import-data-edits.xlsx` (one row per IPT version).
 
 To **replace** a dataset:
 1. [Delete](#data-deletions) it first; the importer keeps existing
@@ -204,7 +204,7 @@ reference database:
    make nomain
    make backup
    ```
-7. **Check** the Download page and remind the Bioatlas team.
+7. **Check** the Download page and remind the Bioatlas team to re-ingest.
 
 ### Rebuilding the BLAST database
 
