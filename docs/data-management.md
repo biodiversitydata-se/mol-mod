@@ -132,9 +132,8 @@ see the [IPT manual](https://ipt.gbif.org/manual/en/ipt/latest/).
    the registration automatically. Version notes can be edited afterwards in
    the version history on the resource page.
 7. **Bioatlas ingestion:** the Bioatlas picks up new and changed GBIF
-   datasets, but remind the Bioatlas team, e.g. with a `DataMobilization`
-   issue in [sbdi-bioatlas](https://github.com/biodiversitydata-se/sbdi-bioatlas/labels/DataMobilization).
-   They return the Bioatlas resource ID (`drXXXX`).
+   datasets, but email the Bioatlas team. They return the Bioatlas resource
+   ID (`drXXXX`).
 
 ### Going public in the ASV portal
 
