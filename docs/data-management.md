@@ -77,13 +77,13 @@ Work in a folder per dataset, outside the repository:
 The import archive is imported into the database by a Python script that
 runs `importer.py` inside the main container. Check the
 `PARSER.add_argument` section in the importer for available arguments, e.g.:
-```
-  $ ./scripts/import_excel.py /path/to/file.xlsx --dry-run -vv
+```sh
+./scripts/import_excel.py /path/to/file.xlsx --dry-run -vv
 ```
 Alternatively, use a Makefile rule, e.g.:
-```
-  $ make dry-import file=/path/to/file.tar.gz
-  $ make import file=/path/to/file.xlsx
+```sh
+make dry-import file=/path/to/file.tar.gz
+make import file=/path/to/file.xlsx
 ```
 
 1. **Dry-run** against a local copy of the stack and resolve any validation
@@ -108,8 +108,8 @@ future. Conflicting target predictions for pre-existing ASVs stop the import;
 After a successful import, move the dataset folder from the pending area to
 `Imported/` and zip the uploaded file, the annotation and the dated R scripts
 for reproducibility:
-```
-  $ scripts/processing/zip-ds.sh <datasetID>   # run from the folder containing Imported/
+```sh
+scripts/processing/zip-ds.sh <datasetID>   # run from the folder containing Imported/
 ```
 The zip contains `input/` and all `*.R` files (not `output/`, which can be
 regenerated). Copy it to the archive folder on the server, which is included in
@@ -179,25 +179,26 @@ After importing, and publishing a dataset in the Bioatlas, you need to change
 the `in_bioatlas` property to `true`, for data to be included in
 `BLAST SEARCH`, `FILTER SEARCH` and `ABOUT` page stats. You also need to add
 Bioatlas and IPT resource IDs, for the `DOWNLOAD DATA` page to work:
-```
-  $ make status pid=3 status=1 ruid=dr963 ipt=kth-2013-baltic-18s
+```sh
+make status pid=3 status=1 ruid=dr963 ipt=kth-2013-baltic-18s
 ```
 The dataset `pid` is shown in the `make delete` menu (quit without deleting)
 and in the view `api.annotation_overview`. Then update the About stats and
 rebuild the BLAST database (see
 [Rebuilding the BLAST database](#rebuilding-the-blast-database)):
-```
-  $ make stats
-  $ make blastdb
+```sh
+make stats
+make blastdb
 ```
 Then let the provider know that their data are published.
 
 ### Dataset exports
+
 To export condensed DwC-like dataset archives (zips) and make these available
 in the `Download` page, use the following `Makefile` target:
-```
-  $ make export             # All datasets
-  $ make export ds="1 4"    # Specific dataset (pid:s)
+```sh
+make export             # All datasets
+make export ds="1 4"    # Specific dataset (pid:s)
 ```
 Without `ds`, all datasets with `in_bioatlas = TRUE` are exported.
 
@@ -210,8 +211,8 @@ keeps serving the old version.
 To check that the versions inside each zip agree (EML packageId, EML citation
 and README citation), run the read-only audit script against the exports
 volume on the server:
-```
-  $ docker exec -i asv-main python3 - /app/data-volumes/exports < scripts/audit-export-versions.py
+```sh
+docker exec -i asv-main python3 - /app/data-volumes/exports < scripts/audit-export-versions.py
 ```
 `scripts/fix-export-readme.py` rebuilds an export's README citation from the
 IPT EML. The audit does not compare with GBIF. After republishing, also check
@@ -247,85 +248,107 @@ deleting would not update them. The new import gets a new pid: update the IPT
 data sources and `make status`, then republish and re-export as above.
 
 ### Taxonomic updates
-On import, each **new** ASV gets a row in table `taxon_annotation` (standard SBDI annotation, updated as reference DBs/algorithms evolve). The current reference database, ampliseq version and classifier per dataset are listed in the view `api.annotation_overview`.
 
-To re-annotate ASVs for a given target gene currently tied to a specific reference DB:
-  1) Export FASTA:
-     ```
-     make fasta ref="SBDI-GTDB-R07-RS207-1" target="16S rRNA"
-     ```
-  2) Run the FASTA with [nf-core/ampliseq](https://nf-co.re/ampliseq).
-  3) Since Ampliseq output doesn’t yet include fields from `Target prediction filtering` (as of 250904), either:
-     - add them via `./scripts/processing/reannotation-processing.R` (which also applies the PR2/COIDB genus/species corrections), or
-     - use `./scripts/processing/output/reannotation.xlsx` as a template and edit your own file.
-  4) Back up and put the app in maintenance mode, then import:
-     ```
-     make backup
-     make main
-     make reannot file=/path/to/reannotation.xlsx
-     ```
-Previous annotations are marked `status='old'`; new rows get `status='valid'`.
-Check the result in `api.annotation_overview`.
+On import, each **new** ASV gets a row in table `taxon_annotation` (standard
+SBDI annotation, updated as reference databases and algorithms evolve). The
+current reference database, ampliseq version and classifier per dataset are
+listed in the view `api.annotation_overview`.
 
-Then republish the affected datasets:
-  5) Republish them in the IPT with
-     `scripts/ipt-update/batch-update-ipt.py`, which reads IPT resource IDs
-     and version notes from `resources.tsv` (see `resources.template`) and
-     credentials from `.ipt.cred`. The script only starts the publications:
-     check its output and `pub_info.tsv`, fix any problems in the IPT
-     interface, and wait until all publications have finished.
-  6) Re-export the datasets, rebuild the BLAST database, end maintenance mode
-     and back up:
-     ```
-     make export ds="<pids>"
-     make blastdb
-     make nomain
-     make backup
-     ```
-  7) Check the `Download` page, and remind the Bioatlas team to re-ingest
-     the datasets.
+The Bioatlas lags behind the portal until it has re-ingested the republished
+datasets, so agree on the timing with the Bioatlas team first. To re-annotate
+the ASVs of a target gene that are currently tied to a specific reference
+database:
 
-Bioatlas will lag behind the portal until it has re-ingested, so agree on the
-timing with the Bioatlas team first.
+1. **Export** the sequences to a FASTA file:
+   ```sh
+   make fasta ref="SBDI-GTDB-R07-RS207-1" target="16S rRNA"
+   ```
+2. **Annotate** the FASTA with [nf-core/ampliseq](https://nf-co.re/ampliseq).
+3. **Add target prediction fields**, which ampliseq output does not include
+   (see [Target prediction filtering](#target-prediction-filtering)), either:
+   - with `scripts/processing/reannotation-processing.R`, which also applies
+     the PR2/COIDB genus/species corrections, or
+   - by hand, using `scripts/processing/output/reannotation.xlsx` as a
+     template.
+4. **Import** the new annotation, after a backup and in maintenance mode:
+   ```sh
+   make backup
+   make main
+   make reannot file=/path/to/reannotation.xlsx
+   ```
+   Previous annotations are marked `status='old'` and new rows get
+   `status='valid'`. Check the result in `api.annotation_overview`.
+5. **Republish** the affected datasets in the IPT with
+   `scripts/ipt-update/batch-update-ipt.py`, which reads IPT resource IDs and
+   version notes from `resources.tsv` (see `resources.template`) and
+   credentials from `.ipt.cred`. The script only starts the publications:
+   check its output and `pub_info.tsv`, fix any problems in the IPT
+   interface, and wait until all publications have finished.
+6. **Re-export** the datasets, rebuild the BLAST database, end maintenance
+   mode and back up:
+   ```sh
+   make export ds="<pids>"
+   make blastdb
+   make nomain
+   make backup
+   ```
+7. **Check** the `Download` page, and remind the Bioatlas team to re-ingest
+   the datasets.
 
 ### Rebuilding the BLAST database
-Generate a new BLAST database (including ASVs from datasets that have been
-imported into the Bioatlas only) using a script that executes
-`blast_builder.py` inside a blast-worker container. Again, check the
-`PARSER.add_argument` section for available arguments, which can be added to
-main function call like so:
+
+The BLAST database includes ASVs from datasets that are in the Bioatlas
+(`in_bioatlas = TRUE`) only. Rebuild it after making a dataset public and after
+changes that affect sequences or annotations:
+```sh
+make blastdb
 ```
-  $ ./scripts/build_blast_db.py -vv
-```
-or:
-```
-  $ make blastdb
-```
+This runs `scripts/build_blast_db.py`, which executes `blast_builder.py` in a
+blast-worker container; see its `PARSER.add_argument` section for options
+(e.g. `./scripts/build_blast_db.py -vv`).
 
 ### Data deletions
-You can delete single datasets with an interactive script:
+
+Delete a single dataset with the interactive menu (or
+`scripts/delete-dataset.sh`):
+```sh
+make delete
 ```
-  $ scripts/delete-dataset.sh
-```
-or:
-```
-  $ make delete
-```
-Both commands will bring up a menu with instructions for how to proceed with deletions. Remember to update stats accordingly (`make stats`).
+The menu lists datasets by pid; quitting without deleting is a quick way to
+look up a pid. Rebuild the About stats afterwards (`make stats`), and the
+BLAST database if the dataset was public.
 
 ## Background
 
 ### Target prediction filtering
-In version 2.0.0, we make it possible to import all denoised sequences from a dataset, and then dynamically filter out any ASVs that we do not (currently) predict to derive from the targeted gene, thereby excluding these from BLAST and filter searches, result displays and IPT views. ASVs are thus only imported once, but their status can change, e.g. at taxonomic re-annotation. Criteria used for ASV exclusion may vary between genes / groups of organisms, but could e.g. combine the output from the *BAsic Rapid Ribosomal RNA Predictor (barrnap)* with the taxonomic annotation itself. For example, we may decide that only ASVs that are annotated at least at kingdom level OR get positive barrnap prediction should be considered as TRUE 16S rRNA sequences.
+
+In version 2.0.0, we make it possible to import all denoised sequences from a
+dataset, and then dynamically filter out any ASVs that we do not (currently)
+predict to derive from the targeted gene, thereby excluding these from BLAST
+and filter searches, result displays and IPT views. ASVs are thus only imported
+once, but their status can change, e.g. at taxonomic re-annotation. Criteria
+used for ASV exclusion may vary between genes / groups of organisms, but could
+e.g. combine the output from the *BAsic Rapid Ribosomal RNA Predictor
+(barrnap)* with the taxonomic annotation itself. For example, we may decide
+that only ASVs that are annotated at least at kingdom level OR get positive
+barrnap prediction should be considered as TRUE 16S rRNA sequences.
 
 We implement this as follows:
 
-Before import of a new dataset, we add the following annotation data to each ASV:
-- `annotation_target` = target gene of reference database used for taxonomic annotation (eg. `16S rRNA`). At this stage, `annotation_target` will equal the `target_gene` of the dataset.
-- `target_prediction` = whether the ASV is predicted to derive from the annotation_target (`TRUE/FALSE`).
-- `target_criteria` = criteria used for setting `target_prediction` to `TRUE` (eg. `'Assigned kingdom OR Barrnap-positive'`, or `'None: defaults to TRUE'`).
+Before import of a new dataset, we add the following annotation data to each
+ASV:
+- `annotation_target` = target gene of reference database used for taxonomic
+  annotation (eg. `16S rRNA`). At this stage, `annotation_target` will equal
+  the `target_gene` of the dataset.
+- `target_prediction` = whether the ASV is predicted to derive from the
+  annotation_target (`TRUE/FALSE`).
+- `target_criteria` = criteria used for setting `target_prediction` to `TRUE`
+  (eg. `'Assigned kingdom OR Barrnap-positive'`, or `'None: defaults to
+  TRUE'`).
 
-During import, we compare annotation targets and predictions of ASVs in new datasets to annotations that already exist in db, with the following possible outcomes and responses:
+During import, we compare annotation targets and predictions of ASVs in new
+datasets to annotations that already exist in db, with the following possible
+outcomes and responses:
 
 ```
 --	target	pred	pred	pred	pred
@@ -338,7 +361,21 @@ new	geneB	TRUE	TRUE	FALSE	FALSE
 --	----	Check	Update	ignore	Ignore
 ```
 
-For example, in the top left case, an ASV in a new dataset comes in with an annotation for geneA, is also predicted to be a TRUE geneA sequence, and this corresponds with what is already noted in the database for that ASV, so we do nothing (the existing annotation remains). If, instead, a new dataset has a TRUE geneB prediction for an ASV that has previously been considered a FALSE geneA, this annotation can be automatically updated. Other conflicts (a same-target prediction flip, or two targets both predicted TRUE) cancel the import by default, with a printed table of the affected ASVs. Re-run with `--allow-conflicts` (`make conflict-import`) to import anyway — those ASVs keep their existing database annotation, the table is printed as a warning, and the marker should be re-annotated afterwards. Note that the importer never stores the incoming annotation (taxonomy or target prediction) of a pre-existing ASV, except in the automatic update case above, so there is no need to edit incoming target predictions to match the database before importing. See `/molmod/importer/importer.py` and function `compare_annotations` for details.
+For example, in the top left case, an ASV in a new dataset comes in with an
+annotation for geneA, is also predicted to be a TRUE geneA sequence, and this
+corresponds with what is already noted in the database for that ASV, so we do
+nothing (the existing annotation remains). If, instead, a new dataset has a
+TRUE geneB prediction for an ASV that has previously been considered a FALSE
+geneA, this annotation can be automatically updated. Other conflicts (a
+same-target prediction flip, or two targets both predicted TRUE) cancel the
+import by default, with a printed table of the affected ASVs. Re-run with
+`--allow-conflicts` (`make conflict-import`) to import anyway — those ASVs keep
+their existing database annotation, the table is printed as a warning, and the
+marker should be re-annotated afterwards. Note that the importer never stores
+the incoming annotation (taxonomy or target prediction) of a pre-existing ASV,
+except in the automatic update case above, so there is no need to edit incoming
+target predictions to match the database before importing. See
+`/molmod/importer/importer.py` and function `compare_annotations` for details.
 
 After import, we filter all database views with an extended WHERE clause:
 ```sql
