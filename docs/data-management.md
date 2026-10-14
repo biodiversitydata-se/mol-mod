@@ -164,7 +164,7 @@ public dataset, then:
 1. Republish in the IPT with a version note.
 2. `make export ds="<pid>"` (and `make stats` / `make blastdb` if affected).
 3. Remind the Bioatlas team to re-ingest.
-4. Log the change in `Post-import-data-edits.xlsx` (one row per IPT version).
+4. Log the change in the post-import edit log (one row per IPT version).
 
 To **replace** a dataset:
 1. [Delete](#data-deletions) it first; the importer keeps existing
