@@ -98,7 +98,7 @@ Copy the zip to the archive folder on the server.
 
 ### Publishing in the IPT and GBIF
 
-Datasets are published through the [Swedish IPT](https://www.gbif.se/ipt/);
+Datasets are published through the [IPT](https://www.gbif.se/ipt/);
 see the [IPT manual](https://ipt.gbif.org/manual/en/ipt/latest/).
 
 1. **Create three SQL data sources** (occurrence, emof, mixs) from the views
