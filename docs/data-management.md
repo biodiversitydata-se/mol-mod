@@ -122,8 +122,9 @@ see the [IPT manual](https://ipt.gbif.org/manual/en/ipt/latest/).
    > This dataset was published via the SBDI ASV portal
    > (https://asv-portal.biodiversitydata.se/).
 
-   The IPT description editor strips HTML; to keep links and lists, edit the
-   EML (DocBook) and import it.
+   If the IPT description editor strips HTML, edit the EML (DocBook) instead
+   and import it, to keep links and lists. Do not save the description in the
+   editor afterwards.
 6. **Publish and register** from the resource overview: *Visibility → Public*,
    *Published Versions → Publish* (with a version note; review the report and
    DwC-A), then *Published Versions → Register*. Later publications update
