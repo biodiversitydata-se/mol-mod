@@ -8,16 +8,16 @@ is described in the main [README](../README.md).
 
 **New dataset**
 
-1. **Preprocess and annotate** the uploaded file with the R scripts in
-   `scripts/processing` (see [Preprocessing and annotation](#preprocessing-and-annotation)).
-2. **Dry-run the import** locally, **confirm changes** with the provider, then
-   **import** on the server (see [Importing](#importing)).
-3. **Archive** the dataset folder (see [Archiving](#archiving)).
-4. **Publish** the dataset in the IPT, register it with GBIF and have it
-   ingested into the Bioatlas (see [Publishing in the IPT and GBIF](#publishing-in-the-ipt-and-gbif)).
-5. **Make the dataset public** in the portal and rebuild the About stats and
-   BLAST database (see [Going public in the ASV portal](#going-public-in-the-asv-portal)).
-6. **Export** the download archive (see [Dataset exports](#dataset-exports)).
+- **Preprocess and annotate** the uploaded file with the R scripts in
+  `scripts/processing` (see [Preprocessing and annotation](#preprocessing-and-annotation)).
+- **Dry-run the import** locally, **confirm changes** with the provider, then
+  **import** on the server (see [Importing](#importing)).
+- **Archive** the dataset folder (see [Archiving](#archiving)).
+- **Publish** the dataset in the IPT, register it with GBIF and have it
+  ingested into the Bioatlas (see [Publishing in the IPT and GBIF](#publishing-in-the-ipt-and-gbif)).
+- **Make the dataset public** in the portal and rebuild the About stats and
+  BLAST database (see [Going public in the ASV portal](#going-public-in-the-asv-portal)).
+- **Export** the download archive (see [Dataset exports](#dataset-exports)).
 
 **Maintaining imported data**
 
