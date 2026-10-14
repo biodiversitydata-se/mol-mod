@@ -6,33 +6,23 @@ is described in the main [README](../README.md).
 
 ## Overview
 
-**New dataset**
-
-- **Preprocess and annotate** the uploaded file with the R scripts in
-  `scripts/processing` (see [Preprocessing and annotation](#preprocessing-and-annotation)).
-- **Dry-run the import** locally, **confirm changes** with the provider, then
-  **import** on the server (see [Importing](#importing)).
-- **Archive** the dataset folder (see [Archiving](#archiving)).
-- **Publish** the dataset in the IPT, register it with GBIF and have it
-  ingested into the Bioatlas (see [Publishing in the IPT and GBIF](#publishing-in-the-ipt-and-gbif)).
-- **Make the dataset public** in the portal and rebuild the About stats and
-  BLAST database (see [Going public in the ASV portal](#going-public-in-the-asv-portal)).
-- **Export** the download archive (see [Dataset exports](#dataset-exports)).
+**New dataset**, in this order:
+- [Preprocessing and annotation](#preprocessing-and-annotation)
+- [Importing](#importing): dry-run, confirm changes with the provider, import
+- [Archiving](#archiving)
+- [Publishing in the IPT and GBIF](#publishing-in-the-ipt-and-gbif),
+  including Bioatlas ingestion
+- [Going public in the ASV portal](#going-public-in-the-asv-portal)
+- [Dataset exports](#dataset-exports)
 
 **Maintaining imported data**
-
-- **Edit** imported data in the database, or replace a dataset, then
-  republish and re-export (see [Edits after import](#edits-after-import)).
-- **Re-annotate** all ASVs tied to a reference database and republish the
-  affected datasets (see [Taxonomic updates](#taxonomic-updates)).
-- **Rebuild** the BLAST database (see
-  [Rebuilding the BLAST database](#rebuilding-the-blast-database)).
-- **Delete** a dataset (see [Data deletions](#data-deletions)).
+- [Edits after import](#edits-after-import), including replacing a dataset
+- [Taxonomic updates](#taxonomic-updates)
+- [Rebuilding the BLAST database](#rebuilding-the-blast-database)
+- [Data deletions](#data-deletions)
 
 **Background**
-
-- **Filter** ASVs by target prediction, at import and in all views (see
-  [Target prediction filtering](#target-prediction-filtering)).
+- [Target prediction filtering](#target-prediction-filtering)
 
 ## New dataset
 
