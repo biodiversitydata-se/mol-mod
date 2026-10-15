@@ -330,8 +330,14 @@ def compare_annotations(data: pd.DataFrame, db_cursor: DictCursor,
     this corresponds with what is already noted in the database for that ASV,
     so we do nothing.
 
-    Cancels import if any issues need to be checked and resolved,
-    and returns pids for annotations that can be updated directly.
+    Cancels import if any issues need to be checked and resolved, unless
+    allow_conflicts is True (then the issues are only reported), and returns
+    pids for annotations that can be updated directly.
+
+    Incoming annotations of pre-existing ASVs are never stored, except for
+    these 'Update' cases: for all other pre-existing ASVs, including those
+    with conflicts imported with allow_conflicts, the existing valid DB
+    annotation (taxonomy as well as target prediction) is kept.
 
     NOTE: This 'validation' is applied during insertion (rather than before) so
     that we can run it on pre-existing ASVs only. We only compare targets, i.e.

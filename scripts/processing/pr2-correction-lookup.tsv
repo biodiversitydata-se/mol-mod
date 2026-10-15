@@ -1,0 +1,62 @@
+genus	species	correct_genus	correct_specific_epithet	correct_infraspecific_epithet	correct_scientific_name
+Ancyromonadida_Group-1_X	Planomonadidae_Group-1_X_sp.	Ancyromonadida_Group-1_X	sp.		Planomonadidae_Group-1_X sp.
+Blastocladiomycota_XX	Blastocladiomycota_X_sp.	Blastocladiomycota_XX	sp.		Blastocladiomycota_X sp.
+Braarudosphaera	Chrysochromulina_parkeae	Braarudosphaera	parkeae		Chrysochromulina parkeae
+Chaetoceros	Chaetoceros_sp._Clade-Na11C3	Chaetoceros	sp.	Clade-Na11C3	Chaetoceros sp. Clade-Na11C3
+Chaetoceros	Chaetoceros_sp._Clade-Na13C1	Chaetoceros	sp.	Clade-Na13C1	Chaetoceros sp. Clade-Na13C1
+Chlorodendrales_XX	Chlorodendrales_X_sp.	Chlorodendrales_XX	sp.		Chlorodendrales_X sp.
+Chloroidium:plas	Chloroidium_ellipsoideum:plas	Chloroidium:plas	ellipsoideum:plas		Chloroidium ellipsoideum:plas
+Chroomonas:nucl	Chroomonas_coerulea:nucl	Chroomonas:nucl	coerulea:nucl		Chroomonas coerulea:nucl
+Cryptomonas:nucl	Cryptomonas_curvata:nucl	Cryptomonas:nucl	curvata:nucl		Cryptomonas curvata:nucl
+Cunninghamia	Cunninghamia_lanceolata_var._konishii	Cunninghamia	lanceolata	var._konishii	Cunninghamia lanceolata var._konishii
+Cyclidium_2	Cyclidium_plouneouri	Cyclidium_2	plouneouri		Cyclidium plouneouri
+Cyclidium_3	Cyclidium_glaucoma	Cyclidium_3	glaucoma		Cyclidium glaucoma
+Dinobryon	Dinobryon_divergens_cluster1	Dinobryon	divergens	cluster1	Dinobryon divergens cluster1
+Edwardsiella-metazoa	Edwardsiella_lineata	Edwardsiella-metazoa	lineata		Edwardsiella lineata
+Falcomonas:nucl	Falcomonas_daucoides:nucl	Falcomonas:nucl	daucoides:nucl		Falcomonas daucoides:nucl
+Geminigera:nucl	Geminigera_cryophila:nucl	Geminigera:nucl	cryophila:nucl		Geminigera cryophila:nucl
+Group-Te	Group_Te_sp.	Group-Te	sp.		Group_Te sp.
+Hemiselmis:nucl	Hemiselmis_cryptochromatica:nucl	Hemiselmis:nucl	cryptochromatica:nucl		Hemiselmis cryptochromatica:nucl
+Hemiselmis:nucl	Hemiselmis_rufescens:nucl	Hemiselmis:nucl	rufescens:nucl		Hemiselmis rufescens:nucl
+Leidyana1	Gregarina_caledia	Leidyana1	caledia		Gregarina caledia
+Macoma	Macoma_balthica_rubra	Macoma	balthica	rubra	Macoma balthica rubra
+Mantoniella	Mantoniella_clade_A	Mantoniella	clade_A		Mantoniella clade_A
+Mantoniella	Mantoniella_clade_B	Mantoniella	clade_B		Mantoniella clade_B
+Micromonas	Micromonas_bravo_B1	Micromonas	bravo	B1	Micromonas bravo B1
+Micromonas	Micromonas_bravo_B2	Micromonas	bravo	B2	Micromonas bravo B2
+Micromonas	Micromonas_clade_B3	Micromonas	clade_B3		Micromonas clade_B3
+Micromonas	Micromonas_clade_B5	Micromonas	clade_B5		Micromonas clade_B5
+Micromonas	Micromonas_commoda_A2	Micromonas	commoda	A2	Micromonas commoda A2
+Norrisiella	Norisiella_sphaerica	Norrisiella	sphaerica		Norisiella sphaerica
+Ostreococcus	Ostreococcus_clade_B	Ostreococcus	clade_B		Ostreococcus clade_B
+Phalachroma	Phalacroma_doryphorum	Phalachroma	doryphorum		Phalacroma doryphorum
+Phalachroma	Phalacroma_oxytoxoides	Phalachroma	oxytoxoides		Phalacroma oxytoxoides
+Phalachroma	Phalacroma_rotundatum	Phalachroma	rotundatum		Phalacroma rotundatum
+Plagioselmis:nucl	Plagioselmis_lacustris:nucl	Plagioselmis:nucl	lacustris:nucl		Plagioselmis lacustris:nucl
+Polysphondylium-Group-II	Polysphondylium_candidum	Polysphondylium-Group-II	candidum		Polysphondylium candidum
+Protostelium	Protostelium_mycophagum_var._crassipes	Protostelium	mycophagum	var._crassipes	Protostelium mycophagum var._crassipes
+Rhinomonas:nucl	Rhinomonas_nottbecki:nucl	Rhinomonas:nucl	nottbecki:nucl		Rhinomonas nottbecki:nucl
+Rhodomonas:nucl	Rhodomonas_abbreviata:nucl	Rhodomonas:nucl	abbreviata:nucl		Rhodomonas abbreviata:nucl
+Rhodomonas:nucl	Rhodomonas_marina:nucl	Rhodomonas:nucl	marina:nucl		Rhodomonas marina:nucl
+Rhodomonas:nucl	Rhodomonas_sp.:nucl	Rhodomonas:nucl	sp.:nucl		Rhodomonas sp.:nucl
+Salpingoeca_M	Salpingoeca_urceolata	Salpingoeca_M	urceolata		Salpingoeca urceolata
+Salpingoeca_N	Salpingoeca_pyxidium	Salpingoeca_N	pyxidium		Salpingoeca pyxidium
+Sandonidae_Clade-N/F-A	Sandonidae_Clade_N/F-A_sp.	Sandonidae_Clade-N/F-A	sp.		Sandonidae_Clade_N/F-A sp.
+Selenidium2	Selenidium_pisinnus	Selenidium2	pisinnus		Selenidium pisinnus
+Selenidium3	Selenidium_terebellae	Selenidium3	terebellae		Selenidium terebellae
+Spencermartinsia	Rhizophlyctis_harderi	Spencermartinsia	harderi		Rhizophlyctis harderi
+Stephanoeca_Group_H	Stephanoeca_cauliculata	Stephanoeca_Group_H	cauliculata		Stephanoeca cauliculata
+Stephanoeca_Group_H	Stephanoeca_paucicostata	Stephanoeca_Group_H	paucicostata		Stephanoeca paucicostata
+Stephanoeca_Group_I	Stephanoeca_diplocostata	Stephanoeca_Group_I	diplocostata		Stephanoeca diplocostata
+Telonema-Group-1	Telonema_sp.	Telonema-Group-1	sp.		Telonema sp.
+Telonema-Group-1	Telonema_subtile	Telonema-Group-1	subtile		Telonema subtile
+Telonema-Group-2	Telonema_antarcticum	Telonema-Group-2	antarcticum		Telonema antarcticum
+Tintinnopsis_01	Tintinnopsis_major	Tintinnopsis_01	major		Tintinnopsis major
+Tintinnopsis_04	Tintinnopsis_parvula	Tintinnopsis_04	parvula		Tintinnopsis parvula
+Tintinnopsis_05	Tintinnopsis_uruguayensis	Tintinnopsis_05	uruguayensis		Tintinnopsis uruguayensis
+Tintinnopsis_09	Tintinnopsis_urnula	Tintinnopsis_09	urnula		Tintinnopsis urnula
+Vampyrellida_clade_B	Vampyrellida_sp.	Vampyrellida_clade_B	sp.		Vampyrellida sp.
+Vampyrellida_clade_C	Penardia_sp.	Vampyrellida_clade_C	sp.		Penardia sp.
+Zoothamnium_1	Zoothamnium_grossi	Zoothamnium_1	grossi		Zoothamnium grossi
+Zoothamnium_2	Zoothamnium_alternans	Zoothamnium_2	alternans		Zoothamnium alternans
+Pseudoscourfieldiaceae-clade1	Pseudoscourfieldiaceae-clade1-sp.	Pseudoscourfieldiaceae-clade1	sp.		Pseudoscourfieldiaceae-clade1 sp.

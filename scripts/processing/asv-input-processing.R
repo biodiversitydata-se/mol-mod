@@ -20,10 +20,26 @@
 #   - sample_id -> eventID
 #   - asv_id -> asv_id_alias
 #
-# Edit dataset-specific sections 1 and 14.
-# Then run the script down to 'Create fasta for annotation workflow',
-# run the ampliseq pipeline separately, place annotation.tsv in input/,
-# and finish the script.
+# Edit dataset-specific sections 1 and 14, then run (source) the whole script
+# twice:
+#   1. Without input/annotation.tsv, the script stops after section 11, having
+#      written the fasta and the ampliseq params.yaml. Review the output, then
+#      run the annotation with ampliseq-hpc.sh (push, start, status, fetch).
+#   2. With input/annotation.tsv in place, the script runs to the end.
+#
+# Checks: this script stops on errors that make a valid import file impossible
+# (missing sheets or required columns, duplicated IDs, ASVs without sequence).
+# Possible mistakes that need judgement (e.g. primer names, new marker or
+# institution values, Excel autofill, IDs dropped between sheets) are only
+# reported, by submission-checks.R, in output/submission-checks.txt. Correct
+# them in section 14 with change_value(), so that the changes are listed in an
+# email for the provider to confirm before import.
+#
+# Helper scripts are sourced from mol-mod/scripts/processing (see section 2).
+# Required environment variables (e.g. in ~/.Renviron): MOLMOD_DIR and
+# NAISS_PROJECT; optional: ASV_DB_SSH_HOST (to take the annotation setup from
+# the ASV portal database), AMPLISEQ_CONFIG_DIR, and MOLMOD_SENDER_NAME /
+# MOLMOD_SENDER_EMAIL for the provider email draft.
 
 ################################################################################
 # 1. Set dataset-specific variables - EDIT HERE
@@ -46,6 +62,11 @@ ipt_resource_id <- NA
 # 2. Packages and output paths
 ################################################################################
 
+# Progress messages while the script runs
+progress <- function(text) message(format(Sys.time(), "%H:%M:%S"), "  ", text)
+
+progress("2. Loading packages")
+
 # install.packages("openxlsx")
 # install.packages("data.table")
 
@@ -54,9 +75,18 @@ library(data.table)
 
 dir.create("output", showWarnings = FALSE)
 
+# Helper scripts in mol-mod/scripts/processing, located via environment
+# variable MOLMOD_DIR (path to the mol-mod repo, e.g. set in ~/.Renviron)
+helper_dir <- file.path(Sys.getenv("MOLMOD_DIR"), "scripts", "processing")
+
+# Log of changes to the provider's data (change_value(), record_change())
+source(file.path(helper_dir, "change-log.R"))
+
 ################################################################################
 # 3. Import uploaded data
 ################################################################################
+
+progress("3. Importing uploaded data")
 
 if (grepl("\\.xlsx$", uploaded_file, ignore.case = TRUE)) {
   sheets <- getSheetNames(uploaded_file)
@@ -121,6 +151,8 @@ if (length(missing_tables) > 0) {
 # 4. Parse Study sheet
 ################################################################################
 
+progress("4. Reading Study")
+
 study_raw <- copy(Study)
 
 if (ncol(study_raw) < 2) {
@@ -165,6 +197,8 @@ fasta_out <- paste0("output/", dataset_id, ".fasta")
 ################################################################################
 # 5. Clean input tables and normalize user-facing ID columns
 ################################################################################
+
+progress("5. Cleaning input tables")
 
 clean_character_dt <- function(dt, exclude_cols = character()) {
   char_cols <- names(dt)[vapply(dt, is.character, logical(1))]
@@ -269,9 +303,25 @@ if (!all(required_tax_cols %in% names(Taxonomy))) {
   )
 }
 
+# Duplicated IDs would make the import invalid
+id_sets <- list(
+  "Samples sample_id" = Samples$eventID,
+  "Taxonomy asv_id" = Taxonomy$asv_id_alias,
+  "ASV-table asv_id" = ASV_table$asv_id_alias,
+  "ASV-table column" = setdiff(names(ASV_table), "asv_id_alias")
+)
+for (id_set in names(id_sets)) {
+  dups <- unique(id_sets[[id_set]][duplicated(id_sets[[id_set]])])
+  if (length(dups) > 0) {
+    stop("Duplicated ", id_set, ": ", paste(head(dups, 5), collapse = ", "))
+  }
+}
+
 ################################################################################
 # 6. Build event from Samples + Study
 ################################################################################
+
+progress("6. Building event")
 
 event_std <- c(
   "eventID", "materialSampleID", "associatedSequences", "eventDate",
@@ -316,6 +366,8 @@ event <- event[, ..event_order]
 # 7. Build dna from Study
 ################################################################################
 
+progress("7. Building dna (mixs)")
+
 dna_fields <- c(
   "sop", "target_gene", "target_subfragment", "lib_layout", "seq_meth",
   "pcr_primer_name_forward", "pcr_primer_name_reverse", "pcr_primer_forward",
@@ -343,6 +395,8 @@ if (length(env_cols) > 0) {
 ################################################################################
 # 8. Build emof from non-standard Sample columns
 ################################################################################
+
+progress("8. Building emof")
 
 extra_cols <- setdiff(names(Samples), event_std)
 
@@ -401,6 +455,8 @@ if (length(extra_cols) > 0) {
 ################################################################################
 # 9. Build asv and occurrence from Taxonomy + ASV-table
 ################################################################################
+
+progress("9. Building asv and occurrence")
 
 taxonomy_dt <- copy(Taxonomy)
 asv_table_dt <- copy(ASV_table)
@@ -491,11 +547,22 @@ occurrence <- occurrence[, .(
 )]
 
 used_asvs <- unique(occurrence$asv_id_alias)
+
+# ASVs with reads must have a sequence in Taxonomy
+missing_seq <- setdiff(used_asvs, asv$asv_id_alias)
+if (length(missing_seq) > 0) {
+  stop(
+    length(missing_seq), " ASV(s) with reads in ASV-table are missing in Taxonomy: ",
+    paste(head(missing_seq, 5), collapse = ", ")
+  )
+}
 asv <- asv[asv_id_alias %in% used_asvs]
 
 ################################################################################
 # 10. Dataset metadata
 ################################################################################
+
+progress("10. Dataset metadata")
 
 dataset <- data.frame(
   datasetID = dataset_id,
@@ -511,6 +578,8 @@ event[, c("datasetName", "datasetID") := NULL]
 # 11. Create fasta for annotation workflow
 ################################################################################
 
+progress("11. Writing fasta")
+
 fasta_dt <- unique(taxonomy_dt[asv_id_alias %in% used_asvs, .(asv_id_alias, DNA_sequence)])
 fasta_dt[, fasta := paste0(">", asv_id_alias, "\n", DNA_sequence)]
 
@@ -521,9 +590,26 @@ fwrite(
   col.names = FALSE
 )
 
+# Without an annotation file, check the submitted data, write the ampliseq
+# params.yaml and stop here, so that the output can be reviewed before running
+# the annotation
+if (!file.exists(annotation_file)) {
+  source(file.path(helper_dir, "submission-checks.R"))
+  run_submission_checks(event, dna, asv, occurrence, marker, Samples, Taxonomy, ASV_table)
+  source(file.path(helper_dir, "ampliseq-config-generator.R"))
+  message(
+    "\nNo ", annotation_file, " yet: stopped after section 11.\n",
+    "Review the output, then run ampliseq-hpc.sh push, start, status and ",
+    "fetch from this folder, and run this script again."
+  )
+  if (interactive()) invokeRestart("abort") else quit(save = "no", status = 0)
+}
+
 ################################################################################
 # 12. Import and filter annotation
 ################################################################################
+
+progress("12. Reading annotation")
 
 annotation <- fread(
   file = annotation_file,
@@ -550,6 +636,8 @@ if ("annotation_algorithm" %in% names(annotation)) {
 ################################################################################
 # 13. Flag ASVs based on target prediction outcome
 ################################################################################
+
+progress("13. Target prediction and taxonomy corrections")
 
 annotation[, annotation_target := marker]
 annotation[, target_criteria := target_criteria]
@@ -592,15 +680,27 @@ if (target_criteria == "None applied") {
 
 annotation[, c(intersect(names(annotation), c(scores, "eval_method"))) := NULL]
 
+# Correct genus/species splitting errors in ampliseq's export for PR2 and COIDB
+source(file.path(helper_dir, "taxonomy-corrections.R"))
+
 ################################################################################
 # 14. Optional dataset-specific fixes
 ################################################################################
 
-# Add dataset-specific fixes here if needed.
+progress("14. Dataset-specific fixes")
+
+# Add dataset-specific fixes here if needed. Change the provider's values with
+# change_value() (or log other changes with record_change()), so that they are
+# listed in output/changes.txt and in the email to the provider, e.g.:
+# change_value(dna, "pcr_primer_reverse", "GGACTACHVGGGTWTCTAAT",
+#              "GACTACHVGGGTATCTAATCC",
+#              "Primer sequence did not match the primer name (805R)")
 
 ################################################################################
 # 15. Export final files
 ################################################################################
+
+progress("15. Exporting import files")
 
 wb <- createWorkbook()
 
@@ -628,5 +728,33 @@ unlink(tfiles)
 
 print(paste("Deleted ASV without occurrences:", del_asv_no))
 
-# Keep only objects that correspond to exported sheets
-rm(list = setdiff(ls(), final_sheets))
+# Keep only objects that correspond to exported sheets, plus what section 16
+# needs
+rm(list = setdiff(ls(), c(final_sheets, "helper_dir", "marker", "changes", "progress",
+                          "write_changes", "change_sheet", "change_rows",
+                          "from_study", "study_fields")))
+
+################################################################################
+# 16. Check output and draft provider email
+################################################################################
+
+progress("16. Checks and change log")
+
+# Compare event and ASV counts across output tables
+source(file.path(helper_dir, "output-checks.R"))
+check_output(dataset$datasetID)
+
+# Check the final data again, after the fixes in section 14
+source(file.path(helper_dir, "submission-checks.R"))
+run_submission_checks(event, dna, asv, occurrence, marker)
+
+# List the changes made to the provider's data, and draft an email asking the
+# provider to confirm them before import
+write_changes()
+tryCatch(
+  source(file.path(helper_dir, "changes-email-generator.R")),
+  error = function(e) warning("Change email not drafted: ", conditionMessage(e))
+)
+
+# Draft the provider email once the IPT resource has been created
+# source(file.path(helper_dir, "email-generator.R"))
