@@ -81,16 +81,23 @@ check_pair <- function(in_name, in_value, known, check, table, fields, labels) {
                 sprintf("%s did not match %s %s", cap(labels[1]), labels[2], in_value))))
   }
   if (any(same_name_rows)) {
+    db_name <- known$name[same_name_rows][1]
     db_value <- known$value[same_name_rows][1]
-    return(finding("WARN", sprintf(
-      "%s '%s' does not match %s '%s' (in the database, '%s' goes with '%s')",
-      cap(labels[2]), in_value, labels[1], in_name, in_name, db_value
-    ), paste0(
+    fix <- paste0(
       "# Either the ", labels[1], " or the ", labels[2],
       " is wrong; check with the provider, e.g.:\n",
       fix_line(table, fields[2], in_value, db_value,
-               sprintf("%s did not match %s %s", cap(labels[2]), labels[1], in_name))
-    )))
+               sprintf("%s did not match %s %s", cap(labels[2]), labels[1], db_name))
+    )
+    # The name may also differ from the database in upper/lower case only
+    if (in_name != db_name) {
+      fix <- paste0(fix, "\n", fix_line(table, fields[1], in_name, db_name,
+                                        "Spelling harmonised with existing datasets"))
+    }
+    return(finding("WARN", sprintf(
+      "%s '%s' does not match %s '%s' (in the database, '%s' goes with '%s')",
+      cap(labels[2]), in_value, labels[1], in_name, db_name, db_value
+    ), fix))
   }
   finding("REVIEW", sprintf(
     "New %s '%s' / %s '%s' (not in the database)", labels[1], in_name, labels[2], in_value
