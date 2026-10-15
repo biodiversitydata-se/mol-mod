@@ -26,6 +26,11 @@ The `Makefile` uses explicit build targets for development vs production images,
   conda env config vars set PLATFORM=mac  # Used in Makefile to select correct Compose file
   conda deactivate && conda activate admin-env
   ```
+- On Apple Silicon (ARM), images must still be built for the server's architecture (amd64), and the published images exist for amd64 only. Install Rosetta and make Docker build, pull and run amd64 images, e.g. in `~/.bash_profile`:
+  ```
+  softwareupdate --install-rosetta
+  export DOCKER_DEFAULT_PLATFORM=linux/amd64
+  ```
 - Port **5000** is used by the Flask/asv-main service, but may already be taken by Apple’s AirPlay Receiver. Disable AirPlay in `System Settings` or remap the port in `docker-compose.[prod.local.]yml`.  
 
 ### Environment & secrets
