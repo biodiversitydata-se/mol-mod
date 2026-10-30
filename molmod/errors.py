@@ -1,6 +1,6 @@
-from flask import Markup
 from flask import current_app as app
 from flask import render_template, request
+from markupsafe import Markup
 from werkzeug.exceptions import HTTPException, default_exceptions
 
 
