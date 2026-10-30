@@ -35,7 +35,7 @@ def error_handler(error):
                            code=code,
                            name=Markup(name),
                            description=Markup(description),
-                           error=error)
+                           error=error), code
 
 
 def init_app(app):
