@@ -1,4 +1,10 @@
 /* Changes may require cache bypass, in Chrome/Mac: shift + cmd + r */
+
+// Max no. of ASV:s that can be sent in one GET request to the occurrence
+// search page (one repeated taxonId param per ASV); longer URLs are rejected
+// by the server (414 URI Too Long)
+var MAX_TAXON_IDS = 150;
+
 $(document).ready(function() {
 
     switch(page) {
@@ -236,6 +242,14 @@ $(document).ready(function() {
                     $('#dtbl_err_container').html('Please, select at least one row. ');
                     $('#dtbl_err_container').removeClass('hiddenElem');
                     $('.table tr td:first-child').addClass('visHlpElem');
+                    return false;
+                }
+
+                // Warn and abort if too many rows are selected
+                if (ids.length > MAX_TAXON_IDS) {
+                    $('#dtbl_err_container').html('Please, select at most ' + MAX_TAXON_IDS +
+                                                  ' rows (you selected ' + ids.length + '). ');
+                    $('#dtbl_err_container').removeClass('hiddenElem');
                     return false;
                 }
 
