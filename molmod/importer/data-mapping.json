@@ -42,7 +42,12 @@
     "minimumElevationInMeters": {"validation": "-?[0-9]+(\\.[0-9]+)?|nan"},
     "maximumElevationInMeters": {"validation": "-?[0-9]+(\\.[0-9]+)?|nan"},
     "minimumDepthInMeters": {"validation": "[0-9]+(\\.[0-9]+)?|nan"},
-    "maximumDepthInMeters": {"validation": "[0-9]+(\\.[0-9]+)?|nan"}
+    "maximumDepthInMeters": {"validation": "[0-9]+(\\.[0-9]+)?|nan"},
+    "degreeOfEstablishment": {
+      "optional": true,
+      "validation": "^(nan|native|captive|cultivated|released|failing|casual|reproducing|established|colonising|invasive|widespreadInvasive)$",
+      "note": "Darwin Core degreeOfEstablishment vocabulary, see https://dwc.tdwg.org/doe/. Use 'captive' for e.g. aquarium/mesocosm experiments."
+    }
   },
   "mixs": {
     "targetTable": "mixs",

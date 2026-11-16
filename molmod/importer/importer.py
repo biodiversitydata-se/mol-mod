@@ -555,6 +555,13 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
         logging.error('No data were imported.')
         sys.exit(1)
 
+    # Add optional fields that are missing from input as empty columns
+    for sheet, fields in mapping.items():
+        for field, settings in fields.items():
+            if (isinstance(settings, dict) and settings.get('optional')
+                    and field not in data[sheet]):
+                data[sheet][field] = numpy.nan
+
     # Deal with Excel timestamps
     # Requires date fields to exist, so do not move ahead of field check!
     data['event']['eventDate'] = handle_dates(data['event']['eventDate'])
@@ -786,7 +793,9 @@ def compare_fields(data: PandasDict, mapping: dict):
     # Check if any mapping fields are missing from data input
     for sheet in mapping.keys():
         set1 = set([k for k in mapping[sheet].keys()
-                    if k not in [
+                    if not (isinstance(mapping[sheet][k], dict)
+                            and mapping[sheet][k].get('optional'))
+                    and k not in [
                         # Fields not expected in input
                         'status', 'targetTable', 'asv_pid',
                         'dataset_pid', 'pid', 'asv_id',

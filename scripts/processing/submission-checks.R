@@ -259,6 +259,25 @@ run_submission_checks <- function(event, dna, asv, occurrence, marker,
     }
   }
 
+  # degreeOfEstablishment flags non-natural settings (e.g. 'captive' for
+  # aquarium/mesocosm experiments); values must follow the DwC vocabulary
+  doe_vocab <- c("native", "captive", "cultivated", "released", "failing",
+                 "casual", "reproducing", "established", "colonising",
+                 "invasive", "widespreadInvasive")
+  doe <- unique(na.omit(as.character(event$degreeOfEstablishment)))
+  bad_doe <- setdiff(doe, doe_vocab)
+  if (length(bad_doe) > 0) {
+    add("WARN", "samples", sprintf(
+      "degreeOfEstablishment not in DwC vocabulary: %s", paste(bad_doe, collapse = " | ")
+    ), '# change_value(event, "degreeOfEstablishment", <old>, "captive", <reason>)')
+  }
+  if (length(doe) > 0) {
+    add("REVIEW", "samples", sprintf(
+      "degreeOfEstablishment set (%s): check that env_local_scale and samplingProtocol describe the setting",
+      paste(doe, collapse = " | ")
+    ))
+  }
+
   dates <- as.character(event$eventDate)
   if (any(grepl("^[0-9]{5}$", dates))) {
     add("WARN", "eventDate", "Five-digit eventDate values (Excel date serial numbers?)",
