@@ -259,6 +259,22 @@ run_submission_checks <- function(event, dna, asv, occurrence, marker,
     }
   }
 
+  # degreeOfEstablishment flags non-natural settings (aquarium/mesocosm
+  # experiments); only 'captive' or empty is accepted
+  doe <- unique(na.omit(as.character(event$degreeOfEstablishment)))
+  bad_doe <- setdiff(doe, "captive")
+  if (length(bad_doe) > 0) {
+    add("WARN", "samples", sprintf(
+      "degreeOfEstablishment must be 'captive' or empty: %s", paste(bad_doe, collapse = " | ")
+    ), '# change_value(event, "degreeOfEstablishment", <old>, "captive", <reason>)')
+  }
+  if ("captive" %in% doe) {
+    add("REVIEW", "samples",
+        paste("degreeOfEstablishment = captive: check that env_local_scale (e.g. saline water",
+              "aquarium [ENVO:00002197] or mesocosm [ENVO:01000620]) and samplingProtocol",
+              "describe the setting"))
+  }
+
   dates <- as.character(event$eventDate)
   if (any(grepl("^[0-9]{5}$", dates))) {
     add("WARN", "eventDate", "Five-digit eventDate values (Excel date serial numbers?)",

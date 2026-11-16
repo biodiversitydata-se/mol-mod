@@ -121,7 +121,8 @@ SELECT ds.pid AS dataset_pid,
     ta.identification_references AS "identificationReferences",
     concat_ws(' '::text, ta.annotation_algorithm, 'annotation against', ta.reference_db::text || ';'::text, 'confidence at lowest specified (ASV portal) taxon:', ta.annotation_confidence) AS "identificationRemarks",
     (('By data provider: '::text || oc.previous_identifications::text) || '; By ASV portal: '::text) || concat_ws('|'::text, ta.kingdom, ta.phylum, ta.class, ta.oorder, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS "previousIdentifications",
-    '' AS "dynamicProperties"
+    '' AS "dynamicProperties",
+    se.degree_of_establishment AS "degreeOfEstablishment"
 FROM :data_schema.sampling_event se
     JOIN :data_schema.occurrence oc ON oc.event_pid = se.pid
     JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid
@@ -453,7 +454,8 @@ SELECT se.dataset_pid,
     mixs.denoising_appr,
     mixs.env_broad_scale,
     mixs.env_local_scale,
-    mixs.env_medium
+    mixs.env_medium,
+    se.degree_of_establishment AS "degreeOfEstablishment"
     FROM sampling_event se
         JOIN dataset ds ON se.dataset_pid = ds.pid
         JOIN mixs ON se.pid = mixs.pid

@@ -42,7 +42,11 @@
     "minimumElevationInMeters": {"validation": "-?[0-9]+(\\.[0-9]+)?|nan"},
     "maximumElevationInMeters": {"validation": "-?[0-9]+(\\.[0-9]+)?|nan"},
     "minimumDepthInMeters": {"validation": "[0-9]+(\\.[0-9]+)?|nan"},
-    "maximumDepthInMeters": {"validation": "[0-9]+(\\.[0-9]+)?|nan"}
+    "maximumDepthInMeters": {"validation": "[0-9]+(\\.[0-9]+)?|nan"},
+    "degreeOfEstablishment": {
+      "validation": "^(nan|captive)$",
+      "note": "Empty, or 'captive' for aquarium/mesocosm and similar experiments (https://dwc.tdwg.org/doe/)."
+    }
   },
   "mixs": {
     "targetTable": "mixs",

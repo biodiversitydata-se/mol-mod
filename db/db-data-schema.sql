@@ -43,7 +43,8 @@ CREATE TABLE IF NOT EXISTS public.sampling_event (
     minimum_elevation_in_meters numeric,
     maximum_elevation_in_meters numeric,
     minimum_depth_in_meters numeric,
-    maximum_depth_in_meters numeric
+    maximum_depth_in_meters numeric,
+    degree_of_establishment character varying
 );
 
 CREATE TABLE IF NOT EXISTS public.mixs (

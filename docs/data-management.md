@@ -225,6 +225,19 @@ Then `make stats`, and `make blastdb` if the dataset was public.
 
 ## Background
 
+### Non-natural settings
+
+Data from aquarium, mesocosm and similar experiments are flagged with
+`degreeOfEstablishment` = `captive`
+([DwC vocabulary](https://dwc.tdwg.org/doe/)) in the Samples sheet; leave it
+empty for field samples. It is stored per event and exported in the
+occurrence core. Also describe the setting in `env_local_scale` and
+`samplingProtocol`.
+
+Databases created before this column existed need
+`db/migrations/2026-11-degree-of-establishment.sql` (run instructions in the
+file).
+
 ### Target prediction filtering
 
 All denoised sequences are imported; ASVs not predicted to derive from the

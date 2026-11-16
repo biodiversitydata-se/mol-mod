@@ -330,7 +330,7 @@ event_std <- c(
   "recordedBy", "country", "municipality", "verbatimLocality",
   "minimumElevationInMeters", "maximumElevationInMeters",
   "minimumDepthInMeters", "maximumDepthInMeters", "fieldNumber",
-  "catalogNumber", "references"
+  "catalogNumber", "references", "degreeOfEstablishment"
 )
 
 missing_event_std <- setdiff(event_std, names(Samples))
@@ -357,7 +357,8 @@ event_order <- c(
   "decimalLatitude", "decimalLongitude", "geodeticDatum",
   "coordinateUncertaintyInMeters", "dataGeneralizations", "recordedBy",
   "country", "municipality", "verbatimLocality", "minimumElevationInMeters",
-  "maximumElevationInMeters", "minimumDepthInMeters", "maximumDepthInMeters"
+  "maximumElevationInMeters", "minimumDepthInMeters", "maximumDepthInMeters",
+  "degreeOfEstablishment"
 )
 
 event <- event[, ..event_order]
