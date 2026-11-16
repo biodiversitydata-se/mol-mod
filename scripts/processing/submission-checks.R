@@ -270,7 +270,9 @@ run_submission_checks <- function(event, dna, asv, occurrence, marker,
   }
   if ("captive" %in% doe) {
     add("REVIEW", "samples",
-        "degreeOfEstablishment = captive: check that env_local_scale and samplingProtocol describe the setting")
+        paste("degreeOfEstablishment = captive: check that env_local_scale (e.g. saline water",
+              "aquarium [ENVO:00002197] or mesocosm [ENVO:01000620]) and samplingProtocol",
+              "describe the setting"))
   }
 
   dates <- as.character(event$eventDate)
