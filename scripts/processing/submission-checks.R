@@ -259,23 +259,18 @@ run_submission_checks <- function(event, dna, asv, occurrence, marker,
     }
   }
 
-  # degreeOfEstablishment flags non-natural settings (e.g. 'captive' for
-  # aquarium/mesocosm experiments); values must follow the DwC vocabulary
-  doe_vocab <- c("native", "captive", "cultivated", "released", "failing",
-                 "casual", "reproducing", "established", "colonising",
-                 "invasive", "widespreadInvasive")
+  # degreeOfEstablishment flags non-natural settings (aquarium/mesocosm
+  # experiments); only 'captive' or empty is accepted
   doe <- unique(na.omit(as.character(event$degreeOfEstablishment)))
-  bad_doe <- setdiff(doe, doe_vocab)
+  bad_doe <- setdiff(doe, "captive")
   if (length(bad_doe) > 0) {
     add("WARN", "samples", sprintf(
-      "degreeOfEstablishment not in DwC vocabulary: %s", paste(bad_doe, collapse = " | ")
+      "degreeOfEstablishment must be 'captive' or empty: %s", paste(bad_doe, collapse = " | ")
     ), '# change_value(event, "degreeOfEstablishment", <old>, "captive", <reason>)')
   }
-  if (length(doe) > 0) {
-    add("REVIEW", "samples", sprintf(
-      "degreeOfEstablishment set (%s): check that env_local_scale and samplingProtocol describe the setting",
-      paste(doe, collapse = " | ")
-    ))
+  if ("captive" %in% doe) {
+    add("REVIEW", "samples",
+        "degreeOfEstablishment = captive: check that env_local_scale and samplingProtocol describe the setting")
   }
 
   dates <- as.character(event$eventDate)

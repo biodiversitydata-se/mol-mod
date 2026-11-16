@@ -2,8 +2,7 @@
 -- Adds sampling_event.degree_of_establishment (dwc:degreeOfEstablishment),
 -- used to flag non-natural settings such as aquarium/mesocosm experiments
 -- ('captive'). The column is appended last in the views, so that CREATE OR
--- REPLACE works, grants are kept, and existing IPT mappings (which refer to
--- columns by position) are unaffected.
+-- REPLACE works and existing grants are kept.
 --
 -- Run once on an existing database (after `make backup`), from mol-mod/:
 --   docker exec -i asv-db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' \

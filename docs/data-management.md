@@ -227,15 +227,12 @@ Then `make stats`, and `make blastdb` if the dataset was public.
 
 ### Non-natural settings
 
-Data from experiments in aquaria, mesocosms and similar settings can be
-published if flagged with `degreeOfEstablishment` = `captive`
-([DwC vocabulary](https://dwc.tdwg.org/doe/)) in the Samples sheet. It is
-stored per event (`sampling_event.degree_of_establishment`), so field samples
-in the same dataset can be left empty. The importer treats the column as
-optional and validates it against the vocabulary. It is exported last in
-`api.dwc_oc_occurrence` and `api.dl_event`. Also describe the setting in
-`env_local_scale` and `samplingProtocol`, and put experimental variables in
-the emof sheet.
+Data from aquarium, mesocosm and similar experiments are flagged with
+`degreeOfEstablishment` = `captive`
+([DwC vocabulary](https://dwc.tdwg.org/doe/)) in the Samples sheet; leave it
+empty for field samples. It is stored per event and exported in the
+occurrence core. Also describe the setting in `env_local_scale` and
+`samplingProtocol`.
 
 Databases created before this column existed need
 `db/migrations/2026-11-degree-of-establishment.sql` (run instructions in the
