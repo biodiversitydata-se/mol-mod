@@ -22,7 +22,7 @@ describes the scripts, their setup and their checks.
 | `published-email-generator.R`, `published-email-template.html` | Draft email telling the provider the dataset is published, with GBIF (DOI) and ASV portal links (run after `make export`) |
 | `zip-ds.sh` | Archives imported datasets for reproducibility |
 | `reannotation-processing.R` | Prepares re-annotations for `make reannot` |
-| `input/`, `output/` | Dummy data for testing |
+| `input/`, `output/` | Dummy data for testing; dry-run the `.xlsx` output, as the tiny `.tar.gz` is not recognised as a tar file by the importer |
 
 ## One-time setup
 
