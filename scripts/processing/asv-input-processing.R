@@ -363,6 +363,11 @@ event_order <- c(
 
 event <- event[, ..event_order]
 
+# Columns left empty in the upload are read as logical or numeric. Make them
+# character, so that values can be filled in later (e.g. in section 14).
+empty_cols <- names(event)[vapply(event, function(x) all(is.na(x)), logical(1))]
+for (col in empty_cols) set(event, j = col, value = as.character(event[[col]]))
+
 ################################################################################
 # 7. Build dna from Study
 ################################################################################
