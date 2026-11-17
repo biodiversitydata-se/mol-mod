@@ -134,9 +134,6 @@ Only when the metadata is complete and the agreement is signed:
    ```html
    <p>This dataset was published via the <a href="https://asv-portal.biodiversitydata.se/">SBDI ASV portal</a>.</p>
    ```
-
-   If the description editor strips HTML, edit the EML (DocBook) and import it
-   instead; do not save the description in the editor afterwards.
 3. **Publish and register:** *Visibility → Public*, *Published Versions →
    Publish* (with a version note; review the report and DwC-A), then
    *Register*. Version notes can be edited later in the version history.
