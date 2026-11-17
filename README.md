@@ -124,8 +124,8 @@ Ensure the nginx limit (`molecular.conf: client_max_body_size`) matches the Flas
 On successful upload, email notifications are sent to the addresses in `UPLOAD_EMAIL` or `UPLOAD_EMAIL_TEST`.
 
 ### Data management
-Processing uploaded files, taxonomic annotation, importing, publishing in the
-IPT and GBIF, making datasets public, exports, post-import edits,
+Processing uploaded files, taxonomic annotation, importing, the provider
+handover and agreement, publishing in the IPT and GBIF, making datasets public, exports, post-import edits,
 taxonomic updates, BLAST-database generation, deletions and background on target
 prediction filtering are described in
 [`docs/data-management.md`](docs/data-management.md).

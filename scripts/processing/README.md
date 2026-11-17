@@ -13,12 +13,13 @@ describes the scripts, their setup and their checks.
 | `ampliseq-config-generator.R` | Writes `ampliseq/params.yaml` (sourced by the main script) |
 | `ampliseq-hpc.sh` | Runs ampliseq on the cluster: `push`, `start`, `status`, `fetch` |
 | `submission-checks.R` | Lists likely mistakes in the submitted data for review (sourced) |
-| `change-log.R` | Logs corrections of the provider's data: `change_value()` (sourced) |
+| `change-log.R` | Logs corrections of the provider's data: `change_value()`, `record_change()` (sourced) |
 | `changes-email-generator.R`, `changes-email-template.html` | Draft email asking the provider to confirm the changes before import (sourced) |
 | `asv-db-query.R` | Read-only queries to the ASV portal database (sourced) |
 | `taxonomy-corrections.R`, `pr2-correction-lookup.tsv` | Fix genus/species splitting for PR2 and COIDB (sourced) |
 | `output-checks.R` | Compares counts across output tables (sourced) |
-| `email-generator.R`, `email-template.html` | Draft email to the data provider |
+| `email-generator.R`, `email-template.html` | Draft handover email to the data provider (call commented out in section 16; run once the IPT resource exists) |
+| `published-email-generator.R`, `published-email-template.html` | Draft email telling the provider the dataset is published, with GBIF (DOI) and ASV portal links (run after `make export`) |
 | `zip-ds.sh` | Archives imported datasets for reproducibility |
 | `reannotation-processing.R` | Prepares re-annotations for `make reannot` |
 | `input/`, `output/` | Dummy data for testing |
@@ -85,6 +86,8 @@ or columns, duplicated IDs, ASVs with reads but no sequence).
 Correct the data in section 14 with
 `change_value(table, field, old, new, reason)`, e.g.
 `change_value(dna, "pcr_primer_reverse", "GGACTACHVGGGTWTCTAAT", "GACTACHVGGGTATCTAATCC", "Primer sequence did not match the primer name (805R)")`.
+Changes that are not a simple value replacement (e.g. removed samples) are
+made in code and logged with `record_change(table, field, old, new, reason, n)`.
 Each change is listed in `output/changes.txt` and in the email draft, by the
 provider's sheet names.
 

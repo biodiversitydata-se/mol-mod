@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Template</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <p>Dear data provider,</p>
+
+    <p>Your dataset <i>%title%</i> is now published and available in:</p>
+
+    <ul>
+        <li><a href="%gbif-link%">GBIF</a>. Please cite the dataset with its DOI:
+        <a href="%doi-link%">%doi-link%</a></li>
+        <li>The <a href="%portal-link%">ASV portal</a>, where the ASVs can be found with BLAST and
+        filter search, and the dataset can be downloaded in a condensed format from the
+        <a href="%download-link%">Download page</a> (login required)</li>
+    </ul>
+
+    <p>Thank you for sharing your data. Please contact us if you need to update the data or
+    metadata, or if you have any questions.</p>
+
+    <p>On behalf of the SBDI molecular team,<br>
+    Regards,<br>
+    %sender-name%</p>
+
+	<p>--<br>
+	%sender-name%<br>
+	SBDI molecular team<br>
+	Email: %sender-email%<br>
+</body>
+</html>

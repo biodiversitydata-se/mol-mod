@@ -11,13 +11,15 @@ is described in the main [README](../README.md).
   edit the uploaded file in R, annotate with ampliseq
 - [Importing](#importing): dry-run locally, confirm changes with the provider,
   import on the server
+- [IPT resource and handover](#ipt-resource-and-handover): create the IPT
+  resource, prepare the agreement, email the provider
 - [Archiving](#archiving): zip the upload and R scripts for reproducibility
-- [Publishing in the IPT and GBIF](#publishing-in-the-ipt-and-gbif): create
-  the IPT resource, hand over to the provider, publish, register, Bioatlas
-  ingestion
+- [Publishing in the IPT and GBIF](#publishing-in-the-ipt-and-gbif): signed
+  agreement, finish metadata, publish, register, Bioatlas ingestion
 - [Going public in the ASV portal](#going-public-in-the-asv-portal): make the
   dataset searchable, update stats and BLAST database
-- [Dataset exports](#dataset-exports): build the archive for the Download page
+- [Dataset exports](#dataset-exports): build the archive for the Download
+  page, then tell the provider
 
 **Maintaining imported data**
 - [Edits after import](#edits-after-import): fix or replace a dataset,
@@ -30,12 +32,16 @@ is described in the main [README](../README.md).
 **Background**
 - [Target prediction filtering](#target-prediction-filtering): how ASVs not
   from the target gene are excluded
+- [Non-natural settings](#non-natural-settings): flagging aquarium and
+  mesocosm data
 
 ## New dataset
 
 ### Preprocessing and annotation
 
-Uploaded files are processed with `scripts/processing/asv-input-processing.R`
+The portal emails the upload addresses (`UPLOAD_EMAIL`) when a file is
+uploaded; the file is stored in the server's uploads volume. Its datasetID is
+in the Study sheet. Uploaded files are processed with `scripts/processing/asv-input-processing.R`
 (setup, helpers, checks and test data:
 [`scripts/processing/README.md`](../scripts/processing/README.md)). Work in a
 folder per dataset, outside the repository:
@@ -52,8 +58,10 @@ folder per dataset, outside the repository:
    edit section 1.
 2. **First pass:** source the script. It stops after section 11 and writes
    the fasta, `ampliseq/params.yaml` and `output/submission-checks.txt`.
-3. **Review** the output and checks; correct data in section 14 with
-   `change_value()`.
+3. **Review** the output and checks; record corrections in section 14 with
+   `change_value()` or `record_change()` (applied in the second pass).
+   Corrections that must affect the annotation (e.g. ASVs to exclude) go in
+   section 1 or the input data instead.
 4. **Annotate** on the HPC cluster, from the dataset folder:
    ```sh
    ampliseq-hpc.sh push     # copy params.yaml and fasta to the cluster
@@ -77,19 +85,11 @@ More options: `PARSER.add_argument` in `molmod/importer/importer.py`.
    [target-prediction conflicts](#target-prediction-filtering).
 2. **Confirm changes:** send `draft_changes_email.eml` (Mac Mail: *Message →
    Send Again*) and wait for the provider's agreement.
-3. **Import** on the server after `make backup`. `make conflict-import`
+3. **Import** on the server after `make backup`, and note the new pid. `make conflict-import`
    imports despite conflicts; the affected ASVs keep their existing
    annotation until a [taxonomic update](#taxonomic-updates).
 
-### Archiving
-
-Move the dataset folder to `Imported/` and zip `input/` and all `*.R` files:
-```sh
-scripts/processing/zip-ds.sh <datasetID>   # run from the folder containing Imported/
-```
-Copy the zip to the archive folder on the server.
-
-### Publishing in the IPT and GBIF
+### IPT resource and handover
 
 In the [IPT](https://www.gbif.se/ipt/) (see the
 [manual](https://ipt.gbif.org/manual/en/ipt/latest/)):
@@ -100,25 +100,48 @@ In the [IPT](https://www.gbif.se/ipt/) (see the
    SELECT * FROM api.dwc_oc_occurrence
    WHERE dataset_pid = <pid> AND "datasetID" = '<datasetID>'
    ```
+   The sources can be set up before the import with a placeholder pid.
 2. **Create the resource**; short name = lowercase datasetID.
 3. **Map the fields.** For 18S, do **not** map `kingdom` and `phylum`
    (worse name matching).
-4. **Hand over to the provider:** add them as IPT user (*Manager without
-   registration rights*) and email them (draft from
-   `scripts/processing/email-generator.R`). They fill in the metadata and sign
-   the agreement; their organisation must be a GBIF publisher.
-5. **Finish the metadata:** remove yourself from *Associated Parties* and end
-   the description with:
+4. **Add the provider** as IPT user (*Manager without registration rights*)
+   and remove yourself from *Associated Parties*.
+5. **Prepare the data-sharing agreement:** fill in only the highlighted
+   fields of the standard SBDI–GBIF Sweden agreement (dataset, organisation,
+   licence, place and date, our signatory); never change its wording.
+6. **Email the provider** (draft from `scripts/processing/email-generator.R`,
+   run right after a second pass of the R script) with the agreement
+   attached. They fill in the metadata and sign the agreement; their
+   organisation must be a GBIF publisher.
+
+### Archiving
+
+Once the handover email is sent, move the dataset folder to `Imported/` and
+zip `input/` and all `*.R` files:
+```sh
+scripts/processing/zip-ds.sh <datasetID>   # run from the folder containing Imported/
+```
+Copy the zip to the archive folder on the server (root-owned: copy it to
+your home folder first, then `sudo cp`).
+
+### Publishing in the IPT and GBIF
+
+Only when the metadata is complete and the agreement is signed:
+
+1. **Counter-sign and archive the agreement** following the current
+   SBDI–GBIF Sweden routine for data-sharing agreements, and send the
+   provider a copy.
+2. **Finish the metadata:** end the description with:
    ```html
    <p>This dataset was published via the <a href="https://asv-portal.biodiversitydata.se/">SBDI ASV portal</a>.</p>
    ```
 
    If the description editor strips HTML, edit the EML (DocBook) and import it
    instead; do not save the description in the editor afterwards.
-6. **Publish and register:** *Visibility → Public*, *Published Versions →
+3. **Publish and register:** *Visibility → Public*, *Published Versions →
    Publish* (with a version note; review the report and DwC-A), then
    *Register*. Version notes can be edited later in the version history.
-7. **Bioatlas ingestion:** email the Bioatlas team and note the resource ID
+4. **Bioatlas ingestion:** email the Bioatlas team and note the resource ID
    (`drXXXX`) the dataset gets.
 
 ### Going public in the ASV portal
@@ -131,7 +154,7 @@ make stats
 make blastdb
 ```
 Find the pid in `api.annotation_overview` or the `make delete` menu (quit
-without deleting). Then tell the provider.
+without deleting).
 
 ### Dataset exports
 
@@ -151,6 +174,14 @@ Then check:
   `scripts/fix-export-readme.py` rebuilds a README citation from the IPT EML.
 - that the README has a DOI. `DOI: N/A` means the dataset was not yet
   registered or GBIF did not respond; re-export.
+
+For a new dataset, tell the provider once the Download page serves it. From
+the dataset folder:
+```sh
+Rscript <mol-mod>/scripts/processing/published-email-generator.R
+```
+writes `draft_published_email.eml` with links to the dataset in GBIF (DOI),
+and the ASV portal.
 
 ## Maintaining imported data
 
@@ -225,19 +256,6 @@ Then `make stats`, and `make blastdb` if the dataset was public.
 
 ## Background
 
-### Non-natural settings
-
-Data from aquarium, mesocosm and similar experiments are flagged with
-`degreeOfEstablishment` = `captive`
-([DwC vocabulary](https://dwc.tdwg.org/doe/)) in the Samples sheet; leave it
-empty for field samples. It is stored per event and exported in the
-occurrence core. Also describe the setting in `env_local_scale` and
-`samplingProtocol`.
-
-Databases created before this column existed need
-`db/migrations/2026-11-degree-of-establishment.sql` (run instructions in the
-file).
-
 ### Target prediction filtering
 
 All denoised sequences are imported; ASVs not predicted to derive from the
@@ -246,8 +264,8 @@ can change at re-annotation. Before import, each ASV gets:
 - `annotation_target`: target gene of the reference database (e.g.
   `16S rRNA`).
 - `target_prediction`: `TRUE`/`FALSE`.
-- `target_criteria`: e.g. `'Assigned kingdom OR Barrnap-positive'` or
-  `'None: defaults to TRUE'`.
+- `target_criteria`: e.g. `'Assigned kingdom OR barrnap-positive'` or
+  `'None applied'` (set in section 1 of the R script).
 
 At import, they are compared with existing annotations:
 
@@ -275,3 +293,16 @@ WHERE ta.status::text = 'valid'
     AND ta.annotation_target::text = mixs.target_gene::text;
 ```
 See `db/db-api-schema.sql`.
+
+### Non-natural settings
+
+Data from aquarium, mesocosm and similar experiments are flagged with
+`degreeOfEstablishment` = `captive`
+([DwC vocabulary](https://dwc.tdwg.org/doe/)) in the Samples sheet; leave it
+empty for field samples. It is stored per event and exported in the
+occurrence core. Also describe the setting in `env_local_scale` and
+`samplingProtocol`.
+
+Databases created before this column existed need
+`db/migrations/2026-11-degree-of-establishment.sql` (run instructions in the
+file).
