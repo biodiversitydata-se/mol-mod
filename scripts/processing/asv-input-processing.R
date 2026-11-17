@@ -661,8 +661,12 @@ if (target_criteria == "None applied") {
 
   if (length(scores_present) > 0) {
     score_mat <- as.matrix(annotation[, ..scores_present])
+    # A missing score means no barrnap hit for that domain; without this,
+    # max.col() returns NA for every row with any missing score
+    score_mat[is.na(score_mat)] <- Inf
     min_idx <- max.col(-score_mat, ties.method = "first")
-    min_names <- scores_present[min_idx]
+    min_names <- ifelse(rowSums(is.finite(score_mat)) > 0,
+                        scores_present[min_idx], NA_character_)
     annotation[, prob_domain := substr(min_names, 1, 3)]
 
     if (marker == "18S rRNA") {
