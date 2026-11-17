@@ -104,8 +104,7 @@ In the [IPT](https://www.gbif.se/ipt/) (see the
 2. **Create the resource**; short name = lowercase datasetID.
 3. **Map the fields.** For 18S, do **not** map `kingdom` and `phylum`
    (worse name matching).
-4. **Add the provider** as IPT user (*Manager without registration rights*)
-   and remove yourself from *Associated Parties*.
+4. **Add the provider** as IPT user (*Manager without registration rights*).
 5. **Prepare the data-sharing agreement:** fill in only the highlighted
    fields of the standard SBDI–GBIF Sweden agreement (dataset, organisation,
    licence, place and date, our signatory); never change its wording.
