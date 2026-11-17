@@ -85,7 +85,8 @@ More options: `PARSER.add_argument` in `molmod/importer/importer.py`.
    [target-prediction conflicts](#target-prediction-filtering).
 2. **Confirm changes:** send `draft_changes_email.eml` (Mac Mail: *Message →
    Send Again*) and wait for the provider's agreement.
-3. **Import** on the server after `make backup`, and note the new pid. `make conflict-import`
+3. **Import** on the server after `make backup`; the import ends by printing
+   the new pid. `make conflict-import`
    imports despite conflicts; the affected ASVs keep their existing
    annotation until a [taxonomic update](#taxonomic-updates).
 
@@ -149,8 +150,8 @@ make status pid=3 status=1 ruid=dr963 ipt=kth-2013-baltic-18s
 make stats
 make blastdb
 ```
-Find the pid in `api.annotation_overview` or the `make delete` menu (quit
-without deleting).
+The pid is printed at import; for older datasets, see
+`api.annotation_overview` or the `make delete` menu (quit without deleting).
 
 ### Dataset exports
 
