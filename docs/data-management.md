@@ -150,8 +150,6 @@ make status pid=3 status=1 ruid=dr963 ipt=kth-2013-baltic-18s
 make stats
 make blastdb
 ```
-The pid is printed at import; for older datasets, see
-`api.annotation_overview` or the `make delete` menu (quit without deleting).
 
 ### Dataset exports
 
@@ -183,7 +181,8 @@ and the ASV portal.
 ## Maintaining imported data
 
 The ASV portal, IPT, GBIF and Bioatlas are not synced automatically;
-coordinate with the Bioatlas team before changing public data.
+coordinate with the Bioatlas team before changing public data. Dataset pids
+are listed in `api.annotation_overview`.
 `scripts/check-event-location.sql` lists events without country or complete
 coordinates, which GBIF requires (run instructions in the file).
 
