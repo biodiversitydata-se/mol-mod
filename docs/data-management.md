@@ -109,7 +109,7 @@ In the [IPT](https://www.gbif.se/ipt/) (see the
 5. **Prepare the data-sharing agreement:** fill in only the highlighted
    fields of the standard SBDI–GBIF Sweden agreement (dataset, organisation,
    licence, place and date, our signatory); never change its wording.
-6. **Email the provider** (draft from `scripts/processing/email-generator.R`,
+6. **Email the provider** (draft from `scripts/processing/handover-email-generator.R`,
    run right after a second pass of the R script) with the agreement
    attached. They fill in the metadata and sign the agreement; their
    organisation must be a GBIF publisher.

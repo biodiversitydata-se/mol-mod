@@ -1,7 +1,7 @@
 # Script for generating an email draft (.eml) with dataset-specific details and links
-# Expects email-template.html in the same folder as this script, and dataset object
+# Expects handover-email-template.html in the same folder as this script, and dataset object
 # from asv-input-processing.R. Source it from the dataset folder, e.g.:
-#   source("<path-to-mol-mod>/scripts/processing/email-generator.R")
+#   source("<path-to-mol-mod>/scripts/processing/handover-email-generator.R")
 # To send: open the draft in Mac Mail, choose Message > Send Again (shift-cmd-D),
 # fill in the IPT password (%pwd%) in the editable copy and send it.
 #
@@ -27,7 +27,7 @@ script_dir <- local({
   dir
 })
 
-generate_email <- function(dataset, template_file = file.path(script_dir, "email-template.html")) {
+generate_handover_email <- function(dataset, template_file = file.path(script_dir, "handover-email-template.html")) {
   sender_name <- Sys.getenv("MOLMOD_SENDER_NAME")
   sender <- Sys.getenv("MOLMOD_SENDER_EMAIL")
   if (sender_name == "" || sender == "") {
@@ -61,7 +61,7 @@ generate_email <- function(dataset, template_file = file.path(script_dir, "email
     "From: %s\nTo: %s\nSubject: %s\nContent-Type: text/html; charset=UTF-8\n",
     sender, provider_email, subject
   )
-  writeLines(c(email_header, email_template), "draft_email.eml")
+  writeLines(c(email_header, email_template), "draft_handover_email.eml")
 }
 
-generate_email(dataset)
+generate_handover_email(dataset)

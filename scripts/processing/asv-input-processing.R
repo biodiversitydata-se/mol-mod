@@ -757,5 +757,5 @@ tryCatch(
   error = function(e) warning("Change email not drafted: ", conditionMessage(e))
 )
 
-# Draft the provider email once the IPT resource has been created
-# source(file.path(helper_dir, "email-generator.R"))
+# Draft the handover email to the provider once the IPT resource has been created
+# source(file.path(helper_dir, "handover-email-generator.R"))

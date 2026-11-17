@@ -18,7 +18,7 @@ describes the scripts, their setup and their checks.
 | `asv-db-query.R` | Read-only queries to the ASV portal database (sourced) |
 | `taxonomy-corrections.R`, `pr2-correction-lookup.tsv` | Fix genus/species splitting for PR2 and COIDB (sourced) |
 | `output-checks.R` | Compares counts across output tables (sourced) |
-| `email-generator.R`, `email-template.html` | Draft handover email to the data provider (call commented out in section 16; run once the IPT resource exists) |
+| `handover-email-generator.R`, `handover-email-template.html` | Draft handover email to the data provider (call commented out in section 16; run once the IPT resource exists) |
 | `published-email-generator.R`, `published-email-template.html` | Draft email telling the provider the dataset is published, with GBIF (DOI) and ASV portal links (run after `make export`) |
 | `zip-ds.sh` | Archives imported datasets for reproducibility |
 | `reannotation-processing.R` | Prepares re-annotations for `make reannot` |
