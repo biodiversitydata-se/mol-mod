@@ -684,6 +684,7 @@ def run_import(data_file: str, mapping_file: str, batch_size: int = 1000,
     else:
         logging.info("Committing changes")
         connection.commit()
+        logging.info("Imported dataset with pid %s", dataset)
 
 
 def run_validation(data: PandasDict, mapping: dict):
