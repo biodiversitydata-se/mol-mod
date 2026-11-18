@@ -117,7 +117,7 @@ In the [IPT](https://www.gbif.se/ipt/) (see the
 ### Archiving
 
 Once the handover email is sent, move the dataset folder to `Imported/` and
-zip `input/` and all `*.R` files:
+zip `input/`, all `*.R` files and `params.yaml` (e.g. `ampliseq/params.yaml`):
 ```sh
 scripts/processing/zip-ds.sh <datasetID>   # run from the folder containing Imported/
 ```

@@ -1,6 +1,7 @@
 #!/bin/bash
 # Zip datasets under Imported/ for reproducibility.
-# Only files in input/ and R scripts (*.R) are included.
+# Only files in input/, R scripts (*.R) and ampliseq params.yaml files one
+# folder level down (e.g. ampliseq/params.yaml) are included.
 # Run from the imports root (the folder containing Imported/), or set
 # ASV_IMPORTS_DIR to that folder. Zips are written to <root>/zipped-import/.
 # Without arguments: zips all datasets.
@@ -38,6 +39,10 @@ zip_one() {
     find . -type f -name '*.R' \
       ! -path './output/*' ! -path './.Rproj.user/*' \
       -exec zip -q "$dest" {} +
+
+    # ampliseq params.yaml, whatever the config folder is called
+    find . -mindepth 2 -maxdepth 2 -type f -name 'params.yaml' \
+      ! -path './input/*' ! -path './output/*' -exec zip -q "$dest" {} +
   )
   echo "Zipped ${base} -> zipped-import/${base}.zip"
 }
