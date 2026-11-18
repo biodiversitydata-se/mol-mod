@@ -363,6 +363,11 @@ event_order <- c(
 
 event <- event[, ..event_order]
 
+# Columns left empty in the upload are read as logical or numeric. Make them
+# character, so that values can be filled in later (e.g. in section 14).
+empty_cols <- names(event)[vapply(event, function(x) all(is.na(x)), logical(1))]
+for (col in empty_cols) set(event, j = col, value = as.character(event[[col]]))
+
 ################################################################################
 # 7. Build dna from Study
 ################################################################################
@@ -656,8 +661,12 @@ if (target_criteria == "None applied") {
 
   if (length(scores_present) > 0) {
     score_mat <- as.matrix(annotation[, ..scores_present])
+    # A missing score means no barrnap hit for that domain; without this,
+    # max.col() returns NA for every row with any missing score
+    score_mat[is.na(score_mat)] <- Inf
     min_idx <- max.col(-score_mat, ties.method = "first")
-    min_names <- scores_present[min_idx]
+    min_names <- ifelse(rowSums(is.finite(score_mat)) > 0,
+                        scores_present[min_idx], NA_character_)
     annotation[, prob_domain := substr(min_names, 1, 3)]
 
     if (marker == "18S rRNA") {
