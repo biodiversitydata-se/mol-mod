@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Template</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <p>Dear data provider,</p>
+
+    <p>We have now imported your data 
+    (%dataset-file% submitted %date-time%) into the ASV database. Before making them publicly available in 
+    SBDI and GBIF, we ask you to:</p>
+
+    <ol>
+        <li>
+            <p>Describe your dataset in the Integrated Publishing Toolkit (IPT). Please, log in
+            <a href="%resource-link%">here</a> and <b>CHANGE YOUR PASSWORD</b> as soon as possible!</p>
+            <p>user: %provider-email%<br>pwd: %pwd%</p>
+
+            <p>Then click 'Edit' in the <a href="%metadata-link%">metadata section</a> (ignore other sections). Fill in mandatory 
+            fields (marked with *), and <b>SAVE</b> before moving between pages. Get more info on fields in this 
+            <a href="https://ipt.gbif.org/manual/en/ipt/latest/manage-resources#basic-metadata">wiki</a>. This step takes effort 
+            but makes your data more valuable. You can also link to information in <b>STABLE</b> sources such as published papers.</p>
+        </li>
+
+        <li>
+            <p>Share data with GBIF. If this is your first time publishing data in SBDI/GBIF, your organisation
+            may need to <a href="https://www.gbif.org/become-a-publisher">apply to become a GBIF publisher</a> first.
+            Once GBIF Sweden has endorsed the application, the organisation becomes available in the IPT.</p>
+        </li>
+
+        <li>
+            <p>Edit highlighted sections in the enclosed data-sharing agreement, sign it (digitally, or on paper
+            and scanned), and return it by replying to this email. We will counter-sign the agreement and send
+            you a copy.</p>
+        </li>
+    </ol>
+
+    <p>We will publish your dataset once the metadata is complete and the agreement is signed, and
+    notify you when it is available in SBDI and GBIF. Please feel free to contact us with any questions.</p>
+
+    <p>On behalf of the SBDI molecular team,<br>
+    Regards,<br>
+    %sender-name%</p>
+
+	<p>--<br>
+	%sender-name%<br>
+	SBDI molecular team<br>
+	Email: %sender-email%<br>
+</body>
+</html>

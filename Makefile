@@ -128,6 +128,13 @@ import:
 dry-import:
 	python3 ./scripts/import_excel.py $(file) -v --dry-run
 
+# As import / dry-import, but proceed despite conflicting target predictions
+# for pre-existing ASVs (their existing db annotation is kept; see README).
+conflict-import:
+	python3 ./scripts/import_excel.py $(file) -v --allow-conflicts
+conflict-dry-import:
+	python3 ./scripts/import_excel.py $(file) -v --dry-run --allow-conflicts
+
 # Update dataset status
 # Example: make status pid=3 status=1 ruid=dr963 ipt=kth-2013-baltic-18s
 status:

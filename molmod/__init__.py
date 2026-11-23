@@ -8,10 +8,10 @@ import logging
 import requests
 from logging.config import dictConfig
 from flask import Flask, render_template, request
-from flask_cas import CAS, login_required
 from flask_mail import Mail
 from flask_wtf.csrf import CSRFProtect
 
+from cas import CAS, login_required
 from config import get_config
 import errors
 
@@ -31,7 +31,7 @@ def cas_server_available():
 
 
 def custom_login_required(route_function):
-    '''Adds CAS server status check to original Flask-CAS decorator, so that
+    '''Adds CAS server status check to the CAS login_required decorator, so that
        users are only sent to CAS login if server is working properly.
        Otherwise sends custom error message'''
     @wraps(route_function)

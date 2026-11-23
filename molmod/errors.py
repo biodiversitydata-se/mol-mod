@@ -1,6 +1,6 @@
-from flask import Markup
 from flask import current_app as app
 from flask import render_template, request
+from markupsafe import Markup
 from werkzeug.exceptions import HTTPException, default_exceptions
 
 
@@ -35,7 +35,7 @@ def error_handler(error):
                            code=code,
                            name=Markup(name),
                            description=Markup(description),
-                           error=error)
+                           error=error), code
 
 
 def init_app(app):

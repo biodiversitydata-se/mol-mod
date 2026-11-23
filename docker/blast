@@ -6,11 +6,7 @@ ADD log/ /worker/log
 
 WORKDIR /worker
 
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C0BA5CE6DC6315A3
-
-RUN apt-get update
-RUN apt-get -y install libpq-dev # Avoid pg_config error
-
+# psycopg2-binary ships its own libpq, so no system packages are needed
 RUN pip3 install -r requirements.txt
 
 ENV FLASK_APP="worker.py"

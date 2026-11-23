@@ -46,9 +46,11 @@
     {% endif %}
     <!-- End Matomo Code -->
 
-    <!-- LA base-branding dependencies -->
-    <script src="https://bioatlas.biodiversitydata.se/js/jquery.min.js"></script>
-    <script src="https://bioatlas.biodiversitydata.se/js/bootstrap.js"></script>
+    <!-- jQuery 3.7.1 and Bootstrap 3.4.1 JS, served locally so that the app
+         keeps working if bioatlas.biodiversitydata.se stops serving them
+         (Bootstrap must stay on 3.x to match the SBDI/LA styles above) -->
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
 
 </head>
 

@@ -1,0 +1,21 @@
+# Settings for the R processing scripts in scripts/processing.
+# Copy the lines below into your personal ~/.Renviron (e.g. open it with
+# usethis::edit_r_environ()), fill in the values and restart R.
+# Keep comments on their own lines: R does not strip comments after a value.
+
+# --- Processing scripts ---------------------------------------
+# Path to your local copy of the mol-mod repository (required)
+MOLMOD_DIR=/path/to/mol-mod
+
+# --- Taxonomic annotation (ampliseq on the HPC cluster) --------
+# Active NAISS compute project, billed for the cluster jobs (required)
+NAISS_PROJECT=naissYYYY-X-XXX
+# ssh alias (in ~/.ssh/config) of the ASV portal server, used to read the
+# current annotation setup and existing values from the database
+# (optional; 'local' uses a local database copy)
+ASV_DB_SSH_HOST=your_server_alias
+
+# --- Provider emails --------------------------------------------
+# Sender of the emails drafted for data providers
+MOLMOD_SENDER_NAME=Your Name
+MOLMOD_SENDER_EMAIL=your.name@example.org

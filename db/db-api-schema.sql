@@ -121,7 +121,8 @@ SELECT ds.pid AS dataset_pid,
     ta.identification_references AS "identificationReferences",
     concat_ws(' '::text, ta.annotation_algorithm, 'annotation against', ta.reference_db::text || ';'::text, 'confidence at lowest specified (ASV portal) taxon:', ta.annotation_confidence) AS "identificationRemarks",
     (('By data provider: '::text || oc.previous_identifications::text) || '; By ASV portal: '::text) || concat_ws('|'::text, ta.kingdom, ta.phylum, ta.class, ta.oorder, ta.family, ta.genus, ta.specific_epithet, ta.infraspecific_epithet, ta.otu) AS "previousIdentifications",
-    '' AS "dynamicProperties"
+    '' AS "dynamicProperties",
+    se.degree_of_establishment AS "degreeOfEstablishment"
 FROM :data_schema.sampling_event se
     JOIN :data_schema.occurrence oc ON oc.event_pid = se.pid
     JOIN :data_schema.dataset ds ON se.dataset_pid = ds.pid
@@ -366,17 +367,30 @@ WITH DATA;
 -- 'Utility' views used by admin
 --
 
--- View listing reference database and algorithm used for annotaton of each dataset
+-- View listing reference database, ampliseq version, classifier and run
+-- options used for annotation of each dataset. annotation_algorithm is set per
+-- ASV and names the step that gave its final classification (e.g. addsh or
+-- DADA2:assignTaxonomy:addSpecies), so the classifier is derived from the steps
+-- rather than listing them, as these differ between datasets from the same run.
 CREATE OR REPLACE VIEW api.annotation_overview
 AS
-SELECT DISTINCT ds.pid, ds.ipt_resource_id, dataset_id, in_bioatlas,
-annotation_target, split_part(reference_db, ' (', 1) AS db,
-split_part(annotation_algorithm, ' (', 1) AS algo
+SELECT ds.pid, ds.ipt_resource_id, ds.dataset_id, ds.in_bioatlas,
+ta.annotation_target, split_part(ta.reference_db, ' (', 1) AS db,
+split_part(ta.annotation_algorithm, ' (', 1) AS algo,
+-- addsh runs alongside DADA2
+string_agg(DISTINCT CASE
+    WHEN ta.annotation_algorithm ~* 'sintax' THEN 'VSEARCH:sintax'
+    WHEN ta.annotation_algorithm ~ '(DADA2|addsh)' THEN 'DADA2:assignTaxonomy'
+END, ', ') AS classifier,
+-- Run options recorded with each step, e.g. cut_its:its2
+string_agg(DISTINCT substring(ta.annotation_algorithm from 'cut_its:\S+'), ', ') AS options
 FROM dataset ds, sampling_event se, occurrence oc, taxon_annotation ta
 WHERE ds.pid = se.dataset_pid
 AND se.pid = oc.event_pid
 AND oc.asv_pid = ta.asv_pid
 AND ta.status = 'valid'
+GROUP BY ds.pid, ds.ipt_resource_id, ds.dataset_id, ds.in_bioatlas,
+ta.annotation_target, db, algo
 ORDER BY annotation_target, dataset_id;
 
 CREATE OR REPLACE VIEW api.split_annotation_ds
@@ -440,7 +454,8 @@ SELECT se.dataset_pid,
     mixs.denoising_appr,
     mixs.env_broad_scale,
     mixs.env_local_scale,
-    mixs.env_medium
+    mixs.env_medium,
+    se.degree_of_establishment AS "degreeOfEstablishment"
     FROM sampling_event se
         JOIN dataset ds ON se.dataset_pid = ds.pid
         JOIN mixs ON se.pid = mixs.pid

@@ -35,23 +35,36 @@ with open('resources.tsv', mode='r', newline='') as tsv_file:
         resources.append({'id': row['id'], 'summary': row['summary']})
 
 # Construct URLs
-ipt_server = 'ipt.gbif.org'  # Demo IPT
-# ipt_server = 'www.gbif.se/ipt/'  # Swedish IPT instance
+ipt_server = 'www.gbif.se/ipt'  # Swedish IPT instance
+# ipt_server = 'ipt.gbif.org'  # Demo IPT
 host_url = f'https://{ipt_server}/'
 login_form_url = host_url + 'login.do'
 login_url = host_url + 'login.do'
 publish_url = host_url + 'manage/publish.do'
 
 # Log in
+# IPT >= 3.3 puts the login token in a hidden 'csrfToken' input on the login
+# form; older versions set it as a 'CSRFtoken' cookie.
 session = requests.Session()
-response = session.post(login_form_url, verify=True)  # retrieve token
+response = session.get(login_form_url, verify=True)  # retrieve token
+match = re.search(r'name="csrfToken"[^>]*value="([^"]+)"', response.text)
 payload = {
     'email': username,
     'password': password,
-    'csrfToken': session.cookies.get('CSRFtoken')
+    'csrfToken': match.group(1) if match else session.cookies.get('CSRFtoken'),
+    'login': 'Login'
 }
 session.post(login_url, data=payload)
 # Unsure how to check success, as login failure also returns 200 here
+
+# IPT >= 3.3 also requires the session token from the 'ipt-csrf-token' meta
+# tag (shown to logged-in users) on every state-changing request.
+response = session.get(host_url + 'manage/resources.do')
+meta = re.search(r'<meta[^>]*name="ipt-csrf-token"[^>]*>', response.text)
+match = re.search(r'content="([^"]+)"', meta.group(0)) if meta else None
+session_csrf = match.group(1) if match else None
+if session_csrf:
+    session.headers['X-CSRF-Token'] = session_csrf
 
 login_check = 0
 pub_info = []
@@ -68,6 +81,8 @@ for r in resources:
         'publish': 'Publish',
         'summary': r['summary']
     }
+    if session_csrf:
+        params['iptCsrfToken'] = session_csrf
     response = session.post(publish_url, data=params)
 
     # Check log-in for first resource only
@@ -90,7 +105,19 @@ for r in resources:
               f"of resource {r['id']}")
     else:
         epattern = r'<h1 class="pb-2 mb-0 pt-2 text-gbif-header.*?">(.*?)</h1>'
-        error = re.search(epattern, response.text, re.DOTALL).group(1).strip()
+        match = (re.search(epattern, response.text, re.DOTALL)
+                 or re.search(r'<title>(.*?)</title>', response.text,
+                              re.DOTALL))
+        error = (match.group(1).strip() if match
+                 else f'HTTP {response.status_code}')
+        # IPT >= 3.3 answers an accepted publish request with the resource
+        # overview page instead of a "Publishing version ... started" message
+        if error.startswith('Overview'):
+            pub_info.append({'resource_id': r['id'],
+                             'version': None,
+                             'status': 'Started'})
+            print(f"Starting republication of resource {r['id']}")
+            continue
         if (error == 'Publication'):
             error = 'Already busy'
         pub_info.append({'resource_id': r['id'],
