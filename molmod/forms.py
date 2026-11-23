@@ -128,7 +128,6 @@ class BlastSearchForm(FlaskForm):
 
 class BlastResultForm(FlaskForm):
     batch_url = APP.config['BATCH_SEARCH_URL']
-    redirect_url = APP.config['REDIRECT_URL']
 
 
 class FilterSearchForm(FlaskForm):
@@ -148,7 +147,6 @@ class FilterSearchForm(FlaskForm):
 
 class FilterResultForm(FlaskForm):
     batch_url = APP.config['BATCH_SEARCH_URL']
-    redirect_url = APP.config['REDIRECT_URL']
 
 
 class UploadForm(FlaskForm):

@@ -80,8 +80,7 @@ class Config:
     IPT_BASE_URL = get_env_variable('IPT_BASE_URL')
 
     BATCH_SEARCH_URL = get_env_variable('BATCH_SEARCH_URL')
-    REDIRECT_URL = get_env_variable('REDIRECT_URL')
-
+    
     CAS_SERVER = get_env_variable('CAS_SERVER')
     CAS_AFTER_LOGIN = get_env_variable('CAS_AFTER_LOGIN')
     CAS_AFTER_LOGOUT = get_env_variable('CAS_AFTER_LOGOUT')
